@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/register" android:id="@+id/registerOption"/>
+    <item android:title="@string/login" android:id="@+id/loginOption"/>
+    <item android:title="@string/logout" android:id="@+id/logoutOption"/>
+    <item android:title="@string/recipes" android:id="@+id/recipesOption"/>
+</menu>

@@ -1,0 +1,6 @@
+/build
+/libraries
+*.iml
+/release
+.gradle
+proguard-rules.pro

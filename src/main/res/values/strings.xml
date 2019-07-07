@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CookAndBake</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="recipes">Rezepte</string>
+    <string name="email">Email</string>
+    <string name="password">Passwort</string>
+</resources>
