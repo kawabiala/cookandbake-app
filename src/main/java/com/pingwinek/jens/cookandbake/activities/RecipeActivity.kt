@@ -3,18 +3,33 @@ package com.pingwinek.jens.cookandbake.activities
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.TabLayout
+import android.support.v4.app.DialogFragment
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.view.ViewPager
 import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.Recipe
 import com.pingwinek.jens.cookandbake.RecipeViewModel
+import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
+import java.lang.NumberFormatException
 
-class RecipeActivity : BaseActivity() {
+const val EXTRA_EDIT_RECIPE = "editRecipe"
+const val EXTRA_INGREDIENT_ID = "ingredientID"
+
+class RecipeActivity : BaseActivity(),
+    IngredientListingFragment.OnListFragmentInteractionListener,
+    ConfirmDialogFragment.ConfirmDialogListener {
 
     private val inputType = InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
 
@@ -33,9 +48,9 @@ class RecipeActivity : BaseActivity() {
 
         val recipeData = recipeModel.recipeData
 
-        val titleView = findViewById<TextView>(R.id.recipeTitle)
-        val descriptionView = findViewById<TextView>(R.id.recipeDescription)
-        val editTitleButtonView = findViewById<Button>(R.id.editTitleButton)
+        val titleView = findViewById<TextView>(R.id.ingredientName)
+        val descriptionView = findViewById<TextView>(R.id.ingredientUnity)
+        val editTitleButtonView = findViewById<Button>(R.id.editIngredientButton)
 
         titleView.setOnEditorActionListener { textView, actionId, keyEvent ->
             Log.i("ActionListener", when (actionId) {
@@ -76,16 +91,94 @@ class RecipeActivity : BaseActivity() {
             }
         })
 
+        val pagerAdapter = RecipePagerAdapter(supportFragmentManager)
+        val tabLayout = findViewById<TabLayout>(R.id.recipe_tablayout)
+        val recipePager  = findViewById<ViewPager>(R.id.recipeTabs).apply {
+            adapter = pagerAdapter
+            tabLayout.setupWithViewPager(this)
+        }
     }
 
     fun editTitleButton(button: View) {
         if (recipeModel.isEditableTitle.value == true) {
             recipeModel.isEditableTitle.postValue(false)
             recipeModel.save(
-                findViewById<TextView>(R.id.recipeTitle).text.toString(),
-                findViewById<TextView>(R.id.recipeDescription).text.toString())
+                findViewById<TextView>(R.id.ingredientName).text.toString(),
+                findViewById<TextView>(R.id.ingredientUnity).text.toString())
         } else {
             recipeModel.isEditableTitle.postValue(true)
+        }
+    }
+
+    override fun onListFragmentInteraction(ingredientId: Int?) {
+        val intent = Intent(this, IngredientActivity::class.java)
+        recipeModel.recipeData.value?.let { recipe ->
+            intent.putExtra(EXTRA_RECIPE_ID, recipe.id)
+            intent.putExtra(EXTRA_EDIT_RECIPE, recipeModel.isEditableTitle.value)
+            ingredientId?.let {
+                intent.putExtra(EXTRA_INGREDIENT_ID, ingredientId)
+            }
+            startActivity(intent)
+        }
+    }
+
+    fun deleteIngredientButton(button: View) {
+
+        val ingredient = recipeModel.ingredientListData.value?.find { item ->
+            try {
+                item.id == button.tag.toString().toInt()
+            } catch (exception: NumberFormatException) {
+                false
+            }
+        }
+
+        val confirmDialog = ConfirmDialogFragment()
+        val args = Bundle()
+        args.putString("message", "Zutat ${ingredient?.name} wirklich löschen?")
+        args.putString("id", button.tag.toString())
+        confirmDialog.setArguments(args)
+        confirmDialog.show(supportFragmentManager, "DeleteIngredient${button.tag}")
+
+        Toast.makeText(this, "Ingredient ${button.tag}", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPositiveButton(ingredientId: String?) {
+        ingredientId?.let { idAsString ->
+            try {
+                val idAsInt = idAsString.toInt()
+                recipeModel.deleteIngredient(idAsInt)
+                Toast.makeText(this, "Delete $idAsInt", Toast.LENGTH_LONG).show()
+            } catch (exception: NumberFormatException) {
+                Log.e(this::class.java.name, "Cannot parse $ingredientId into Integer")
+            }
+        }
+    }
+
+    override fun onNegativeButton(confirmItemId: String?) {
+        Toast.makeText(this, "Cancel", Toast.LENGTH_LONG).show()
+        //Do nothing
+    }
+}
+
+class RecipePagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+
+    override fun getItem(position: Int): Fragment {
+        return if (position == 0) {
+            IngredientListingFragment()
+        } else {
+            IngredientInstructionFragment()
+        }
+    }
+
+    override fun getCount(): Int {
+        return 2
+    }
+
+    override fun getPageTitle(position: Int): CharSequence? {
+        return if (position == 0) {
+            "Zutaten"
+        } else {
+            "Anleitung"
         }
     }
 }

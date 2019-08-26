@@ -30,7 +30,7 @@ data class Recipe(val id: Int?, val title: String, val description: String?) {
                 null
             }
 
-            val title = jsonObject.optString("title", "")
+            val title = jsonObject.optString("title", "Recipe")
 
             val description = try {
                 if (jsonObject.isNull("description")) {

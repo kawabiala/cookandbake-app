@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal">
+
+    <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:id="@+id/quantityView" android:hint="Menge"
+            android:layout_marginLeft="8dp"/>
+    <TextView
+            android:layout_width="89dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:id="@+id/unityView" android:hint="Einheit"/>
+    <TextView
+            android:id="@+id/nameView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:layout_weight="1"
+            android:gravity="left"/>
+    <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" app:srcCompat="@drawable/ic_action_delete"
+            android:id="@+id/deleteIngredientButton"
+            android:backgroundTint="@color/colorBackground" android:padding="0dp" android:layout_marginRight="8dp"
+            android:onClick="deleteIngredientButton"/>
+</LinearLayout>

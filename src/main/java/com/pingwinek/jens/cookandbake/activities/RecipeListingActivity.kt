@@ -18,7 +18,7 @@ import com.pingwinek.jens.cookandbake.RecipeListingViewModel
 import java.util.*
 
 
-public const val EXTRA_RECIPE_ID = "recipeID"
+const val EXTRA_RECIPE_ID = "recipeID"
 
 class RecipeListingActivity : BaseActivity() {
 
