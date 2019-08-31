@@ -3,7 +3,16 @@
     <string name="register">Register</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="recipe">Rezept</string>
     <string name="recipes">Rezepte</string>
+    <string name="recipe_title">Rezepttitel</string>
+    <string name="recipe_description">Kurzbeschreibung</string>
+    <string name="ingredient">Zutat</string>
+    <string name="ingredients">Zutaten</string>
+    <string name="instruction">Anleitung</string>
+    <string name="quantity">Menge</string>
+    <string name="unity">Einheit</string>
+    <string name="write_instruction">Jetzt Anleitung ergänzen</string>
     <string name="email">Email</string>
     <string name="password">Passwort</string>
 </resources>

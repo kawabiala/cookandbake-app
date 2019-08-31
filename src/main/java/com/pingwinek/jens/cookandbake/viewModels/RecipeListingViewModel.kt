@@ -1,9 +1,10 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
-import android.util.Log
+import com.pingwinek.jens.cookandbake.Recipe
+import com.pingwinek.jens.cookandbake.RecipeRepository
 import java.util.*
 
 class RecipeListingViewModel(application: Application) : AndroidViewModel(application) {

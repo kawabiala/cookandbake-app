@@ -7,12 +7,10 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.*
-import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 
-const val REQUEST_ACCOUNT_CHOOSER = 1
 const val LOGIN_EVENT = "login"
 const val LOGOUT_EVENT = "logout"
 
@@ -42,7 +40,7 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         super.setContentView(R.layout.activity_base)
-        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         networkRequest = NetworkRequest.getInstance(this.application)
 
@@ -51,16 +49,6 @@ abstract class BaseActivity : AppCompatActivity() {
             addAction(LOGIN_EVENT)
         }
         LocalBroadcastManager.getInstance(this).registerReceiver(loginReceiver, intentFilter)
-    }
-
-    // when the activity becomes visible, e.g. after it was covered by another screen
-    override fun onStart() {
-        super.onStart()
-    }
-
-    // when the activity gets focus, e.g. after a dialog or switching back from another app
-    override fun onResume() {
-        super.onResume()
     }
 
     // when the activity is finally destroyed
@@ -106,7 +94,6 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-
     /*
     /////////////////////////////////////////////
     / login/logout related stuff
@@ -142,6 +129,6 @@ abstract class BaseActivity : AppCompatActivity() {
     protected fun addContentView (viewId: Int) {
         val baseLayout = findViewById<View>(R.id.mainContent) as ViewGroup
         val layoutInflater = this.layoutInflater
-        val view = layoutInflater.inflate(viewId, baseLayout)
+        layoutInflater.inflate(viewId, baseLayout)
     }
 }

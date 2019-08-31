@@ -1,9 +1,13 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.pingwinek.jens.cookandbake.Ingredient
+import com.pingwinek.jens.cookandbake.IngredientRepository
+import com.pingwinek.jens.cookandbake.Recipe
+import com.pingwinek.jens.cookandbake.RecipeRepository
 import java.util.*
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,7 +22,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         isEditableTitle.value = false
-        recipeData.value = Recipe(null, "", null)
+        recipeData.value = Recipe(null, "", null, null)
         ingredientListData.value = LinkedList()
     }
 
@@ -34,28 +38,26 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun save(title: String, description: String) {
 
         // input validation could be moved to something separate
-        if (title == null || title.length == 0) {
+        if (title.isEmpty()) {
             return
         }
-
-        var recipe = recipeData.value
 
         /*
         / if the viewmodel does not contain a recipe, we didn't get any from the server
          */
-        recipe?.let {
+        recipeData.value?.let {
 
             // create a new recipe, when id is null
             if (it.id == null) {
-                val _recipe = Recipe(null, title, description)
-                recipeRepository.putRecipe(_recipe) { recipeFromResponse ->
+                val recipe = Recipe(null, title, description, null)
+                recipeRepository.putRecipe(recipe) { recipeFromResponse ->
                     recipeData.postValue(recipeFromResponse)
                 }
 
             // otherwise update existing recipe
             } else {
-                val _recipe = Recipe(it.id, title, description)
-                recipeRepository.postRecipe(_recipe) { recipeFromResponse ->
+                val recipe = Recipe(it.id, title, description, it.instruction)
+                recipeRepository.postRecipe(recipe) { recipeFromResponse ->
                     recipeData.postValue(recipeFromResponse)
                 }
             }

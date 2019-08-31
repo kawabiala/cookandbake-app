@@ -15,18 +15,28 @@
             android:usesCleartextTraffic="true">
         <activity android:name=".activities.MainActivity">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.RegisterActivity"/>
+        <activity android:name=".activities.LoginActivity"/>
+        <activity android:name=".activities.RecipeListingActivity">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.RegisterActivity"></activity>
-        <activity android:name=".activities.LoginActivity"></activity>
-        <activity android:name=".activities.RecipeListingActivity"></activity>
         <activity android:name=".activities.RecipeActivity"
-                    android:parentActivityName=".activities.RecipeListingActivity"></activity>
+                    android:parentActivityName=".activities.RecipeListingActivity"
+                    android:launchMode="singleTop"
+                    android:label="@string/recipe"/>
         <activity android:name=".activities.IngredientActivity"
-                  android:parentActivityName=".activities.RecipeActivity"></activity>
+                  android:parentActivityName=".activities.RecipeActivity"/>
+        <activity android:name=".activities.InstructionActivity"
+                  android:parentActivityName=".activities.RecipeActivity"/>
+        <activity android:name=".activities.RecipeEditActivity"
+                  android:parentActivityName=".activities.RecipeActivity"
+                    android:label="@string/recipe"/>
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel

@@ -14,7 +14,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.Recipe
-import com.pingwinek.jens.cookandbake.RecipeListingViewModel
+import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.*
 
 
@@ -31,7 +31,7 @@ class RecipeListingActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_listing)
 
-        var recipeList = LinkedList<Recipe>();
+        val recipeList = LinkedList<Recipe>()
 
         viewManager = LinearLayoutManager(this)
         viewAdapter = RecipeListingAdapter(recipeList)
@@ -65,7 +65,7 @@ class RecipeListingActivity : BaseActivity() {
         openRecipeItem(null)
     }
 
-    fun openRecipeItem(itemId: Int?) {
+    private fun openRecipeItem(itemId: Int?) {
         val intent = Intent(this, RecipeActivity::class.java)
         itemId?.let { _itemId ->
             intent.apply {

@@ -11,7 +11,7 @@ import java.util.*
 
 class RecipeRepository private constructor(val application: Application) {
 
-    val tag = this::class.java.name
+    private val tag: String = this::class.java.name
 
     fun getAll(callback: (recipeList: LinkedList<Recipe>) -> Unit) {
         val networkResponseRouter = NetworkResponseRouter()
@@ -22,7 +22,7 @@ class RecipeRepository private constructor(val application: Application) {
             val recipes = Recipes(response)
             callback(recipes)
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -44,11 +44,11 @@ class RecipeRepository private constructor(val application: Application) {
                 callback(recipes[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
-            "https://www.pingwinek.de/cookandbake/api/recipe/" + recipeId,
+            "https://www.pingwinek.de/cookandbake/api/recipe/$recipeId",
             NetworkRequest.Method.GET,
             null,
             mapOf(),
@@ -66,7 +66,7 @@ class RecipeRepository private constructor(val application: Application) {
                 callback(recipes[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -88,7 +88,7 @@ class RecipeRepository private constructor(val application: Application) {
                 callback(recipes[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(

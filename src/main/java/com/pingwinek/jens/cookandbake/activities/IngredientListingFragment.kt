@@ -15,10 +15,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.Ingredient
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.RecipeViewModel
+import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
-import kotlinx.android.synthetic.main.activity_recipe.view.*
-
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
 import java.util.*
@@ -31,7 +29,7 @@ import java.util.*
 class IngredientListingFragment : Fragment() {
 
     private var listener: OnListFragmentInteractionListener? = null
-    private lateinit var recipeModel: RecipeViewModel;
+    private lateinit var recipeModel: RecipeViewModel
 
     private var ingredientList = LinkedList<Ingredient>()
 
@@ -67,10 +65,8 @@ class IngredientListingFragment : Fragment() {
             }
         })
 
-        view.addIngredientButton.setOnClickListener { v ->
-            listener?.let { l ->
-                l.onListFragmentInteraction(null)
-            }
+        view.addIngredientButton.setOnClickListener {
+            listener?.onListFragmentInteraction(null)
         }
 
         return view

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.ConfigurationViewModel
+import com.pingwinek.jens.cookandbake.viewModels.ConfigurationViewModel
 import com.pingwinek.jens.cookandbake.R
 
 class MainActivity : BaseActivity() {

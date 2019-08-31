@@ -11,7 +11,7 @@ import java.util.*
 
 class IngredientRepository private constructor(val application: Application) {
 
-    val tag = this::class.java.name
+    private val tag: String = this::class.java.name
 
     fun getAll(recipeId: Int, callback: (ingredientList: LinkedList<Ingredient>) -> Unit) {
         val networkResponseRouter = NetworkResponseRouter()
@@ -22,7 +22,7 @@ class IngredientRepository private constructor(val application: Application) {
             val ingredients = Ingredients(response)
             callback(ingredients)
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -44,7 +44,7 @@ class IngredientRepository private constructor(val application: Application) {
                 callback(ingredients[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -66,7 +66,7 @@ class IngredientRepository private constructor(val application: Application) {
                 callback(ingredients[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -88,7 +88,7 @@ class IngredientRepository private constructor(val application: Application) {
                 callback(ingredients[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(
@@ -103,11 +103,11 @@ class IngredientRepository private constructor(val application: Application) {
         val networkResponseRouter = NetworkResponseRouter()
         val networkRequest = NetworkRequest.getInstance(application)
 
-        networkResponseRouter.registerSuccessRoute(200) { response ->
+        networkResponseRouter.registerSuccessRoute(200) {
             Log.i(tag, "deleteIngredient response 200")
             callback()
         }
-        networkResponseRouter.registerSuccessRoute(401) { response ->
+        networkResponseRouter.registerSuccessRoute(401) {
             LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
         }
         networkRequest.runRequest(

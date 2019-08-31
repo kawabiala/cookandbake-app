@@ -3,7 +3,7 @@ package com.pingwinek.jens.cookandbake
 import org.json.JSONException
 import org.json.JSONObject
 
-data class Recipe(val id: Int?, val title: String, val description: String?) {
+data class Recipe(val id: Int?, val title: String, val description: String?, val instruction: String?) {
 
     fun asMap() : Map<String, String> {
         val map = HashMap<String, String>()
@@ -12,6 +12,7 @@ data class Recipe(val id: Int?, val title: String, val description: String?) {
         }
         map.put("title", title)
         map.put("description", description ?: "")
+        map.put("instruction", instruction ?: "")
 
         return map
     }
@@ -42,7 +43,17 @@ data class Recipe(val id: Int?, val title: String, val description: String?) {
                 null
             }
 
-            return Recipe(id, title, description)
+            val instruction = try {
+                if (jsonObject.isNull("instruction")) {
+                    null
+                } else {
+                    jsonObject.getString("instruction")
+                }
+            } catch (jsonException: JSONException) {
+                null
+            }
+
+            return Recipe(id, title, description, instruction)
         }
     }
 }
