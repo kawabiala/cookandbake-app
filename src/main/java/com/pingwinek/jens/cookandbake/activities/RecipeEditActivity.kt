@@ -1,40 +1,33 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeEditActivity : BaseActivity() {
-
-    private lateinit var recipeViewModel: RecipeViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_edit)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        recipeViewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
-            .get(RecipeViewModel::class.java)
-
-        recipeViewModel.recipeData.observe(this, Observer { recipe ->
-            findViewById<TextView>(R.id.titleText).text = recipe?.title
-            findViewById<TextView>(R.id.descriptionText).text = recipe?.description
-        })
     }
 
     override fun onResume() {
         super.onResume()
 
-        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
-            intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
-                recipeViewModel.loadData(id)
-            }
+        intent.extras?.getString(EXTRA_RECIPE_TITLE)?.let { title ->
+            findViewById<TextView>(R.id.titleText).text = title
+        }
+
+        intent.extras?.getString(EXTRA_RECIPE_DESCRIPTION)?.let { description ->
+            findViewById<TextView>(R.id.descriptionText).text = description
         }
     }
 
@@ -54,9 +47,10 @@ class RecipeEditActivity : BaseActivity() {
     }
 
     private fun save() {
-        recipeViewModel.save(
-            findViewById<TextView>(R.id.titleText).text.toString(),
-            findViewById<TextView>(R.id.descriptionText).text.toString())
+        setResult(Activity.RESULT_OK, Intent().also {
+            it.putExtra(EXTRA_RECIPE_TITLE, findViewById<TextView>(R.id.titleText).text.toString())
+            it.putExtra(EXTRA_RECIPE_DESCRIPTION, findViewById<TextView>(R.id.descriptionText).text.toString())
+        })
         finish()
     }
 

@@ -1,5 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.Activity
+import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.content.Intent
@@ -12,19 +14,15 @@ import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
-import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.Recipe
+import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-
-const val EXTRA_EDIT_RECIPE = "editRecipe"
-const val EXTRA_INGREDIENT_ID = "ingredientID"
 
 class RecipeActivity : BaseActivity(),
     IngredientListingFragment.OnListFragmentInteractionListener,
     ConfirmDialogFragment.ConfirmDialogListener {
 
     private lateinit var recipeModel: RecipeViewModel
+    //private lateinit var recipeData: LiveData<Recipe?>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,20 +33,25 @@ class RecipeActivity : BaseActivity(),
         recipeModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
             .get(RecipeViewModel::class.java)
 
-        val recipeData = recipeModel.recipeData
+        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
+            intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
+                recipeModel.recipeId = id
+            }
+        }
 
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
-        recipeData.observe(this, Observer { recipe: Recipe? ->
+        recipeModel.recipeData.observe(this, Observer { recipe: Recipe? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
         })
 
         val onClickListener  = { _: View ->
-            val intent = Intent(this, RecipeEditActivity::class.java)
-            intent.putExtra(EXTRA_RECIPE_ID, recipeData.value?.id)
-            startActivity(intent)
+            startActivityForResult(Intent(this, RecipeEditActivity::class.java).also {
+                it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
+                it.putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
+            }, REQUEST_CODE_TITLE)
         }
 
         titleView.setOnClickListener(onClickListener)
@@ -64,22 +67,66 @@ class RecipeActivity : BaseActivity(),
 
     override fun onResume() {
         super.onResume()
-        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
-            intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
-                recipeModel.loadData(id)
+        recipeModel.loadData()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            REQUEST_CODE_TITLE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.extras?.let {
+                        it.getString(EXTRA_RECIPE_TITLE)?.let { title ->
+                            recipeModel.save(title, it.getString(EXTRA_RECIPE_DESCRIPTION, ""), recipeModel.recipeData.value?.instruction ?: "")
+                        }
+                    }
+                }
+            }
+            REQUEST_CODE_INSTRUCTION -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.extras?.let {
+                        it.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
+                            recipeModel.recipeData.value?.title?.let { title ->
+                                recipeModel.save(title, recipeModel.recipeData.value?.description ?: "", instruction)
+                            }
+                        }
+                    }
+                }
+            }
+            REQUEST_CODE_INGREDIENT -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.extras?.let {
+                        val id = it.get(EXTRA_INGREDIENT_ID)?.run {
+                            it.getInt(EXTRA_INGREDIENT_ID)
+                        }
+                        val name = it.getString(EXTRA_INGREDIENT_NAME)
+                        val quantity = it.get(EXTRA_INGREDIENT_QUANTITY)?.run {
+                            it.getDouble(EXTRA_INGREDIENT_QUANTITY)
+                        }
+                        val unity = it.getString(EXTRA_INGREDIENT_UNITY)
+                        if (name != null) { recipeModel.saveIngredient(id, name, quantity, unity) }
+                    }
+                }
             }
         }
     }
 
-    override fun onListFragmentInteraction(id: Int?) {
+    override fun onLogin(intent: Intent) {
+        if (this.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            recipeModel.loadData()
+        }
+    }
+
+    override fun onListFragmentInteraction(ingredient: Ingredient?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
-            intent.putExtra(EXTRA_RECIPE_ID, recipe.id)
-            intent.putExtra(EXTRA_EDIT_RECIPE, recipeModel.isEditableTitle.value)
-            id?.let {
-                intent.putExtra(EXTRA_INGREDIENT_ID, id)
+            intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
+            ingredient?.let {
+                intent.putExtra(EXTRA_INGREDIENT_ID, it.id)
+                intent.putExtra(EXTRA_INGREDIENT_NAME, it.name)
+                intent.putExtra(EXTRA_INGREDIENT_QUANTITY, it.quantity)
+                intent.putExtra(EXTRA_INGREDIENT_UNITY, it.unity)
             }
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_INGREDIENT)
         }
     }
 
@@ -99,8 +146,6 @@ class RecipeActivity : BaseActivity(),
         args.putString("id", button.tag.toString())
         confirmDialog.arguments = args
         confirmDialog.show(supportFragmentManager, "DeleteIngredient${button.tag}")
-
-        Toast.makeText(this, "Ingredient ${button.tag}", Toast.LENGTH_LONG).show()
     }
 
     override fun onPositiveButton(confirmItemId: String?) {
@@ -108,7 +153,6 @@ class RecipeActivity : BaseActivity(),
             try {
                 val idAsInt = idAsString.toInt()
                 recipeModel.deleteIngredient(idAsInt)
-                Toast.makeText(this, "Delete $idAsInt", Toast.LENGTH_LONG).show()
             } catch (exception: NumberFormatException) {
                 Log.e(this::class.java.name, "Cannot parse $confirmItemId into Integer")
             }
@@ -116,7 +160,6 @@ class RecipeActivity : BaseActivity(),
     }
 
     override fun onNegativeButton(confirmItemId: String?) {
-        Toast.makeText(this, "Cancel", Toast.LENGTH_LONG).show()
         //Do nothing
     }
 }

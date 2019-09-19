@@ -1,10 +1,8 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
-import android.content.Intent
-import android.support.v4.content.LocalBroadcastManager
+import android.arch.lifecycle.MutableLiveData
 import android.util.Log
-import com.pingwinek.jens.cookandbake.activities.LOGOUT_EVENT
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRouter
 import java.util.*
@@ -13,27 +11,29 @@ class RecipeRepository private constructor(val application: Application) {
 
     private val tag: String = this::class.java.name
 
-    fun getAll(callback: (recipeList: LinkedList<Recipe>) -> Unit) {
+    val recipeListData = MutableLiveData<LinkedList<Recipe>>()
+
+    fun getAll() {
         val networkResponseRouter = NetworkResponseRouter()
         val networkRequest = NetworkRequest.getInstance(application)
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "getRecipe response 200")
-            val recipes = Recipes(response)
-            callback(recipes)
-        }
+            recipeListData.postValue(Recipes(response))
+         }
         networkResponseRouter.registerSuccessRoute(401) {
-            LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
+            Log.i(tag, "getRecipe response $it")
+            AuthService.getInstance(application).onSessionInvalid()
         }
         networkRequest.runRequest(
-            "https://www.pingwinek.de/cookandbake/api/recipe/",
+            RECIPEPATH,
             NetworkRequest.Method.GET,
             null,
             mapOf(),
             networkResponseRouter)
     }
 
-    fun getRecipe(recipeId: Int, callback: (recipe: Recipe) -> Unit ) {
+    fun getRecipe(recipeId: Int) {
         val networkResponseRouter = NetworkResponseRouter()
         val networkRequest = NetworkRequest.getInstance(application)
 
@@ -41,21 +41,22 @@ class RecipeRepository private constructor(val application: Application) {
             Log.i(tag, "getRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
-                callback(recipes[0])
+                updateRecipeList(recipes[0])
             }
         }
         networkResponseRouter.registerSuccessRoute(401) {
-            LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
+            Log.i(tag, "getRecipe response $it")
+            AuthService.getInstance(application).onSessionInvalid()
         }
         networkRequest.runRequest(
-            "https://www.pingwinek.de/cookandbake/api/recipe/$recipeId",
+            "$RECIPEPATH$recipeId",
             NetworkRequest.Method.GET,
             null,
             mapOf(),
             networkResponseRouter)
     }
 
-    fun putRecipe(recipe: Recipe, callback: (recipe: Recipe) -> Unit) {
+    fun putRecipe(recipe: Recipe, confirmUpdate: (recipeId: Int) -> Boolean) {
         val networkResponseRouter = NetworkResponseRouter()
         val networkRequest = NetworkRequest.getInstance(application)
 
@@ -63,21 +64,26 @@ class RecipeRepository private constructor(val application: Application) {
             Log.i(tag, "putRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
-                callback(recipes[0])
+                val newRecipe = recipes[0]
+                newRecipe.id?.let {
+                    if (confirmUpdate(it)) {
+                        updateRecipeList(newRecipe)
+                    }
+                }
             }
         }
         networkResponseRouter.registerSuccessRoute(401) {
-            LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
+            AuthService.getInstance(application).onSessionInvalid()
         }
         networkRequest.runRequest(
-            "https://www.pingwinek.de/cookandbake/api/recipe/",
+            RECIPEPATH,
             NetworkRequest.Method.PUT,
             NetworkRequest.ContentType.APPLICATION_URLENCODED,
             recipe.asMap(),
             networkResponseRouter)
     }
 
-    fun postRecipe(recipe: Recipe, callback: (recipe: Recipe) -> Unit) {
+    fun postRecipe(recipe: Recipe) {
         val networkResponseRouter = NetworkResponseRouter()
         val networkRequest = NetworkRequest.getInstance(application)
 
@@ -85,18 +91,27 @@ class RecipeRepository private constructor(val application: Application) {
             Log.i(tag, "postRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
-                callback(recipes[0])
+                updateRecipeList(recipes[0])
             }
         }
         networkResponseRouter.registerSuccessRoute(401) {
-            LocalBroadcastManager.getInstance(application).sendBroadcast(Intent(LOGOUT_EVENT))
+            AuthService.getInstance(application).onSessionInvalid()
         }
         networkRequest.runRequest(
-            "https://www.pingwinek.de/cookandbake/api/recipe/",
+            RECIPEPATH,
             NetworkRequest.Method.POST,
             NetworkRequest.ContentType.APPLICATION_URLENCODED,
             recipe.asMap(),
             networkResponseRouter)
+    }
+
+    private fun updateRecipeList(updatedRecipe: Recipe) {
+        val recipeList = recipeListData.value ?: LinkedList()
+        recipeList.removeAll {
+            it.id == updatedRecipe.id
+        }
+        recipeList.add(updatedRecipe)
+        recipeListData.postValue(recipeList)
     }
 
     companion object : SingletonHolder<RecipeRepository, Application>(::RecipeRepository)

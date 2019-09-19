@@ -1,17 +1,21 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.REQUEST_CODE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class InstructionFragment : Fragment() {
@@ -39,10 +43,10 @@ class InstructionFragment : Fragment() {
         })
 
         instructionView.setOnClickListener {
-            Toast.makeText(this.context, "instruction", Toast.LENGTH_LONG).show()
-            val intent = Intent(this.context, InstructionActivity::class.java)
-            intent.putExtra(EXTRA_RECIPE_ID, recipeModel.recipeData.value?.id)
-            startActivity(intent)
+            activity?.startActivityForResult(Intent(activity, InstructionActivity::class.java).also {
+                it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
+                it.putExtra(EXTRA_RECIPE_INSTRUCTION, recipeModel.recipeData.value?.instruction)
+            }, REQUEST_CODE_INSTRUCTION)
         }
 
         return view

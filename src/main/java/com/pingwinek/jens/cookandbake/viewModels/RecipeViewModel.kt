@@ -2,7 +2,9 @@ package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.util.Log
 import com.pingwinek.jens.cookandbake.Ingredient
 import com.pingwinek.jens.cookandbake.IngredientRepository
@@ -15,66 +17,83 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val recipeRepository = RecipeRepository.getInstance(application)
     private val ingredientRepository = IngredientRepository.getInstance(application)
 
-    val recipeData = MutableLiveData<Recipe>()
-    val ingredientListData = MutableLiveData<LinkedList<Ingredient>>()
+    var recipeId: Int? = null
+    //var ingredientId: Int? = null
 
-    val isEditableTitle = MutableLiveData<Boolean>()
+    val recipeData: LiveData<Recipe?> = Transformations.map(recipeRepository.recipeListData) { recipeList ->
+        recipeId?.let {
+            recipeList.find { recipe ->
+                recipe.id == recipeId
+            }
+        }
+    }
+/*
+    val ingredientData: LiveData<Ingredient?> = Transformations.map(ingredientRepository.ingredientListData) { ingredientList ->
+        ingredientId?.let {
+            ingredientList.find { ingredient ->
+                ingredient.id == ingredientId
+            }
+        }
+    }
+*/
+    val ingredientListData = ingredientRepository.ingredientListData
 
     init {
-        isEditableTitle.value = false
-        recipeData.value = Recipe(null, "", null, null)
         ingredientListData.value = LinkedList()
     }
 
-    fun loadData(recipeId: Int) {
-        recipeRepository.getRecipe(recipeId) { recipe ->
-            recipeData.postValue(recipe)
-        }
-        ingredientRepository.getAll(recipeId) { ingredientList ->
-            ingredientListData.postValue(ingredientList)
+    fun loadData() {
+        recipeId?.let { id ->
+            recipeRepository.getRecipe(id)
+            ingredientRepository.getAll(id)
         }
     }
 
-    fun save(title: String, description: String) {
+    fun save(title: String, description: String, instruction: String) {
 
         // input validation could be moved to something separate
         if (title.isEmpty()) {
             return
         }
 
-        /*
-        / if the viewmodel does not contain a recipe, we didn't get any from the server
-         */
-        recipeData.value?.let {
-
-            // create a new recipe, when id is null
-            if (it.id == null) {
-                val recipe = Recipe(null, title, description, null)
-                recipeRepository.putRecipe(recipe) { recipeFromResponse ->
-                    recipeData.postValue(recipeFromResponse)
-                }
-
-            // otherwise update existing recipe
-            } else {
-                val recipe = Recipe(it.id, title, description, it.instruction)
-                recipeRepository.postRecipe(recipe) { recipeFromResponse ->
-                    recipeData.postValue(recipeFromResponse)
-                }
+        if (recipeId != null) {
+            recipeData.value?.let {
+                val recipe = Recipe(it.id, title, description, instruction)
+                recipeRepository.postRecipe(recipe)
             }
+        } else {
+            val recipe = Recipe(null, title, description, instruction)
+            recipeRepository.putRecipe(recipe) { newRecipeId ->
+                recipeId = newRecipeId
+                true
+            }
+        }
+    }
+
+    fun saveIngredient(id: Int?, name: String, quantity: Double?, unity: String?) {
+        if (name.isEmpty()) {
+            return
+        }
+
+        if (recipeId == null){
+            return
+        }
+
+        val ingredient = Ingredient(id, recipeId!!, quantity, unity, name)
+
+        if (id == null) {
+            ingredientRepository.putIngredient(ingredient) {
+                true
+            }
+        } else {
+            ingredientRepository.postIngredient(ingredient)
         }
     }
 
     fun deleteIngredient(ingredientId: Int) {
         ingredientRepository.deleteIngredient(ingredientId) {
-            Log.e(this::class.java.name, "deleted")
-            val recipeId = recipeData.value?.id
-            Log.e(this::class.java.name, "load for $recipeId")
-            recipeId?.let {
-                Log.e(this::class.java.name, "loadData")
-                loadData(it)
-            }
+            loadData()
         }
-        Log.e(this::class.java.name, "Deleting $ingredientId")
     }
 
 }

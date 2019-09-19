@@ -17,6 +17,7 @@ import com.pingwinek.jens.cookandbake.Ingredient
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
+import com.pingwinek.jens.cookandbake.Utils.quantityToString
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
 import java.util.*
@@ -99,17 +100,16 @@ class IngredientListingFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
 
-        fun onListFragmentInteraction(id: Int?)
+        fun onListFragmentInteraction(ingredient: Ingredient?)
     }
 }
 
 /**
  * [RecyclerView.Adapter] that can display a [Ingredient] and makes a call to the
  * specified [OnListFragmentInteractionListener].
- * TODO: Replace the implementation with code for your data type.
  */
 class IngredientListingAdapter(
-    private val mValues: List<Ingredient>,
+    private val ingredientList: List<Ingredient>,
     private val listener: OnListFragmentInteractionListener?
 ) : RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
 
@@ -117,10 +117,10 @@ class IngredientListingAdapter(
 
     init {
         onClickListener = View.OnClickListener { v ->
-            val id = v.tag as Int?
+            val ingredient = v.tag as Ingredient?
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
-            listener?.onListFragmentInteraction(id)
+            listener?.onListFragmentInteraction(ingredient)
         }
     }
 
@@ -131,19 +131,19 @@ class IngredientListingAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val ingredient = mValues[position]
-        holder.quantityView.text = ingredient.quantity.toString()
+        val ingredient = ingredientList[position]
+        holder.quantityView.text = quantityToString(ingredient.quantity)
         holder.unityView.text = ingredient.unity
         holder.nameView.text = ingredient.name
         holder.buttonView.tag = ingredient.id
 
         with(holder.mView) {
-            tag = ingredient.id
+            tag = ingredient
             setOnClickListener(onClickListener)
         }
     }
 
-    override fun getItemCount(): Int = mValues.size
+    override fun getItemCount(): Int = ingredientList.size
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val quantityView: TextView = mView.quantityView

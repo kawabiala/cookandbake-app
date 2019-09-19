@@ -12,7 +12,7 @@ class NetworkRequestBodyProvider(val body: String): UploadDataProvider() {
     }
 
     override fun rewind(uploadDataSink: UploadDataSink?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        uploadDataSink?.onRewindSucceeded()
     }
 
     override fun read(uploadDataSink: UploadDataSink?, byteBuffer: ByteBuffer?) {

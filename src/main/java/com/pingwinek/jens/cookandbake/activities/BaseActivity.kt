@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.arch.lifecycle.Lifecycle
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,25 +8,15 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.*
-import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-
-const val LOGIN_EVENT = "login"
-const val LOGOUT_EVENT = "logout"
 
 /*
 Sets option menu, handles user interaction with login / logout and defines handler for login and logout events
  */
 abstract class BaseActivity : AppCompatActivity() {
-
-    protected val domain = "https://www.pingwinek.de"
-//    doesn't work (Exception in CronetUrlRequest: net::ERR_INVALID_URL):
-//    protected val domain = "localhost/strato/pingwinek"
-    protected val baseUrl = "$domain/cookandbake"
-    protected val authPath = "$baseUrl/authenticate"
-    protected val registerPath = "$baseUrl/auth/register"
-    protected val loginPath = "$baseUrl/auth/login"
 
     protected lateinit var networkRequest: NetworkRequest
 
@@ -82,7 +73,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 true
             }
             R.id.logoutOption -> {
-                //logout()
+                AuthService.getInstance(application).logout()
                 true
             }
             R.id.recipesOption -> {
@@ -112,11 +103,12 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     open fun onLogin(intent: Intent) {
-
     }
 
     open fun onLogout(intent: Intent) {
-        startActivity(Intent(this, LoginActivity::class.java))
+        Log.i(this::class.java.name, "onLogout")
+        //AuthService.getInstance(application).loginWithRefreshToken()
+        finish()
     }
 
 

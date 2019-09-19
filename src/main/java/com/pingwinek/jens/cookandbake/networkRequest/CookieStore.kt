@@ -34,4 +34,8 @@ object CookieStore {
         Log.i(tag, "setCookies: " + cookies.toString())
         cookieMap[host] = cookies
     }
+
+    fun removeCookies(host: String) {
+        cookieMap.remove(host)
+    }
 }

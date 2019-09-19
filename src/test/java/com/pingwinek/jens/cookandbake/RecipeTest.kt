@@ -30,7 +30,7 @@ class RecipeTest {
     fun asMap_test() {
         `when`(jsonObject.getInt(keyId))
             .thenReturn(valueId1)
-        `when`(jsonObject.optString(keyTitle, ""))
+        `when`(jsonObject.optString(keyTitle, "Recipe"))
             .thenReturn(valueTitle1)
         `when`(jsonObject.getString(keyDescription))
             .thenReturn(valueDescription1)
@@ -43,7 +43,7 @@ class RecipeTest {
 
         `when`(jsonObject.getInt(keyId))
             .thenThrow(JSONException(""))
-        `when`(jsonObject.optString(keyTitle, ""))
+        `when`(jsonObject.optString(keyTitle, "Recipe"))
             .thenReturn(valueTitle2)
         `when`(jsonObject.getString(keyDescription))
             .thenThrow(JSONException(""))

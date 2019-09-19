@@ -4,9 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRouter
 
 class LoginActivity : BaseActivity() {
 
@@ -22,21 +21,16 @@ class LoginActivity : BaseActivity() {
     }
 
     fun loginButton(view: View) {
-        val method = NetworkRequest.Method.POST
-        val contentType = NetworkRequest.ContentType.APPLICATION_URLENCODED
-        val params = HashMap<String, String>()
-        params["email"] = emailView.text.toString()
-        params["password"] = passwordView.text.toString()
+        AuthService.getInstance(application).login(emailView.text.toString(), passwordView.text.toString())
+    }
 
-        val networkRequest = NetworkRequest.getInstance(application)
-        val networkResponseRouter = NetworkResponseRouter()
-        networkResponseRouter.registerSuccessRoute(200) {
-            startActivity(Intent(this, RecipeListingActivity::class.java))
-        }
+    override fun onLogin(intent: Intent) {
+        finish()
+//        startActivity(Intent(this, RecipeListingActivity::class.java))
+    }
 
-        networkRequest.runRequest(loginPath, method, contentType, params,
-            networkResponseRouter
-        )
+    override fun onLogout(intent: Intent) {
+        // do nothing
     }
 
 }

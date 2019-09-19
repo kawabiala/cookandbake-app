@@ -1,17 +1,18 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.viewModels.IngredientViewModel
-import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.Utils.quantityToDouble
+import com.pingwinek.jens.cookandbake.Utils.quantityToString
 
 class IngredientActivity : BaseActivity() {
 
-    private lateinit var ingredientModel: IngredientViewModel
+    var ingredientId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,37 +20,15 @@ class IngredientActivity : BaseActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val nameView = findViewById<TextView>(R.id.ingredientName)
-        val unityView = findViewById<TextView>(R.id.ingredientUnity)
-        val quantityView = findViewById<TextView>(R.id.ingredientQuantity)
-
-        ingredientModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
-            .get(IngredientViewModel::class.java)
-
-        ingredientModel.ingredientData.observe(this, Observer { ingredient ->
-            nameView.text = ingredient?.name
-            quantityView.text = ingredient?.quantity.toString()
-            unityView.text = ingredient?.unity
-        })
-
-        ingredientModel.recipeData.observe(this, Observer { recipe ->
-            supportActionBar?.title = recipe?.title
-        })
-
-        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
-            intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
-                ingredientModel.loadRecipe(id)
+        intent?.extras?.let {
+            supportActionBar?.title = it.getString(EXTRA_RECIPE_TITLE)
+            it.get(EXTRA_INGREDIENT_ID)?.run {
+                ingredientId = it.getInt(EXTRA_INGREDIENT_ID)
             }
-
-            if (intent.hasExtra(EXTRA_INGREDIENT_ID)) {
-                intent.extras?.getInt(EXTRA_INGREDIENT_ID)?.let { id ->
-                    ingredientModel.loadData(id)
-                }
-            } else {
-                intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
-                    ingredientModel.newIngredient(id)
-                }
-            }
+            findViewById<TextView>(R.id.ingredientName).text = it.getString(EXTRA_INGREDIENT_NAME)
+            findViewById<TextView>(R.id.ingredientQuantity).text =
+                quantityToString(it.getDouble(EXTRA_INGREDIENT_QUANTITY))
+            findViewById<TextView>(R.id.ingredientUnity).text = it.getString(EXTRA_INGREDIENT_UNITY)
         }
     }
 
@@ -68,11 +47,14 @@ class IngredientActivity : BaseActivity() {
         }
     }
 
-    fun save() {
-        ingredientModel.save(
-            findViewById<TextView>(R.id.ingredientName).text.toString(),
-            findViewById<TextView>(R.id.ingredientQuantity).text.toString().toDoubleOrNull(),
-            findViewById<TextView>(R.id.ingredientUnity).text.toString())
+    private fun save() {
+        setResult(Activity.RESULT_OK, Intent().also {
+            it.putExtra(EXTRA_INGREDIENT_ID, ingredientId)
+            it.putExtra(EXTRA_INGREDIENT_NAME, findViewById<TextView>(R.id.ingredientName).text.toString())
+            it.putExtra(EXTRA_INGREDIENT_QUANTITY, quantityToDouble(findViewById<TextView>(R.id.ingredientQuantity).text.toString()))
+            it.putExtra(EXTRA_INGREDIENT_UNITY, findViewById<TextView>(R.id.ingredientUnity).text.toString())
+        })
         finish()
     }
+
 }

@@ -1,13 +1,16 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRouter
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.REGISTERPATH
 
 class RegisterActivity : BaseActivity() {
 
@@ -23,6 +26,7 @@ class RegisterActivity : BaseActivity() {
     }
 
     fun registerButton(view: View) {
+        /*
         Toast.makeText(this, "register", Toast.LENGTH_LONG).show()
 
         val method = NetworkRequest.Method.POST
@@ -35,9 +39,16 @@ class RegisterActivity : BaseActivity() {
 
         val networkRequest = NetworkRequest.getInstance(application)
 
-        networkRequest.runRequest(registerPath, method, contentType, params,
+        networkRequest.runRequest(
+            REGISTERPATH, method, contentType, params,
             NetworkResponseRouter()
         )
+        */
+        AuthService.getInstance(application).register(emailView.text.toString(), passwordView.text.toString())
+    }
+
+    override fun onLogout(intent: Intent) {
+        // do nothing
     }
 
 }

@@ -42,19 +42,35 @@ class RecipeListingActivity : BaseActivity() {
             adapter = viewAdapter
         }
 
-        recipeListingModel = ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory.getInstance(this.application))
-            .get(RecipeListingViewModel::class.java)
+        recipeListingModel =
+            ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory.getInstance(this.application))
+                .get(RecipeListingViewModel::class.java)
         val recipeListData = recipeListingModel.recipeListData
 
         recipeListData.observe(this, Observer { newRecipeList: LinkedList<Recipe>? ->
             newRecipeList?.let { nrl ->
                 recipeList.clear()
-                recipeList.addAll(nrl)
+                recipeList.addAll(nrl.sortedBy { recipe ->
+                    recipe.title
+                })
                 viewAdapter.notifyDataSetChanged()
             }
         })
+    }
 
-        recipeListingModel.loadData()
+    override fun onResume() {
+        super.onResume()
+        loadData()
+    }
+
+    override fun onLogin(intent: Intent) {
+        if (this.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            loadData()
+        }
+    }
+
+    override fun onLogout(intent: Intent) {
+        startActivity(Intent(this, LoginActivity::class.java))
     }
 
     fun onRecipeItemClick(recipeItem: View) {
@@ -63,6 +79,10 @@ class RecipeListingActivity : BaseActivity() {
 
     fun onNewRecipeClick(button: View) {
         openRecipeItem(null)
+    }
+
+    private fun loadData() {
+        recipeListingModel.loadData()
     }
 
     private fun openRecipeItem(itemId: Int?) {
@@ -94,7 +114,7 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
     }
 
     override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
-        Log.i("OnBindViewHolder", "Position: $position")
+
         (viewHolder.recipeListItem.getViewById(R.id.itemTitle) as TextView).text = recipeList[position].title
         (viewHolder.recipeListItem.getViewById(R.id.itemDescription) as TextView).text = recipeList[position].description
         viewHolder.recipeListItem.tag = recipeList[position].id

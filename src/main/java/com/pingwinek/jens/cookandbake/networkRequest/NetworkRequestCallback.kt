@@ -38,17 +38,6 @@ class NetworkRequestCallback(val networkResponseRouter: NetworkResponseRouter) :
             }
         }
 
-        /*
-        info?.allHeaders?.get("Set-Cookie")?.forEach { _cookie ->
-            Log.i(tag, _cookie)
-            val cookie = Cookie(_cookie)
-
-            if (cookie.cookieName == "cookandbake") {
-                NetworkRequest.setCookie(cookie)
-            }
-        }
-        */
-
         networkResponseRouter.routeResponse(SUCCESS, info?.httpStatusCode ?: -1, responseStringBuilder.toString())
     }
 
