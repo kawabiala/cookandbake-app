@@ -23,27 +23,50 @@
                   android:parentActivityName=".activities.RecipeListingActivity"
                   android:launchMode="singleTop"
                   android:label="@string/login"/>
-        <activity android:name=".activities.RecipeListingActivity"
-                  android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+        <activity android:name=".activities.ConfirmRegistrationActivity"
+                  android:launchMode="singleTask">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="https"/>
                 <data android:host="pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                        android:scheme="https"
-                        android:host="www.pingwinek.de"
-                />
+                <data android:scheme="https"/>
+                <data android:host="www.pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.NewPasswordActivity"
+                  android:launchMode="singleTask">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="https"/>
+                <data android:host="pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/lost_password/.*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="www.pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/lost_password/.*"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.MessageActivity"/>
+        <activity android:name=".activities.RecipeListingActivity"
+                  android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".activities.RecipeActivity"

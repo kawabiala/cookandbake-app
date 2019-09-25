@@ -87,6 +87,10 @@ class NetworkRequest private constructor(val application: Application){
         return requestBuilder.build()
     }
 
+    fun obtainNetworkRequestRouter() : NetworkResponseRouter {
+        return NetworkResponseRouter(application.mainLooper)
+    }
+
     private fun toBody(params: Map<String, String>): String {
 
         val bodyBuilder = StringBuilder()

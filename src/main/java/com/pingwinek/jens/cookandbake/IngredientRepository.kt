@@ -11,11 +11,11 @@ class IngredientRepository private constructor(val application: Application) {
 
     private val tag: String = this::class.java.name
 
+    val networkRequest = NetworkRequest.getInstance(application)
     val ingredientListData = MutableLiveData<LinkedList<Ingredient>>()
 
     fun getAll(recipeId: Int) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "getIngredient response 200")
@@ -33,8 +33,7 @@ class IngredientRepository private constructor(val application: Application) {
     }
 
     fun getIngredient(ingredientId: Int) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "getIngredient response 200")
@@ -55,8 +54,7 @@ class IngredientRepository private constructor(val application: Application) {
     }
 
     fun putIngredient(ingredient: Ingredient, confirmUpdate: (ingredientId: Int) -> Boolean) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "putIngredient response 200")
@@ -82,8 +80,7 @@ class IngredientRepository private constructor(val application: Application) {
     }
 
     fun postIngredient(ingredient: Ingredient) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "postIngredient response 200")
@@ -104,8 +101,7 @@ class IngredientRepository private constructor(val application: Application) {
     }
 
     fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) {
             Log.i(tag, "deleteIngredient response 200")

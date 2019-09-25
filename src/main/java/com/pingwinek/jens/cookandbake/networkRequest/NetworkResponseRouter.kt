@@ -1,24 +1,49 @@
 package com.pingwinek.jens.cookandbake.networkRequest
 
+import android.os.Looper
 import android.util.Log
 
 const val SUCCESS = "success"
 const val FAILED = "failed"
 
-class NetworkResponseRouter {
+class NetworkResponseRouter(val looper: Looper) {
 
     private val tag = "NetworkResponseRouter"
+
+    private val networkResponseHandler: NetworkResponseHandler = object : NetworkResponseHandler(looper) {
+        override fun handleResponse(status: String, code: Int, response: String) {
+            when (status) {
+                SUCCESS -> {
+                    if (successRoutes.containsKey(code)) {
+                        successRoutes[code]?.let { it(response) }
+                    } else {
+                        defaultSuccessRoute(code, response)
+                    }
+                }
+                FAILED -> {
+                    if (failedRoutes.containsKey(code)) {
+                        failedRoutes[code]?. let { it(response) }
+                    } else {
+                        defaultFailedRoute(code, response)
+                    }
+                }
+                else -> {
+                    defaultRoute(status, code, response)
+                }
+            }
+        }
+    }
 
     private var defaultRoute: (status: String, code: Int, response: String) -> Unit = {
         status, code, response -> log(status, code, response)
     }
 
-    private var defaultSuccessRoute: (code: Int, response: String) -> Unit = {
-            code, response -> log(SUCCESS, code, response)
+    private var defaultSuccessRoute: (code: Int, response: String) -> Unit = { code, response ->
+        defaultRoute(SUCCESS, code, response)
     }
 
-    private var defaultFailedRoute: (code: Int, response: String) -> Unit = {
-            code, response -> log(FAILED, code, response)
+    private var defaultFailedRoute: (code: Int, response: String) -> Unit = { code, response ->
+        defaultRoute(FAILED, code, response)
     }
 
     private val successRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
@@ -26,6 +51,8 @@ class NetworkResponseRouter {
     private val failedRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
 
     fun routeResponse(status: String, code: Int, response: String) {
+        networkResponseHandler.sendResponse(status, code, response)
+        /*
         when (status) {
             SUCCESS -> {
                 if (successRoutes.containsKey(code)) {
@@ -44,7 +71,7 @@ class NetworkResponseRouter {
             else -> {
                 defaultRoute(status, code, response)
             }
-        }
+        }*/
     }
 
     fun registerDefaultResponseRoute(responseRoute: (status: String, code: Int, response: String) -> Unit) {

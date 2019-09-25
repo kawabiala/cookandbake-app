@@ -1,13 +1,17 @@
 package com.pingwinek.jens.cookandbake
 
 const val LOCAL_DOMAIN = "http://10.0.2.2/strato/pingwinek"
-const val DOMAIN = "https://www.pingwinek.de"
-//const val DOMAIN = LOCAL_DOMAIN
+//const val DOMAIN = "https://www.pingwinek.de"
+const val DOMAIN = LOCAL_DOMAIN
 const val BASEURL = "$DOMAIN/cookandbake"
 
 const val REGISTERPATH = "$BASEURL/auth/register"
 const val LOGINPATH = "$BASEURL/auth/login"
 const val REFRESHPATH = "$BASEURL/auth/refresh"
+const val LOSTPASSWORDPATH = "$BASEURL/auth/lost_password"
+const val NEWPASSWORDPATH = "$BASEURL/auth/new_password"
+const val CHANGEPASSWORDPATH = "$BASEURL/auth/change_password"
+const val CONFIRMREGISTRATIONPATH = "$BASEURL/auth/confirm_registration"
 const val RECIPEPATH = "$BASEURL/api/recipe/"
 const val INGREDIENTPATH = "$BASEURL/api/ingredient/"
 

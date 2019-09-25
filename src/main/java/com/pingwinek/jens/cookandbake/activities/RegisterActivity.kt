@@ -1,18 +1,16 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.support.v4.app.DialogFragment
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRouter
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.REGISTERPATH
 
-class RegisterActivity : BaseActivity() {
+class RegisterActivity : BaseActivity(), ConfirmDialogFragment.ConfirmDialogListener {
 
     private lateinit var emailView: TextView
     private lateinit var passwordView: TextView
@@ -22,33 +20,61 @@ class RegisterActivity : BaseActivity() {
         addContentView(R.layout.activity_register)
 
         emailView = findViewById(R.id.email)
-        passwordView = findViewById(R.id.password)
+        passwordView = findViewById(R.id.newPassword)
     }
 
     fun registerButton(view: View) {
-        /*
-        Toast.makeText(this, "register", Toast.LENGTH_LONG).show()
+        if (AuthService.getInstance(application).isRemembered()) {
+            val confirmDialogFragment = ConfirmDialogFragment()
+            confirmDialogFragment.arguments = Bundle().also {
+                it.putString("message", "Soll der aktuelle Benutzer ausgeloggt werden?")
+                it.putString("id", "id")
+            }
+            confirmDialogFragment.show(supportFragmentManager, "tag")
+        } else {
+            register()
+        }
 
-        val method = NetworkRequest.Method.POST
-        val contentType = NetworkRequest.ContentType.APPLICATION_URLENCODED
-        val params = HashMap<String, String>()
-        params["email"] = emailView.text.toString()
-        params["password"] = passwordView.text.toString()
-
-        Log.i("RegisterActivity", "email: " + params["email"] + " - password: " + params["password"])
-
-        val networkRequest = NetworkRequest.getInstance(application)
-
-        networkRequest.runRequest(
-            REGISTERPATH, method, contentType, params,
-            NetworkResponseRouter()
-        )
-        */
-        AuthService.getInstance(application).register(emailView.text.toString(), passwordView.text.toString())
     }
 
     override fun onLogout(intent: Intent) {
         // do nothing
     }
 
+    override fun onPositiveButton(confirmItemId: String?) {
+        AuthService.getInstance(application).logout() { _, _ ->
+            register()
+        }
+    }
+
+    override fun onNegativeButton(confirmItemId: String?) {
+        // do nothing
+    }
+
+    private fun register() {
+        AuthService.getInstance(application).register(emailView.text.toString(),passwordView.text.toString()) { code, response ->
+            if (code == 200) {
+                val message = "Registrierung erfolgreich. Es wurde eine Bestätigungsmail an die angegebene Email gesandt."
+                startActivity(Intent(this, MessageActivity::class.java)
+                    .putExtra("message", message))
+                finish()
+            } else {
+                ErrorMessage().show(supportFragmentManager, "errorMessage")
+            }
+        }
+    }
+
+    class ErrorMessage : DialogFragment() {
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            return activity?.let {
+                val builder = AlertDialog.Builder(it)
+                builder.setMessage("Die Registrierung ist fehlgeschlagen")
+                builder.setPositiveButton("Ok") { _, _ ->
+                    // do nothing
+                }
+                builder.create()
+            } ?: throw IllegalStateException("ErrorMessage cannot be built due to missing activity")
+        }
+    }
 }

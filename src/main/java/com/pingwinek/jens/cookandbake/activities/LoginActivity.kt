@@ -17,7 +17,7 @@ class LoginActivity : BaseActivity() {
         addContentView(R.layout.activity_login)
 
         emailView = findViewById(R.id.email)
-        passwordView = findViewById(R.id.password)
+        passwordView = findViewById(R.id.newPassword)
     }
 
     fun loginButton(view: View) {

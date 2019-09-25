@@ -11,11 +11,11 @@ class RecipeRepository private constructor(val application: Application) {
 
     private val tag: String = this::class.java.name
 
+    val networkRequest = NetworkRequest.getInstance(application)
     val recipeListData = MutableLiveData<LinkedList<Recipe>>()
 
     fun getAll() {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "getRecipe response 200")
@@ -34,8 +34,7 @@ class RecipeRepository private constructor(val application: Application) {
     }
 
     fun getRecipe(recipeId: Int) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "getRecipe response 200")
@@ -57,8 +56,7 @@ class RecipeRepository private constructor(val application: Application) {
     }
 
     fun putRecipe(recipe: Recipe, confirmUpdate: (recipeId: Int) -> Boolean) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "putRecipe response 200")
@@ -84,8 +82,7 @@ class RecipeRepository private constructor(val application: Application) {
     }
 
     fun postRecipe(recipe: Recipe) {
-        val networkResponseRouter = NetworkResponseRouter()
-        val networkRequest = NetworkRequest.getInstance(application)
+        val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
         networkResponseRouter.registerSuccessRoute(200) { response ->
             Log.i(tag, "postRecipe response 200")
