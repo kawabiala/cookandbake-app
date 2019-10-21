@@ -15,20 +15,28 @@ const val CONFIRMREGISTRATIONPATH = "$BASEURL/auth/confirm_registration"
 const val RECIPEPATH = "$BASEURL/api/recipe/"
 const val INGREDIENTPATH = "$BASEURL/api/ingredient/"
 
-const val LOGIN_EVENT = "login"
-const val LOGOUT_EVENT = "logout"
+const val EXTRA_RECIPE_TITLE = "com.pingwinek.jens.cookandbake.extraRecipeTitle"
+const val EXTRA_RECIPE_DESCRIPTION = "com.pingwinek.jens.cookandbake.extraRecipeDescription"
+const val EXTRA_RECIPE_INSTRUCTION = "com.pingwinek.jens.cookandbake.extraRecipeInstruction"
 
-const val EXTRA_RECIPE_TITLE = "extraRecipeTitle"
-const val EXTRA_RECIPE_DESCRIPTION = "extraRecipeDescription"
-const val EXTRA_RECIPE_INSTRUCTION = "extraRecipeInstruction"
+const val EXTRA_INGREDIENT_ID = "com.pingwinek.jens.cookandbake.extraIngredientID"
+const val EXTRA_INGREDIENT_NAME = "com.pingwinek.jens.cookandbake.extraIngredientName"
+const val EXTRA_INGREDIENT_QUANTITY = "com.pingwinek.jens.cookandbake.extraIngredientQuantity"
+const val EXTRA_INGREDIENT_UNITY = "com.pingwinek.jens.cookandbake.extraIngredientUnity"
 
-const val EXTRA_INGREDIENT_ID = "extraIngredientID"
-const val EXTRA_INGREDIENT_NAME = "extraIngredientName"
-const val EXTRA_INGREDIENT_QUANTITY = "extraIngredientQuantity"
-const val EXTRA_INGREDIENT_UNITY = "extraIngredientUnity"
+const val ACTION_REGISTER_CONFIRMATION_SENT = "com.pingwinek.jens.cookandbake.registerConfirmationSent"
+const val ACTION_LOGIN_CONFIRMATION_SENT = "com.pingwinek.jens.cookandbake.registerLoginSent"
 
 const val REQUEST_CODE_TITLE = 1
 const val REQUEST_CODE_INSTRUCTION = 2
 const val REQUEST_CODE_INGREDIENT = 3
+
+const val OPTION_MENU_REGISTER = 1
+const val OPTION_MENU_LOGIN = 2
+const val OPTION_MENU_LOGOUT = 3
+const val OPTION_MENU_CLOSE = 6
+const val OPTION_MENU_RECIPES = 4
+const val OPTION_MENU_LOST_PASSWORD = 5
+const val OPTION_MENU_DONE = 7
 
 const val SHARED_PREFERENCES_FILE = "preferences"

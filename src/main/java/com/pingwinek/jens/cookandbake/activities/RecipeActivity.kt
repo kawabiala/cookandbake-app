@@ -110,12 +110,6 @@ class RecipeActivity : BaseActivity(),
         }
     }
 
-    override fun onLogin(intent: Intent) {
-        if (this.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            recipeModel.loadData()
-        }
-    }
-
     override fun onListFragmentInteraction(ingredient: Ingredient?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->

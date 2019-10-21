@@ -11,9 +11,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.*
 
@@ -30,6 +31,8 @@ class RecipeListingActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_listing)
+
+        findViewById<ImageView>(R.id.floatingActionButton).setImageResource(R.drawable.ic_action_add)
 
         val recipeList = LinkedList<Recipe>()
 
@@ -63,14 +66,19 @@ class RecipeListingActivity : BaseActivity() {
         loadData()
     }
 
-    override fun onLogin(intent: Intent) {
-        if (this.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            loadData()
+    override fun getOptionsMenu(): OptionMenu {
+        return OptionMenu().apply {
+            addMenuEntry(OPTION_MENU_LOGIN, "Login") {
+                startActivity(Intent(this@RecipeListingActivity, LoginActivity::class.java))
+                true
+            }
+            addMenuEntry(OPTION_MENU_LOGOUT, "Logout") {
+                AuthService.getInstance(application).logout() { _, _ ->
+                    startActivity(Intent(this@RecipeListingActivity, LoginActivity::class.java))
+                }
+                true
+            }
         }
-    }
-
-    override fun onLogout(intent: Intent) {
-        startActivity(Intent(this, LoginActivity::class.java))
     }
 
     fun onRecipeItemClick(recipeItem: View) {

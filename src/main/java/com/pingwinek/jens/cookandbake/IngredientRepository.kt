@@ -3,30 +3,39 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRouter
+import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
 import java.util.*
 
 class IngredientRepository private constructor(val application: Application) {
 
     private val tag: String = this::class.java.name
 
-    val networkRequest = NetworkRequest.getInstance(application)
+    val networkRequest = NetworkRequestProvider.getInstance(application)
     val ingredientListData = MutableLiveData<LinkedList<Ingredient>>()
+    val networkError = MutableLiveData<String>()
 
     fun getAll(recipeId: Int) {
         val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
-        networkResponseRouter.registerSuccessRoute(200) { response ->
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response ->
             Log.i(tag, "getIngredient response 200")
             ingredientListData.postValue(Ingredients(response))
         }
-        networkResponseRouter.registerSuccessRoute(401) {
-            AuthService.getInstance(application).onSessionInvalid()
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,401) { status, code, response ->
+            AuthService.getInstance(application).onSessionInvalid { code, response ->
+                when (code) {
+                    200 -> {}
+                    else -> {
+                        networkError.postValue(response)
+                        clearIngredientList()
+                    }
+                }
+            }
         }
         networkRequest.runRequest(
             "$RECIPEPATH$recipeId/ingredient/",
-            NetworkRequest.Method.GET,
+            NetworkRequestProvider.Method.GET,
             null,
             mapOf(),
             networkResponseRouter)
@@ -35,19 +44,27 @@ class IngredientRepository private constructor(val application: Application) {
     fun getIngredient(ingredientId: Int) {
         val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
-        networkResponseRouter.registerSuccessRoute(200) { response ->
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response ->
             Log.i(tag, "getIngredient response 200")
             val ingredients = Ingredients(response)
             if (ingredients.isNotEmpty()) {
                 updateIngredientList(ingredients[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) {
-            AuthService.getInstance(application).onSessionInvalid()
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,401) { status, code, response ->
+            AuthService.getInstance(application).onSessionInvalid { code, response ->
+                when (code) {
+                    200 -> {}
+                    else -> {
+                        networkError.postValue(response)
+                        clearIngredientList()
+                    }
+                }
+            }
         }
         networkRequest.runRequest(
             "$INGREDIENTPATH$ingredientId",
-            NetworkRequest.Method.GET,
+            NetworkRequestProvider.Method.GET,
             null,
             mapOf(),
             networkResponseRouter)
@@ -56,7 +73,7 @@ class IngredientRepository private constructor(val application: Application) {
     fun putIngredient(ingredient: Ingredient, confirmUpdate: (ingredientId: Int) -> Boolean) {
         val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
-        networkResponseRouter.registerSuccessRoute(200) { response ->
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response ->
             Log.i(tag, "putIngredient response 200")
             val ingredients = Ingredients(response)
             if (ingredients.isNotEmpty()) {
@@ -68,13 +85,21 @@ class IngredientRepository private constructor(val application: Application) {
                 }
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) {
-            AuthService.getInstance(application).onSessionInvalid()
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,401) { status, code, response ->
+            AuthService.getInstance(application).onSessionInvalid { code, response ->
+                when (code) {
+                    200 -> {}
+                    else -> {
+                        networkError.postValue(response)
+                        clearIngredientList()
+                    }
+                }
+            }
         }
         networkRequest.runRequest(
             INGREDIENTPATH,
-            NetworkRequest.Method.PUT,
-            NetworkRequest.ContentType.APPLICATION_URLENCODED,
+            NetworkRequestProvider.Method.PUT,
+            NetworkRequestProvider.ContentType.APPLICATION_URLENCODED,
             ingredient.asMap(),
             networkResponseRouter)
     }
@@ -82,20 +107,28 @@ class IngredientRepository private constructor(val application: Application) {
     fun postIngredient(ingredient: Ingredient) {
         val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
-        networkResponseRouter.registerSuccessRoute(200) { response ->
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response ->
             Log.i(tag, "postIngredient response 200")
             val ingredients = Ingredients(response)
             if (ingredients.isNotEmpty()) {
                 updateIngredientList(ingredients[0])
             }
         }
-        networkResponseRouter.registerSuccessRoute(401) {
-            AuthService.getInstance(application).onSessionInvalid()
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,401) { status, code, response ->
+            AuthService.getInstance(application).onSessionInvalid { code, response ->
+                when (code) {
+                    200 -> {}
+                    else -> {
+                        networkError.postValue(response)
+                        clearIngredientList()
+                    }
+                }
+            }
         }
         networkRequest.runRequest(
             INGREDIENTPATH,
-            NetworkRequest.Method.POST,
-            NetworkRequest.ContentType.APPLICATION_URLENCODED,
+            NetworkRequestProvider.Method.POST,
+            NetworkRequestProvider.ContentType.APPLICATION_URLENCODED,
             ingredient.asMap(),
             networkResponseRouter)
     }
@@ -103,17 +136,25 @@ class IngredientRepository private constructor(val application: Application) {
     fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {
         val networkResponseRouter = networkRequest.obtainNetworkRequestRouter()
 
-        networkResponseRouter.registerSuccessRoute(200) {
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response ->
             Log.i(tag, "deleteIngredient response 200")
             callback()
         }
-        networkResponseRouter.registerSuccessRoute(401) {
-            AuthService.getInstance(application).onSessionInvalid()
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,401) { status, code, response ->
+            AuthService.getInstance(application).onSessionInvalid { code, response ->
+                when (code) {
+                    200 -> {}
+                    else -> {
+                        networkError.postValue(response)
+                        clearIngredientList()
+                    }
+                }
+            }
         }
         networkRequest.runRequest(
             "$INGREDIENTPATH$ingredientId",
-            NetworkRequest.Method.DELETE,
-            NetworkRequest.ContentType.APPLICATION_URLENCODED,
+            NetworkRequestProvider.Method.DELETE,
+            NetworkRequestProvider.ContentType.APPLICATION_URLENCODED,
             emptyMap(),
             networkResponseRouter)
     }
@@ -125,6 +166,10 @@ class IngredientRepository private constructor(val application: Application) {
         }
         ingredientList.add(ingredient)
         ingredientListData.postValue(ingredientList)
+    }
+
+    private fun clearIngredientList() {
+        ingredientListData.postValue(LinkedList())
     }
 
     companion object : SingletonHolder<IngredientRepository, Application>(::IngredientRepository)

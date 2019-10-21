@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.pingwinek.jens.cookandbake">
 
+    <!--
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    -->
 
     <application
             android:allowBackup="true"
@@ -12,74 +14,85 @@
             android:roundIcon="@mipmap/ic_cookandbake_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/CookAndBakeAppTheme"
-            android:usesCleartextTraffic="true">
-        <activity android:name=".activities.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".activities.RegisterActivity"/>
-        <activity android:name=".activities.LoginActivity"
-                  android:parentActivityName=".activities.RecipeListingActivity"
-                  android:launchMode="singleTop"
-                  android:label="@string/login"/>
-        <activity android:name=".activities.ConfirmRegistrationActivity"
-                  android:launchMode="singleTask">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="https"/>
-                <data android:host="pingwinek.de"/>
-                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"/>
-                <data android:host="www.pingwinek.de"/>
-                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".activities.NewPasswordActivity"
-                  android:launchMode="singleTask">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="https"/>
-                <data android:host="pingwinek.de"/>
-                <data android:pathPattern="/cookandbake/lost_password/.*"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"/>
-                <data android:host="www.pingwinek.de"/>
-                <data android:pathPattern="/cookandbake/lost_password/.*"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".activities.MessageActivity"/>
+            android:usesCleartextTraffic="true"
+            >
+
         <activity android:name=".activities.RecipeListingActivity"
-                  android:launchMode="singleTop">
+                android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity android:name=".activities.RecipeActivity"
-                  android:parentActivityName=".activities.RecipeListingActivity"
-                  android:launchMode="singleTop"
-                  android:label="@string/recipe"/>
+                android:parentActivityName=".activities.RecipeListingActivity"
+                android:launchMode="singleTop"
+                android:label="@string/recipe"/>
+
         <activity android:name=".activities.IngredientActivity"
-                  android:parentActivityName=".activities.RecipeActivity"/>
+                android:parentActivityName=".activities.RecipeActivity"/>
         <activity android:name=".activities.InstructionActivity"
-                  android:parentActivityName=".activities.RecipeActivity"/>
+                android:parentActivityName=".activities.RecipeActivity"/>
         <activity android:name=".activities.RecipeEditActivity"
-                  android:parentActivityName=".activities.RecipeActivity"
-                  android:label="@string/recipe"/>
+                android:parentActivityName=".activities.RecipeActivity"
+                android:label="@string/recipe"/>
+
+        <activity android:name=".activities.RegisterActivity"
+                android:launchMode="singleTop"/>
+
+        <activity android:name=".activities.LoginActivity"
+                  android:launchMode="singleTop"
+                  android:label="@string/login"/>
+
+        <activity android:name=".activities.LostPasswordActivity"
+                android:launchMode="singleTop"
+                android:parentActivityName=".activities.LoginActivity"
+                android:label="@string/lostPassword"/>
+
+        <activity android:name=".activities.ChangePasswordActivity"
+                android:launchMode="singleTop"
+                android:label="@string/changePassword"/>
+
+        <activity android:name=".activities.ConfirmRegistrationActivity">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="https"/>
+                <data android:host="pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="www.pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/confirm_registration/.*"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".activities.NewPasswordActivity">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="https"/>
+                <data android:host="pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/lost_password/.*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="www.pingwinek.de"/>
+                <data android:pathPattern="/cookandbake/lost_password/.*"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".activities.MessageActivity"/>
     </application>
 
 </manifest>

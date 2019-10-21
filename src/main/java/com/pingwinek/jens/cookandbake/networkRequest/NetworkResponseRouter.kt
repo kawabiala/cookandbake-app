@@ -10,30 +10,32 @@ class NetworkResponseRouter(val looper: Looper) {
 
     private val tag = "NetworkResponseRouter"
 
+    private val responseRoutes = GlobalNetworkResponseRoutes.clone()
+
     private val networkResponseHandler: NetworkResponseHandler = object : NetworkResponseHandler(looper) {
-        override fun handleResponse(status: String, code: Int, response: String) {
+        override fun handleResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
             when (status) {
-                SUCCESS -> {
-                    if (successRoutes.containsKey(code)) {
-                        successRoutes[code]?.let { it(response) }
+                NetworkResponseRoutes.Result.SUCCESS -> {
+                    if (responseRoutes.successRoutes.containsKey(code)) {
+                        responseRoutes.successRoutes[code]?.let { it(status, code, response) }
                     } else {
-                        defaultSuccessRoute(code, response)
+                        responseRoutes.defaultSuccessRoute(status, code, response)
                     }
                 }
-                FAILED -> {
-                    if (failedRoutes.containsKey(code)) {
-                        failedRoutes[code]?. let { it(response) }
+                NetworkResponseRoutes.Result.FAILED -> {
+                    if (responseRoutes.failedRoutes.containsKey(code)) {
+                        responseRoutes.failedRoutes[code]?. let { it(status, code, response) }
                     } else {
-                        defaultFailedRoute(code, response)
+                        responseRoutes.defaultFailedRoute(status, code, response)
                     }
                 }
                 else -> {
-                    defaultRoute(status, code, response)
+                    responseRoutes.defaultRoute(status, code, response)
                 }
             }
         }
     }
-
+/*
     private var defaultRoute: (status: String, code: Int, response: String) -> Unit = {
         status, code, response -> log(status, code, response)
     }
@@ -49,49 +51,37 @@ class NetworkResponseRouter(val looper: Looper) {
     private val successRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
 
     private val failedRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
-
-    fun routeResponse(status: String, code: Int, response: String) {
+*/
+    fun routeResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
         networkResponseHandler.sendResponse(status, code, response)
-        /*
-        when (status) {
-            SUCCESS -> {
-                if (successRoutes.containsKey(code)) {
-                    successRoutes[code]?.let { it(response) }
-                } else {
-                    defaultSuccessRoute(code, response)
-                }
-            }
-            FAILED -> {
-                if (failedRoutes.containsKey(code)) {
-                    failedRoutes[code]?. let { it(response) }
-                } else {
-                    defaultFailedRoute(code, response)
-                }
-            }
-            else -> {
-                defaultRoute(status, code, response)
-            }
-        }*/
     }
 
-    fun registerDefaultResponseRoute(responseRoute: (status: String, code: Int, response: String) -> Unit) {
-        defaultRoute = responseRoute
+    fun registerDefaultResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+        responseRoutes.defaultRoute = responseRoute
     }
 
-    fun registerSuccessResponseRoute(responseRoute: (code: Int, response: String) -> Unit) {
-        defaultSuccessRoute = responseRoute
+    fun registerSuccessResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+        responseRoutes.defaultSuccessRoute = responseRoute
     }
 
-    fun registerFailedResponseRoute(responseRoute: (code: Int, response: String) -> Unit) {
-        defaultFailedRoute = responseRoute
+    fun registerFailedResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+        responseRoutes.defaultFailedRoute = responseRoute
     }
-
+/*
     fun registerSuccessRoute(code: Int, responseRoute: (response: String) -> Unit) {
         successRoutes[code] = responseRoute
     }
 
     fun registerFailedRoute(code: Int, responseRoute: (response: String) -> Unit) {
         failedRoutes[code] = responseRoute
+    }
+*/
+    fun registerResponseRoute(
+        status: NetworkResponseRoutes.Result,
+        code: Int,
+        callback: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit
+    ) {
+        responseRoutes.setResponseRoute(status, code, callback)
     }
 
     private fun log(status: String, code: Int, response: String) {

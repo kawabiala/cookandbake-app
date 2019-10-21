@@ -7,7 +7,7 @@ import org.chromium.net.UrlResponseInfo
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
-class NetworkRequestCallback(val networkResponseRouter: NetworkResponseRouter) : UrlRequest.Callback() {
+class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseRouter) : UrlRequest.Callback() {
 
     private val tag = "NetworkRequestCallback"
     private val capacity = 10000
@@ -26,7 +26,7 @@ class NetworkRequestCallback(val networkResponseRouter: NetworkResponseRouter) :
 
     override fun onFailed(request: UrlRequest?, info: UrlResponseInfo?, error: CronetException?) {
         Log.i(tag, "failed")
-        networkResponseRouter.routeResponse(FAILED, info?.httpStatusCode ?: -1, error?.localizedMessage ?: "")
+        networkResponseRouter.routeResponse(NetworkResponseRoutes.Result.FAILED, info?.httpStatusCode ?: -1, error?.localizedMessage ?: "")
     }
 
     override fun onSucceeded(request: UrlRequest?, info: UrlResponseInfo?) {
@@ -38,7 +38,7 @@ class NetworkRequestCallback(val networkResponseRouter: NetworkResponseRouter) :
             }
         }
 
-        networkResponseRouter.routeResponse(SUCCESS, info?.httpStatusCode ?: -1, responseStringBuilder.toString())
+        networkResponseRouter.routeResponse(NetworkResponseRoutes.Result.SUCCESS, info?.httpStatusCode ?: -1, responseStringBuilder.toString())
     }
 
     override fun onRedirectReceived(request: UrlRequest?, info: UrlResponseInfo?, newLocationUrl: String?) {

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">CookAndBake</string>
     <string name="register">Anmelden</string>
+    <string name="close">Schließen</string>
+    <string name="save">Speichern</string>
     <string name="setPassword">Passwort setzen</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
@@ -16,5 +18,11 @@
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
     <string name="email">Email</string>
     <string name="password">Passwort</string>
+    <string name="lostPassword">Passwort zurücksetzen</string>
     <string name="newPassword">Neues Passwort</string>
+    <string name="oldPassword">Bisheriges Passwort</string>
+    <string name="changePassword">Passwort ändern</string>
+    <string name="confirmationSent">Eine Mail mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
+    <string name="confirmationSucceeded">Der Account ist jetzt bestätigt.</string>
+    <string name="confirmationFailed">Die Bestätigung des Accounts ist fehlgeschlagen.</string>
 </resources>

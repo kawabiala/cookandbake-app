@@ -1,16 +1,16 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.View
 import android.widget.TextView
+import com.pingwinek.jens.cookandbake.ACTION_REGISTER_CONFIRMATION_SENT
 import com.pingwinek.jens.cookandbake.AuthService
+import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
 import com.pingwinek.jens.cookandbake.R
 
-class RegisterActivity : BaseActivity(), ConfirmDialogFragment.ConfirmDialogListener {
+class RegisterActivity : BaseActivity() {
 
     private lateinit var emailView: TextView
     private lateinit var passwordView: TextView
@@ -19,62 +19,56 @@ class RegisterActivity : BaseActivity(), ConfirmDialogFragment.ConfirmDialogList
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_register)
 
-        emailView = findViewById(R.id.email)
-        passwordView = findViewById(R.id.newPassword)
+        emailView = findViewById(R.id.raEmail)
+        passwordView = findViewById(R.id.raPassword)
+    }
+
+    override fun getOptionsMenu(): OptionMenu {
+        return OptionMenu().apply {
+            addMenuEntry(OPTION_MENU_CLOSE, resources.getString(R.string.close)) {
+                finish()
+                true
+            }.apply {
+                iconId = R.drawable.ic_action_close
+                ifRoom = true
+            }
+        }
     }
 
     fun registerButton(view: View) {
-        if (AuthService.getInstance(application).isRemembered()) {
-            val confirmDialogFragment = ConfirmDialogFragment()
-            confirmDialogFragment.arguments = Bundle().also {
-                it.putString("message", "Soll der aktuelle Benutzer ausgeloggt werden?")
-                it.putString("id", "id")
+        if (AuthService.getInstance(application).hasStoredAccount()) {
+            AlertDialog.Builder(this).apply {
+                setMessage("Soll der aktuelle Benutzer ausgeloggt werden?")
+                setPositiveButton("Ja") { _, _ ->
+                    AuthService.getInstance(application).logout { _, _ ->
+                        register()
+                    }
+                }
+                setNegativeButton("Nein") { _, _ -> }
+                create()
+                show()
             }
-            confirmDialogFragment.show(supportFragmentManager, "tag")
         } else {
             register()
         }
 
     }
 
-    override fun onLogout(intent: Intent) {
-        // do nothing
-    }
-
-    override fun onPositiveButton(confirmItemId: String?) {
-        AuthService.getInstance(application).logout() { _, _ ->
-            register()
-        }
-    }
-
-    override fun onNegativeButton(confirmItemId: String?) {
-        // do nothing
-    }
-
     private fun register() {
-        AuthService.getInstance(application).register(emailView.text.toString(),passwordView.text.toString()) { code, response ->
+        AuthService.getInstance(application).register(emailView.text.toString(),passwordView.text.toString()) { code, _ ->
             if (code == 200) {
-                val message = "Registrierung erfolgreich. Es wurde eine Bestätigungsmail an die angegebene Email gesandt."
-                startActivity(Intent(this, MessageActivity::class.java)
-                    .putExtra("message", message))
+                startActivity(Intent(this, ConfirmRegistrationActivity::class.java).apply {
+                    action = ACTION_REGISTER_CONFIRMATION_SENT
+                })
                 finish()
             } else {
-                ErrorMessage().show(supportFragmentManager, "errorMessage")
-            }
-        }
-    }
-
-    class ErrorMessage : DialogFragment() {
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            return activity?.let {
-                val builder = AlertDialog.Builder(it)
-                builder.setMessage("Die Registrierung ist fehlgeschlagen")
-                builder.setPositiveButton("Ok") { _, _ ->
-                    // do nothing
+                AlertDialog.Builder(this).apply {
+                    setMessage("Die Registrierung ist fehlgeschlagen")
+                    setPositiveButton("Ok") { _, _ -> }
+                    create()
+                    show()
                 }
-                builder.create()
-            } ?: throw IllegalStateException("ErrorMessage cannot be built due to missing activity")
+            }
         }
     }
 }

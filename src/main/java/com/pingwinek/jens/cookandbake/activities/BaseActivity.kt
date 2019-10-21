@@ -1,24 +1,16 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.arch.lifecycle.Lifecycle
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.*
-import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
+import android.view.Menu.NONE
+import android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM
+import com.pingwinek.jens.cookandbake.R
 
 /*
 Sets option menu, handles user interaction with login / logout and defines handler for login and logout events
  */
 abstract class BaseActivity : AppCompatActivity() {
-
-    protected lateinit var networkRequest: NetworkRequest
 
     /*
     /////////////////////////////////////////////
@@ -32,20 +24,6 @@ abstract class BaseActivity : AppCompatActivity() {
 
         super.setContentView(R.layout.activity_base)
         setSupportActionBar(findViewById(R.id.toolbar))
-
-        networkRequest = NetworkRequest.getInstance(this.application)
-
-        val intentFilter = IntentFilter().apply {
-            addAction(LOGOUT_EVENT)
-            addAction(LOGIN_EVENT)
-        }
-        LocalBroadcastManager.getInstance(this).registerReceiver(loginReceiver, intentFilter)
-    }
-
-    // when the activity is finally destroyed
-    override fun onDestroy() {
-        super.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(loginReceiver)
     }
 
     /*
@@ -54,63 +32,30 @@ abstract class BaseActivity : AppCompatActivity() {
     /////////////////////////////////////////////
      */
 
+    protected open fun getOptionsMenu() : OptionMenu? {
+        return null
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.main_options, menu)
+        getOptionsMenu()?.apply {
+            getMenuEntries().iterator().forEach { optionMenuItem ->
+                if (menu?.findItem(optionMenuItem.key) == null) {
+                    val m = menu?.add(NONE, optionMenuItem.key, NONE, optionMenuItem.value.itemName)
+                    optionMenuItem.value.iconId?.let { icondId ->
+                        m?.setIcon(icondId)
+                    }
+                    if (optionMenuItem.value.ifRoom) {
+                        m?.setShowAsAction(SHOW_AS_ACTION_IF_ROOM)
+                    }
+                }
+            }
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.registerOption -> {
-                val intent = Intent(this, RegisterActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            R.id.loginOption -> {
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            R.id.logoutOption -> {
-                AuthService.getInstance(application).logout()
-                true
-            }
-            R.id.recipesOption -> {
-                val intent = Intent(this, RecipeListingActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+        return getOptionsMenu()?.invokeAction(item.itemId) ?: super.onOptionsItemSelected(item)
     }
-
-    /*
-    /////////////////////////////////////////////
-    / login/logout related stuff
-    /////////////////////////////////////////////
-     */
-
-    private val loginReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent != null) {
-                when (intent.action) {
-                    LOGIN_EVENT -> onLogin(intent)
-                    LOGOUT_EVENT -> onLogout(intent)
-                }
-            }
-        }
-    }
-
-    open fun onLogin(intent: Intent) {
-    }
-
-    open fun onLogout(intent: Intent) {
-        Log.i(this::class.java.name, "onLogout")
-        //AuthService.getInstance(application).loginWithRefreshToken()
-        finish()
-    }
-
 
     /*
     /////////////////////////////////////////////
@@ -122,5 +67,29 @@ abstract class BaseActivity : AppCompatActivity() {
         val baseLayout = findViewById<View>(R.id.mainContent) as ViewGroup
         val layoutInflater = this.layoutInflater
         layoutInflater.inflate(viewId, baseLayout)
+    }
+}
+
+class OptionMenu() {
+
+    inner class OptionMenuItem(val itemName: String, val action: (Int) -> Boolean) {
+        var iconId: Int? = null
+        var ifRoom: Boolean = false
+    }
+
+    private val options: MutableMap<Int, OptionMenuItem> = mutableMapOf()
+
+    fun addMenuEntry(itemId: Int, itemName: String, action: (Int) -> Boolean) : OptionMenuItem {
+        val optionMenuItem = OptionMenuItem(itemName, action)
+        options[itemId] = optionMenuItem
+        return optionMenuItem
+    }
+
+    fun getMenuEntries() : Map<Int, OptionMenuItem> {
+        return options
+    }
+
+    fun invokeAction(itemId: Int) : Boolean {
+        return options[itemId]?.action?.invoke(itemId) ?: false
     }
 }

@@ -12,6 +12,10 @@ class MessageActivity : BaseActivity() {
 
     }
 
+    override fun getOptionsMenu(): OptionMenu {
+        return OptionMenu()
+    }
+
     override fun onResume() {
         super.onResume()
         findViewById<TextView>(R.id.textMessage).text =

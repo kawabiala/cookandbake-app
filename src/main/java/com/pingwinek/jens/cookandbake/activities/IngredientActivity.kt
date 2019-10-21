@@ -32,18 +32,15 @@ class IngredientActivity : BaseActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.instruction_options, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.done -> {
+    override fun getOptionsMenu(): OptionMenu {
+        return OptionMenu().apply {
+            addMenuEntry(OPTION_MENU_DONE, resources.getString(R.string.save)) {
                 save()
                 true
-            } else -> super.onOptionsItemSelected(item)
+            }.apply {
+                iconId = R.drawable.ic_action_done
+                ifRoom = true
+            }
         }
     }
 

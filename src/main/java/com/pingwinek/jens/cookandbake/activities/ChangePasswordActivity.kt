@@ -9,18 +9,11 @@ import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
 import com.pingwinek.jens.cookandbake.R
 
-class NewPasswordActivity : BaseActivity() {
-
-    private var tempCode: String? = null
+class ChangePasswordActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_new_password)
-
-        val segments = intent?.data?.pathSegments
-        if (segments != null && segments.contains("temp_code")) {
-            tempCode = segments.last()
-        }
     }
 
     override fun getOptionsMenu(): OptionMenu {
@@ -36,22 +29,23 @@ class NewPasswordActivity : BaseActivity() {
     }
 
     fun onNewPasswordButton(view: View) {
-        tempCode?.let {
-            AuthService.getInstance(application).newPassword(it, findViewById<TextView>(R.id.npaPassword).text.toString()) { code, response ->
-                when (code) {
-                    200 -> {
-                        startActivity(Intent(this, LoginActivity::class.java))
-                        finish()
-                    }
-                    else -> {
-                        AlertDialog.Builder(this).apply {
-                            setMessage("Passwort konnte nicht gesetzt werden")
-                            setPositiveButton("Ok") { _, _ ->
-                                // do nothing
-                            }
-                            create()
-                            show()
+        AuthService.getInstance(application).changePassword(
+            findViewById<TextView>(R.id.cpaOldPassword).text.toString(),
+            findViewById<TextView>(R.id.cpaNewPassword).text.toString()
+        ) { code, response ->
+            when (code) {
+                200 -> {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
+                else -> {
+                    AlertDialog.Builder(this).apply {
+                        setMessage("Passwort konnte nicht gesetzt werden")
+                        setPositiveButton("Ok") { _, _ ->
+                            // do nothing
                         }
+                        create()
+                        show()
                     }
                 }
             }
