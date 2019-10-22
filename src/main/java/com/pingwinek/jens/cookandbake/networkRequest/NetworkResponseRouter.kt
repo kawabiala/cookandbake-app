@@ -1,14 +1,8 @@
 package com.pingwinek.jens.cookandbake.networkRequest
 
 import android.os.Looper
-import android.util.Log
 
-const val SUCCESS = "success"
-const val FAILED = "failed"
-
-class NetworkResponseRouter(val looper: Looper) {
-
-    private val tag = "NetworkResponseRouter"
+class NetworkResponseRouter(val looper: Looper, networkRequest: NetworkRequest) {
 
     private val responseRoutes = GlobalNetworkResponseRoutes.clone()
 
@@ -17,74 +11,43 @@ class NetworkResponseRouter(val looper: Looper) {
             when (status) {
                 NetworkResponseRoutes.Result.SUCCESS -> {
                     if (responseRoutes.successRoutes.containsKey(code)) {
-                        responseRoutes.successRoutes[code]?.let { it(status, code, response) }
+                        responseRoutes.successRoutes[code]?.let { it(status, code, response, networkRequest) }
                     } else {
-                        responseRoutes.defaultSuccessRoute(status, code, response)
+                        responseRoutes.defaultSuccessRoute(status, code, response, networkRequest)
                     }
                 }
                 NetworkResponseRoutes.Result.FAILED -> {
                     if (responseRoutes.failedRoutes.containsKey(code)) {
-                        responseRoutes.failedRoutes[code]?. let { it(status, code, response) }
+                        responseRoutes.failedRoutes[code]?. let { it(status, code, response, networkRequest) }
                     } else {
-                        responseRoutes.defaultFailedRoute(status, code, response)
+                        responseRoutes.defaultFailedRoute(status, code, response, networkRequest)
                     }
-                }
-                else -> {
-                    responseRoutes.defaultRoute(status, code, response)
                 }
             }
         }
     }
-/*
-    private var defaultRoute: (status: String, code: Int, response: String) -> Unit = {
-        status, code, response -> log(status, code, response)
-    }
 
-    private var defaultSuccessRoute: (code: Int, response: String) -> Unit = { code, response ->
-        defaultRoute(SUCCESS, code, response)
-    }
-
-    private var defaultFailedRoute: (code: Int, response: String) -> Unit = { code, response ->
-        defaultRoute(FAILED, code, response)
-    }
-
-    private val successRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
-
-    private val failedRoutes: HashMap<Int, (response: String) -> Unit> = hashMapOf()
-*/
     fun routeResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
         networkResponseHandler.sendResponse(status, code, response)
     }
 
-    fun registerDefaultResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+    fun registerDefaultResponseRoute(responseRoute: (result: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         responseRoutes.defaultRoute = responseRoute
     }
 
-    fun registerSuccessResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+    fun registerDefaultSuccessRoute(responseRoute: (result: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         responseRoutes.defaultSuccessRoute = responseRoute
     }
 
-    fun registerFailedResponseRoute(responseRoute: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit) {
+    fun registerDefaultFailedRoute(responseRoute: (result: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         responseRoutes.defaultFailedRoute = responseRoute
     }
-/*
-    fun registerSuccessRoute(code: Int, responseRoute: (response: String) -> Unit) {
-        successRoutes[code] = responseRoute
-    }
 
-    fun registerFailedRoute(code: Int, responseRoute: (response: String) -> Unit) {
-        failedRoutes[code] = responseRoute
-    }
-*/
     fun registerResponseRoute(
         status: NetworkResponseRoutes.Result,
         code: Int,
-        callback: (status: NetworkResponseRoutes.Result, code: Int, response: String) -> Unit
+        callback: (result: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit
     ) {
         responseRoutes.setResponseRoute(status, code, callback)
-    }
-
-    private fun log(status: String, code: Int, response: String) {
-        Log.i(tag, "status: $status - code: $code - response: $response")
     }
 }

@@ -8,7 +8,7 @@ import org.chromium.net.UrlRequest
 import java.net.URI
 import java.util.concurrent.ExecutorService
 
-class CloneableNetworkRequest(
+class ReusableNetworkRequest(
     override val url: String,
     override val executor: ExecutorService,
     override val application: Application,
@@ -16,9 +16,9 @@ class CloneableNetworkRequest(
 ) : NetworkRequest {
 
     private val cronetEngine = CronetEngine.Builder(application).build()
-
     private val headers: MutableMap<String, String> = mutableMapOf()
-    private var networkResponseRouter: NetworkResponseRouter? = null
+    private val networkResponseRouter = NetworkResponseRouter(application.mainLooper, this)
+
     private var uploadDataProvider: UploadDataProvider? = null
     private var contentType: NetworkRequestProvider.ContentType? = null
 
@@ -26,30 +26,23 @@ class CloneableNetworkRequest(
         headers[header] = value
     }
 
-    override fun setNetworkResponseRouter(networkResponseRouter: NetworkResponseRouter) {
-        this.networkResponseRouter = networkResponseRouter
-    }
-
     override fun setUploadDataProvider(uploadDataProvider: UploadDataProvider, contentType: NetworkRequestProvider.ContentType) {
         this.uploadDataProvider = uploadDataProvider
+        this.contentType = contentType
     }
 
-    override fun optainNetworkResponseRouter() : NetworkResponseRouter {
-        return NetworkResponseRouter(application.mainLooper)
+    override fun obtainNetworkResponseRouter() : NetworkResponseRouter {
+        return networkResponseRouter
     }
 
-    override fun start() {
-        networkResponseRouter?.let { router ->
-            getUrlRequestBuilder(NetworkRequestCallback(router)).build().start()
-        }
-    }
-
-    override fun clone() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun start(): UrlRequest {
+        val urlRequest = getUrlRequestBuilder(NetworkRequestCallback(networkResponseRouter)).build()
+        urlRequest.start()
+        return urlRequest
     }
 
     private fun getUrlRequestBuilder(networkRequestCallback: NetworkRequestCallback) : UrlRequest.Builder {
-        var logMessage = "Request built with Url: $url, Method: $httpMethod"
+        val logMessage = "Request built with Url: $url, Method: $httpMethod"
 
         val requestBuilder = cronetEngine.newUrlRequestBuilder(
             url,

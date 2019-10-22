@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets
 
 class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseRouter) : UrlRequest.Callback() {
 
-    private val tag = "NetworkRequestCallback"
+    private val tag = this::class.java.name
     private val capacity = 10000
 
     private val responseStringBuilder = StringBuilder()
@@ -42,7 +42,7 @@ class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseR
     }
 
     override fun onRedirectReceived(request: UrlRequest?, info: UrlResponseInfo?, newLocationUrl: String?) {
-        Log.i(tag, "redirect to " + newLocationUrl)
+        Log.i(tag, "redirect to $newLocationUrl")
         request?.cancel()
     }
 

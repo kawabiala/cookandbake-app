@@ -1,8 +1,8 @@
 package com.pingwinek.jens.cookandbake.networkRequest
 
 import android.app.Application
-import org.chromium.net.CronetEngine
 import org.chromium.net.UploadDataProvider
+import org.chromium.net.UrlRequest
 import java.util.concurrent.ExecutorService
 
 interface NetworkRequest {
@@ -13,12 +13,9 @@ interface NetworkRequest {
     val httpMethod: NetworkRequestProvider.Method
 
     fun addHeader(header: String, value: String)
-    fun setNetworkResponseRouter(networkResponseRouter: NetworkResponseRouter)
     fun setUploadDataProvider(uploadDataProvider: UploadDataProvider, contentType: NetworkRequestProvider.ContentType)
 
-    fun optainNetworkResponseRouter() : NetworkResponseRouter
+    fun obtainNetworkResponseRouter() : NetworkResponseRouter
 
-    fun start()
-
-    fun clone()
+    fun start(): UrlRequest
 }

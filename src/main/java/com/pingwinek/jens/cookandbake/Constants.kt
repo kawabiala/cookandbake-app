@@ -14,6 +14,7 @@ const val CHANGEPASSWORDPATH = "$BASEURL/auth/change_password"
 const val CONFIRMREGISTRATIONPATH = "$BASEURL/auth/confirm_registration"
 const val RECIPEPATH = "$BASEURL/api/recipe/"
 const val INGREDIENTPATH = "$BASEURL/api/ingredient/"
+const val LOGOUTPATH = "$BASEURL/auth/logout"
 
 const val EXTRA_RECIPE_TITLE = "com.pingwinek.jens.cookandbake.extraRecipeTitle"
 const val EXTRA_RECIPE_DESCRIPTION = "com.pingwinek.jens.cookandbake.extraRecipeDescription"
