@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.networkRequest
 
 import android.os.Looper
+import android.util.Log
 
 class NetworkResponseRouter(val looper: Looper, networkRequest: NetworkRequest) {
 
@@ -28,6 +29,7 @@ class NetworkResponseRouter(val looper: Looper, networkRequest: NetworkRequest) 
     }
 
     fun routeResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
+        Log.i(this::class.java.name, "routeResponse with status $status, code $code and response $response")
         networkResponseHandler.sendResponse(status, code, response)
     }
 

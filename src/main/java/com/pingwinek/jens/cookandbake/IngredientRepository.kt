@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
 import java.util.*
@@ -22,6 +23,7 @@ class IngredientRepository private constructor(val application: Application) {
             Log.i(tag, "getIngredient response 200")
             ingredientListData.postValue(Ingredients(response))
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -36,6 +38,7 @@ class IngredientRepository private constructor(val application: Application) {
                 updateIngredientList(ingredients[0])
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -59,6 +62,7 @@ class IngredientRepository private constructor(val application: Application) {
                 }
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -77,6 +81,7 @@ class IngredientRepository private constructor(val application: Application) {
                 updateIngredientList(ingredients[0])
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -92,6 +97,7 @@ class IngredientRepository private constructor(val application: Application) {
             Log.i(tag, "deleteIngredient response 200")
             callback()
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -106,6 +112,20 @@ class IngredientRepository private constructor(val application: Application) {
 
     private fun clearIngredientList() {
         ingredientListData.postValue(LinkedList())
+    }
+
+    private fun retry(status: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
+        Log.i(tag, "getRecipe response 401")
+        AuthService.getInstance(application).onSessionInvalid() { authCode, authResponse ->
+            if (authCode == 200) {
+                request.obtainNetworkResponseRouter().registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
+                    //Do nothing, especially don't loop
+                }
+                request.start()
+            } else {
+                clearIngredientList()
+            }
+        }
     }
 
     companion object : SingletonHolder<IngredientRepository, Application>(::IngredientRepository)

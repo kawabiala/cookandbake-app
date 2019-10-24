@@ -3,10 +3,11 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.util.Log
 import com.pingwinek.jens.cookandbake.networkRequest.GlobalNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
 
 class CookandbakeApplication : Application() {
+
+    private val tag = this::class.java.name
 
     override fun onCreate() {
         super.onCreate()
@@ -19,30 +20,8 @@ class CookandbakeApplication : Application() {
         GlobalNetworkResponseRoutes.setResponseRoute(
             NetworkResponseRoutes.Result.SUCCESS, 401
         ) { result, code, response, request ->
-            refresh(request)
+            Log.i(tag, "defaultRoute for 401")
         }
     }
 
-    /*
-    Try to authenticate based on refresh token and then re-run the original request
-     */
-    private fun refresh(networkRequest: NetworkRequest) {
-        AuthService.getInstance(this).onSessionInvalid { authCode, authResponse ->
-            if (authCode == 200) {
-                restartRequest(networkRequest)
-            }
-        }
-    }
-
-    /*
-    Reconfigure the original request: overwrite the global 401 routing in order to avoid endless loop
-    Then restart it.
-     */
-    private fun restartRequest(networkRequest: NetworkRequest) {
-        networkRequest.obtainNetworkResponseRouter().
-            registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401) { result, code, response, request ->
-            Log.i(this::class.java.name, "401 loop stopped")
-        }
-        networkRequest.start()
-    }
 }

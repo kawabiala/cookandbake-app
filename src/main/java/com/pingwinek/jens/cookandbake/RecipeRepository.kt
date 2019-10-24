@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
 import java.util.*
@@ -22,6 +23,7 @@ class RecipeRepository private constructor(val application: Application) {
             Log.i(tag, "getRecipe response 200")
             recipeListData.postValue(Recipes(response))
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -36,6 +38,7 @@ class RecipeRepository private constructor(val application: Application) {
                 updateRecipeList(recipes[0])
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -58,6 +61,7 @@ class RecipeRepository private constructor(val application: Application) {
                 }
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -75,6 +79,7 @@ class RecipeRepository private constructor(val application: Application) {
                 updateRecipeList(recipes[0])
             }
         }
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -89,6 +94,20 @@ class RecipeRepository private constructor(val application: Application) {
 
     private fun clearRecipeList() {
         recipeListData.postValue(LinkedList())
+    }
+
+    private fun retry(status: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
+        Log.i(tag, "getRecipe response 401")
+        AuthService.getInstance(application).onSessionInvalid() { authCode, authResponse ->
+            if (authCode == 200) {
+                request.obtainNetworkResponseRouter().registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
+                    //Do nothing, especially don't loop
+                }
+                request.start()
+            } else {
+                clearRecipeList()
+            }
+        }
     }
 
     companion object : SingletonHolder<RecipeRepository, Application>(::RecipeRepository)
