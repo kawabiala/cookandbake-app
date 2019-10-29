@@ -12,9 +12,11 @@ const val LOSTPASSWORDPATH = "$BASEURL/auth/lost_password"
 const val NEWPASSWORDPATH = "$BASEURL/auth/new_password"
 const val CHANGEPASSWORDPATH = "$BASEURL/auth/change_password"
 const val CONFIRMREGISTRATIONPATH = "$BASEURL/auth/confirm_registration"
+const val LOGOUTPATH = "$BASEURL/auth/logout"
+const val UNSUBSCRIBEPATH = "$BASEURL/auth/unsubscribe"
+
 const val RECIPEPATH = "$BASEURL/api/recipe/"
 const val INGREDIENTPATH = "$BASEURL/api/ingredient/"
-const val LOGOUTPATH = "$BASEURL/auth/logout"
 
 const val EXTRA_RECIPE_TITLE = "com.pingwinek.jens.cookandbake.extraRecipeTitle"
 const val EXTRA_RECIPE_DESCRIPTION = "com.pingwinek.jens.cookandbake.extraRecipeDescription"
@@ -39,5 +41,8 @@ const val OPTION_MENU_CLOSE = 6
 const val OPTION_MENU_RECIPES = 4
 const val OPTION_MENU_LOST_PASSWORD = 5
 const val OPTION_MENU_DONE = 7
+const val OPTION_MENU_IMPRESSUM = 8
+const val OPTION_MENU_DATAPROTECTION = 9
+const val OPTION_MENU_MANAGE_ACCOUNT = 10
 
 const val SHARED_PREFERENCES_FILE = "preferences"

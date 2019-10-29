@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name">CookAndBake</string>
+
+    <string name="impressum_url">https://www.pingwinek.de/cookandbake/impressum</string>
+    <string name="dataprotection_url">https://www.pingwinek.de/cookandbake/datenschutz</string>
+
     <string name="register">Anmelden</string>
     <string name="close">Schließen</string>
     <string name="save">Speichern</string>
     <string name="setPassword">Passwort setzen</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="unsubscribe">Konto löschen</string>
+    <string name="no_account">Kein Konto angemeldet</string>
+    <string name="impressum">Impressum</string>
+    <string name="dataprotection">Datenschutz</string>
     <string name="recipe">Rezept</string>
     <string name="recipes">Rezepte</string>
     <string name="recipe_title">Rezepttitel</string>

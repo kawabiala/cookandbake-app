@@ -23,6 +23,10 @@ class AuthService private constructor(private val application: Application){
         return (Account.getStoredAccount(application) != null)
     }
 
+    fun getStoredAccount() : Account? {
+        return Account.getStoredAccount(application)
+    }
+
     fun isLoggedIn() : Boolean {
         return Account.getStoredAccount(application)?.hasRefreshToken() ?: false
     }
@@ -259,19 +263,17 @@ class AuthService private constructor(private val application: Application){
     }
 
     fun logout(callback: (code: Int, response: String) -> Unit) {
-        val email = Account.getStoredAccount(application)?.getEmail()
+        CookieStore.removeCookies(URI(BASEURL).host)
+        val email = Account.getStoredAccount(application)?.getEmail() ?: return
 
         prefs.edit().apply() {
             remove("email")
             remove("token")
         }.apply()
 
-        CookieStore.removeCookies(URI(BASEURL).host)
-
-        if (email == null) return
-
         val params = HashMap<String, String>()
         params["email"] = email
+        params["uuid"] = getUUID()
 
         val networkRequest = networkRequestProvider.getNetworkRequest(LOGOUTPATH, method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
@@ -285,8 +287,38 @@ class AuthService private constructor(private val application: Application){
             Log.i(this::class.java.name, "logout on server failed")
             callback(code, response)
         }
-//        networkRequest.start()
-        callback(-1, "")
+        networkRequest.start()
+    }
+
+    fun unsubscribe(password: String, callback: (code: Int, response: String) -> Unit) {
+        val email = Account.getStoredAccount(application)?.getEmail() ?: return
+
+        val params = HashMap<String, String>()
+        params["email"] = email
+        params["password"] = password
+
+        val networkRequest = networkRequestProvider.getNetworkRequest(UNSUBSCRIBEPATH, method)
+        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
+
+        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
+            Log.i(this::class.java.name, "unsubscribe 200")
+
+            prefs.edit().apply() {
+                remove("email")
+                remove("token")
+            }.apply()
+
+            CookieStore.removeCookies(URI(BASEURL).host)
+
+            callback(200, response)
+        }
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response, request ->
+            Log.i(this::class.java.name, "unsubscribe on server failed")
+            callback(code, response)
+        }
+
+        networkRequest.start()
     }
 
     private fun getUUID() : String {

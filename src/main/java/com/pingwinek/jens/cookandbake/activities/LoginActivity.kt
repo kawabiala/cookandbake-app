@@ -37,6 +37,10 @@ class LoginActivity : BaseActivity() {
                 startActivity(Intent(this@LoginActivity, RecipeListingActivity::class.java))
                 true
             }
+            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, "Konto managen") {
+                startActivity(Intent(this@LoginActivity, ManageAccountActivity::class.java))
+                true
+            }
         }
     }
 
