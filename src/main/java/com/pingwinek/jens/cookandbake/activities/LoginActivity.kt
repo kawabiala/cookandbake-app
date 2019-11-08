@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -21,24 +20,39 @@ class LoginActivity : BaseActivity() {
 
         emailView = findViewById(R.id.laEmail)
         passwordView = findViewById(R.id.laPassword)
+
+        doConfirm()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        doConfirm()
     }
 
     override fun getOptionsMenu() : OptionMenu {
         return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_REGISTER, "Anmelden") {
+            addMenuEntry(OPTION_MENU_REGISTER, resources.getString(R.string.register)) {
                 startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
                 true
             }
-            addMenuEntry(OPTION_MENU_LOST_PASSWORD, "Passwort vergessen") {
+            addMenuEntry(OPTION_MENU_LOST_PASSWORD, resources.getString(R.string.lostPassword)) {
                 startActivity(Intent(this@LoginActivity, LostPasswordActivity::class.java))
-                    true
-            }
-            addMenuEntry(OPTION_MENU_RECIPES, "Rezepte") {
-                startActivity(Intent(this@LoginActivity, RecipeListingActivity::class.java))
                 true
             }
-            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, "Konto managen") {
-                startActivity(Intent(this@LoginActivity, ManageAccountActivity::class.java))
+            addMenuEntry(OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
+                startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
+                    .putExtra("url", resources.getString(R.string.impressum_url)))
+                true
+            }
+            addMenuEntry(OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
+                startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
+                    .putExtra("url", resources.getString(R.string.dataprotection_url)))
+                true
+            }
+            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.close)) {
+                finish()
                 true
             }
         }
@@ -62,6 +76,8 @@ class LoginActivity : BaseActivity() {
     }
 
     fun loginButton(view: View) {
+        deleteMessage()
+
         AuthService.getInstance(application).login(emailView.text.toString(), passwordView.text.toString()){ code, _ ->
             when (code) {
                 200 -> {
@@ -69,19 +85,52 @@ class LoginActivity : BaseActivity() {
                     finish()
                 }
                 206 -> {
-                    startActivity(Intent(this, ConfirmRegistrationActivity::class.java).apply {
-                        action =ACTION_LOGIN_CONFIRMATION_SENT
-                    })
+                    setMessage(resources.getString(R.string.confirmationSent))
                 }
                 else -> {
-                    AlertDialog.Builder(this).apply {
-                        setMessage("Login fehlgeschlagen")
-                        setPositiveButton("Ok") { _, _ ->
-                            // do nothing
-                        }
-                        create()
-                        show()
-                    }
+                    setMessage(resources.getString(R.string.loginFailed))
+                }
+            }
+        }
+    }
+
+    private fun deleteMessage() {
+        findViewById<TextView>(R.id.laMessageView).apply {
+            text = null
+            visibility = View.INVISIBLE
+        }
+    }
+
+    private fun setMessage(message: String) {
+        findViewById<TextView>(R.id.laMessageView).apply {
+            text = message
+            visibility = View.VISIBLE
+        }
+    }
+
+    private fun doConfirm() {
+        retrieveTempCode()?.let { tempCode ->
+            confirmTempCode(tempCode)
+        }
+    }
+
+    private fun retrieveTempCode() : String? {
+        var tempCode: String? = null
+        val segments = intent?.data?.pathSegments
+        if (segments != null && segments.contains("temp_code")) {
+            tempCode = segments.last()
+        }
+        return tempCode
+    }
+
+    private fun confirmTempCode(tempCode: String) {
+        AuthService.getInstance(application).confirmRegistration(tempCode) { code, _ ->
+            when (code) {
+                200 -> {
+                    setMessage(resources.getString(R.string.confirmationSucceeded))
+                }
+                else -> {
+                    setMessage(resources.getString(R.string.confirmationFailed))
                 }
             }
         }

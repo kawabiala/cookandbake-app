@@ -8,4 +8,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MessageBoxStyle">
+        <item name="android:paddingStart">@dimen/text_padding</item>
+        <item name="android:paddingEnd">@dimen/text_padding</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
 </resources>

@@ -68,6 +68,11 @@ class RecipeListingActivity : BaseActivity() {
 
     override fun getOptionsMenu(): OptionMenu {
         return OptionMenu().apply {
+            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
+                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
+                true
+            }
+            /*
             addMenuEntry(OPTION_MENU_LOGIN, resources.getString(R.string.login)) {
                 startActivity(Intent(this@RecipeListingActivity, LoginActivity::class.java))
                 true
@@ -78,6 +83,8 @@ class RecipeListingActivity : BaseActivity() {
                 }
                 true
             }
+
+             */
             addMenuEntry(OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
                     .putExtra("url", resources.getString(R.string.impressum_url)))
@@ -88,13 +95,6 @@ class RecipeListingActivity : BaseActivity() {
                     .putExtra("url", resources.getString(R.string.dataprotection_url)))
                 true
             }
-            /*
-            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, "Konto managen") {
-                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
-                true
-            }
-
-             */
         }
     }
 

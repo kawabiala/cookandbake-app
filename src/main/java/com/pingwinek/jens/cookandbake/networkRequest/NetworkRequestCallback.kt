@@ -26,7 +26,7 @@ class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseR
 
     override fun onFailed(request: UrlRequest?, info: UrlResponseInfo?, error: CronetException?) {
         Log.i(tag, "failed")
-        networkResponseRouter.routeResponse(NetworkResponseRoutes.Result.FAILED, info?.httpStatusCode ?: -1, error?.localizedMessage ?: "")
+        networkResponseRouter.routeResponse(AbstractNetworkResponseRoutes.Result.FAILED, info?.httpStatusCode ?: -1, error?.localizedMessage ?: "")
     }
 
     override fun onSucceeded(request: UrlRequest?, info: UrlResponseInfo?) {
@@ -38,7 +38,7 @@ class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseR
             }
         }
 
-        networkResponseRouter.routeResponse(NetworkResponseRoutes.Result.SUCCESS, info?.httpStatusCode ?: -1, responseStringBuilder.toString())
+        networkResponseRouter.routeResponse(AbstractNetworkResponseRoutes.Result.SUCCESS, info?.httpStatusCode ?: -1, responseStringBuilder.toString())
     }
 
     override fun onRedirectReceived(request: UrlRequest?, info: UrlResponseInfo?, newLocationUrl: String?) {

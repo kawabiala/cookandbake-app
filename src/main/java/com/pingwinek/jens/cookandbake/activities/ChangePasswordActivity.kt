@@ -13,7 +13,9 @@ class ChangePasswordActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_new_password)
+        addContentView(R.layout.activity_change_password)
+
+        fillEmail()
     }
 
     override fun getOptionsMenu(): OptionMenu {
@@ -29,26 +31,47 @@ class ChangePasswordActivity : BaseActivity() {
     }
 
     fun onNewPasswordButton(view: View) {
+        deleteMessage()
+
         AuthService.getInstance(application).changePassword(
             findViewById<TextView>(R.id.cpaOldPassword).text.toString(),
             findViewById<TextView>(R.id.cpaNewPassword).text.toString()
         ) { code, response ->
             when (code) {
                 200 -> {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
+                    setMessage("Password geändert")
+                    AuthService.getInstance(application).logout(){ code, response ->
+                        fillEmail()
+                    }
                 }
                 else -> {
-                    AlertDialog.Builder(this).apply {
-                        setMessage("Passwort konnte nicht gesetzt werden")
-                        setPositiveButton("Ok") { _, _ ->
-                            // do nothing
-                        }
-                        create()
-                        show()
-                    }
+                    setMessage("Password konnte nicht geändert werden")
                 }
             }
         }
     }
- }
+
+    private fun fillEmail() {
+        val authService = AuthService.getInstance(application)
+        val emailView = findViewById<TextView>(R.id.cpaEmailView)
+        if (authService.hasStoredAccount()) {
+            emailView.text = "Angemeldet als: ${authService.getStoredAccount()?.getEmail()}"
+        } else {
+            emailView.text = resources.getString(R.string.no_account)
+        }
+    }
+
+    private fun setMessage(message: String) {
+        findViewById<TextView>(R.id.cpaMessageView).apply {
+            text = message
+            visibility = View.VISIBLE
+        }
+    }
+
+    private fun deleteMessage() {
+        findViewById<TextView>(R.id.cpaMessageView).apply {
+            text = null
+            visibility = View.INVISIBLE
+        }
+    }
+}

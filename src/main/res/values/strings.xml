@@ -1,19 +1,39 @@
 <resources>
-    <string name="app_name">CookAndBake</string>
+    <string name="app_name">Pingwinek Cooks</string>
 
     <string name="impressum_url">https://www.pingwinek.de/cookandbake/impressum</string>
     <string name="dataprotection_url">https://www.pingwinek.de/cookandbake/datenschutz</string>
 
-    <string name="register">Anmelden</string>
     <string name="close">Schließen</string>
     <string name="save">Speichern</string>
-    <string name="setPassword">Passwort setzen</string>
+
     <string name="login">Login</string>
+    <string name="loginFailed">Login ist fehlgeschlagen.</string>
+    <string name="logged_in_as">%1$s (angemeldet)</string>
+    <string name="not_logged_in_as">%1$s (nicht angemeldet)</string>
+
     <string name="logout">Logout</string>
-    <string name="unsubscribe">Konto löschen</string>
-    <string name="no_account">Kein Konto angemeldet</string>
+    <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
+
+    <string name="setPassword">Passwort setzen</string>
+    <string name="password">Passwort</string>
+    <string name="lostPassword">Passwort zurücksetzen</string>
+    <string name="lostPasswordFailed">Rücksetzen des Passworts fehlgeschlagen</string>
+    <string name="newPassword">Neues Passwort</string>
+    <string name="oldPassword">Bisheriges Passwort</string>
+    <string name="changePassword">Passwort ändern</string>
+
+    <string name="register">Profil anlegen</string>
+    <string name="registrationFailed">Profil anlegen fehlgeschlagen</string>
+    <string name="unsubscribe">Profil löschen</string>
+    <string name="no_account">Kein Profil angemeldet</string>
+    <string name="manage_account">Profildaten</string>
+    <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
+    <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
+
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>
+
     <string name="recipe">Rezept</string>
     <string name="recipes">Rezepte</string>
     <string name="recipe_title">Rezepttitel</string>
@@ -24,13 +44,8 @@
     <string name="quantity">Menge</string>
     <string name="unity">Einheit</string>
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
+
     <string name="email">Email</string>
-    <string name="password">Passwort</string>
-    <string name="lostPassword">Passwort zurücksetzen</string>
-    <string name="newPassword">Neues Passwort</string>
-    <string name="oldPassword">Bisheriges Passwort</string>
-    <string name="changePassword">Passwort ändern</string>
-    <string name="confirmationSent">Eine Mail mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
-    <string name="confirmationSucceeded">Der Account ist jetzt bestätigt.</string>
-    <string name="confirmationFailed">Die Bestätigung des Accounts ist fehlgeschlagen.</string>
+    <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
+
 </resources>

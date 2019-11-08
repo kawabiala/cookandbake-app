@@ -1,7 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -31,23 +29,31 @@ class LostPasswordActivity : BaseActivity() {
     }
 
     fun onLostPasswordButton(view: View) {
-        AuthService.getInstance(application).lostPassword(findViewById<TextView>(R.id.lpaPassword).text.toString()) { code, response ->
+        deleteMessage()
+
+        AuthService.getInstance(application).lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, response ->
             when (code) {
                 200 -> {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
+                    setMessage(resources.getString(R.string.confirmationSent))
                 }
                 else -> {
-                    AlertDialog.Builder(this).apply {
-                        setMessage("Rücksetzung des Passworts fehlgeschlagen")
-                        setPositiveButton("Ok") { _, _ ->
-                            // do nothing
-                        }
-                        create()
-                        show()
-                    }
+                    setMessage(resources.getString(R.string.lostPasswordFailed))
                 }
             }
         }
     }
- }
+
+    private fun deleteMessage() {
+        findViewById<TextView>(R.id.lpaMessageView).apply {
+            text = null
+            visibility = View.INVISIBLE
+        }
+    }
+
+    private fun setMessage(message: String) {
+        findViewById<TextView>(R.id.lpaMessageView).apply {
+            text = message
+            visibility = View.VISIBLE
+        }
+    }
+}

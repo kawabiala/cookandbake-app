@@ -36,6 +36,8 @@ class RegisterActivity : BaseActivity() {
     }
 
     fun registerButton(view: View) {
+        deleteMessage()
+
         if (AuthService.getInstance(application).hasStoredAccount()) {
             AlertDialog.Builder(this).apply {
                 setMessage("Soll der aktuelle Benutzer ausgeloggt werden?")
@@ -57,18 +59,40 @@ class RegisterActivity : BaseActivity() {
     private fun register() {
         AuthService.getInstance(application).register(emailView.text.toString(),passwordView.text.toString()) { code, _ ->
             if (code == 200) {
+                setMessage(resources.getString(R.string.confirmationSent))
+                /*
                 startActivity(Intent(this, ConfirmRegistrationActivity::class.java).apply {
                     action = ACTION_REGISTER_CONFIRMATION_SENT
                 })
                 finish()
+
+                 */
             } else {
+                setMessage(resources.getString(R.string.registrationFailed))
+                /*
                 AlertDialog.Builder(this).apply {
                     setMessage("Die Registrierung ist fehlgeschlagen")
                     setPositiveButton("Ok") { _, _ -> }
                     create()
                     show()
                 }
+
+                 */
             }
+        }
+    }
+
+    private fun deleteMessage() {
+        findViewById<TextView>(R.id.raMessageView).apply {
+            text = null
+            visibility = View.INVISIBLE
+        }
+    }
+
+    private fun setMessage(message: String) {
+        findViewById<TextView>(R.id.raMessageView).apply {
+            text = message
+            visibility = View.VISIBLE
         }
     }
 }

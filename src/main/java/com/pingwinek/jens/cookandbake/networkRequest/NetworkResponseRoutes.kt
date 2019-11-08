@@ -1,46 +1,30 @@
 package com.pingwinek.jens.cookandbake.networkRequest
 
-import android.util.Log
+open class NetworkResponseRoutes : AbstractNetworkResponseRoutes() {
 
-open class NetworkResponseRoutes {
-
-    enum class Result(val result: String) {
-        SUCCESS("success"),
-        FAILED("failed")
+    fun registerDefaultRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+        defaultRoute = callback
     }
 
-    private val tag = this::class.java.name
-
-    var defaultRoute: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit = { result, code, response, request ->
-        log(result, code, response)
+    fun registerDefaultSuccessRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+        defaultSuccessRoute = callback
     }
 
-    var defaultSuccessRoute: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit = { result, code, response, request ->
-        log(result, code, response)
+    fun registerDefaultFailedRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+        defaultFailedRoute = callback
     }
 
-    var defaultFailedRoute: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit = { result, code, response, request ->
-        log(result, code, response)
-    }
-
-    val successRoutes: MutableMap<Int, (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit> = mutableMapOf()
-    val failedRoutes: MutableMap<Int, (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit> = mutableMapOf()
-
-    private fun log(result: Result, code: Int, response: String) {
-        Log.i(tag, "status: $result - code: $code - response: $response")
-    }
-
-    fun setResponseRoute(result: Result, code: Int, callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+    open fun registerResponseRoute(result: Result, code: Int, callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         when (result) {
             Result.SUCCESS -> successRoutes[code] = callback
             Result.FAILED -> failedRoutes[code] = callback
         }
     }
 
-    fun getResponseRoute(result: Result, code: Int): ((result: Result, code: Int, response: String, request: NetworkRequest) -> Unit)? {
+    open fun getResponseRoute(result: Result, code: Int): ((result: Result, code: Int, response: String, request: NetworkRequest) -> Unit)? {
         return when (result) {
-            Result.SUCCESS -> successRoutes[code]
-            Result.FAILED -> failedRoutes[code]
+            Result.SUCCESS -> successRoutes[code] ?: defaultSuccessRoute ?: defaultRoute
+            Result.FAILED -> failedRoutes[code] ?: defaultFailedRoute ?: defaultRoute
         }
     }
 }

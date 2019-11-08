@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
@@ -19,11 +20,11 @@ class RecipeRepository private constructor(val application: Application) {
         val networkRequest = networkRequestProvider.getNetworkRequest(RECIPEPATH, NetworkRequestProvider.Method.GET)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
             Log.i(tag, "getRecipe response 200")
             recipeListData.postValue(Recipes(response))
         }
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -31,14 +32,14 @@ class RecipeRepository private constructor(val application: Application) {
         val networkRequest = networkRequestProvider.getNetworkRequest("$RECIPEPATH$recipeId", NetworkRequestProvider.Method.GET)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
             Log.i(tag, "getRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
                 updateRecipeList(recipes[0])
             }
         }
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -49,7 +50,7 @@ class RecipeRepository private constructor(val application: Application) {
             NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
             Log.i(tag, "putRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
@@ -61,7 +62,7 @@ class RecipeRepository private constructor(val application: Application) {
                 }
             }
         }
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -72,14 +73,14 @@ class RecipeRepository private constructor(val application: Application) {
             NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
             Log.i(tag, "postRecipe response 200")
             val recipes = Recipes(response)
             if (recipes.isNotEmpty()) {
                 updateRecipeList(recipes[0])
             }
         }
-        networkResponseRouter.registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkRequest.start()
     }
 
@@ -96,11 +97,11 @@ class RecipeRepository private constructor(val application: Application) {
         recipeListData.postValue(LinkedList())
     }
 
-    private fun retry(status: NetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
+    private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
         Log.i(tag, "getRecipe response 401")
         AuthService.getInstance(application).onSessionInvalid() { authCode, authResponse ->
             if (authCode == 200) {
-                request.obtainNetworkResponseRouter().registerResponseRoute(NetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
+                request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
                     //Do nothing, especially don't loop
                 }
                 request.start()

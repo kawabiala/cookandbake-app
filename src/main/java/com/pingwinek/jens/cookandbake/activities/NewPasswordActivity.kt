@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -44,17 +43,24 @@ class NewPasswordActivity : BaseActivity() {
                         finish()
                     }
                     else -> {
-                        AlertDialog.Builder(this).apply {
-                            setMessage("Passwort konnte nicht gesetzt werden")
-                            setPositiveButton("Ok") { _, _ ->
-                                // do nothing
-                            }
-                            create()
-                            show()
-                        }
+                        setMessage(resources.getString(R.string.lostPasswordFailed))
                     }
                 }
             }
         }
     }
- }
+
+    private fun deleteMessage() {
+        findViewById<TextView>(R.id.npaMessageView).apply {
+            text = null
+            visibility = View.INVISIBLE
+        }
+    }
+
+    private fun setMessage(message: String) {
+        findViewById<TextView>(R.id.npaMessageView).apply {
+            text = message
+            visibility = View.VISIBLE
+        }
+    }
+}

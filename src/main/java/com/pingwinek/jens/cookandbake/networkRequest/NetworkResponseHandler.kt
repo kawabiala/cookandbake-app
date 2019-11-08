@@ -10,10 +10,10 @@ open class NetworkResponseHandler(val looper: Looper) {
     private val handler = object : Handler(looper) {
         override fun handleMessage(msg: Message?) {
             val status = msg?.data?.getString("status", "") ?: ""
-            val result = if (status == NetworkResponseRoutes.Result.SUCCESS.result) {
-                NetworkResponseRoutes.Result.SUCCESS
+            val result = if (status == AbstractNetworkResponseRoutes.Result.SUCCESS.result) {
+                AbstractNetworkResponseRoutes.Result.SUCCESS
             } else {
-                NetworkResponseRoutes.Result.FAILED
+                AbstractNetworkResponseRoutes.Result.FAILED
             }
             handleResponse(
                 result,
@@ -23,7 +23,7 @@ open class NetworkResponseHandler(val looper: Looper) {
         }
     }
 
-    fun sendResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
+    fun sendResponse(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String) {
         handler.sendMessage(handler.obtainMessage().also { msg ->
             msg.data = Bundle().also { data ->
                 data.putString("status", status.result)
@@ -33,6 +33,6 @@ open class NetworkResponseHandler(val looper: Looper) {
         })
     }
 
-    open fun handleResponse(status: NetworkResponseRoutes.Result, code: Int, response: String) {
+    open fun handleResponse(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String) {
     }
 }

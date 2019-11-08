@@ -11,21 +11,16 @@
             android:supportsRtl="true"
             android:theme="@style/CookAndBakeAppTheme"
             android:usesCleartextTraffic="true">
-        <activity
-                android:name=".activities.ManageAccountActivity"
-                android:launchMode="singleTop"/>
-        <activity
-                android:name=".activities.ImpressumActivity"
-                android:launchMode="singleTop"/>
+
         <activity
                 android:name=".activities.RecipeListingActivity"
-                android:launchMode="singleTop">
+                android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
                 android:name=".activities.RecipeActivity"
                 android:label="@string/recipe"
@@ -41,23 +36,22 @@
                 android:name=".activities.RecipeEditActivity"
                 android:label="@string/recipe"
                 android:parentActivityName=".activities.RecipeActivity" />
+
+        <activity
+                android:name=".activities.ManageAccountActivity"
+                android:label="@string/manage_account"
+                android:launchMode="singleTop"/>
+        <activity
+                android:name=".activities.ImpressumActivity"
+                android:launchMode="singleTop"/>
         <activity
                 android:name=".activities.RegisterActivity"
+                android:label="@string/register"
                 android:launchMode="singleTop" />
         <activity
                 android:name=".activities.LoginActivity"
                 android:label="@string/login"
-                android:launchMode="singleTop" />
-        <activity
-                android:name=".activities.LostPasswordActivity"
-                android:label="@string/lostPassword"
-                android:launchMode="singleTop"
-                android:parentActivityName=".activities.LoginActivity" />
-        <activity
-                android:name=".activities.ChangePasswordActivity"
-                android:label="@string/changePassword"
-                android:launchMode="singleTop" />
-        <activity android:name=".activities.ConfirmRegistrationActivity">
+                android:launchMode="singleTask">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -79,6 +73,15 @@
                 <data android:pathPattern="/cookandbake/confirm_registration/.*" />
             </intent-filter>
         </activity>
+        <activity
+                android:name=".activities.LostPasswordActivity"
+                android:label="@string/lostPassword"
+                android:launchMode="singleTop"
+                android:parentActivityName=".activities.LoginActivity" />
+        <activity
+                android:name=".activities.ChangePasswordActivity"
+                android:label="@string/changePassword"
+                android:launchMode="singleTop" />
         <activity android:name=".activities.NewPasswordActivity">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
