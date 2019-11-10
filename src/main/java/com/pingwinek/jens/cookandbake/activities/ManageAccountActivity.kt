@@ -5,9 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
-import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.*
 
 class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePasswordListener {
 
@@ -59,12 +57,12 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
 
         findViewById<TextView>(R.id.maImpressumView).setOnClickListener {
             startActivity(Intent(this, ImpressumActivity::class.java)
-                .putExtra("url", resources.getString(R.string.impressum_url)))
+                .putExtra("url", IMPRESSUMPATH))
         }
 
         findViewById<TextView>(R.id.maDatenschutzView).setOnClickListener {
             startActivity(Intent(this, ImpressumActivity::class.java)
-                .putExtra("url", resources.getString(R.string.dataprotection_url)))
+                .putExtra("url", DATAPROTECTIONPATH))
         }
     }
 

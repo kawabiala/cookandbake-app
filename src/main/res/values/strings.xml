@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Pingwinek Cooks</string>
 
-    <string name="impressum_url">https://www.pingwinek.de/cookandbake/impressum</string>
-    <string name="dataprotection_url">https://www.pingwinek.de/cookandbake/datenschutz</string>
-
     <string name="close">Schließen</string>
     <string name="save">Speichern</string>
 
@@ -30,6 +27,7 @@
     <string name="manage_account">Profildaten</string>
     <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
     <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
+    <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>

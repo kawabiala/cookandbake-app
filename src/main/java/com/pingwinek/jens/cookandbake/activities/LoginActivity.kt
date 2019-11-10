@@ -43,12 +43,12 @@ class LoginActivity : BaseActivity() {
             }
             addMenuEntry(OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
                 startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
-                    .putExtra("url", resources.getString(R.string.impressum_url)))
+                    .putExtra("url", IMPRESSUMPATH))
                 true
             }
             addMenuEntry(OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
                 startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
-                    .putExtra("url", resources.getString(R.string.dataprotection_url)))
+                    .putExtra("url", DATAPROTECTIONPATH))
                 true
             }
             addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.close)) {

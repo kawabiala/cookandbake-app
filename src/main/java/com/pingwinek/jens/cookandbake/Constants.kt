@@ -5,6 +5,8 @@ const val LOCAL_DOMAIN = "http://10.0.2.2/strato/pingwinek"
 const val DOMAIN = LOCAL_DOMAIN
 const val BASEURL = "$DOMAIN/cookandbake"
 
+const val DATAPROTECTIONPATH = "$BASEURL/datenschutz"
+const val IMPRESSUMPATH = "$BASEURL/impressum"
 const val REGISTERPATH = "$BASEURL/auth/register"
 const val LOGINPATH = "$BASEURL/auth/login"
 const val REFRESHPATH = "$BASEURL/auth/refresh"

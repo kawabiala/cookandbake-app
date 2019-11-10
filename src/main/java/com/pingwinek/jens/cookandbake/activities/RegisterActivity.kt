@@ -3,24 +3,29 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.text.Annotation
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.View
+import android.widget.CheckBox
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.ACTION_REGISTER_CONFIRMATION_SENT
 import com.pingwinek.jens.cookandbake.AuthService
+import com.pingwinek.jens.cookandbake.DATAPROTECTIONPATH
 import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
 import com.pingwinek.jens.cookandbake.R
 
 class RegisterActivity : BaseActivity() {
 
-    private lateinit var emailView: TextView
-    private lateinit var passwordView: TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_register)
 
-        emailView = findViewById(R.id.raEmail)
-        passwordView = findViewById(R.id.raPassword)
+        findViewById<TextView>(R.id.raAcceptance).apply {
+            text = getSpannableAcceptanceText()
+            movementMethod = LinkMovementMethod.getInstance()
+        }
     }
 
     override fun getOptionsMenu(): OptionMenu {
@@ -57,27 +62,15 @@ class RegisterActivity : BaseActivity() {
     }
 
     private fun register() {
-        AuthService.getInstance(application).register(emailView.text.toString(),passwordView.text.toString()) { code, _ ->
-            if (code == 200) {
+        AuthService.getInstance(application).register(
+            findViewById<TextView>(R.id.raEmail).text.toString(),
+            findViewById<TextView>(R.id.raPassword).text.toString(),
+            findViewById<CheckBox>(R.id.raCheckBox).isChecked
+            ) { code, _ ->
+            if (code == 201) {
                 setMessage(resources.getString(R.string.confirmationSent))
-                /*
-                startActivity(Intent(this, ConfirmRegistrationActivity::class.java).apply {
-                    action = ACTION_REGISTER_CONFIRMATION_SENT
-                })
-                finish()
-
-                 */
             } else {
                 setMessage(resources.getString(R.string.registrationFailed))
-                /*
-                AlertDialog.Builder(this).apply {
-                    setMessage("Die Registrierung ist fehlgeschlagen")
-                    setPositiveButton("Ok") { _, _ -> }
-                    create()
-                    show()
-                }
-
-                 */
             }
         }
     }
@@ -94,5 +87,35 @@ class RegisterActivity : BaseActivity() {
             text = message
             visibility = View.VISIBLE
         }
+    }
+
+    private fun getSpannableAcceptanceText() : SpannableString {
+        val clickableSpan = SimpleClickableSpan {
+            startActivity(
+                Intent(this@RegisterActivity, ImpressumActivity::class.java)
+                    .putExtra("url", DATAPROTECTIONPATH))
+        }
+
+        val spannableAcceptanceText = SpannableString(resources.getText(R.string.declareAcceptanceOfDataprotection))
+        val annotations = spannableAcceptanceText.getSpans(0, spannableAcceptanceText.length, Annotation::class.java)
+        annotations.forEach {
+            if (it.key == "clickableArea") {
+                if (it.value == "dataprotection") {
+                    spannableAcceptanceText.setSpan(
+                        clickableSpan,
+                        spannableAcceptanceText.getSpanStart(it),
+                        spannableAcceptanceText.getSpanEnd(it),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+        }
+        return spannableAcceptanceText
+    }
+}
+
+class SimpleClickableSpan(val action: () -> Unit) : ClickableSpan() {
+
+    override fun onClick(widget: View) {
+        action()
     }
 }

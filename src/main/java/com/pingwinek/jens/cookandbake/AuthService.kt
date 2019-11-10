@@ -35,20 +35,22 @@ class AuthService private constructor(private val application: Application){
     fun register(
         email: String,
         password: String,
+        dataprotection: Boolean,
         callback: (code: Int, response: String) -> Unit
     ) {
         val params = HashMap<String, String>()
         params["email"] = email
         params["password"] = password
+        params["dataprotection"] = dataprotection.toString()
 
         val networkRequest = networkRequestProvider.getNetworkRequest(REGISTERPATH, method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(this::class.java.name, "register 200")
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,201) { status, code, response, request ->
+            Log.i(this::class.java.name, "register 201")
             Account.createStoredAccount(application, email)
-            callback(200, response)
+            callback(201, response)
         }
         networkResponseRouter.registerDefaultResponseRoute { status, code, response, request ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
