@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.AlertDialog
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import android.content.Intent
@@ -63,7 +64,19 @@ class RecipeListingActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadData()
+        if (AuthService.getInstance(application).isLoggedIn()) {
+            loadData()
+        } else {
+            AlertDialog.Builder(this).apply {
+                setMessage("Kein User eingeloggt. Jetzt einloggen oder anmelden?")
+                setPositiveButton("Ja") { dialog, which ->
+                    startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
+                }
+                setNegativeButton("Nein") { _, _ ->
+                    // Do nothing
+                }
+            }.show()
+        }
     }
 
     override fun getOptionsMenu(): OptionMenu {
