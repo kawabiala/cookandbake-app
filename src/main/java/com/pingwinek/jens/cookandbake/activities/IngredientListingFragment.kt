@@ -1,23 +1,22 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.Ingredient
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
 import com.pingwinek.jens.cookandbake.Utils.quantityToString
+import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
 import java.util.*
@@ -27,12 +26,12 @@ import java.util.*
  * Activities containing this fragment MUST implement the
  * [IngredientListingFragment.OnListFragmentInteractionListener] interface.
  */
-class IngredientListingFragment : Fragment() {
+class IngredientListingFragment : androidx.fragment.app.Fragment() {
 
     private var listener: OnListFragmentInteractionListener? = null
     private lateinit var recipeModel: RecipeViewModel
 
-    private var ingredientList = LinkedList<Ingredient>()
+    private var ingredientList = LinkedList<IngredientLocal>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,15 +52,15 @@ class IngredientListingFragment : Fragment() {
         val ingredientListingAdapter = IngredientListingAdapter(ingredientList, listener)
 
         view.list.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = ingredientListingAdapter
         }
 
         recipeModel.ingredientListData.observe(this, Observer { ingredients ->
-            ingredients?.let { nil ->
+            ingredients?.let { newIngredientList ->
                 Log.i(this::class.java.name, "Change in ingredientlist observed")
                 ingredientList.clear()
-                ingredientList.addAll(nil)
+                ingredientList.addAll(newIngredientList)
                 ingredientListingAdapter.notifyDataSetChanged()
             }
         })
@@ -100,24 +99,24 @@ class IngredientListingFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
 
-        fun onListFragmentInteraction(ingredient: Ingredient?)
+        fun onListFragmentInteraction(ingredient: IngredientRemote?)
     }
 }
 
 /**
- * [RecyclerView.Adapter] that can display a [Ingredient] and makes a call to the
+ * [RecyclerView.Adapter] that can display a [IngredientRemote] and makes a call to the
  * specified [OnListFragmentInteractionListener].
  */
 class IngredientListingAdapter(
-    private val ingredientList: List<Ingredient>,
+    private val ingredientList: List<IngredientLocal>,
     private val listener: OnListFragmentInteractionListener?
-) : RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
 
     private val onClickListener: View.OnClickListener
 
     init {
         onClickListener = View.OnClickListener { v ->
-            val ingredient = v.tag as Ingredient?
+            val ingredient = v.tag as IngredientRemote?
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             listener?.onListFragmentInteraction(ingredient)
@@ -145,7 +144,7 @@ class IngredientListingAdapter(
 
     override fun getItemCount(): Int = ingredientList.size
 
-    inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
+    inner class ViewHolder(val mView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(mView) {
         val quantityView: TextView = mView.quantityView
         val unityView: TextView = mView.unityView
         val nameView: TextView = mView.nameView

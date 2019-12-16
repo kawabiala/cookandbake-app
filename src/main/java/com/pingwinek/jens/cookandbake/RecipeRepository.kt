@@ -1,114 +1,71 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
-import android.arch.lifecycle.MutableLiveData
-import android.util.Log
-import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
+import androidx.lifecycle.MutableLiveData
+import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import java.util.*
 
 class RecipeRepository private constructor(val application: Application) {
 
-    private val tag: String = this::class.java.name
+    private val recipeSourceLocal = RecipeSourceLocal.getInstance(application)
+    private val syncManager = SyncManager.getInstance(application)
 
-    private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
-    val recipeListData = MutableLiveData<LinkedList<Recipe>>()
+    val recipeListData = MutableLiveData<LinkedList<RecipeLocal>>()
 
     fun getAll() {
-        val networkRequest = networkRequestProvider.getNetworkRequest(RECIPEPATH, NetworkRequestProvider.Method.GET)
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "getRecipe response 200")
-            recipeListData.postValue(Recipes(response))
+        // Step 1: get local
+        recipeSourceLocal.getAll { _, recipes ->
+            recipeListData.postValue(recipes)
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkRequest.start()
+
+        // Step 2: sync
+        syncManager.syncRecipes {
+            // Step 3: get local again
+            recipeSourceLocal.getAll { _, recipes ->
+                recipeListData.postValue(recipes)
+            }
+        }
     }
 
     fun getRecipe(recipeId: Int) {
-        val networkRequest = networkRequestProvider.getNetworkRequest("$RECIPEPATH$recipeId", NetworkRequestProvider.Method.GET)
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "getRecipe response 200")
-            val recipes = Recipes(response)
-            if (recipes.isNotEmpty()) {
-                updateRecipeList(recipes[0])
-            }
+        // Step 1: get local
+        /*
+        recipeSourceLocal.getRecipe(id) { recipe ->
+            updateRecipeList(recipe)
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkRequest.start()
+
+         */
+        // syncManager.tbd
+
     }
 
-    fun putRecipe(recipe: Recipe, confirmUpdate: (recipeId: Int) -> Boolean) {
-        val networkRequest = networkRequestProvider.getNetworkRequest(RECIPEPATH, NetworkRequestProvider.Method.PUT)
-        networkRequest.setUploadDataProvider(
-            NetworkRequestProvider.getUploadDataProvider(recipe.asMap(), NetworkRequestProvider.ContentType.APPLICATION_URLENCODED),
-            NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "putRecipe response 200")
-            val recipes = Recipes(response)
-            if (recipes.isNotEmpty()) {
-                val newRecipe = recipes[0]
-                newRecipe.id?.let {
-                    if (confirmUpdate(it)) {
-                        updateRecipeList(newRecipe)
-                    }
-                }
+    fun newRecipe(recipe: RecipeLocal, confirmUpdate: (recipeId: Int) -> Boolean) {
+/*
+        recipeSourceLocal.newRecipe(recipe) { newRecipe ->
+            if (confirmUpdate(newRecipe.id)) {
+                updateRecipeList(newRecipe)
             }
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkRequest.start()
+
+ */
     }
 
-    fun postRecipe(recipe: Recipe) {
-        val networkRequest = networkRequestProvider.getNetworkRequest(RECIPEPATH, NetworkRequestProvider.Method.POST)
-        networkRequest.setUploadDataProvider(
-            NetworkRequestProvider.getUploadDataProvider(recipe.asMap(), NetworkRequestProvider.ContentType.APPLICATION_URLENCODED),
-            NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "postRecipe response 200")
-            val recipes = Recipes(response)
-            if (recipes.isNotEmpty()) {
-                updateRecipeList(recipes[0])
-            }
+    fun updateRecipe(recipe: RecipeLocal) {
+        recipeSourceLocal.update(recipe) { _, updatedRecipe ->
+            updatedRecipe?.let { updateRecipeList(it) }
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkRequest.start()
     }
 
-    private fun updateRecipeList(updatedRecipe: Recipe) {
+    private fun updateRecipeList(updatedRecipe: RecipeLocal) {
         val recipeList = recipeListData.value ?: LinkedList()
         recipeList.removeAll {
-            it.id == updatedRecipe.id
+            it.remoteId == updatedRecipe.remoteId
         }
         recipeList.add(updatedRecipe)
         recipeListData.postValue(recipeList)
-    }
-
-    private fun clearRecipeList() {
-        recipeListData.postValue(LinkedList())
-    }
-
-    private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
-        Log.i(tag, "getRecipe response 401")
-        AuthService.getInstance(application).onSessionInvalid() { authCode, authResponse ->
-            if (authCode == 200) {
-                request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
-                    //Do nothing, especially don't loop
-                }
-                request.start()
-            } else {
-                clearRecipeList()
-            }
-        }
     }
 
     companion object : SingletonHolder<RecipeRepository, Application>(::RecipeRepository)

@@ -4,18 +4,18 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
 
-class ConfirmDialogFragment : DialogFragment() {
+class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
 
     lateinit var listener: ConfirmDialogListener
     private var confirmItemId: String? = null
     private var message: String = "You should provide a message with setArguments"
 
     override fun setArguments(args: Bundle?) {
-        confirmItemId = args?.getString("id")
+        confirmItemId = args?.getString("remoteId")
         message = args?.getString("message") ?: ""
     }
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -37,7 +37,7 @@ class ConfirmDialogFragment : DialogFragment() {
         fun onNegativeButton(confirmItemId: String?)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             listener = context as ConfirmDialogListener

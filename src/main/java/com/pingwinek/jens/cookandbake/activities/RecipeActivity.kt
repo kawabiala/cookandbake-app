@@ -1,20 +1,17 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
+import com.google.android.material.tabs.TabLayout
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeActivity : BaseActivity(),
@@ -22,7 +19,7 @@ class RecipeActivity : BaseActivity(),
     ConfirmDialogFragment.ConfirmDialogListener {
 
     private lateinit var recipeModel: RecipeViewModel
-    //private lateinit var recipeData: LiveData<Recipe?>
+    //private lateinit var recipeData: LiveData<RecipeLocal?>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +39,7 @@ class RecipeActivity : BaseActivity(),
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
-        recipeModel.recipeData.observe(this, Observer { recipe: Recipe? ->
+        recipeModel.recipeData.observe(this, Observer { recipe: RecipeLocal? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
         })
@@ -59,7 +56,7 @@ class RecipeActivity : BaseActivity(),
 
         val pagerAdapter = RecipePagerAdapter(supportFragmentManager)
         val tabLayout = findViewById<TabLayout>(R.id.recipe_tablayout)
-        findViewById<ViewPager>(R.id.recipeTabs).apply {
+        findViewById<androidx.viewpager.widget.ViewPager>(R.id.recipeTabs).apply {
             adapter = pagerAdapter
             tabLayout.setupWithViewPager(this)
         }
@@ -110,11 +107,11 @@ class RecipeActivity : BaseActivity(),
         }
     }
 
-    override fun onListFragmentInteraction(ingredient: Ingredient?) {
+    override fun onListFragmentInteraction(ingredientRemote: IngredientRemote?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
             intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
-            ingredient?.let {
+            ingredientRemote?.let {
                 intent.putExtra(EXTRA_INGREDIENT_ID, it.id)
                 intent.putExtra(EXTRA_INGREDIENT_NAME, it.name)
                 intent.putExtra(EXTRA_INGREDIENT_QUANTITY, it.quantity)
@@ -137,7 +134,7 @@ class RecipeActivity : BaseActivity(),
         val confirmDialog = ConfirmDialogFragment()
         val args = Bundle()
         args.putString("message", "Zutat ${ingredient?.name} wirklich löschen?")
-        args.putString("id", button.tag.toString())
+        args.putString("remoteId", button.tag.toString())
         confirmDialog.arguments = args
         confirmDialog.show(supportFragmentManager, "DeleteIngredient${button.tag}")
     }
@@ -158,9 +155,9 @@ class RecipeActivity : BaseActivity(),
     }
 }
 
-class RecipePagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fragmentManager) {
 
-    override fun getItem(position: Int): Fragment {
+    override fun getItem(position: Int): androidx.fragment.app.Fragment {
         return if (position == 0) {
             IngredientListingFragment()
         } else {

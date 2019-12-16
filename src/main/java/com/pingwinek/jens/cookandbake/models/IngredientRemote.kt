@@ -1,14 +1,20 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.models
 
 import org.json.JSONException
 import org.json.JSONObject
 
-data class Ingredient(val id: Int?, val recipeId: Int, val quantity: Double?, val unity: String?, val name: String) {
+data class IngredientRemote(
+    override val id: Int?,
+    override val recipeId: Int,
+    override val quantity: Double?,
+    override val unity: String?,
+    override val name: String
+) : Ingredient() {
 
     fun asMap() : Map<String, String> {
         val map = HashMap<String, String>()
         if (id != null) {
-            map.put("id", id.toString())
+            map.put("remoteId", id.toString())
         }
         map.put("recipeId", recipeId.toString())
         map.put("quantity", quantity.toString())
@@ -22,12 +28,15 @@ data class Ingredient(val id: Int?, val recipeId: Int, val quantity: Double?, va
         return JSONObject(asMap()).toString()
     }
 
+    fun getUpdated(quantity: Double?, unity: String?, name: String) : IngredientRemote {
+        return IngredientRemote(id, recipeId, quantity, unity, name)
+    }
+
     companion object {
 
-        fun getInstance(jsonObject: JSONObject) : Ingredient {
-
+        fun getInstance(jsonObject: JSONObject) : IngredientRemote {
             val id = try {
-                jsonObject.getInt("id")
+                jsonObject.getInt("remoteId")
             } catch (jsonException: JSONException) {
                 null
             }
@@ -54,9 +63,19 @@ data class Ingredient(val id: Int?, val recipeId: Int, val quantity: Double?, va
                 null
             }
 
-            val name = jsonObject.optString("name", "Ingredient")
+            val name = jsonObject.optString("name", "IngredientRemote")
 
-            return Ingredient(id, recipeId, quantity, unity, name)
+            return IngredientRemote(
+                id,
+                recipeId,
+                quantity,
+                unity,
+                name
+            )
+        }
+
+        fun newFromLocal(local: IngredientLocal, recipeId: Int) : IngredientRemote {
+            return IngredientRemote(0, recipeId, local.quantity, local.unity, local.name)
         }
     }
 }

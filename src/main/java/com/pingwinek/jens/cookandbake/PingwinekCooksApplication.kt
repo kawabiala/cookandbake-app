@@ -6,7 +6,7 @@ import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRout
 import com.pingwinek.jens.cookandbake.networkRequest.GlobalNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
 
-class CookandbakeApplication : Application() {
+class PingwinekCooksApplication : Application() {
 
     private val tag = this::class.java.name
 
@@ -24,5 +24,4 @@ class CookandbakeApplication : Application() {
             Log.i(tag, "defaultRoute for 401")
         }
     }
-
 }

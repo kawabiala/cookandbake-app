@@ -1,11 +1,12 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.*
 import android.view.Menu.NONE
 import android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.SyncManager
 
 /*
 Sets option menu, handles user interaction with login / logout and defines handler for login and logout events

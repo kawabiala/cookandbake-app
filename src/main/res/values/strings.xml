@@ -32,11 +32,11 @@
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>
 
-    <string name="recipe">Rezept</string>
+    <string name="recipeLocal">Rezept</string>
     <string name="recipes">Rezepte</string>
     <string name="recipe_title">Rezepttitel</string>
     <string name="recipe_description">Kurzbeschreibung</string>
-    <string name="ingredient">Zutat</string>
+    <string name="ingredientRemote">Zutat</string>
     <string name="ingredients">Zutaten</string>
     <string name="instruction">Anleitung</string>
     <string name="quantity">Menge</string>

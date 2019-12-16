@@ -5,13 +5,13 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import android.widget.EditText
 import com.pingwinek.jens.cookandbake.R
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
 
-class RequirePasswordFragment : DialogFragment() {
+class RequirePasswordFragment : androidx.fragment.app.DialogFragment() {
 
     lateinit var listener: RequirePasswordListener
     private var message: String = "You should provide a message with setArguments"
@@ -31,7 +31,7 @@ class RequirePasswordFragment : DialogFragment() {
         fun onNegativeButton()
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             listener = context as RequirePasswordListener

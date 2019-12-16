@@ -1,21 +1,21 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.AlertDialog
-import android.arch.lifecycle.*
-import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.*
 
@@ -24,9 +24,6 @@ const val EXTRA_RECIPE_ID = "recipeID"
 
 class RecipeListingActivity : BaseActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var recipeListingModel: RecipeListingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,14 +32,13 @@ class RecipeListingActivity : BaseActivity() {
 
         findViewById<ImageView>(R.id.floatingActionButton).setImageResource(R.drawable.ic_action_add)
 
-        val recipeList = LinkedList<Recipe>()
+        val recipeList = LinkedList<RecipeLocal>()
 
-        viewManager = LinearLayoutManager(this)
-        viewAdapter = RecipeListingAdapter(recipeList)
+        val viewAdapter = RecipeListingAdapter(recipeList)
 
-        recyclerView = findViewById<RecyclerView>(R.id.recipeList).apply {
+        findViewById<RecyclerView>(R.id.recipeList).apply {
             setHasFixedSize(true)
-            layoutManager = viewManager
+            layoutManager = LinearLayoutManager(this@RecipeListingActivity)
             adapter = viewAdapter
         }
 
@@ -51,7 +47,7 @@ class RecipeListingActivity : BaseActivity() {
                 .get(RecipeListingViewModel::class.java)
         val recipeListData = recipeListingModel.recipeListData
 
-        recipeListData.observe(this, Observer { newRecipeList: LinkedList<Recipe>? ->
+        recipeListData.observe(this, Observer { newRecipeList: LinkedList<RecipeLocal>? ->
             newRecipeList?.let { nrl ->
                 recipeList.clear()
                 recipeList.addAll(nrl.sortedBy { recipe ->
@@ -121,7 +117,7 @@ class RecipeListingActivity : BaseActivity() {
     }
 }
 
-class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
+class RecipeListingAdapter(private var recipeList: LinkedList<RecipeLocal>) :
     RecyclerView.Adapter<RecipeListingViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
@@ -142,7 +138,7 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
 
         (viewHolder.recipeListItem.getViewById(R.id.itemTitle) as TextView).text = recipeList[position].title
         (viewHolder.recipeListItem.getViewById(R.id.itemDescription) as TextView).text = recipeList[position].description
-        viewHolder.recipeListItem.tag = recipeList[position].id
+        viewHolder.recipeListItem.tag = recipeList[position].remoteId
     }
 }
 

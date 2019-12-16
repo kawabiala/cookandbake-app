@@ -1,12 +1,13 @@
 package com.pingwinek.jens.cookandbake
 
 import android.util.Log
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-class Ingredients(jsonString: String) : LinkedList<Ingredient>() {
+class Ingredients(jsonString: String) : LinkedList<IngredientRemote>() {
 
     private val tag = "Ingredients"
 
@@ -20,7 +21,7 @@ class Ingredients(jsonString: String) : LinkedList<Ingredient>() {
     init {
         for (i in 0 until ingredients.length()) {
             if (ingredients[i] is JSONObject) {
-                push(Ingredient.getInstance(ingredients[i] as JSONObject))
+                push(IngredientRemote.getInstance(ingredients[i] as JSONObject))
             }
         }
     }
