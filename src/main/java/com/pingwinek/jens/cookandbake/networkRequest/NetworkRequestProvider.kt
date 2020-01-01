@@ -7,7 +7,7 @@ import org.json.JSONObject
 import java.net.URLEncoder
 import java.util.concurrent.Executors
 
-class NetworkRequestProvider private constructor(val application: Application){
+class NetworkRequestProvider private constructor(val application: Application) {
 
     enum class Method(val method: String) {
         GET("GET"),
@@ -24,13 +24,22 @@ class NetworkRequestProvider private constructor(val application: Application){
     fun getNetworkRequest(
         url: String,
         method: Method?
-    ) : NetworkRequest {
-        return ReusableNetworkRequest(url, Executors.newSingleThreadExecutor(), application, method ?: Method.GET)
+    ): NetworkRequest {
+        return ReusableNetworkRequest(
+            url,
+            Executors.newSingleThreadExecutor(),
+            application,
+            method ?: Method.GET
+        )
     }
 
-    companion object : SingletonHolder<NetworkRequestProvider, Application>(::NetworkRequestProvider) {
+    companion object :
+        SingletonHolder<NetworkRequestProvider, Application>(::NetworkRequestProvider) {
 
-        fun getUploadDataProvider(params: Map<String, String>, contentType: ContentType): UploadDataProvider {
+        fun getUploadDataProvider(
+            params: Map<String, String>,
+            contentType: ContentType
+        ): UploadDataProvider {
             return if (contentType == ContentType.APPLICATION_URLENCODED) {
                 NetworkRequestBodyProvider(toBody(params))
             } else if (contentType == ContentType.APPLICATION_JSON) {

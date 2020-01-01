@@ -3,45 +3,53 @@ package com.pingwinek.jens.cookandbake.models
 import org.json.JSONException
 import org.json.JSONObject
 
-data class IngredientRemote(
-    override val id: Int?,
+class IngredientRemote private constructor(
+    override val id: Int = 0,
     override val recipeId: Int,
     override val quantity: Double?,
     override val unity: String?,
-    override val name: String
+    override val name: String,
+    override var lastModified: Long
 ) : Ingredient() {
 
-    fun asMap() : Map<String, String> {
+    private constructor(
+        id: Int,
+        recipeId: Int,
+        quantity: Double?,
+        unity: String?,
+        name: String
+    ) : this(id, recipeId, quantity, unity, name, 0)
+
+    fun asMap(): Map<String, String> {
         val map = HashMap<String, String>()
-        if (id != null) {
-            map.put("remoteId", id.toString())
-        }
-        map.put("recipeId", recipeId.toString())
-        map.put("quantity", quantity.toString())
-        map.put("unity", unity ?: "")
-        map.put("name", name)
+        map["id"] = id.toString()
+        map["recipe_id"] = recipeId.toString()
+        map["quantity"] = quantity.toString()
+        map["unity"] = unity ?: ""
+        map["name"] = name
+        map["lastModified"] = lastModified.toString()
 
         return map
     }
 
-    override fun toString() : String {
+    override fun toString(): String {
         return JSONObject(asMap()).toString()
     }
 
-    fun getUpdated(quantity: Double?, unity: String?, name: String) : IngredientRemote {
-        return IngredientRemote(id, recipeId, quantity, unity, name)
+    override fun getUpdated(ingredient: Ingredient): IngredientRemote {
+        return IngredientRemote(id, recipeId, ingredient.quantity, ingredient.unity, ingredient.name, ingredient.lastModified)
     }
 
     companion object {
 
-        fun getInstance(jsonObject: JSONObject) : IngredientRemote {
+        fun parse(jsonObject: JSONObject): IngredientRemote {
             val id = try {
-                jsonObject.getInt("remoteId")
+                jsonObject.getInt("id")
             } catch (jsonException: JSONException) {
-                null
+                0
             }
 
-            val recipeId = jsonObject.optInt("recipeId", -1)
+            val recipeId = jsonObject.optInt("recipe_id", -1)
 
             val quantity = try {
                 if (jsonObject.isNull("quantity")) {
@@ -65,17 +73,45 @@ data class IngredientRemote(
 
             val name = jsonObject.optString("name", "IngredientRemote")
 
-            return IngredientRemote(
-                id,
-                recipeId,
-                quantity,
-                unity,
-                name
-            )
+            val lastModified = try {
+                if (jsonObject.isNull("lastModified")) {
+                    null
+                } else {
+                    jsonObject.getLong("lastModified")
+                }
+            } catch (jsonException: JSONException) {
+                null
+            }
+
+            return when (lastModified) {
+                null -> IngredientRemote(id, recipeId, quantity, unity, name)
+                else -> IngredientRemote(id, recipeId, quantity, unity, name, lastModified)
+            }
         }
 
-        fun newFromLocal(local: IngredientLocal, recipeId: Int) : IngredientRemote {
-            return IngredientRemote(0, recipeId, local.quantity, local.unity, local.name)
+        fun fromLocal(ingredientLocal: IngredientLocal, recipeId: Int): IngredientRemote {
+            return when (ingredientLocal.remoteId) {
+                null -> newFromLocal(ingredientLocal, recipeId)
+                else -> IngredientRemote(
+                    ingredientLocal.remoteId,
+                    recipeId,
+                    ingredientLocal.quantity,
+                    ingredientLocal.unity,
+                    ingredientLocal.name,
+                    ingredientLocal.lastModified
+                )
+            }
+        }
+
+        fun newFromLocal(ingredientLocal: IngredientLocal, recipeId: Int): IngredientRemote {
+            return IngredientRemote(
+                0,
+                recipeId,
+                ingredientLocal.quantity,
+                ingredientLocal.unity,
+                ingredientLocal.name,
+                ingredientLocal.lastModified
+            )
         }
     }
 }

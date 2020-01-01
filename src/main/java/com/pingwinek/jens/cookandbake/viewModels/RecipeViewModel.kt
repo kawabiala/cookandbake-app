@@ -4,11 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.IngredientRepository
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
-import com.pingwinek.jens.cookandbake.RecipeRepository
-import java.util.*
+import com.pingwinek.jens.cookandbake.models.Recipe
+import com.pingwinek.jens.cookandbake.repos.IngredientRepository
+import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -17,19 +15,15 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     var recipeId: Int? = null
 
-    val recipeData: LiveData<RecipeLocal?> = Transformations.map(recipeRepository.recipeListData) { recipeList ->
+    val recipeData: LiveData<Recipe?> = Transformations.map(recipeRepository.recipeListData) { recipeList ->
         recipeId?.let {
             recipeList.find { recipe ->
-                recipe.remoteId == recipeId
+                recipe.id == recipeId
             }
         }
     }
 
     val ingredientListData = ingredientRepository.ingredientListData
-
-    init {
-        ingredientListData.value = LinkedList()
-    }
 
     fun loadData() {
         recipeId?.let { id ->
@@ -38,33 +32,19 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun save(title: String, description: String, instruction: String) {
+    fun saveRecipe(title: String, description: String, instruction: String) {
 
-        // input validation could be moved to something separate
         if (title.isEmpty()) {
             return
         }
 
-        if (recipeId != null) {
-            recipeData.value?.let {
-                val recipe = RecipeLocal(
-                    it.rowid,
-                    it.remoteId,
-                    title,
-                    description,
-                    instruction
-                )
-                recipeRepository.updateRecipe(recipe)
-            }
-        } else {
-            val recipe = RecipeLocal(
-                0,
-                null,
-                title,
-                description,
-                instruction
-            )
-            recipeRepository.newRecipe(recipe) { newRecipeId ->
+        recipeId?.let {
+            recipeRepository.updateRecipe(it, title, description, instruction)
+            return
+        }
+
+        if (recipeId == null) {
+            recipeRepository.newRecipe(title, description, instruction) { newRecipeId ->
                 recipeId = newRecipeId
                 true
             }
@@ -80,15 +60,14 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
-        val ingredient =
-            IngredientRemote(id, recipeId!!, quantity, unity, name)
-
         if (id == null) {
-            ingredientRepository.putIngredient(ingredient) {
-                true
+            recipeId?.let {
+                ingredientRepository.new(it, quantity, unity, name) {
+                    true
+                }
             }
         } else {
-            ingredientRepository.postIngredient(ingredient)
+            ingredientRepository.update(id, quantity, unity, name)
         }
     }
 

@@ -1,12 +1,19 @@
-package com.pingwinek.jens.cookandbake.sources
+package com.pingwinek.jens.cookandbake.utils
 
 import android.os.AsyncTask
+import android.util.Log
+import java.lang.Exception
 
 class Taskifier<T>(val onResult: (T?) -> Unit) : AsyncTask<() -> T?, Any, T>() {
 
     override fun doInBackground(vararg params: () -> T?): T? {
         return if (params.isNotEmpty()) {
-            params[0]()
+            try {
+                params[0]()
+            } catch (e: Exception) {
+                Log.w(this::class.java.name, e.localizedMessage)
+                null
+            }
         } else {
             null
         }

@@ -2,7 +2,7 @@ package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.pingwinek.jens.cookandbake.RecipeRepository
+import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 
 class RecipeListingViewModel(application: Application) : AndroidViewModel(application) {
 

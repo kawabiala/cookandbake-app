@@ -1,7 +1,10 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
-import com.pingwinek.jens.cookandbake.models.*
+import com.pingwinek.jens.cookandbake.models.IngredientLocal
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.*
 import java.util.*
 
@@ -17,388 +20,457 @@ class SyncManager private constructor(val application: Application) {
 
         private var counter = 0
 
-        fun taskStarted(): SyncTaskCounter {
+        fun taskStarted() {
             counter++
-            return this
         }
 
-        fun taskEnded(): SyncTaskCounter {
+        fun taskEnded() {
             counter--
             if (counter == 0) {
                 onAllEnded()
             }
-            return this
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// Recipes ///////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     fun syncRecipes(onDone: () -> Unit) {
-        val syncTaskCounter = SyncTaskCounter(onDone).taskStarted()
-        recipeSourceRemote.getAll { _, recipesRemote ->
-            recipeSourceLocal.getAll { _, recipesLocal ->
-                compareRecipes(recipesLocal, recipesRemote, syncTaskCounter)
+        recipeSourceRemote.getAll { status, recipesRemote ->
+            if (status == Source.Status.SUCCESS) {
+                recipeSourceLocal.getAll { _, recipesLocal ->
+                    compareRecipes(recipesLocal, recipesRemote, onDone)
+                }
+            } else {
+                onDone()
             }
         }
-        syncTaskCounter.taskEnded()
     }
 
     fun syncRecipe(recipeId: Int, onDone: () -> Unit) {
-        val syncTaskCounter = SyncTaskCounter(onDone).taskStarted()
         recipeSourceLocal.get(recipeId) { status, recipeLocal ->
             if (status == Source.Status.SUCCESS && recipeLocal != null) {
                 val idOfRemote = recipeLocal.remoteId
                 if (idOfRemote != null) {
-                    recipeSourceRemote.get(idOfRemote) { _, recipeRemote ->
-                        compareRecipe(recipeLocal, recipeRemote, syncTaskCounter)
+                    recipeSourceRemote.get(idOfRemote) { statusRemote, recipeRemote ->
+                        if (statusRemote == Source.Status.SUCCESS) {
+                            compareRecipe(recipeLocal, recipeRemote, onDone)
+                        } else {
+                            onDone()
+                        }
                     }
                 } else {
-                    compareRecipe(recipeLocal, null, syncTaskCounter)
+                    compareRecipe(recipeLocal, null, onDone)
                 }
             } else {
                 // if local is null, we can't get remote either
+                onDone()
             }
         }
-        syncTaskCounter.taskEnded()
     }
 
     private fun compareRecipes(
         recipesLocal: LinkedList<RecipeLocal>,
         recipesRemote: LinkedList<RecipeRemote>,
-        syncTaskCounter: SyncTaskCounter
+        onDone: () -> Unit
     ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         syncTaskCounter.taskStarted()
+        syncTaskCounter.taskStarted()
+        loopLocalRecipes(recipesLocal, recipesRemote) { syncTaskCounter.taskEnded() }
+        loopRemoteRecipes(recipesLocal, recipesRemote) { syncTaskCounter.taskEnded() }
+    }
+
+    private fun loopLocalRecipes(
+        recipesLocal: LinkedList<RecipeLocal>,
+        recipesRemote: LinkedList<RecipeRemote>,
+        onDone: () -> Unit
+    ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         if (recipesLocal.size > 0) {
             recipesLocal.forEach { recipeLocal ->
+                syncTaskCounter.taskStarted()
                 compareRecipe(
                     recipeLocal,
                     recipesRemote.find { recipeRemote ->
-                        recipeRemote.rowid == recipeLocal.remoteId
-                    },
-                    syncTaskCounter
-                )
+                        recipeRemote.id == recipeLocal.remoteId
+                    }
+                ) { syncTaskCounter.taskEnded() }
             }
+        } else {
+            onDone()
         }
+    }
+
+    private fun loopRemoteRecipes(
+        recipesLocal: LinkedList<RecipeLocal>,
+        recipesRemote: LinkedList<RecipeRemote>,
+        onDone: () -> Unit
+    ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         if (recipesRemote.size > 0) {
             recipesRemote.forEach { recipeRemote ->
+                syncTaskCounter.taskStarted()
                 compareRecipe(
                     recipesLocal.find { recipeLocal ->
-                        recipeLocal.remoteId == recipeRemote.rowid
+                        recipeLocal.remoteId == recipeRemote.id
                     },
-                    recipeRemote,
-                    syncTaskCounter
-                )
+                    recipeRemote
+                ) { syncTaskCounter.taskEnded() }
             }
+        } else {
+            onDone()
         }
-        syncTaskCounter.taskEnded()
     }
 
     private fun compareRecipe(
         recipeLocal: RecipeLocal?,
         recipeRemote: RecipeRemote?,
-        syncTaskCounter: SyncTaskCounter
+        onDone: () -> Unit
     ) {
-        syncTaskCounter.taskStarted()
         when {
             // CASE 1: doesn't make sense to call this method with both local and remote null
-            recipeLocal == null && recipeRemote == null -> {
-                syncTaskCounter.taskEnded()
-                // do nothing
-            }
+            recipeLocal == null && recipeRemote == null -> onDone()
 
             // CASE 2: local null -> add new remote locally
-            recipeLocal == null -> {
-                recipeSourceLocal.new(RecipeLocal.fromRemote(recipeRemote!!)) { _, _ ->
-                    syncTaskCounter.taskEnded()
-                }
-            }
+            recipeLocal == null -> newLocalFromRemote(recipeRemote!!, onDone)
 
             // CASE 3: remote null and local.remoteId null -> add remotely
-            recipeRemote == null && recipeLocal.remoteId == null -> {
-                recipeSourceRemote.new(RecipeRemote.newFromLocal(recipeLocal)) { status, newRecipeRemote ->
-                    if (status == Source.Status.SUCCESS && newRecipeRemote != null) {
-                        recipeSourceLocal.update(
-                            RecipeLocal(
-                                recipeLocal.rowid,
-                                newRecipeRemote.rowid,
-                                recipeLocal.title,
-                                recipeLocal.description,
-                                recipeLocal.instruction
-                            )
-                        ) { _, _ ->
-                            syncTaskCounter.taskEnded()
-                        }
-                    } else {
-                        syncTaskCounter.taskEnded()
-                    }
-                }
-            }
+            recipeRemote == null && recipeLocal.remoteId == null -> newRemoteFromLocal(recipeLocal, onDone)
 
             // CASE 4: remote null and local.remoteId not null -> delete locally
-            recipeRemote == null -> {
-                recipeSourceLocal.delete(recipeLocal.rowid) {
-                    syncTaskCounter.taskEnded()
-                }
-            }
+            recipeRemote == null -> deleteLocal(recipeLocal, onDone)
 
             // CASE 5: local and remote do not refer to the same recipe => BUG!!!
-            recipeLocal.remoteId != recipeRemote.rowid -> {
-                // do nothing
-            }
+            recipeLocal.remoteId != recipeRemote.id -> onDone()
 
             // CASE 6: remote more recent -> update locally
-            recipeLocal.lastModified < recipeRemote.lastModified -> {
-                recipeSourceLocal.update(
-                    recipeLocal.getUpdated(
-                        recipeRemote.title,
-                        recipeRemote.description,
-                        recipeRemote.instruction
-                    )
-                ) { _, _ ->
-                    syncTaskCounter.taskEnded()
-                }
-            }
+            recipeLocal.lastModified < recipeRemote.lastModified -> updateLocal(recipeLocal, recipeRemote, onDone)
 
             // CASE 7: check
-            recipeLocal.lastModified >= recipeRemote.lastModified -> {
-                recipeSourceRemote.update(
-                    recipeRemote.getUpdated(
+            recipeLocal.lastModified > recipeRemote.lastModified -> updateRemote(recipeLocal, recipeRemote, onDone)
+
+            // there shouldn't be anything left
+            else -> onDone()
+        }
+    }
+
+    private fun newLocalFromRemote(
+        recipeRemote: RecipeRemote,
+        onDone: () -> Unit
+    ) {
+        recipeSourceLocal.new(RecipeLocal.newFromRemote(recipeRemote)) { _, _ ->
+            onDone()
+        }
+    }
+
+    private fun newRemoteFromLocal(
+        recipeLocal: RecipeLocal,
+        onDone: () -> Unit
+    ) {
+        recipeSourceRemote.new(RecipeRemote.newFromLocal(recipeLocal)) { status, newRecipeRemote ->
+            if (status == Source.Status.SUCCESS && newRecipeRemote != null) {
+                recipeSourceLocal.update(
+                    RecipeLocal(
+                        recipeLocal.id,
+                        newRecipeRemote.id,
                         recipeLocal.title,
                         recipeLocal.description,
                         recipeLocal.instruction
                     )
                 ) { _, _ ->
-                    syncTaskCounter.taskEnded()
+                    onDone()
                 }
-            }
-
-            // there shouldn't be anything left
-            else -> {
-                syncTaskCounter.taskEnded()
+            } else {
+                onDone()
             }
         }
-        syncTaskCounter.taskEnded()
     }
 
+    private fun updateLocal(
+        recipeLocal: RecipeLocal,
+        recipeRemote: RecipeRemote,
+        onDone: () -> Unit
+    ) {
+        recipeSourceLocal.update(
+            recipeLocal.getUpdated(
+                recipeRemote
+            )
+        ) { _, _ ->
+            onDone()
+        }
+    }
+
+    private fun updateRemote(
+        recipeLocal: RecipeLocal,
+        recipeRemote: RecipeRemote,
+        onDone: () -> Unit
+    ) {
+        recipeSourceRemote.update(
+            recipeRemote.getUpdated(
+                recipeLocal
+            )
+        ) { _, _ ->
+            onDone()
+        }
+    }
+
+    private fun deleteLocal(
+        recipeLocal: RecipeLocal,
+        onDone: () -> Unit
+    ) {
+        recipeSourceLocal.delete(recipeLocal.id) {
+            onDone()
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// Ingredients ///////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun syncIngredients(localRecipeId: Int, onDone: () -> Unit) {
-        val syncTaskCounter = SyncTaskCounter(onDone).taskStarted()
-        retrieveRemoteRecipeId(localRecipeId) { remoteRecipeId ->
+        recipeSourceLocal.toRemoteId(localRecipeId) { remoteRecipeId ->
             if (remoteRecipeId != null) {
-                ingredientSourceRemote.getAllForRecipeId(remoteRecipeId) { _, ingredientsRemote ->
-                    ingredientSourceLocal.getAllForRecipeId(localRecipeId) { _, ingredientsLocal ->
-                        compareIngredients(ingredientsLocal, ingredientsRemote, syncTaskCounter)
+                ingredientSourceRemote.getAllForRecipeId(remoteRecipeId) { status, ingredientsRemote ->
+                    if (status == Source.Status.SUCCESS) {
+                        ingredientSourceLocal.getAllForRecipeId(localRecipeId) { _, ingredientsLocal ->
+                            compareIngredients(ingredientsLocal, ingredientsRemote, onDone)
+                        }
+                    } else {
+                        onDone()
                     }
                 }
             } else {
                 ingredientSourceLocal.getAllForRecipeId(localRecipeId) { _, ingredientsLocal ->
-                    compareIngredients(ingredientsLocal, LinkedList(), syncTaskCounter)
+                    compareIngredients(ingredientsLocal, LinkedList(), onDone)
                 }
             }
         }
-        syncTaskCounter.taskEnded()
     }
 
     fun syncIngredient(ingredientId: Int, onDone: () -> Unit) {
-        val syncTaskCounter = SyncTaskCounter(onDone).taskStarted()
         ingredientSourceLocal.get(ingredientId) { status, ingredientLocal ->
             if (status == Source.Status.SUCCESS && ingredientLocal != null) {
                 val idOfRemote = ingredientLocal.remoteId
                 if (idOfRemote != null) {
-                    ingredientSourceRemote.get(idOfRemote) { _, ingredientRemote ->
+                    ingredientSourceRemote.get(idOfRemote) { statusRemote, ingredientRemote ->
                         // if local has remoteid, but remote is null, remote has been deleted -> will be handled in compareIngredient
-                        compareIngredient(ingredientLocal, ingredientRemote, syncTaskCounter)
+                        if (statusRemote == Source.Status.SUCCESS) {
+                            compareIngredient(ingredientLocal, ingredientRemote, onDone)
+                        } else {
+                            onDone()
+                        }
                     }
                 } else {
                     // if local has no remoteid, local is new and not yet been synced to remote
-                    compareIngredient(ingredientLocal, null, syncTaskCounter)
+                    compareIngredient(ingredientLocal, null, onDone)
                 }
             } else {
                 // if local is null, we can't get remote either
+                onDone()
             }
         }
-        syncTaskCounter.taskEnded()
     }
 
     private fun compareIngredients(
         ingredientsLocal: LinkedList<IngredientLocal>,
         ingredientsRemote: LinkedList<IngredientRemote>,
-        syncTaskCounter: SyncTaskCounter
+        onDone: () -> Unit
     ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         syncTaskCounter.taskStarted()
+        syncTaskCounter.taskStarted()
+        loopLocalIngredients(ingredientsLocal, ingredientsRemote) { syncTaskCounter.taskEnded() }
+        loopRemoteIngredients(ingredientsLocal, ingredientsRemote) { syncTaskCounter.taskEnded() }
+    }
+
+    private fun loopLocalIngredients(
+        ingredientsLocal: LinkedList<IngredientLocal>,
+        ingredientsRemote: LinkedList<IngredientRemote>,
+        onDone: () -> Unit
+    ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         if (ingredientsLocal.size > 0) {
             ingredientsLocal.forEach { ingredientLocal ->
+                syncTaskCounter.taskStarted()
                 compareIngredient(
                     ingredientLocal,
                     ingredientsRemote.find { _ingredientRemote ->
                         ingredientLocal.remoteId == _ingredientRemote.id
-                    },
-                    syncTaskCounter
-                )
+                    }
+                ) { syncTaskCounter.taskEnded() }
             }
+        } else {
+            onDone()
         }
+    }
+
+    private fun loopRemoteIngredients(
+        ingredientsLocal: LinkedList<IngredientLocal>,
+        ingredientsRemote: LinkedList<IngredientRemote>,
+        onDone: () -> Unit
+    ) {
+        val syncTaskCounter = SyncTaskCounter(onDone)
         if (ingredientsRemote.size > 0) {
             ingredientsRemote.forEach { ingredientRemote ->
+                syncTaskCounter.taskStarted()
                 compareIngredient(
                     ingredientsLocal.find { ingredientLocal ->
                         ingredientLocal.remoteId == ingredientRemote.id
                     },
-                    ingredientRemote,
-                    syncTaskCounter
-                )
+                    ingredientRemote
+                ) { syncTaskCounter.taskEnded() }
             }
+        } else {
+            onDone()
         }
-        syncTaskCounter.taskEnded()
     }
 
     private fun compareIngredient(
         ingredientLocal: IngredientLocal?,
         ingredientRemote: IngredientRemote?,
-        syncTaskCounter: SyncTaskCounter
+        onDone: () -> Unit
     ) {
-        syncTaskCounter.taskStarted()
         when {
             // CASE 1: doesn't make sense to call this method with both local and remote null
-            ingredientLocal == null && ingredientRemote == null -> {
-                // do nothing
-                syncTaskCounter.taskEnded()
-            }
+            ingredientLocal == null && ingredientRemote == null -> onDone()
 
             // CASE 2: we have a new remote ingredient, that we want to insert into local
-            ingredientLocal == null -> {
-                // we need the id of local recipe (!) to generate a local ingredient
-                retrieveLocalRecipeIdFromRemoteIngredient(ingredientRemote!!) { recipeId ->
-                    if (recipeId != null) {
-                        ingredientSourceLocal.new(
-                            IngredientLocal.newFromRemote(
-                                ingredientRemote,
-                                recipeId
-                            )
-                        ) { _, _ ->
-                            syncTaskCounter.taskEnded()
-                        }
-                    } else {
-                        // ignore
-                        syncTaskCounter.taskEnded()
-                    }
-                }
-            }
+            ingredientLocal == null -> newLocalFromRemote(ingredientRemote!!, onDone)
 
             // CASE 3: we have a new local ingredient, that we want to insert into remote
-            ingredientRemote == null && ingredientLocal.remoteId == null -> {
-                // the remoteid of the local recipe (!) is the recipeId for the remote ingredient we want to create
-                retrieveRemoteRecipeIdFromLocalIngredient(ingredientLocal) { recipeId ->
-                    if (recipeId != null) {
-                        ingredientSourceRemote.new(
-                            IngredientRemote.newFromLocal(
-                                ingredientLocal,
-                                recipeId
-                            )
-                        ) { status, newIngredientRemote ->
-                            if (status == Source.Status.SUCCESS && newIngredientRemote != null) {
-                                ingredientSourceLocal.update(
-                                    IngredientLocal(
-                                        ingredientLocal.id,
-                                        newIngredientRemote.id,
-                                        ingredientLocal.recipeId,
-                                        ingredientLocal.quantity,
-                                        ingredientLocal.unity,
-                                        ingredientLocal.name
-                                    )
-                                ) { _, _ ->
-                                    syncTaskCounter.taskEnded()
-                                }
-                            } else {
-                                syncTaskCounter.taskEnded()
-                            }
-                        }
-                    } else {
-                        // ignore
-                        syncTaskCounter.taskEnded()
-                    }
-                }
-            }
+            ingredientRemote == null && ingredientLocal.remoteId == null -> newRemoteFromLocal(ingredientLocal, onDone)
 
             // CASE 4: remote deleted, i.e. existence of local.remoteid indicates, that there was a remote ingredient
-            ingredientRemote == null && ingredientLocal.remoteId != null -> {
-                ingredientLocal.id?.let {
-                    ingredientSourceLocal.delete(it) {
-                        syncTaskCounter.taskEnded()
-                    }
-                }
-
-            }
+            ingredientRemote == null && ingredientLocal.remoteId != null -> deleteLocal(ingredientLocal, onDone)
 
             // CASE 5: local and remote do not refer to the same ingredient => BUG!!!
-            ingredientLocal.remoteId != ingredientRemote!!.id -> {
-                // if this happens, we have a major bug!!!
-                syncTaskCounter.taskEnded()
-            }
+            ingredientLocal.remoteId != ingredientRemote!!.id -> onDone()
 
             // CASE 6: remote has more recent updates, so we update local
-            ingredientLocal.lastModified < ingredientRemote.lastModified -> {
-                ingredientSourceLocal.update(
-                    ingredientLocal.getUpdated(
-                        ingredientRemote.quantity,
-                        ingredientRemote.unity,
-                        ingredientRemote.name
-                    )
-                ) { _, _ ->
-                    syncTaskCounter.taskEnded()
-                }
-            }
+            ingredientLocal.lastModified < ingredientRemote.lastModified -> updateLocal(ingredientLocal, ingredientRemote, onDone)
 
             // CASE 7: local has more recent updates, so we update remote
-            ingredientLocal.lastModified >= ingredientRemote.lastModified -> {
-                ingredientSourceRemote.update(
-                    ingredientRemote.getUpdated(
-                        ingredientLocal.quantity,
-                        ingredientLocal.unity,
-                        ingredientLocal.name
-                    )
-                ) { _, _ ->
-                    syncTaskCounter.taskEnded()
-                }
-            }
+            ingredientLocal.lastModified > ingredientRemote.lastModified -> updateRemote(ingredientLocal, ingredientRemote, onDone)
 
             // There shouldn't be anything left
-            else -> {
-                syncTaskCounter.taskEnded()
+            else -> onDone()
+        }
+    }
+
+    private fun newLocalFromRemote(
+        ingredientRemote: IngredientRemote,
+        onDone: () -> Unit
+    ) {
+        localRecipeIdForRemoteIngredient(ingredientRemote) { recipeLocalId ->
+            if (recipeLocalId != null) {
+                ingredientSourceLocal.new(
+                    IngredientLocal.newFromRemote(
+                        ingredientRemote,
+                        recipeLocalId
+                    )
+                ) { _, _ ->
+                    onDone()
+                }
+            } else {
+                onDone()
             }
+        }
+    }
+
+    private fun newRemoteFromLocal(
+        ingredientLocal: IngredientLocal,
+        onDone: () -> Unit
+    ) {
+        remoteRecipeIdForLocalIngredient(ingredientLocal) { recipeId ->
+            if (recipeId != null) {
+                ingredientSourceRemote.new(
+                    IngredientRemote.newFromLocal(
+                        ingredientLocal,
+                        recipeId
+                    )
+                ) { status, newIngredientRemote ->
+                    if (status == Source.Status.SUCCESS && newIngredientRemote != null) {
+                        ingredientSourceLocal.update(
+                            IngredientLocal(
+                                ingredientLocal.id,
+                                newIngredientRemote.id,
+                                ingredientLocal.recipeId,
+                                ingredientLocal.quantity,
+                                ingredientLocal.unity,
+                                ingredientLocal.name
+                            )
+                        ) { _, _ ->
+                            onDone()
+                        }
+                    } else {
+                        onDone()
+                    }
+                }
+            } else {
+                onDone()
+            }
+        }
+    }
+
+    private fun deleteLocal(
+        ingredientLocal: IngredientLocal,
+        onDone: () -> Unit
+    ) {
+        ingredientLocal.id?.let {
+            ingredientSourceLocal.delete(it) {
+                onDone()
+            }
+        }
+    }
+
+    private fun updateLocal(
+        ingredientLocal: IngredientLocal,
+        ingredientRemote: IngredientRemote,
+        onDone: () -> Unit
+    ) {
+        ingredientSourceLocal.update(
+            ingredientLocal.getUpdated(
+                ingredientRemote
+            )
+        ) { _, _ ->
+            onDone()
+        }
+    }
+
+    private fun updateRemote(
+        ingredientLocal: IngredientLocal,
+        ingredientRemote: IngredientRemote,
+        onDone: () -> Unit
+    ) {
+        ingredientSourceRemote.update(
+            ingredientRemote.getUpdated(
+                ingredientLocal
+            )
+        ) { _, _ ->
+            onDone()
         }
     }
 
     /*
     The callback returns the local recipeId - or null, if the ingredientRemote ingredient has no id
      */
-    private fun retrieveLocalRecipeIdFromRemoteIngredient(
+    private fun localRecipeIdForRemoteIngredient(
         ingredientRemote: IngredientRemote,
         callback: (Int?) -> Unit
     ) {
-        ingredientRemote.id?.let { idOfRemote ->
-            recipeSourceLocal.getRecipeForRemoteId(idOfRemote) { _, recipeLocal ->
-                callback(recipeLocal?.rowid)
-            }
-        } ?: callback(null)
+        recipeSourceLocal.toLocalId(ingredientRemote.recipeId, callback)
     }
 
     /*
     The callback returns the remote recipeId - or null, if the ingredientLocal recipe has not yet a remoteId, i.e. has not been synced with remote
      */
-    private fun retrieveRemoteRecipeIdFromLocalIngredient(
+    private fun remoteRecipeIdForLocalIngredient(
         ingredientLocal: IngredientLocal,
         callback: (Int?) -> Unit
     ) {
-        retrieveRemoteRecipeId(ingredientLocal.recipeId, callback)
-    }
-
-    /*
-    The callback returns the remote recipeId - or null, if the local recipe has not yet a remoteId, i.e. has not been synced with remote
-     */
-    private fun retrieveRemoteRecipeId(recipeLocalId: Int, callback: (Int?) -> Unit) {
-        recipeSourceLocal.get(recipeLocalId) { _, recipeLocal ->
-            recipeLocal?.remoteId?.let { recipeRemoteId ->
-                callback(recipeRemoteId)
-            } ?: callback(null)
-        }
+        recipeSourceLocal.toRemoteId(ingredientLocal.recipeId, callback)
     }
 
     companion object : SingletonHolder<SyncManager, Application>(::SyncManager)

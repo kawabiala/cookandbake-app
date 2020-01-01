@@ -21,7 +21,7 @@ class Ingredients(jsonString: String) : LinkedList<IngredientRemote>() {
     init {
         for (i in 0 until ingredients.length()) {
             if (ingredients[i] is JSONObject) {
-                push(IngredientRemote.getInstance(ingredients[i] as JSONObject))
+                push(IngredientRemote.parse(ingredients[i] as JSONObject))
             }
         }
     }

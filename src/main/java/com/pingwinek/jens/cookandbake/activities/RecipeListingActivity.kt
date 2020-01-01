@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.*
 
@@ -32,7 +32,7 @@ class RecipeListingActivity : BaseActivity() {
 
         findViewById<ImageView>(R.id.floatingActionButton).setImageResource(R.drawable.ic_action_add)
 
-        val recipeList = LinkedList<RecipeLocal>()
+        val recipeList = LinkedList<Recipe>()
 
         val viewAdapter = RecipeListingAdapter(recipeList)
 
@@ -47,7 +47,7 @@ class RecipeListingActivity : BaseActivity() {
                 .get(RecipeListingViewModel::class.java)
         val recipeListData = recipeListingModel.recipeListData
 
-        recipeListData.observe(this, Observer { newRecipeList: LinkedList<RecipeLocal>? ->
+        recipeListData.observe(this, Observer { newRecipeList: LinkedList<Recipe>? ->
             newRecipeList?.let { nrl ->
                 recipeList.clear()
                 recipeList.addAll(nrl.sortedBy { recipe ->
@@ -117,7 +117,7 @@ class RecipeListingActivity : BaseActivity() {
     }
 }
 
-class RecipeListingAdapter(private var recipeList: LinkedList<RecipeLocal>) :
+class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
     RecyclerView.Adapter<RecipeListingViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
@@ -138,7 +138,7 @@ class RecipeListingAdapter(private var recipeList: LinkedList<RecipeLocal>) :
 
         (viewHolder.recipeListItem.getViewById(R.id.itemTitle) as TextView).text = recipeList[position].title
         (viewHolder.recipeListItem.getViewById(R.id.itemDescription) as TextView).text = recipeList[position].description
-        viewHolder.recipeListItem.tag = recipeList[position].remoteId
+        viewHolder.recipeListItem.tag = recipeList[position].id
     }
 }
 

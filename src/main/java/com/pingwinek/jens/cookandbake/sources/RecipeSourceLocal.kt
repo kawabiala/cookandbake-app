@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.pingwinek.jens.cookandbake.SingletonHolder
 import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*
 
 class RecipeSourceLocal private constructor(val application: Application):
@@ -42,11 +43,7 @@ class RecipeSourceLocal private constructor(val application: Application):
 
     override fun update(item: RecipeLocal, callback: (Source.Status, RecipeLocal?) -> Unit) {
         Taskifier<Unit> {
-            if (item.rowid != null) {
-                get(item.rowid, callback)
-            } else {
-                callback(Source.Status.FAILURE, null)
-            }
+            get(item.id, callback)
         }.execute({db.recipeDAO().update(item)})
     }
 
@@ -66,7 +63,7 @@ class RecipeSourceLocal private constructor(val application: Application):
         }.execute({db.recipeDAO().delete(item)})
     }
 
-    fun getRecipeForRemoteId(remoteId: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
+    fun getForRemoteId(remoteId: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
         Taskifier<RecipeLocal> { recipe ->
             val status = when (recipe) {
                 null -> Source.Status.FAILURE
@@ -74,6 +71,26 @@ class RecipeSourceLocal private constructor(val application: Application):
             }
             callback(status, recipe)
         }.execute({db.recipeDAO().selectForRemoteId(remoteId)})
+    }
+
+    fun toRemoteId(localId: Int, callback: (Int?) -> Unit) {
+        get(localId) { status, recipeLocal ->
+            if (status == Source.Status.SUCCESS && recipeLocal != null) {
+                callback(recipeLocal.remoteId)
+            } else {
+                callback(null)
+            }
+        }
+    }
+
+    fun toLocalId(remoteId: Int, callback: (Int?) -> Unit) {
+        getForRemoteId(remoteId) { status, recipeLocal ->
+            if (status == Source.Status.SUCCESS && recipeLocal != null) {
+                callback(recipeLocal.id)
+            } else {
+                callback(null)
+            }
+        }
     }
 
     companion object : SingletonHolder<RecipeSourceLocal, Application>(::RecipeSourceLocal)

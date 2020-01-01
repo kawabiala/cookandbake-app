@@ -1,22 +1,21 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
-import androidx.recyclerview.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
 import com.pingwinek.jens.cookandbake.Utils.quantityToString
-import com.pingwinek.jens.cookandbake.models.IngredientLocal
+import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
+import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
 import java.util.*
@@ -31,7 +30,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
     private var listener: OnListFragmentInteractionListener? = null
     private lateinit var recipeModel: RecipeViewModel
 
-    private var ingredientList = LinkedList<IngredientLocal>()
+    private var ingredientList = LinkedList<Ingredient>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +57,6 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
 
         recipeModel.ingredientListData.observe(this, Observer { ingredients ->
             ingredients?.let { newIngredientList ->
-                Log.i(this::class.java.name, "Change in ingredientlist observed")
                 ingredientList.clear()
                 ingredientList.addAll(newIngredientList)
                 ingredientListingAdapter.notifyDataSetChanged()
@@ -77,7 +75,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
         if (context is OnListFragmentInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
+            throw RuntimeException("$context must implement OnListFragmentInteractionListener")
         }
     }
 
@@ -108,9 +106,9 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
  * specified [OnListFragmentInteractionListener].
  */
 class IngredientListingAdapter(
-    private val ingredientList: List<IngredientLocal>,
+    private val ingredientList: List<Ingredient>,
     private val listener: OnListFragmentInteractionListener?
-) : androidx.recyclerview.widget.RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
 
     private val onClickListener: View.OnClickListener
 
@@ -144,7 +142,7 @@ class IngredientListingAdapter(
 
     override fun getItemCount(): Int = ingredientList.size
 
-    inner class ViewHolder(val mView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(mView) {
+    inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val quantityView: TextView = mView.quantityView
         val unityView: TextView = mView.unityView
         val nameView: TextView = mView.nameView

@@ -1,42 +1,45 @@
 package com.pingwinek.jens.cookandbake.models
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
 import org.json.JSONException
 import org.json.JSONObject
 
-data class RecipeRemote(
-    override var rowid: Int = 0,
+class RecipeRemote private constructor(
+    override var id: Int = 0,
     override val title: String,
     override val description: String?,
-    override val instruction: String?
+    override val instruction: String?,
+    override var lastModified: Long
 ) : Recipe() {
 
-    fun asMap() : Map<String, String> {
+    private constructor(
+        id: Int = 0,
+        title: String,
+        description: String?,
+        instruction: String?
+    ) : this(id, title, description, instruction, 0)
+
+    fun asMap(): Map<String, String> {
         val map = HashMap<String, String>()
-        if (rowid != null) {
-            map.put("id", rowid.toString())
-        }
-        map.put("title", title)
-        map.put("description", description ?: "")
-        map.put("instruction", instruction ?: "")
+        map["id"] = id.toString()
+        map["title"] = title
+        map["description"] = description ?: ""
+        map["instruction"] = instruction ?: ""
+        map["lastModified"] = lastModified.toString()
 
         return map
     }
 
-    override fun toString() : String {
+    override fun toString(): String {
         return JSONObject(asMap()).toString()
     }
 
-    fun getUpdated(title: String, description: String?, instruction: String?) : RecipeRemote {
-        return RecipeRemote(rowid, title, description, instruction)
+    override fun getUpdated(recipe: Recipe): RecipeRemote {
+        return RecipeRemote(id, recipe.title, recipe.description, recipe.instruction, recipe.lastModified)
     }
 
     companion object {
 
-        fun parse(jsonObject: JSONObject) : RecipeRemote {
+        fun parse(jsonObject: JSONObject): RecipeRemote {
 
             val id = try {
                 jsonObject.getInt("id")
@@ -44,7 +47,7 @@ data class RecipeRemote(
                 0
             }
 
-            val title = jsonObject.optString("title", "RecipeLocal")
+            val title = jsonObject.optString("title", "RecipeRemote")
 
             val description = try {
                 if (jsonObject.isNull("description")) {
@@ -66,27 +69,46 @@ data class RecipeRemote(
                 null
             }
 
-            return RecipeRemote(
-                id,
-                title,
-                description,
-                instruction
-            )
+            val lastModified = try {
+                if (jsonObject.isNull("lastModified")) {
+                    null
+                } else {
+                    jsonObject.getLong("lastModified")
+                }
+            } catch (jsonException: JSONException) {
+                null
+            }
+
+            return when (lastModified) {
+                null -> RecipeRemote(id, title, description, instruction)
+                else -> RecipeRemote(id, title, description, instruction, lastModified)
+            }
         }
 
-        fun fromLocal(recipeLocal: RecipeLocal) : RecipeRemote {
-            return if (recipeLocal.remoteId != null) {
-                RecipeRemote(recipeLocal.remoteId, recipeLocal.title, recipeLocal.description, recipeLocal.instruction)
-            } else {
-                RecipeRemote(0, recipeLocal.title, recipeLocal.description, recipeLocal.instruction)
+        fun fromLocal(recipeLocal: RecipeLocal): RecipeRemote {
+            return when (recipeLocal.remoteId) {
+                null -> newFromLocal(recipeLocal)
+                else -> RecipeRemote(
+                    recipeLocal.remoteId,
+                    recipeLocal.title,
+                    recipeLocal.description,
+                    recipeLocal.instruction,
+                    recipeLocal.lastModified
+                )
             }
         }
 
         /*
-        Returns always a RecipeRemote with rowid = 0
+        Returns always a RecipeRemote with id = 0
          */
-        fun newFromLocal(recipeLocal: RecipeLocal) : RecipeRemote {
-            return RecipeRemote(0, recipeLocal.title, recipeLocal.description, recipeLocal.instruction)
+        fun newFromLocal(recipeLocal: RecipeLocal): RecipeRemote {
+            return RecipeRemote(
+                0,
+                recipeLocal.title,
+                recipeLocal.description,
+                recipeLocal.instruction,
+                recipeLocal.lastModified
+            )
         }
     }
 }

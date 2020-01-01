@@ -1,56 +1,53 @@
 package com.pingwinek.jens.cookandbake
 
+import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
-import org.json.JSONException
-import org.json.JSONObject
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.runners.MockitoJUnitRunner
+import java.util.*
 
-@RunWith(MockitoJUnitRunner::class)
 class RecipeLocalTest {
 
-    private val keyId = "remoteId"
-    private val valueId1 = 1
-    private val valueId2 = null
-    private val keyTitle = "title"
-    private val valueTitle1 = "Title"
-    private val valueTitle2 = ""
-    private val keyDescription = "description"
-    private val valueDescription1 = "Description"
-    private val valueDescription2 = null
+    @Test
+    fun getUpdated_test() {
+        val date1 = Date().time
+        Thread.sleep(1)
+        val date2 = Date().time
+        Thread.sleep(1)
 
-    @Mock
-    private var jsonObject = JSONObject()
+        val recipe1 = RecipeLocal(1, 2, "Recipe Local 1", null, null, date1)
+        val recipe2 = recipe1.getUpdated(
+            RecipeLocal(3, 4, "Recipe Local 2", null, null, date2)
+        )
+        Thread.sleep(1)
+
+        assert(recipe1.lastModified == date1)
+
+        assert(recipe2.id == 1)
+        assert(recipe2.remoteId == 2)
+        assert(recipe2.title == "Recipe Local 2")
+        assert(recipe2.lastModified > date1)
+        assert(recipe2.lastModified > date2)
+    }
 
     @Test
-    fun asMap_test() {
-        `when`(jsonObject.getInt(keyId))
-            .thenReturn(valueId1)
-        `when`(jsonObject.optString(keyTitle, "RecipeLocal"))
-            .thenReturn(valueTitle1)
-        `when`(jsonObject.getString(keyDescription))
-            .thenReturn(valueDescription1)
-        `when`(jsonObject.isNull(keyDescription))
-            .thenReturn(false)
-        var recipe = RecipeRemote.parse(jsonObject)
-        assert(recipe.rowid == valueId1)
-        assert(recipe.title == valueTitle1)
-        assert(recipe.description == valueDescription1)
+    fun newFromRemote_test() {
+        val earliest = Date().time
 
-        `when`(jsonObject.getInt(keyId))
-            .thenThrow(JSONException(""))
-        `when`(jsonObject.optString(keyTitle, "RecipeLocal"))
-            .thenReturn(valueTitle2)
-        `when`(jsonObject.getString(keyDescription))
-            .thenThrow(JSONException(""))
-        `when`(jsonObject.isNull(keyDescription))
-            .thenReturn(true)
-        recipe = RecipeRemote.parse(jsonObject)
-        assert(recipe.rowid == valueId2)
-        assert(recipe.title == valueTitle2)
-        assert(recipe.description == valueDescription2)
+        Thread.sleep(1)
+        val recipeRemote = RecipeRemote.fromLocal(
+            RecipeLocal(1, 2, "Recipe Local 1", null, null)
+        )
+        Thread.sleep(1)
+        val recipeLocal = RecipeLocal.newFromRemote(recipeRemote)
+
+        assert(recipeRemote.id == 2)
+        assert(recipeRemote.title == "Recipe Local 1")
+        assert(recipeRemote.lastModified > earliest)
+        assert(recipeRemote.lastModified < Date().time)
+
+        assert(recipeLocal.id == 0)
+        assert(recipeLocal.remoteId == recipeRemote.id)
+        assert(recipeLocal.title == "Recipe Local 1")
+        assert(recipeLocal.lastModified == recipeRemote.lastModified)
     }
 }

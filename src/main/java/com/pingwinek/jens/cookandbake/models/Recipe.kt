@@ -1,9 +1,11 @@
 package com.pingwinek.jens.cookandbake.models
 
 abstract class Recipe {
-    abstract var rowid: Int
+    abstract var id: Int
     abstract val title: String
     abstract val description: String?
     abstract val instruction: String?
-    var lastModified: Long = java.util.Date().time
+    abstract var lastModified: Long
+    //abstract fun getUpdated(title: String, description: String?, instruction: String?, lastModified: Long) : Recipe
+    abstract fun getUpdated(recipe: Recipe) : Recipe
 }

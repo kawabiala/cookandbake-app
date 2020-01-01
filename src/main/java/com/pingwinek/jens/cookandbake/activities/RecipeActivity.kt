@@ -11,7 +11,7 @@ import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeActivity : BaseActivity(),
@@ -27,7 +27,10 @@ class RecipeActivity : BaseActivity(),
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        recipeModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
+        recipeModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )
             .get(RecipeViewModel::class.java)
 
         if (intent.hasExtra(EXTRA_RECIPE_ID)) {
@@ -39,12 +42,12 @@ class RecipeActivity : BaseActivity(),
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
-        recipeModel.recipeData.observe(this, Observer { recipe: RecipeLocal? ->
+        recipeModel.recipeData.observe(this, Observer { recipe: Recipe? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
         })
 
-        val onClickListener  = { _: View ->
+        val onClickListener = { _: View ->
             startActivityForResult(Intent(this, RecipeEditActivity::class.java).also {
                 it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
                 it.putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
@@ -73,7 +76,11 @@ class RecipeActivity : BaseActivity(),
                 if (resultCode == Activity.RESULT_OK) {
                     data?.extras?.let {
                         it.getString(EXTRA_RECIPE_TITLE)?.let { title ->
-                            recipeModel.save(title, it.getString(EXTRA_RECIPE_DESCRIPTION, ""), recipeModel.recipeData.value?.instruction ?: "")
+                            recipeModel.saveRecipe(
+                                title,
+                                it.getString(EXTRA_RECIPE_DESCRIPTION, ""),
+                                recipeModel.recipeData.value?.instruction ?: ""
+                            )
                         }
                     }
                 }
@@ -83,7 +90,11 @@ class RecipeActivity : BaseActivity(),
                     data?.extras?.let {
                         it.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
                             recipeModel.recipeData.value?.title?.let { title ->
-                                recipeModel.save(title, recipeModel.recipeData.value?.description ?: "", instruction)
+                                recipeModel.saveRecipe(
+                                    title,
+                                    recipeModel.recipeData.value?.description ?: "",
+                                    instruction
+                                )
                             }
                         }
                     }
@@ -100,18 +111,21 @@ class RecipeActivity : BaseActivity(),
                             it.getDouble(EXTRA_INGREDIENT_QUANTITY)
                         }
                         val unity = it.getString(EXTRA_INGREDIENT_UNITY)
-                        if (name != null) { recipeModel.saveIngredient(id, name, quantity, unity) }
+                        if (name != null) {
+                            recipeModel.saveIngredient(id, name, quantity, unity)
+                        }
                     }
                 }
             }
+            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
-    override fun onListFragmentInteraction(ingredientRemote: IngredientRemote?) {
+    override fun onListFragmentInteraction(ingredient: IngredientRemote?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
             intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
-            ingredientRemote?.let {
+            ingredient?.let {
                 intent.putExtra(EXTRA_INGREDIENT_ID, it.id)
                 intent.putExtra(EXTRA_INGREDIENT_NAME, it.name)
                 intent.putExtra(EXTRA_INGREDIENT_QUANTITY, it.quantity)
@@ -155,7 +169,8 @@ class RecipeActivity : BaseActivity(),
     }
 }
 
-class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fragmentManager) {
+class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager) :
+    androidx.fragment.app.FragmentPagerAdapter(fragmentManager) {
 
     override fun getItem(position: Int): androidx.fragment.app.Fragment {
         return if (position == 0) {

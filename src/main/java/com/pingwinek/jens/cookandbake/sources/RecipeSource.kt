@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
+import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import java.util.*
 

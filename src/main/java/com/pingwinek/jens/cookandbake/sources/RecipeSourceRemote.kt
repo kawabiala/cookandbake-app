@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import android.app.Application
-import android.util.Log
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.RECIPEPATH
 import com.pingwinek.jens.cookandbake.Recipes
@@ -15,16 +14,13 @@ import java.util.*
 class RecipeSourceRemote private constructor(val application: Application) :
     RecipeSource<RecipeRemote> {
 
-    private val tag: String = this::class.java.name
-
     private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
 
     override fun getAll(callback: (Source.Status, LinkedList<RecipeRemote>) -> Unit) {
         val networkRequest = networkRequestProvider.getNetworkRequest(RECIPEPATH, NetworkRequestProvider.Method.GET)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "getRecipe response 200")
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
             callback(Source.Status.SUCCESS, Recipes(response))
         }
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
@@ -38,8 +34,7 @@ class RecipeSourceRemote private constructor(val application: Application) :
         val networkRequest = networkRequestProvider.getNetworkRequest("$RECIPEPATH$id", NetworkRequestProvider.Method.GET)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "getRecipe response 200")
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
             val recipes = Recipes(response)
                 callback(Source.Status.SUCCESS, recipes[0])
         }
@@ -57,8 +52,7 @@ class RecipeSourceRemote private constructor(val application: Application) :
             NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "newRecipe response 200")
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
             val recipes = Recipes(response)
                 callback(Source.Status.SUCCESS, recipes[0])
         }
@@ -76,8 +70,7 @@ class RecipeSourceRemote private constructor(val application: Application) :
             NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { status, code, response, request ->
-            Log.i(tag, "updateRecipe response 200")
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
             val recipes = Recipes(response)
                 callback(Source.Status.SUCCESS, recipes[0])
         }
@@ -93,8 +86,7 @@ class RecipeSourceRemote private constructor(val application: Application) :
     }
 
     private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
-        Log.i(tag, "getRecipe response 401")
-        AuthService.getInstance(application).onSessionInvalid { authCode, authResponse ->
+        AuthService.getInstance(application).onSessionInvalid { authCode, _ ->
             if (authCode == 200) {
                 request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
                     //Do nothing, especially don't loop

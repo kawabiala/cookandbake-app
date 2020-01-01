@@ -50,11 +50,11 @@ class SyncManagerTest {
 
                         override fun get(id: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
                             callback(Source.Status.SUCCESS, recipesLocal.find { recipeLocal ->
-                                recipeLocal.rowid == id
+                                recipeLocal.id == id
                             })
                         }
 
-                        fun getRecipeForRemoteId(remoteId: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
+                        fun getForRemoteId(remoteId: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
                             callback(Source.Status.SUCCESS, recipesLocal.find { recipeLocal ->
                                 recipeLocal.remoteId == remoteId
                             })
@@ -64,7 +64,7 @@ class SyncManagerTest {
                             item: RecipeLocal,
                             callback: (Source.Status, RecipeLocal?) -> Unit
                         ) {
-                            mockedVerifier.callMe("Update locally ${item.title}, id: ${item.rowid}, remoteId: ${item.remoteId}")
+                            mockedVerifier.callMe("Update locally ${item.title}, id: ${item.id}, remoteId: ${item.remoteId}")
                             callback(Source.Status.SUCCESS, item)
                         }
 
@@ -76,15 +76,35 @@ class SyncManagerTest {
                                 item.description,
                                 item.instruction
                             )
-                            mockedVerifier.callMe("Insert locally ${newRecipeLocal.title}, id: ${newRecipeLocal.rowid}, remoteId: ${newRecipeLocal.remoteId}")
+                            mockedVerifier.callMe("Insert locally ${newRecipeLocal.title}, id: ${newRecipeLocal.id}, remoteId: ${newRecipeLocal.remoteId}")
                             callback(Source.Status.SUCCESS, newRecipeLocal)
                         }
 
                         override fun delete(id: Int, callback: (Source.Status) -> Unit) {
                             mockedVerifier.callMe("Delete locally ${recipesLocal.find { recipeLocal ->
-                                recipeLocal.rowid == id
+                                recipeLocal.id == id
                             }?.title.toString()}")
                             callback(Source.Status.SUCCESS)
+                        }
+
+                        fun toLocalId(remoteId: Int, callback: (Int?) -> Unit) {
+                            getForRemoteId(remoteId) { status, recipeLocal ->
+                                if (status == Source.Status.SUCCESS && recipeLocal != null) {
+                                    callback(recipeLocal.id)
+                                } else {
+                                    callback(null)
+                                }
+                            }
+                        }
+
+                        fun toRemoteId(localId: Int, callback: (Int?) -> Unit) {
+                            get(localId) { status, recipeLocal ->
+                                if (status == Source.Status.SUCCESS && recipeLocal != null) {
+                                    callback(recipeLocal.remoteId)
+                                } else {
+                                    callback(null)
+                                }
+                            }
                         }
                     }
                 )
@@ -103,7 +123,7 @@ class SyncManagerTest {
 
                         override fun get(id: Int, callback: (Source.Status, RecipeRemote?) -> Unit) {
                             callback(Source.Status.SUCCESS, recipesRemote.find { recipeRemote ->
-                                recipeRemote.rowid == id
+                                recipeRemote.id == id
                             })
                         }
 
@@ -119,13 +139,8 @@ class SyncManagerTest {
                             item: RecipeRemote,
                             callback: (Source.Status, RecipeRemote?) -> Unit
                         ) {
-                            val newRecipeRemote = RecipeRemote(
-                                10,
-                                item.title,
-                                item.description,
-                                item.instruction
-                            )
-                            mockedVerifier.callMe("Insert remotely ${newRecipeRemote.title}, id: ${newRecipeRemote.rowid}")
+                            val newRecipeRemote = createRecipeRemote(10, item.title)
+                            mockedVerifier.callMe("Insert remotely ${newRecipeRemote.title}, id: ${newRecipeRemote.id}")
                             callback(Source.Status.SUCCESS, newRecipeRemote)
                         }
 
@@ -228,13 +243,7 @@ class SyncManagerTest {
                             item: IngredientRemote,
                             callback: (Source.Status, IngredientRemote?) -> Unit
                         ) {
-                            val newIngredientRemote = IngredientRemote(
-                                10,
-                                item.recipeId,
-                                item.quantity,
-                                item.unity,
-                                item.name
-                            )
+                            val newIngredientRemote = createIngredientRemote(10, item.recipeId, item.name)
                             mockedVerifier.callMe("Insert remotely ${newIngredientRemote.name}, id: ${newIngredientRemote.id}, recipeId: ${newIngredientRemote.recipeId}")
                             callback(Source.Status.SUCCESS, newIngredientRemote)
                         }
@@ -291,7 +300,7 @@ class SyncManagerTest {
 
         // CASE 2: no local recipe available, and remote not reachable
         clearTestData()
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         syncManager.syncRecipe(1) { mockedVerifier.callOnDone() }
 
         // CASE 3: local recipe with remoteId null -> insert remotely
@@ -308,12 +317,12 @@ class SyncManagerTest {
         clearTestData()
         recipesLocal.add(RecipeLocal(1, 1, "Recipe Local 1", null, null))
         Thread.sleep(1) // make sure, remote is more recent than local
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         syncManager.syncRecipe(1) { mockedVerifier.callOnDone() }
 
         // CASE 7: Local recipe more recent than remote
         clearTestData()
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         Thread.sleep(1) // make sure, local is more recent than remote
         recipesLocal.add(RecipeLocal(1, 1, "Recipe Local 1", null, null))
         syncManager.syncRecipe(1) { mockedVerifier.callOnDone() }
@@ -358,7 +367,7 @@ class SyncManagerTest {
 
         // CASE 2: no local recipe available
         clearTestData()
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         syncManager.syncRecipes { mockedVerifier.callOnDone() }
 
         // CASE 3: local recipe with remoteId null -> insert remotely
@@ -375,12 +384,12 @@ class SyncManagerTest {
         clearTestData()
         recipesLocal.add(RecipeLocal(1, 1, "Recipe Local 1", null, null))
         Thread.sleep(1) // make sure, remote is more recent than local
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         syncManager.syncRecipes { mockedVerifier.callOnDone() }
 
         // CASE 7: Local recipe more recent than remote
         clearTestData()
-        recipesRemote.add(RecipeRemote(1, "Recipe Remote 1", null, null))
+        recipesRemote.add(createRecipeRemote(1, "Recipe Remote 1"))
         Thread.sleep(1) // make sure, local is more recent than remote
         recipesLocal.add(RecipeLocal(1, 1, "Recipe Local 1", null, null))
         syncManager.syncRecipes { mockedVerifier.callOnDone() }
@@ -430,7 +439,7 @@ class SyncManagerTest {
 
         // Case 2: same as 1, though remote would be existent (but not reachable from syncIngredient)
         clearTestData()
-        ingredientsRemote.add(IngredientRemote(2, 1, null, null, "Ingredient Remote 2"))
+        ingredientsRemote.add(createIngredientRemote(2, 1, "Ingredient Remote 2"))
         syncManager.syncIngredient(2) { mockedVerifier.callOnDone() }
 
         // Case 3: Local ingredient with remoteId isNull -> insert remotely
@@ -448,12 +457,12 @@ class SyncManagerTest {
         clearTestData()
         ingredientsLocal.add(IngredientLocal(6, 6, 1, null, null, "Ingredient Local 6"))
         Thread.sleep(1) // make sure, remote is more recent than local
-        ingredientsRemote.add(IngredientRemote(6, 1, null, null, "Ingredient Remote 6"))
+        ingredientsRemote.add(createIngredientRemote(6, 1,"Ingredient Remote 6"))
         syncManager.syncIngredient(6) { mockedVerifier.callOnDone() }
 
         // Case 7: Local ingredient more recent than remote -> update remotely
         clearTestData()
-        ingredientsRemote.add(IngredientRemote(7, 1, null, null, "Ingredient Remote 7"))
+        ingredientsRemote.add(createIngredientRemote(7, 1,"Ingredient Remote 7"))
         Thread.sleep(1) // make sure, that local is more recent than local
         ingredientsLocal.add(IngredientLocal(7, 7, 1, null, null, "Ingredient Local 7"))
         syncManager.syncIngredient(7) { mockedVerifier.callOnDone() }
@@ -501,7 +510,8 @@ class SyncManagerTest {
 
         // CASE 2: only remote ingredient
         clearTestData()
-        ingredientsRemote.add(IngredientRemote(2, 2, null, null, "Ingredient Remote 2"))
+        ingredientsRemote.add(createIngredientRemote(2, 2,"Ingredient Remote 2"))
+        recipesRemote.add(createRecipeRemote(2, "Recipe Remote"))
         recipesLocal.add(RecipeLocal(1,2, "Recipe Local", null, null))
         syncManager.syncIngredients(1) { mockedVerifier.callOnDone() }
 
@@ -526,6 +536,19 @@ class SyncManagerTest {
         ingredientsRemote.clear()
         recipesLocal.clear()
         recipesRemote.clear()
+    }
+
+    private fun createRecipeRemote(id: Int, title: String) : RecipeRemote {
+        return RecipeRemote.fromLocal(
+            RecipeLocal(0, id, title, null, null)
+        )
+    }
+
+    private fun createIngredientRemote(id: Int, recipeId: Int, name: String) : IngredientRemote {
+        return IngredientRemote.fromLocal(
+            IngredientLocal(0, id, 0, null, null, name),
+            recipeId
+        )
     }
 
     private fun <T : Any> mockSingletonHolderInstance(singleton: KClass<T>, mock: T) {
