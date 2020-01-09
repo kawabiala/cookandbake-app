@@ -4,9 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
+import java.util.*
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -23,7 +25,11 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    val ingredientListData = ingredientRepository.ingredientListData
+    val ingredientListData: LiveData<LinkedList<Ingredient>> = Transformations.map(ingredientRepository.ingredientListData) { ingredientList ->
+        LinkedList(ingredientList.filter { ingredient ->
+            ingredient.recipeId == recipeId
+        })
+    }
 
     fun loadData() {
         recipeId?.let { id ->

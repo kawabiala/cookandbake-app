@@ -14,7 +14,6 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.Utils.quantityToString
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
@@ -97,12 +96,12 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
      */
     interface OnListFragmentInteractionListener {
 
-        fun onListFragmentInteraction(ingredient: IngredientRemote?)
+        fun onListFragmentInteraction(ingredient: Ingredient?)
     }
 }
 
 /**
- * [RecyclerView.Adapter] that can display a [IngredientRemote] and makes a call to the
+ * [RecyclerView.Adapter] that can display a [Ingredient] and makes a call to the
  * specified [OnListFragmentInteractionListener].
  */
 class IngredientListingAdapter(
@@ -114,7 +113,7 @@ class IngredientListingAdapter(
 
     init {
         onClickListener = View.OnClickListener { v ->
-            val ingredient = v.tag as IngredientRemote?
+            val ingredient = v.tag as Ingredient?
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             listener?.onListFragmentInteraction(ingredient)

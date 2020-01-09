@@ -19,7 +19,13 @@ class IngredientRepository private constructor(val application: Application) {
 
     private val repoListData = MutableLiveData<LinkedList<IngredientLocal>>()
     val ingredientListData = Transformations.map(repoListData) {
-        it as LinkedList<Ingredient>
+        LinkedList<Ingredient>().apply {
+            it.forEach { ingredientLocal ->
+                if (!ingredientLocal.flagAsDeleted) {
+                    add(ingredientLocal)
+                }
+            }
+        }
     }
 
     fun getAll(recipeId: Int) {
@@ -66,7 +72,19 @@ class IngredientRepository private constructor(val application: Application) {
             it.id == ingredientId
         } ?: return
 
-        ingredientSourceLocal.update(ingredient.getUpdated(quantity, unity, name)) { status, updatedIngredient ->
+        doUpdate(ingredient.getUpdated(quantity, unity, name))
+    }
+
+    fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {
+        val ingredient = repoListData.value?.find {
+            it.id == ingredientId
+        } ?: return
+
+        doUpdate(ingredient.getDeleted())
+    }
+
+    private fun doUpdate(ingredientLocal: IngredientLocal) {
+        ingredientSourceLocal.update(ingredientLocal) { status, updatedIngredient ->
             if (status == Source.Status.SUCCESS && updatedIngredient != null) {
                 updateIngredientList(updatedIngredient)
                 syncManager.syncIngredient(updatedIngredient.id) {
@@ -90,12 +108,6 @@ class IngredientRepository private constructor(val application: Application) {
                 removeFromIngredientList(ingredientId)
             }
         }
-    }
-
-    fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {
-        /*
-        update with flag 'ToBeDeleted'
-         */
     }
 
     private fun updateIngredientList(ingredient: IngredientLocal) {

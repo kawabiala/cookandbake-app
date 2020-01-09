@@ -249,7 +249,8 @@ class SyncManagerTest {
                         }
 
                         override fun delete(id: Int, callback: (Source.Status) -> Unit) {
-                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                            mockedVerifier.callMe("Delete remotely Ingredient Local $id")
+                            callback(Source.Status.SUCCESS)
                         }
                     }
                 )
@@ -288,7 +289,7 @@ class SyncManagerTest {
         syncIngredient_test()
     }
 
-    fun syncRecipe_test() {
+    private fun syncRecipe_test() {
 
         mockedVerifier = mock(Verifier::class.java)
 
@@ -355,7 +356,7 @@ class SyncManagerTest {
         orderedMock.verify(mockedVerifier).callOnDone()
     }
 
-    fun syncRecipes_test() {
+    private fun syncRecipes_test() {
 
         mockedVerifier = mock(Verifier::class.java)
 
@@ -418,16 +419,15 @@ class SyncManagerTest {
         orderedMock.verify(mockedVerifier).callOnDone()
 
         // CASE 6: update locally
-        orderedMock.verify(mockedVerifier, times(2))
-            .callMe("Update locally Recipe Remote 1, id: 1, remoteId: 1")
+        orderedMock.verify(mockedVerifier).callMe("Update locally Recipe Remote 1, id: 1, remoteId: 1")
         orderedMock.verify(mockedVerifier).callOnDone()
 
         // CASE 7: update remotely
-        orderedMock.verify(mockedVerifier, times(2)).callMe("Update remotely Recipe Local 1")
+        orderedMock.verify(mockedVerifier).callMe("Update remotely Recipe Local 1")
         orderedMock.verify(mockedVerifier).callOnDone()
     }
 
-    fun syncIngredient_test() {
+    private fun syncIngredient_test() {
 
         mockedVerifier = mock(Verifier::class.java)
 
@@ -460,12 +460,18 @@ class SyncManagerTest {
         ingredientsRemote.add(createIngredientRemote(6, 1,"Ingredient Remote 6"))
         syncManager.syncIngredient(6) { mockedVerifier.callOnDone() }
 
-        // Case 7: Local ingredient more recent than remote -> update remotely
+        // Case 7: Local has flag deleted and is more recent than remote -> delete remotely
         clearTestData()
-        ingredientsRemote.add(createIngredientRemote(7, 1,"Ingredient Remote 7"))
-        Thread.sleep(1) // make sure, that local is more recent than local
-        ingredientsLocal.add(IngredientLocal(7, 7, 1, null, null, "Ingredient Local 7"))
+        ingredientsRemote.add(createIngredientRemote(7, 1, "Ingredient Remote 7"))
+        ingredientsLocal.add(IngredientLocal(7, 7, 1, null, null, "Ingredient Local 7", Date().time, true))
         syncManager.syncIngredient(7) { mockedVerifier.callOnDone() }
+
+        // Case 8: Local ingredient more recent than remote -> update remotely
+        clearTestData()
+        ingredientsRemote.add(createIngredientRemote(8, 1,"Ingredient Remote 8"))
+        Thread.sleep(1) // make sure, that local is more recent than local
+        ingredientsLocal.add(IngredientLocal(8, 8, 1, null, null, "Ingredient Local 8"))
+        syncManager.syncIngredient(8) { mockedVerifier.callOnDone() }
 
 
         ////// Verification //////
@@ -491,8 +497,12 @@ class SyncManagerTest {
             .callMe("Update locally Ingredient Remote 6, id: 6, remoteId: 6, recipeId: 1")
         orderedMock.verify(mockedVerifier).callOnDone()
 
-        // Case 7: remote synced to local
-        orderedMock.verify(mockedVerifier).callMe("Update remotely Ingredient Local 7")
+        // Case 7: delete remotely
+        orderedMock.verify(mockedVerifier).callMe("Delete remotely Ingredient Local 7")
+        orderedMock.verify(mockedVerifier).callOnDone()
+
+        // Case 8: remote synced to local
+        orderedMock.verify(mockedVerifier).callMe("Update remotely Ingredient Local 8")
         orderedMock.verify(mockedVerifier).callOnDone()
 
     }

@@ -1,16 +1,16 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.tabs.TabLayout
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.tabs.TabLayout
 import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
@@ -19,7 +19,6 @@ class RecipeActivity : BaseActivity(),
     ConfirmDialogFragment.ConfirmDialogListener {
 
     private lateinit var recipeModel: RecipeViewModel
-    //private lateinit var recipeData: LiveData<RecipeLocal?>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,7 +120,7 @@ class RecipeActivity : BaseActivity(),
         }
     }
 
-    override fun onListFragmentInteraction(ingredient: IngredientRemote?) {
+    override fun onListFragmentInteraction(ingredient: Ingredient?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
             intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
@@ -170,7 +169,7 @@ class RecipeActivity : BaseActivity(),
 }
 
 class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager) :
-    androidx.fragment.app.FragmentPagerAdapter(fragmentManager) {
+    androidx.fragment.app.FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int): androidx.fragment.app.Fragment {
         return if (position == 0) {

@@ -16,7 +16,8 @@ data class IngredientLocal(
     override val quantity: Double?,
     override val unity: String?,
     override val name: String,
-    override var lastModified: Long = Date().time
+    override var lastModified: Long = Date().time,
+    val flagAsDeleted: Boolean = false
 ) : Ingredient() {
 
     constructor(
@@ -39,6 +40,10 @@ data class IngredientLocal(
 
     fun getUpdated(quantity: Double?, unity: String?, name: String): IngredientLocal {
         return IngredientLocal(id, remoteId, recipeId, quantity, unity, name)
+    }
+
+    fun getDeleted(): IngredientLocal {
+        return IngredientLocal(id, remoteId, recipeId, quantity, unity, name, Date().time, true)
     }
 
     companion object {

@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
 
-@Database(entities = [RecipeLocal::class, IngredientLocal::class], version = 7, exportSchema = false)
+@Database(entities = [RecipeLocal::class, IngredientLocal::class], version = 8, exportSchema = false)
 abstract class PingwinekCooksDB : RoomDatabase() {
 
     abstract fun recipeDAO(): RecipeDAO

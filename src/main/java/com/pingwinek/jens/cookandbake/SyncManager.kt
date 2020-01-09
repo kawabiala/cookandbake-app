@@ -7,6 +7,7 @@ import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.*
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class SyncManager private constructor(val application: Application) {
 
@@ -111,13 +112,17 @@ class SyncManager private constructor(val application: Application) {
         val syncTaskCounter = SyncTaskCounter(onDone)
         if (recipesRemote.size > 0) {
             recipesRemote.forEach { recipeRemote ->
-                syncTaskCounter.taskStarted()
-                compareRecipe(
-                    recipesLocal.find { recipeLocal ->
+                if (recipesLocal.find { recipeLocal ->
                         recipeLocal.remoteId == recipeRemote.id
-                    },
-                    recipeRemote
-                ) { syncTaskCounter.taskEnded() }
+                    } == null) {
+                    syncTaskCounter.taskStarted()
+                    compareRecipe(
+                        null,
+                        recipeRemote
+                    ) { syncTaskCounter.taskEnded() }
+                } else {
+                    onDone()
+                }
             }
         } else {
             onDone()
@@ -314,13 +319,18 @@ class SyncManager private constructor(val application: Application) {
         val syncTaskCounter = SyncTaskCounter(onDone)
         if (ingredientsRemote.size > 0) {
             ingredientsRemote.forEach { ingredientRemote ->
-                syncTaskCounter.taskStarted()
-                compareIngredient(
-                    ingredientsLocal.find { ingredientLocal ->
+                if (ingredientsLocal.find { ingredientLocal ->
                         ingredientLocal.remoteId == ingredientRemote.id
-                    },
-                    ingredientRemote
-                ) { syncTaskCounter.taskEnded() }
+                    } == null) {
+                    syncTaskCounter.taskStarted()
+                    compareIngredient(
+                        null,
+                        ingredientRemote) {
+                        syncTaskCounter.taskEnded()
+                    }
+                } else {
+                    onDone()
+                }
             }
         } else {
             onDone()
@@ -351,7 +361,10 @@ class SyncManager private constructor(val application: Application) {
             // CASE 6: remote has more recent updates, so we update local
             ingredientLocal.lastModified < ingredientRemote.lastModified -> updateLocal(ingredientLocal, ingredientRemote, onDone)
 
-            // CASE 7: local has more recent updates, so we update remote
+            // CASE 7: local has deleted flag, delete remotely
+            ingredientLocal.flagAsDeleted -> deleteRemote(ingredientLocal, onDone)
+
+            // CASE 8: local has more recent updates, so we update remote
             ingredientLocal.lastModified > ingredientRemote.lastModified -> updateRemote(ingredientLocal, ingredientRemote, onDone)
 
             // There shouldn't be anything left
@@ -379,37 +392,68 @@ class SyncManager private constructor(val application: Application) {
         }
     }
 
+    private val lockedNewIngredients = ConcurrentHashMap<Int, Long>()
+
+    @Synchronized
+    private fun toggleLockForNewIngredient(ingredientLocalId: Int, lock: Boolean): Boolean {
+        return if (lockedNewIngredients.containsKey(ingredientLocalId)) {
+            if (!lock) {
+                lockedNewIngredients.remove(ingredientLocalId)
+            }
+            false
+        } else {
+            lockedNewIngredients[ingredientLocalId] = Date().time
+            true
+        }
+    }
+
     private fun newRemoteFromLocal(
         ingredientLocal: IngredientLocal,
         onDone: () -> Unit
     ) {
+        if (!toggleLockForNewIngredient(ingredientLocal.id, true)) {
+            onDone()
+            return
+        }
+
         remoteRecipeIdForLocalIngredient(ingredientLocal) { recipeId ->
-            if (recipeId != null) {
-                ingredientSourceRemote.new(
-                    IngredientRemote.newFromLocal(
-                        ingredientLocal,
-                        recipeId
-                    )
-                ) { status, newIngredientRemote ->
-                    if (status == Source.Status.SUCCESS && newIngredientRemote != null) {
-                        ingredientSourceLocal.update(
-                            IngredientLocal(
-                                ingredientLocal.id,
-                                newIngredientRemote.id,
-                                ingredientLocal.recipeId,
-                                ingredientLocal.quantity,
-                                ingredientLocal.unity,
-                                ingredientLocal.name
-                            )
-                        ) { _, _ ->
+            if (recipeId == null) {
+                toggleLockForNewIngredient(ingredientLocal.id, false)
+                onDone()
+                return@remoteRecipeIdForLocalIngredient
+            }
+
+            ingredientSourceLocal.get(ingredientLocal.id) { status, checkedIngredientLocal ->
+                if (status == Source.Status.SUCCESS && checkedIngredientLocal?.remoteId == null) {
+                    ingredientSourceRemote.new(
+                        IngredientRemote.newFromLocal(
+                            ingredientLocal,
+                            recipeId
+                        )
+                    ) { statusRemote, newIngredientRemote ->
+                        if (statusRemote == Source.Status.SUCCESS && newIngredientRemote != null) {
+                            ingredientSourceLocal.update(
+                                IngredientLocal(
+                                    ingredientLocal.id,
+                                    newIngredientRemote.id,
+                                    ingredientLocal.recipeId,
+                                    ingredientLocal.quantity,
+                                    ingredientLocal.unity,
+                                    ingredientLocal.name
+                                )
+                            ) { _, _ ->
+                                toggleLockForNewIngredient(ingredientLocal.id, false)
+                                onDone()
+                            }
+                        } else {
+                            toggleLockForNewIngredient(ingredientLocal.id, false)
                             onDone()
                         }
-                    } else {
-                        onDone()
                     }
+                } else {
+                    toggleLockForNewIngredient(ingredientLocal.id, false)
+                    onDone()
                 }
-            } else {
-                onDone()
             }
         }
     }
@@ -418,8 +462,17 @@ class SyncManager private constructor(val application: Application) {
         ingredientLocal: IngredientLocal,
         onDone: () -> Unit
     ) {
-        ingredientLocal.id?.let {
-            ingredientSourceLocal.delete(it) {
+        ingredientSourceLocal.delete(ingredientLocal.id) {
+            onDone()
+        }
+    }
+
+    private fun deleteRemote(
+        ingredientLocal: IngredientLocal,
+        onDone: () -> Unit
+    ) {
+        ingredientLocal.remoteId?.let {
+            ingredientSourceRemote.delete(it) {
                 onDone()
             }
         }
