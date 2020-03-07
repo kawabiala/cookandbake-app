@@ -1,15 +1,19 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.OPTION_MENU_DONE
 import com.pingwinek.jens.cookandbake.R
+import org.w3c.dom.Text
 
 class RecipeEditActivity : BaseActivity() {
 
@@ -18,20 +22,30 @@ class RecipeEditActivity : BaseActivity() {
         addContentView(R.layout.activity_recipe_edit)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
 
-    override fun onResume() {
-        super.onResume()
+        val titleView = findViewById<TextView>(R.id.titleText)
+        val descriptionView = findViewById<TextView>(R.id.descriptionText)
 
         intent.extras?.getString(EXTRA_RECIPE_TITLE)?.let { title ->
-            findViewById<TextView>(R.id.titleText).text = title
+            titleView.text = title
         }
 
         intent.extras?.getString(EXTRA_RECIPE_DESCRIPTION)?.let { description ->
-            findViewById<TextView>(R.id.descriptionText).text = description
+            descriptionView.text = description
         }
-    }
 
+        titleView.requestFocus()
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.showSoftInput(titleView, InputMethodManager.SHOW_IMPLICIT)
+
+    }
+/*
+    override fun onResume() {
+        super.onResume()
+
+
+    }
+*/
     override fun getOptionsMenu(): OptionMenu {
         return OptionMenu().apply {
             addMenuEntry(OPTION_MENU_DONE, resources.getString(R.string.save)) {

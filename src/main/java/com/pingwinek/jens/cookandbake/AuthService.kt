@@ -278,6 +278,8 @@ class AuthService private constructor(private val application: Application){
             remove("token")
         }.apply()
 
+        DatabaseService.resetDatabase(application)
+
         val params = HashMap<String, String>()
         params["email"] = email
         params["uuid"] = getUUID()

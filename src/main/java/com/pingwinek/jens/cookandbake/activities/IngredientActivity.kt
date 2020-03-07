@@ -1,10 +1,12 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.Utils.quantityToDouble
@@ -20,16 +22,20 @@ class IngredientActivity : BaseActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val ingredientView = findViewById<TextView>(R.id.ingredientName)
+
         intent?.extras?.let {
             supportActionBar?.title = it.getString(EXTRA_RECIPE_TITLE)
             it.get(EXTRA_INGREDIENT_ID)?.run {
                 ingredientId = it.getInt(EXTRA_INGREDIENT_ID)
             }
-            findViewById<TextView>(R.id.ingredientName).text = it.getString(EXTRA_INGREDIENT_NAME)
+            ingredientView.text = it.getString(EXTRA_INGREDIENT_NAME)
             findViewById<TextView>(R.id.ingredientQuantity).text =
                 quantityToString(it.getDouble(EXTRA_INGREDIENT_QUANTITY))
             findViewById<TextView>(R.id.ingredientUnity).text = it.getString(EXTRA_INGREDIENT_UNITY)
         }
+
+        ingredientView.requestFocus()
     }
 
     override fun getOptionsMenu(): OptionMenu {

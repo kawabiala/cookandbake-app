@@ -60,9 +60,8 @@ class RecipeListingActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (AuthService.getInstance(application).isLoggedIn()) {
-            loadData()
-        } else {
+        loadData()
+        if (! AuthService.getInstance(application).isLoggedIn()) {
             AlertDialog.Builder(this).apply {
                 setMessage("Kein User eingeloggt. Jetzt einloggen oder anmelden?")
                 setPositiveButton("Ja") { dialog, which ->

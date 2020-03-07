@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.sources
 
 import android.app.Application
 import androidx.room.Room
+import com.pingwinek.jens.cookandbake.DatabaseService
 import com.pingwinek.jens.cookandbake.SingletonHolder
 import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
@@ -11,9 +12,7 @@ import java.util.*
 class RecipeSourceLocal private constructor(val application: Application):
     RecipeSource<RecipeLocal> {
 
-    private val db = Room.databaseBuilder(application, PingwinekCooksDB::class.java, "PingwinekCooks")
-        .fallbackToDestructiveMigration()
-        .build()
+    private val db = DatabaseService.getDatabase(application)
 
     override fun getAll(callback: (Source.Status, LinkedList<RecipeLocal>) -> Unit) {
         Taskifier<Array<RecipeLocal>> { recipes ->

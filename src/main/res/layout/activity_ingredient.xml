@@ -6,27 +6,32 @@
 >
 
     <EditText
+            android:id="@+id/ingredientName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:ems="10"
             android:hint="@string/ingredientRemote"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text|textAutoCorrect"
             android:imeOptions="actionNext"
-            android:id="@+id/ingredientName" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+            android:inputType="textAutoCorrect|text|textCapWords"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
+            android:id="@+id/ingredientUnity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="text|textAutoCorrect"
-            android:imeOptions="actionDone"
-            android:hint="@string/unity"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
-            android:id="@+id/ingredientUnity"
-            app:layout_constraintStart_toStartOf="parent"
+            android:hint="@string/unity"
+            android:imeOptions="actionDone"
+            android:inputType="textAutoCorrect|text|textCapWords"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:layout_constraintTop_toBottomOf="@+id/ingredientQuantity" android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ingredientQuantity" />
     <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

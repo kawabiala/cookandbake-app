@@ -1,10 +1,13 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.*
 
@@ -15,18 +18,18 @@ class InstructionActivity : BaseActivity() {
         addContentView(R.layout.activity_instruction)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
 
-    override fun onResume() {
-        super.onResume()
+        val instructionView = findViewById<TextView>(R.id.editInstruction)
 
         intent.extras?.getString(EXTRA_RECIPE_TITLE)?.let { title ->
             supportActionBar?.title = title
         }
 
         intent.extras?.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
-            findViewById<TextView>(R.id.editInstruction).text = instruction
+            instructionView.text = instruction
         }
+
+        instructionView.requestFocus()
     }
 
     override fun getOptionsMenu(): OptionMenu {

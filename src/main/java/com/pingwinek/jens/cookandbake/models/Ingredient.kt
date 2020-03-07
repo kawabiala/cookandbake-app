@@ -1,7 +1,5 @@
 package com.pingwinek.jens.cookandbake.models
 
-import java.util.*
-
 abstract class Ingredient {
     abstract val id: Int
     abstract val recipeId: Int

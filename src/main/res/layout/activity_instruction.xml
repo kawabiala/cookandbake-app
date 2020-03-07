@@ -2,16 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent" android:orientation="vertical">
+
     <EditText
+            android:id="@+id/editInstruction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
-            android:gravity="start|top"
-            android:ems="10"
-            android:id="@+id/editInstruction"
-            android:layout_marginTop="8dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginRight="8dp"
+            android:ems="10"
+            android:gravity="start|top"
             android:hint="@string/write_instruction"
-            android:importantForAutofill="no"/>
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textCapSentences" />
 </LinearLayout>

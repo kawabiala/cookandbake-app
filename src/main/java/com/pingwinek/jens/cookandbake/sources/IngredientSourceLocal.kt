@@ -11,9 +11,7 @@ import java.util.*
 
 class IngredientSourceLocal private constructor(val application: Application) : IngredientSource<IngredientLocal> {
 
-    private val db = Room.databaseBuilder(application, PingwinekCooksDB::class.java, "PingwinekCooks")
-        .fallbackToDestructiveMigration()
-        .build()
+    private val db = DatabaseService.getDatabase(application)
 
     override fun getAll(callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
         Taskifier<Array<IngredientLocal>> { ingredients ->

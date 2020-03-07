@@ -28,13 +28,16 @@
                 android:parentActivityName=".activities.RecipeListingActivity" />
         <activity
                 android:name=".activities.IngredientActivity"
+                android:windowSoftInputMode="stateVisible"
                 android:parentActivityName=".activities.RecipeActivity" />
         <activity
                 android:name=".activities.InstructionActivity"
+                android:windowSoftInputMode="stateVisible"
                 android:parentActivityName=".activities.RecipeActivity" />
         <activity
                 android:name=".activities.RecipeEditActivity"
                 android:label="@string/recipeLocal"
+                android:windowSoftInputMode="stateVisible"
                 android:parentActivityName=".activities.RecipeActivity" />
 
         <activity
