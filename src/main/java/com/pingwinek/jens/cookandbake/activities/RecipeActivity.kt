@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -61,6 +62,18 @@ class RecipeActivity : BaseActivity(),
         findViewById<androidx.viewpager.widget.ViewPager>(R.id.recipeTabs).apply {
             adapter = pagerAdapter
             tabLayout.setupWithViewPager(this)
+        }
+    }
+
+    override fun getOptionsMenu(): OptionMenu {
+        return OptionMenu().apply {
+            addMenuEntry(OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
+                delete()
+                true
+            }/*.apply {
+                iconId = R.drawable.ic_action_delete_black
+                ifRoom = true
+            }*/
         }
     }
 
@@ -165,6 +178,20 @@ class RecipeActivity : BaseActivity(),
 
     override fun onNegativeButton(confirmItemId: String?) {
         //Do nothing
+    }
+
+    fun delete() {
+        AlertDialog.Builder(this).apply {
+            setMessage(R.string.recipe_delete_confirm)
+            setPositiveButton(R.string.yes) { dialog, which ->
+                finish()
+                recipeModel.delete()
+            }
+            setNegativeButton(R.string.no) { _, _ ->
+                // Do nothing
+            }
+        }.show()
+
     }
 }
 

@@ -91,6 +91,16 @@ class IngredientSourceLocal private constructor(val application: Application) : 
         }
     }
 
+    fun flagAsDeleted(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
+        get(id) { status, ingredientLocal ->
+            if (status == Source.Status.SUCCESS && ingredientLocal != null) {
+                update(ingredientLocal.getDeleted(), callback)
+            } else {
+                callback(Source.Status.FAILURE, ingredientLocal)
+            }
+        }
+    }
+
     private fun delete(item: IngredientLocal, callback: (Source.Status) -> Unit) {
         Taskifier<Unit> {
             callback(Source.Status.SUCCESS)

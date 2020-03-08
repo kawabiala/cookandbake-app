@@ -13,7 +13,8 @@ data class RecipeLocal(
     override val title: String,
     override val description: String?,
     override val instruction: String?,
-    override var lastModified: Long = Date().time
+    override var lastModified: Long = Date().time,
+    val flagAsDeleted: Boolean = false
 ) : Recipe() {
 
     constructor(
@@ -34,6 +35,10 @@ data class RecipeLocal(
 
     fun getUpdated(title: String, description: String?, instruction: String?): RecipeLocal {
         return RecipeLocal(id, remoteId, title, description, instruction)
+    }
+
+    fun getDeleted(): RecipeLocal {
+        return RecipeLocal(id, remoteId, title, description, instruction, Date().time, true)
     }
 
     companion object {

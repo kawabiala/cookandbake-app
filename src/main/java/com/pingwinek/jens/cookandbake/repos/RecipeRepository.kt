@@ -19,7 +19,13 @@ class RecipeRepository private constructor(val application: Application) {
 
     private val repoListData = MutableLiveData<LinkedList<RecipeLocal>>()
     val recipeListData: LiveData<LinkedList<Recipe>> = Transformations.map(repoListData) {
-        it as LinkedList<Recipe>
+        LinkedList<Recipe>().apply {
+            it.forEach { recipeLocal ->
+                if (!recipeLocal.flagAsDeleted) {
+                    add(recipeLocal)
+                }
+            }
+        }
     }
 
     fun getAll() {
@@ -67,6 +73,20 @@ class RecipeRepository private constructor(val application: Application) {
                 updateRecipeList(updatedRecipe)
                 syncManager.syncRecipe(updatedRecipe.id) {
                     fetchRecipe(updatedRecipe.id)
+                }
+            }
+        }
+    }
+
+    fun deleteRecipe(recipeId: Int, callback: () -> Unit) {
+        IngredientRepository.getInstance(application).deleteIngredientForRecipeId(recipeId) {
+            recipeSourceLocal.flagAsDeleted(recipeId) { status, recipe ->
+                System.out.println("Flag recipe $recipe")
+                if (status == Source.Status.SUCCESS && recipe != null) {
+                    updateRecipeList(recipe)
+                    syncManager.syncRecipe(recipe.id) {
+                        fetchRecipe(recipe.id)
+                    }
                 }
             }
         }

@@ -83,4 +83,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun delete() {
+        recipeId?.let {
+            recipeRepository.deleteRecipe(it) {
+                loadData()
+            }
+        }
+    }
+
 }

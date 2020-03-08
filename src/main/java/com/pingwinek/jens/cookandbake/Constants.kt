@@ -1,8 +1,8 @@
 package com.pingwinek.jens.cookandbake
 
 const val LOCAL_DOMAIN = "http://10.0.2.2/strato/pingwinek"
-const val DOMAIN = "https://www.pingwinek.de"
-//const val DOMAIN = LOCAL_DOMAIN
+//const val DOMAIN = "https://www.pingwinek.de"
+const val DOMAIN = LOCAL_DOMAIN
 const val BASEURL = "$DOMAIN/cookandbake"
 
 const val DATAPROTECTIONPATH = "$BASEURL/datenschutz"
@@ -46,5 +46,6 @@ const val OPTION_MENU_DONE = 7
 const val OPTION_MENU_IMPRESSUM = 8
 const val OPTION_MENU_DATAPROTECTION = 9
 const val OPTION_MENU_MANAGE_ACCOUNT = 10
+const val OPTION_MENU_DELETE = 11
 
 const val SHARED_PREFERENCES_FILE = "preferences"

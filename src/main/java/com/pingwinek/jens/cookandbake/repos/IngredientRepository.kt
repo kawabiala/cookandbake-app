@@ -76,11 +76,28 @@ class IngredientRepository private constructor(val application: Application) {
     }
 
     fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {
-        val ingredient = repoListData.value?.find {
-            it.id == ingredientId
-        } ?: return
+        ingredientSourceLocal.flagAsDeleted(ingredientId) { status, ingredient ->
+            if (status == Source.Status.SUCCESS && ingredient != null) {
+                updateIngredientList(ingredient)
+                syncManager.syncIngredient(ingredient.id) {
+                    fetchIngredient(ingredient.id)
+                    callback()
+                }
+            } else {
+                callback()
+            }
+        }
+    }
 
-        doUpdate(ingredient.getDeleted())
+    fun deleteIngredientForRecipeId(recipeId: Int, callback: () -> Unit) {
+        ingredientSourceLocal.getAllForRecipeId(recipeId) { status, ingredients ->
+            if (status == Source.Status.SUCCESS) {
+                ingredients.forEach { ingredient ->
+                    deleteIngredient(ingredient.id) {}
+                }
+            }
+            callback()
+        }
     }
 
     private fun doUpdate(ingredientLocal: IngredientLocal) {

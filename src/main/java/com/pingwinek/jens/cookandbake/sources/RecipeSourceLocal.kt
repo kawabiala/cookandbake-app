@@ -56,6 +56,16 @@ class RecipeSourceLocal private constructor(val application: Application):
         }
     }
 
+    fun flagAsDeleted(id: Int, callback: (Source.Status, RecipeLocal?) -> Unit) {
+        get(id) { status, recipeLocal ->
+            if (status == Source.Status.SUCCESS && recipeLocal != null) {
+                update(recipeLocal.getDeleted(), callback)
+            } else {
+                callback(Source.Status.FAILURE, recipeLocal)
+            }
+        }
+    }
+
     private fun delete(item: RecipeLocal, callback: (Source.Status) -> Unit) {
         Taskifier<Unit> {
             callback(Source.Status.SUCCESS)

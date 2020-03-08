@@ -153,7 +153,10 @@ class SyncManager private constructor(val application: Application) {
             // CASE 6: remote more recent -> update locally
             recipeLocal.lastModified < recipeRemote.lastModified -> updateLocal(recipeLocal, recipeRemote, onDone)
 
-            // CASE 7: check
+            // CASE 7: local has flag deleted -> delete remote
+            recipeLocal.flagAsDeleted -> deleteRemote(recipeLocal, onDone)
+
+            // CASE 8: check
             recipeLocal.lastModified > recipeRemote.lastModified -> updateRemote(recipeLocal, recipeRemote, onDone)
 
             // there shouldn't be anything left
@@ -227,6 +230,17 @@ class SyncManager private constructor(val application: Application) {
     ) {
         recipeSourceLocal.delete(recipeLocal.id) {
             onDone()
+        }
+    }
+
+    private fun deleteRemote(
+        recipeLocal: RecipeLocal,
+        onDone: () -> Unit
+    ) {
+        recipeLocal.remoteId?.let { remoteId ->
+            recipeSourceRemote.delete(remoteId) {
+                onDone()
+            }
         }
     }
 

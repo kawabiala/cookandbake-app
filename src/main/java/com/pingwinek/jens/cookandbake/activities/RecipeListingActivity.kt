@@ -61,6 +61,7 @@ class RecipeListingActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         loadData()
+        /*
         if (! AuthService.getInstance(application).isLoggedIn()) {
             AlertDialog.Builder(this).apply {
                 setMessage("Kein User eingeloggt. Jetzt einloggen oder anmelden?")
@@ -72,6 +73,7 @@ class RecipeListingActivity : BaseActivity() {
                 }
             }.show()
         }
+         */
     }
 
     override fun getOptionsMenu(): OptionMenu {

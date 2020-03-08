@@ -32,11 +32,16 @@ class RecipeSourceRemote private constructor(val application: Application) :
 
     override fun get(id: Int, callback: (Source.Status, RecipeRemote?) -> Unit) {
         val networkRequest = networkRequestProvider.getNetworkRequest("$RECIPEPATH$id", NetworkRequestProvider.Method.GET)
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
+        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
             val recipes = Recipes(response)
-                callback(Source.Status.SUCCESS, recipes[0])
+            val recipe = if (recipes.isEmpty()) {
+                null
+            } else {
+                recipes[0]
+            }
+            callback(Source.Status.SUCCESS, recipe)
         }
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
@@ -82,7 +87,16 @@ class RecipeSourceRemote private constructor(val application: Application) :
     }
 
     override fun delete(id: Int, callback: (Source.Status) -> Unit) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val networkRequest = networkRequestProvider.getNetworkRequest("$RECIPEPATH$id", NetworkRequestProvider.Method.DELETE)
+
+        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, _, _ ->
+            callback(Source.Status.SUCCESS)
+        }
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+            callback(Source.Status.FAILURE)
+        }
+        networkRequest.start()
     }
 
     private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
