@@ -3,9 +3,11 @@ package com.pingwinek.jens.cookandbake.sources
 import android.app.Application
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.sync.Source
+import com.pingwinek.jens.cookandbake.models.Ingredients
 import java.util.*
 
 class IngredientSourceRemote private constructor(val application: Application) : IngredientSource<IngredientRemote> {
@@ -17,7 +19,9 @@ class IngredientSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            callback(Source.Status.SUCCESS, Ingredients(response))
+            callback(Source.Status.SUCCESS,
+                Ingredients(response)
+            )
         }
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
@@ -31,7 +35,9 @@ class IngredientSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            callback(Source.Status.SUCCESS, Ingredients(response))
+            callback(Source.Status.SUCCESS,
+                Ingredients(response)
+            )
         }
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
@@ -45,7 +51,8 @@ class IngredientSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            val ingredients = Ingredients(response)
+            val ingredients =
+                Ingredients(response)
             if (ingredients.isNotEmpty()) {
                 callback(Source.Status.SUCCESS, ingredients[0])
             } else {
@@ -68,7 +75,8 @@ class IngredientSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            val ingredients = Ingredients(response)
+            val ingredients =
+                Ingredients(response)
             if (ingredients.isNotEmpty()) {
                 callback(Source.Status.SUCCESS, ingredients[0])
             } else {
@@ -91,7 +99,8 @@ class IngredientSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            val ingredients = Ingredients(response)
+            val ingredients =
+                Ingredients(response)
             if (ingredients.isNotEmpty()) {
                 callback(Source.Status.SUCCESS, ingredients[0])
             } else {

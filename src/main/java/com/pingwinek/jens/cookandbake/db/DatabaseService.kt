@@ -1,9 +1,8 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.db
 
 import android.app.Application
 import android.os.AsyncTask
 import androidx.room.Room
-import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
 
 class DatabaseService {
 
@@ -17,7 +16,9 @@ class DatabaseService {
         fun resetDatabase(application: Application) {
             class ResetInBackgroundTask :AsyncTask<Unit, Unit, Unit>() {
                 override fun doInBackground(vararg params: Unit?) {
-                    getDatabase(application).clearAllTables()
+                    getDatabase(
+                        application
+                    ).clearAllTables()
                 }
             }
             ResetInBackgroundTask().execute()

@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.sources
+package com.pingwinek.jens.cookandbake.lib.sync
 
 import java.util.*
 

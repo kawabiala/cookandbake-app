@@ -4,21 +4,20 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import org.json.JSONException
-import org.json.JSONObject
+import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 import java.util.*
 
 @Entity(indices = [Index(value = ["remoteId"], unique = true)])
 data class IngredientLocal(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "rowid") override val id: Int = 0,
-    val remoteId: Int?,
+    override val remoteId: Int?,
     override val recipeId: Int,
     override val quantity: Double?,
     override val unity: String?,
     override val name: String,
     override var lastModified: Long = Date().time,
     val flagAsDeleted: Boolean = false
-) : Ingredient() {
+) : Ingredient(), ModelLocal {
 
     constructor(
         recipeId: Int,

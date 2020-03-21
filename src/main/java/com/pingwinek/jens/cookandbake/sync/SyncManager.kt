@@ -1,6 +1,8 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.sync
 
 import android.app.Application
+import com.pingwinek.jens.cookandbake.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.sync.Source
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
@@ -76,7 +78,10 @@ class SyncManager private constructor(val application: Application) {
         recipesRemote: LinkedList<RecipeRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         syncTaskCounter.taskStarted()
         syncTaskCounter.taskStarted()
         loopLocalRecipes(recipesLocal, recipesRemote) { syncTaskCounter.taskEnded() }
@@ -88,7 +93,10 @@ class SyncManager private constructor(val application: Application) {
         recipesRemote: LinkedList<RecipeRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         if (recipesLocal.size > 0) {
             recipesLocal.forEach { recipeLocal ->
                 syncTaskCounter.taskStarted()
@@ -109,7 +117,10 @@ class SyncManager private constructor(val application: Application) {
         recipesRemote: LinkedList<RecipeRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         if (recipesRemote.size > 0) {
             recipesRemote.forEach { recipeRemote ->
                 if (recipesLocal.find { recipeLocal ->
@@ -297,7 +308,10 @@ class SyncManager private constructor(val application: Application) {
         ingredientsRemote: LinkedList<IngredientRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         syncTaskCounter.taskStarted()
         syncTaskCounter.taskStarted()
         loopLocalIngredients(ingredientsLocal, ingredientsRemote) { syncTaskCounter.taskEnded() }
@@ -309,7 +323,10 @@ class SyncManager private constructor(val application: Application) {
         ingredientsRemote: LinkedList<IngredientRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         if (ingredientsLocal.size > 0) {
             ingredientsLocal.forEach { ingredientLocal ->
                 syncTaskCounter.taskStarted()
@@ -330,7 +347,10 @@ class SyncManager private constructor(val application: Application) {
         ingredientsRemote: LinkedList<IngredientRemote>,
         onDone: () -> Unit
     ) {
-        val syncTaskCounter = SyncTaskCounter(onDone)
+        val syncTaskCounter =
+            SyncTaskCounter(
+                onDone
+            )
         if (ingredientsRemote.size > 0) {
             ingredientsRemote.forEach { ingredientRemote ->
                 if (ingredientsLocal.find { ingredientLocal ->

@@ -2,9 +2,9 @@ package com.pingwinek.jens.cookandbake.sources
 
 import android.app.Application
 import android.util.Log
-import androidx.room.Room
 import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
+import com.pingwinek.jens.cookandbake.db.DatabaseService
+import com.pingwinek.jens.cookandbake.lib.sync.Source
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*

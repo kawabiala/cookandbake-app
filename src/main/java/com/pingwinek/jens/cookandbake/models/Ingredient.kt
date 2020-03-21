@@ -1,11 +1,11 @@
 package com.pingwinek.jens.cookandbake.models
 
-abstract class Ingredient {
-    abstract val id: Int
+import com.pingwinek.jens.cookandbake.lib.sync.Model
+
+abstract class Ingredient: Model {
     abstract val recipeId: Int
     abstract val quantity: Double?
     abstract val unity: String?
     abstract val name: String
-    abstract var lastModified: Long
     abstract fun getUpdated(ingredient: Ingredient) : Ingredient
 }

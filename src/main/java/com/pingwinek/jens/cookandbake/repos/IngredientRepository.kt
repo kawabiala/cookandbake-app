@@ -5,11 +5,11 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.pingwinek.jens.cookandbake.SingletonHolder
-import com.pingwinek.jens.cookandbake.SyncManager
+import com.pingwinek.jens.cookandbake.sync.SyncManager
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
-import com.pingwinek.jens.cookandbake.sources.Source
+import com.pingwinek.jens.cookandbake.lib.sync.Source
 import java.util.*
 
 class IngredientRepository private constructor(val application: Application) {

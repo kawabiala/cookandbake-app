@@ -1,7 +1,6 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.models
 
 import android.util.Log
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject

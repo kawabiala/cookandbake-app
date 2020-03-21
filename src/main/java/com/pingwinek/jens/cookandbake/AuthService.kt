@@ -3,10 +3,10 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.networkRequest.CookieStore
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.db.DatabaseService
+import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.CookieStore
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URI

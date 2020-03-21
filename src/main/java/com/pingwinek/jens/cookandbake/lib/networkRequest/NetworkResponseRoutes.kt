@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.networkRequest
+package com.pingwinek.jens.cookandbake.lib.networkRequest
 
 open class NetworkResponseRoutes : AbstractNetworkResponseRoutes() {
 

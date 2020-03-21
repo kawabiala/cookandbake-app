@@ -3,12 +3,13 @@ package com.pingwinek.jens.cookandbake.sources
 import android.app.Application
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.RECIPEPATH
-import com.pingwinek.jens.cookandbake.Recipes
+import com.pingwinek.jens.cookandbake.models.Recipes
 import com.pingwinek.jens.cookandbake.SingletonHolder
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
-import com.pingwinek.jens.cookandbake.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.sync.Source
 import java.util.*
 
 class RecipeSourceRemote private constructor(val application: Application) :
@@ -21,7 +22,9 @@ class RecipeSourceRemote private constructor(val application: Application) :
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
-            callback(Source.Status.SUCCESS, Recipes(response))
+            callback(Source.Status.SUCCESS,
+                Recipes(response)
+            )
         }
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
         networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->

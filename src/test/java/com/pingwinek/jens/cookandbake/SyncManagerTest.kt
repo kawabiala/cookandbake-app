@@ -1,11 +1,13 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
+import com.pingwinek.jens.cookandbake.lib.sync.Source
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.*
+import com.pingwinek.jens.cookandbake.sync.SyncManager
 import org.junit.Test
 import org.mockito.AdditionalAnswers.delegatesTo
 import org.mockito.Mockito.*

@@ -5,17 +5,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.pingwinek.jens.cookandbake.SingletonHolder
-import com.pingwinek.jens.cookandbake.SyncManager
+import com.pingwinek.jens.cookandbake.sync.SyncManager
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
+import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
-import com.pingwinek.jens.cookandbake.sources.Source
+import com.pingwinek.jens.cookandbake.lib.sync.Source
+import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import java.util.*
 
 class RecipeRepository private constructor(val application: Application) {
 
     private val recipeSourceLocal = RecipeSourceLocal.getInstance(application)
     private val syncManager = SyncManager.getInstance(application)
+    private val syncService = SyncService.getInstance(application)
 
     private val repoListData = MutableLiveData<LinkedList<RecipeLocal>>()
     val recipeListData: LiveData<LinkedList<Recipe>> = Transformations.map(repoListData) {
@@ -31,6 +34,9 @@ class RecipeRepository private constructor(val application: Application) {
     fun getAll() {
         fetchAll()
         syncManager.syncRecipes {
+            fetchAll()
+        }
+        syncService.sync<RecipeLocal, RecipeRemote> {
             fetchAll()
         }
     }
