@@ -4,7 +4,7 @@ import com.pingwinek.jens.cookandbake.utils.CallbackLoopCounter
 import java.util.*
 
 class SyncHelper(
-    private val syncManager: SynchManager<ModelLocal, Model>,
+    private val syncManager: SyncManager<ModelLocal, Model>,
     private val onDone: () -> Unit
 ) {
     private var localList: LinkedList<ModelLocal>? = null

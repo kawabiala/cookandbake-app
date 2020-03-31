@@ -1,10 +1,9 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import android.app.Application
-import android.util.Log
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.db.DatabaseService
-import com.pingwinek.jens.cookandbake.lib.sync.Source
+import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*
@@ -13,108 +12,135 @@ class IngredientSourceLocal private constructor(val application: Application) : 
 
     private val db = DatabaseService.getDatabase(application)
 
-    override fun getAll(callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
+    override fun getAll() : Promise<LinkedList<IngredientLocal>> {
+        val promise = Promise<LinkedList<IngredientLocal>>()
         Taskifier<Array<IngredientLocal>> { ingredients ->
-            callback(Source.Status.SUCCESS, LinkedList(ingredients?.toList()))
+            promise.setResult(Promise.Status.SUCCESS, LinkedList(ingredients?.toList()))
         }.execute({db.ingredientDAO().getAll()})
+        return promise
     }
 
-    override fun getAllForRecipeId(recipeId: Int, callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
+    override fun getAllForRecipeId(recipeId: Int) : Promise<LinkedList<IngredientLocal>> {
+        val promise = Promise<LinkedList<IngredientLocal>>()
         Taskifier<Array<IngredientLocal>> { ingredients ->
-            callback(Source.Status.SUCCESS, LinkedList(ingredients?.asList()))
+            promise.setResult(Promise.Status.SUCCESS, LinkedList(ingredients?.asList()))
         }.execute({db.ingredientDAO().getAllForRecipeId(recipeId)})
+        return promise
     }
 
-    override fun get(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    override fun get(id: Int) : Promise<IngredientLocal> {
+        val promise = Promise<IngredientLocal>()
         Taskifier<IngredientLocal> { ingredient ->
             val status = when (ingredient) {
-                null -> Source.Status.FAILURE
-                else -> Source.Status.SUCCESS
+                null -> Promise.Status.FAILURE
+                else -> Promise.Status.SUCCESS
             }
-            callback(status, ingredient)
+            promise.setResult(status, ingredient)
         }.execute({db.ingredientDAO().getIngredient(id)})
+        return promise
     }
 
-    fun getForRemoteId(remoteId: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    @Suppress("Unused")
+    fun getForRemoteId(remoteId: Int) : Promise<IngredientLocal> {
+        val promise = Promise<IngredientLocal>()
         Taskifier<IngredientLocal> { ingredient ->
             val status = when (ingredient) {
-                null -> Source.Status.FAILURE
-                else -> Source.Status.SUCCESS
+                null -> Promise.Status.FAILURE
+                else -> Promise.Status.SUCCESS
             }
-            callback(status, ingredient)
+            promise.setResult(status, ingredient)
         }.execute({db.ingredientDAO().getIngredientForRemoteId(remoteId)})
+        return promise
     }
 
-    override fun new(item: IngredientLocal, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    override fun new(item: IngredientLocal) : Promise<IngredientLocal> {
+        var promise = Promise<IngredientLocal>()
+        /*
+        remoteId is unique -> if we already have an ingredient with the same remoteId,
+        we delete it, before we insert the new one
+         */
         if (item.remoteId != null) {
-            getForRemoteId(item.remoteId) { _, ingredientLocal ->
-                if (ingredientLocal != null) {
-                    delete(ingredientLocal.id) {
-                        Log.i(
-                            this::class.java.name,
-                            "Deleted duplicate ingredient: $ingredientLocal"
-                        )
-                        doNew(item, callback)
+            getForRemoteId(item.remoteId).setResultHandler { getResult ->
+                val ingredientLocal = getResult.value
+                if (getResult.status == Promise.Status.SUCCESS && ingredientLocal != null) {
+                    delete(ingredientLocal.id).setResultHandler {
+                        promise = doNew(item)
                     }
                 } else {
-                    doNew(item, callback)
+                    promise = doNew(item)
                 }
             }
         } else {
-            doNew(item, callback)
+            promise = doNew(item)
         }
+        return promise
     }
 
-    private fun doNew(item: IngredientLocal, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    private fun doNew(item: IngredientLocal) : Promise<IngredientLocal> {
+        var promise = Promise<IngredientLocal>()
         Taskifier<Long> { newIngredientId ->
             if (newIngredientId != null) {
-                get(newIngredientId.toInt(), callback)
+                promise = get(newIngredientId.toInt())
             } else {
-                callback(Source.Status.FAILURE, null)
+                promise.setResult(Promise.Status.FAILURE, null)
             }
         }.execute({db.ingredientDAO().insertIngredient(item)})
+        return promise
     }
 
-    override fun update(item: IngredientLocal, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    override fun update(item: IngredientLocal) : Promise<IngredientLocal> {
+        var promise = Promise<IngredientLocal>()
         Taskifier<Unit> {
-            get(item.id, callback)
+            promise = get(item.id)
         }.execute({db.ingredientDAO().updateIngredient(item)})
+        return promise
     }
 
-    override fun delete(id: Int, callback: (Source.Status) -> Unit) {
-        get(id) { status, ingredientLocal ->
-            if (status == Source.Status.SUCCESS && ingredientLocal != null) {
-                delete(ingredientLocal, callback)
+    override fun delete(id: Int) : Promise<Unit> {
+        var promise = Promise<Unit>()
+        get(id).setResultHandler{ getResult ->
+            val ingredientLocal = getResult.value
+            if (getResult.status == Promise.Status.SUCCESS && ingredientLocal != null) {
+                promise = delete(ingredientLocal)
             } else {
-                callback(Source.Status.FAILURE)
+                promise.setResult(Promise.Status.FAILURE, null)
             }
         }
+        return promise
     }
 
-    fun flagAsDeleted(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
-        get(id) { status, ingredientLocal ->
-            if (status == Source.Status.SUCCESS && ingredientLocal != null) {
-                update(ingredientLocal.getDeleted(), callback)
+    fun flagAsDeleted(id: Int) : Promise<IngredientLocal> {
+        var promise = Promise<IngredientLocal>()
+        get(id).setResultHandler { getResult ->
+            val ingredientLocal = getResult.value
+            if (getResult.status == Promise.Status.SUCCESS && ingredientLocal != null) {
+                promise = update(ingredientLocal.getDeleted())
             } else {
-                callback(Source.Status.FAILURE, ingredientLocal)
+                promise.setResult(Promise.Status.FAILURE, ingredientLocal)
             }
         }
+        return promise
     }
 
-    private fun delete(item: IngredientLocal, callback: (Source.Status) -> Unit) {
+    private fun delete(item: IngredientLocal) : Promise<Unit> {
+        val promise = Promise<Unit>()
         Taskifier<Unit> {
-            callback(Source.Status.SUCCESS)
+            promise.setResult(Promise.Status.SUCCESS, null)
         }.execute({db.ingredientDAO().deleteIngredient(item)})
+        return promise
     }
 
-    fun getIngredientForRemoteId(remoteId: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
+    @Suppress("Unused")
+    fun getIngredientForRemoteId(remoteId: Int) : Promise<IngredientLocal> {
+        val promise = Promise<IngredientLocal>()
         Taskifier<IngredientLocal> { ingredient ->
             val status = when (ingredient) {
-                null -> Source.Status.FAILURE
-                else -> Source.Status.SUCCESS
+                null -> Promise.Status.FAILURE
+                else -> Promise.Status.SUCCESS
             }
-            callback(status, ingredient)
+            promise.setResult(status, ingredient)
         }.execute({db.ingredientDAO().getIngredientForRemoteId(remoteId)})
+        return promise
     }
 
     companion object : SingletonHolder<IngredientSourceLocal, Application>(::IngredientSourceLocal)

@@ -1,13 +1,8 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.lib.sync
 
 import android.app.Application
-import com.pingwinek.jens.cookandbake.lib.sync.SourceProvider
-import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
-import com.pingwinek.jens.cookandbake.lib.sync.SyncService
-import com.pingwinek.jens.cookandbake.lib.sync.SynchManager
 import com.pingwinek.jens.cookandbake.models.*
 import com.pingwinek.jens.cookandbake.sources.IngredientSource
-import com.pingwinek.jens.cookandbake.lib.sync.Source
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
@@ -19,10 +14,11 @@ class SyncServiceTest {
     private val application = mock(Application::class.java)
     private val syncService = SyncService.getInstance(application)
 
+    @Suppress("Unchecked_Cast")
     private val mockedIngredientSyncLogic = mock(SyncLogic::class.java) as SyncLogic<IngredientLocal, IngredientRemote>
 
     private val syncManager = object :
-        SynchManager<IngredientLocal, IngredientRemote> {
+        SyncManager<IngredientLocal, IngredientRemote>() {
         override val syncLogic: SyncLogic<IngredientLocal, IngredientRemote>
             get() = mockedIngredientSyncLogic
 
@@ -61,146 +57,145 @@ class SyncServiceTest {
     }
 
     private abstract class MockedIngredientSourceLocal : IngredientSource<IngredientLocal> {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
+        override fun getAll() : Promise<LinkedList<IngredientLocal>> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
+        override fun get(id: Int) : Promise<IngredientLocal> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun new(
-            item: IngredientLocal,
-            callback: (Source.Status, IngredientLocal?) -> Unit
-        ) {
+        override fun new(item: IngredientLocal) : Promise<IngredientLocal> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun update(
-            item: IngredientLocal,
-            callback: (Source.Status, IngredientLocal?) -> Unit
-        ) {
+        override fun update(item: IngredientLocal) : Promise<IngredientLocal> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun delete(id: Int, callback: (Source.Status) -> Unit) {
+        override fun delete(id: Int) : Promise<Unit> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getAllForRecipeId(
-            recipeId: Int,
-            callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit
-        ) {
+        override fun getAllForRecipeId(recipeId: Int) : Promise<LinkedList<IngredientLocal>> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
     }
 
     private class MockedIngredientSourceLocalSuccess : MockedIngredientSourceLocal() {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
-            callback(
-                Source.Status.SUCCESS,
-                LinkedList<IngredientLocal>().apply {
-                    add(IngredientLocal(1, 2, 1, null, null, "Ingredient Local 1"))
-                }
-            )
+        override fun getAll(): Promise<LinkedList<IngredientLocal>> {
+            return Promise<LinkedList<IngredientLocal>>().apply {
+                setResult(
+                    Promise.Status.SUCCESS,
+                    LinkedList<IngredientLocal>().apply {
+                        add(IngredientLocal(1, 2, 1, null, null, "Ingredient Local 1"))
+                    }
+                )
+            }
+
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
-            callback(
-                Source.Status.SUCCESS,
-                IngredientLocal(1, 2, 1, null, null, "Ingredient Local 1")
-            )
+        override fun get(id: Int) : Promise<IngredientLocal> {
+            return Promise<IngredientLocal>().apply {
+                setResult(
+                    Promise.Status.SUCCESS,
+                    IngredientLocal(1, 2, 1, null, null, "Ingredient Local 1")
+                )
+            }
         }
     }
 
     private class MockedIngredientSourceLocalFailure : MockedIngredientSourceLocal() {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientLocal>) -> Unit) {
-            callback(
-                Source.Status.FAILURE,
-                LinkedList<IngredientLocal>()
-            )
+        override fun getAll() : Promise<LinkedList<IngredientLocal>> {
+            return Promise<LinkedList<IngredientLocal>>().apply {
+                setResult(
+                    Promise.Status.FAILURE,
+                    LinkedList()
+                )
+            }
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientLocal?) -> Unit) {
-            callback(
-                Source.Status.FAILURE,
-                null
-            )
+        override fun get(id: Int) : Promise<IngredientLocal> {
+            return Promise<IngredientLocal>().apply {
+                setResult(
+                    Promise.Status.FAILURE,
+                    null
+                )
+            }
         }
     }
 
     private abstract class MockedIngredientSourceRemote : IngredientSource<IngredientRemote> {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientRemote>) -> Unit) {
+        override fun getAll() : Promise<LinkedList<IngredientRemote>> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientRemote?) -> Unit) {
+        override fun get(id: Int) : Promise<IngredientRemote> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun new(
-            item: IngredientRemote,
-            callback: (Source.Status, IngredientRemote?) -> Unit
-        ) {
+        override fun new(item: IngredientRemote) : Promise<IngredientRemote> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun update(
-            item: IngredientRemote,
-            callback: (Source.Status, IngredientRemote?) -> Unit
-        ) {
+        override fun update(item: IngredientRemote) : Promise<IngredientRemote> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun delete(id: Int, callback: (Source.Status) -> Unit) {
+        override fun delete(id: Int) : Promise<Unit> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getAllForRecipeId(
-            recipeId: Int,
-            callback: (Source.Status, LinkedList<IngredientRemote>) -> Unit
-        ) {
+        override fun getAllForRecipeId(recipeId: Int) : Promise<LinkedList<IngredientRemote>> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
     }
 
     private class MockedIngredientSourceRemoteSuccess : MockedIngredientSourceRemote() {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientRemote>) -> Unit) {
-            callback(
-                Source.Status.SUCCESS,
-                LinkedList<IngredientRemote>().apply {
-                    add(IngredientRemote.fromLocal(
-                        IngredientLocal(0, 2, 1, null, null, "Ingredient Remote 2"), 3
-                    ))
-                }
-            )
+        override fun getAll() : Promise<LinkedList<IngredientRemote>> {
+            return Promise<LinkedList<IngredientRemote>>().apply {
+                setResult(
+                    Promise.Status.SUCCESS,
+                    LinkedList<IngredientRemote>().apply {
+                        add(IngredientRemote.fromLocal(
+                            IngredientLocal(0, 2, 1, null, null, "Ingredient Remote 2"), 3
+                        ))
+                    }
+                )
+            }
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientRemote?) -> Unit) {
-            callback(
-                Source.Status.SUCCESS,
-                IngredientRemote.fromLocal(
-                    IngredientLocal(0, 2, 1, null, null, "Ingredient Remote 2"), 3)
-            )
+        override fun get(id: Int) : Promise<IngredientRemote> {
+            return Promise<IngredientRemote>().apply {
+                setResult(
+                    Promise.Status.SUCCESS,
+                    IngredientRemote.fromLocal(
+                        IngredientLocal(0, 2, 1, null, null, "Ingredient Remote 2"), 3)
+                )
+            }
         }
 
     }
 
     private class MockedIngredientSourceRemoteFailure : MockedIngredientSourceRemote() {
-        override fun getAll(callback: (Source.Status, LinkedList<IngredientRemote>) -> Unit) {
-            callback(
-                Source.Status.FAILURE,
-                LinkedList<IngredientRemote>()
-            )
+        override fun getAll() : Promise<LinkedList<IngredientRemote>> {
+            return Promise<LinkedList<IngredientRemote>>().apply {
+                setResult(
+                    Promise.Status.FAILURE,
+                    LinkedList()
+                )
+            }
         }
 
-        override fun get(id: Int, callback: (Source.Status, IngredientRemote?) -> Unit) {
-            callback(
-                Source.Status.FAILURE,
-                null
-            )
+        override fun get(id: Int) : Promise<IngredientRemote> {
+            return Promise<IngredientRemote>().apply {
+                setResult(
+                    Promise.Status.FAILURE,
+                    null
+                )
+            }
         }
 
     }
@@ -216,7 +211,7 @@ class SyncServiceTest {
         println("Test getSyncManager")
 
         prepareHappyCase()
-        assert(syncService.getSyncManager<IngredientLocal, IngredientRemote>() is SynchManager<IngredientLocal, IngredientRemote>)
+        assert(syncService.getSyncManager<IngredientLocal, IngredientRemote>() is SyncManager<IngredientLocal, IngredientRemote>)
     }
 
     @Test
@@ -227,7 +222,7 @@ class SyncServiceTest {
             syncService.syncEntry<IngredientLocal, IngredientRemote>(null, null, it)
         }
 
-        happyCase() {
+        happyCase {
             syncService.syncEntry<IngredientLocal, IngredientRemote>(null, null) {}
         }
     }
@@ -256,7 +251,7 @@ class SyncServiceTest {
             syncService.syncEntry<IngredientLocal, IngredientRemote>(1, it)
         }
 
-        happyCase() {
+        happyCase {
             syncService.syncEntry<IngredientLocal, IngredientRemote>(1) {}
         }
     }
@@ -291,8 +286,8 @@ class SyncServiceTest {
             syncService.sync<IngredientLocal, IngredientRemote>(it)
         }
 
-        happyCase() {
-            syncService.sync<IngredientLocal, IngredientRemote>() {}
+        happyCase {
+            syncService.sync<IngredientLocal, IngredientRemote> {}
         }
     }
 
@@ -320,7 +315,7 @@ class SyncServiceTest {
             syncService.syncAll(it)
         }
 
-        happyCase() {
+        happyCase {
             syncService.syncAll {}
         }
         syncService.syncAll {}
@@ -334,7 +329,7 @@ class SyncServiceTest {
     }
 
     private fun withoutSources(test: (onDone: () -> Unit) -> Unit) {
-        System.out.println(("without Sources"))
+        println(("without Sources"))
         clear()
         syncService.registerSyncManager(syncManager)
 
@@ -388,7 +383,7 @@ class SyncServiceTest {
 
     private fun doTest(test: (onDone: () -> Unit) -> Unit) {
         var onDoneCalled = false
-        test() { onDoneCalled = true }
+        test { onDoneCalled = true }
         assert(onDoneCalled)
     }
 

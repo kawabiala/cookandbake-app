@@ -1,14 +1,15 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.utils
 
+import com.pingwinek.jens.cookandbake.SingletonHolder
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class SingletonHolderTest {
 
     class SingletonTester private constructor(val testString: String) {
 
-        companion object : SingletonHolder<SingletonTester, String>(::SingletonTester)
+        companion object : SingletonHolder<SingletonTester, String>(
+            SingletonHolderTest::SingletonTester
+        )
     }
 
     @Test

@@ -1,11 +1,10 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.lib.sync
 
 import android.app.Application
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
-import com.pingwinek.jens.cookandbake.lib.sync.SourceProvider
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock

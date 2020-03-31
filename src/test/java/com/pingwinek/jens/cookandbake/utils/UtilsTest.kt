@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.utils
 
 import com.pingwinek.jens.cookandbake.Utils.quantityToDouble
 import com.pingwinek.jens.cookandbake.Utils.quantityToString

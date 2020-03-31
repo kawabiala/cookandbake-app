@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.models
 
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.models.RecipeRemote

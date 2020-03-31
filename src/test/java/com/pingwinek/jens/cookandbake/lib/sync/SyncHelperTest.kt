@@ -1,12 +1,7 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.lib.sync
 
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.lib.sync.Model
-import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
-import com.pingwinek.jens.cookandbake.lib.sync.SyncHelper
-import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
-import com.pingwinek.jens.cookandbake.lib.sync.SynchManager
 import org.junit.Test
 
 import org.junit.Before
@@ -17,6 +12,7 @@ import java.util.*
 
 class SyncHelperTest {
 
+    @Suppress("Unchecked_Cast")
     private val mockedIngredientSyncLogic = Mockito.mock(SyncLogic::class.java) as SyncLogic<IngredientLocal, IngredientRemote>
 
     private val ingredientLocalList = LinkedList<IngredientLocal>().apply {
@@ -31,7 +27,7 @@ class SyncHelperTest {
     }
 
     private val syncManager = object :
-        SynchManager<IngredientLocal, IngredientRemote> {
+        SyncManager<IngredientLocal, IngredientRemote>() {
         override val syncLogic: SyncLogic<IngredientLocal, IngredientRemote>
             get() = mockedIngredientSyncLogic
 
@@ -85,9 +81,10 @@ class SyncHelperTest {
     When setting both lists and the lists are not empty, the sync is triggered
      */
     @Test
+    @Suppress("Unchecked_Cast")
     fun setLists() {
-        val syncHelper: SyncHelper =
-            SyncHelper(syncManager as SynchManager<ModelLocal, Model>) {}
+        val syncHelper =
+            SyncHelper(syncManager as SyncManager<ModelLocal, Model>) {}
 
         syncHelper.setLocalList(ingredientLocalList as LinkedList<ModelLocal>)
         Mockito.verify(mockedIngredientSyncLogic, never())

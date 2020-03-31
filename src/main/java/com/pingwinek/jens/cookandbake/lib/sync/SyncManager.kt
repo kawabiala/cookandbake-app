@@ -1,8 +1,8 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
-interface SynchManager<TLocal: ModelLocal, TRemote: Model> {
+abstract class SyncManager<TLocal: ModelLocal, TRemote: Model> {
 
-    val syncLogic: SyncLogic<TLocal, TRemote>
+    abstract val syncLogic: SyncLogic<TLocal, TRemote>
 
     fun sync(local: TLocal?, remote: TRemote?, onDone: () -> Unit) {
         when (syncLogic.compare(local, remote)) {
@@ -44,10 +44,10 @@ interface SynchManager<TLocal: ModelLocal, TRemote: Model> {
         }
     }
 
-    fun newLocal(remote: TRemote, onDone: () -> Unit)
-    fun newRemote(local: TLocal, onDone: () -> Unit)
-    fun updateLocal(local: TLocal, remote: TRemote, onDone: () -> Unit)
-    fun updateRemote(local: TLocal, remote: TRemote, onDone: () -> Unit)
-    fun deleteLocal(local: TLocal, onDone: () -> Unit)
-    fun deleteRemote(remote: TRemote, onDone: () -> Unit)
+    abstract fun newLocal(remote: TRemote, onDone: () -> Unit)
+    abstract fun newRemote(local: TLocal, onDone: () -> Unit)
+    abstract fun updateLocal(local: TLocal, remote: TRemote, onDone: () -> Unit)
+    abstract fun updateRemote(local: TLocal, remote: TRemote, onDone: () -> Unit)
+    abstract fun deleteLocal(local: TLocal, onDone: () -> Unit)
+    abstract fun deleteRemote(remote: TRemote, onDone: () -> Unit)
 }

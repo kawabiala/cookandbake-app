@@ -13,6 +13,7 @@ object SourceProvider {
         remoteSources[T::class.java] = source
     }
 
+    @Suppress("Unchecked_Cast")
     inline fun <reified T> getLocalSource() : Source<T>? {
         return try {
             localSources[T::class.java] as Source<T>
@@ -21,6 +22,7 @@ object SourceProvider {
         }
     }
 
+    @Suppress("Unchecked_Cast")
     fun <T> getLocalSource(localClass: Class<T>) : Source<T>? {
         return try {
             localSources[localClass] as Source<T>
@@ -29,6 +31,7 @@ object SourceProvider {
         }
     }
 
+    @Suppress("Unchecked_Cast")
     inline fun <reified T> getRemoteSource() : Source<T>? {
         return try {
             remoteSources[T::class.java] as Source<T>
@@ -37,6 +40,7 @@ object SourceProvider {
         }
     }
 
+    @Suppress("Unchecked_Cast")
     fun <T> getRemoteSource(remoteClass: Class<T>) : Source<T>? {
         return try {
             remoteSources[remoteClass] as Source<T>
@@ -45,12 +49,14 @@ object SourceProvider {
         }
     }
 
+    @Suppress("Unused")
     inline fun <reified T> removeLocalSource() {
         removeLocalSource(
             T::class.java
         )
     }
 
+    @Suppress("Unused")
     inline fun <reified T> removeRemoteSource() {
         removeRemoteSource(
             T::class.java
