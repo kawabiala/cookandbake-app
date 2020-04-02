@@ -33,7 +33,7 @@ class SyncHelper(
         syncTaskCounter.taskStarted()
         localList?.forEach { localEntry ->
             syncTaskCounter.taskStarted()
-            syncManager.sync(
+            syncManager.syncEntry(
                 localEntry,
                 remoteList?.find { remoteEntry ->
                     remoteEntry.id == localEntry.remoteId
@@ -48,7 +48,7 @@ class SyncHelper(
             }
             if (checkLocal == null) {
                 syncTaskCounter.taskStarted()
-                syncManager.sync(
+                syncManager.syncEntry(
                     null,
                     remoteEntry
                 ) { syncTaskCounter.taskEnded() }

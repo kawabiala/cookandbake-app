@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.sync
 
 import android.app.Application
+import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
 import com.pingwinek.jens.cookandbake.lib.sync.SyncManager
@@ -10,17 +11,31 @@ import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.utils.Locker
+import java.util.*
 
 class IngredientSyncManager(
-    override val syncLogic: SyncLogic<IngredientLocal, IngredientRemote>,
-    val application: Application
-) : SyncManager<IngredientLocal, IngredientRemote>() {
+    val application: Application,
+    private val ingredientSourceLocal: IngredientSourceLocal,
+    private val ingredientSourceRemote: IngredientSourceRemote,
+    private val syncLogic: SyncLogic<IngredientLocal, IngredientRemote>
+) : SyncManager<IngredientLocal, IngredientRemote>(ingredientSourceLocal, ingredientSourceRemote, syncLogic) {
 
     private var recipeSourceLocal = RecipeSourceLocal.getInstance(application)
-    private val ingredientSourceLocal = IngredientSourceLocal.getInstance(application)
-    private val ingredientSourceRemote = IngredientSourceRemote.getInstance(application)
 
     private val locker = Locker()
+
+    @Suppress("Unchecked_Cast")
+    override fun getLocalParent(parentId: Int): Promise<ModelLocal> {
+        return recipeSourceLocal.get(parentId) as Promise<ModelLocal>
+    }
+
+    override fun getLocalsByParent(parentId: Int): Promise<LinkedList<IngredientLocal>> {
+        return ingredientSourceLocal.getAllForRecipeId(parentId)
+    }
+
+    override fun getRemotesByParent(parentId: Int): Promise<LinkedList<IngredientRemote>> {
+        return ingredientSourceRemote.getAllForRecipeId(parentId)
+    }
 
     override fun newLocal(remote: IngredientRemote, onDone: () -> Unit) {
         recipeSourceLocal.toLocalId(remote.recipeId)

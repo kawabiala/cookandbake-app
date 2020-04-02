@@ -4,11 +4,12 @@ import android.app.Application
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.db.DatabaseService
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
+import com.pingwinek.jens.cookandbake.lib.sync.SourceLocal
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*
 
-class IngredientSourceLocal private constructor(val application: Application) : IngredientSource<IngredientLocal> {
+class IngredientSourceLocal private constructor(val application: Application) : IngredientSource<IngredientLocal>, SourceLocal<IngredientLocal> {
 
     private val db = DatabaseService.getDatabase(application)
 
@@ -41,7 +42,7 @@ class IngredientSourceLocal private constructor(val application: Application) : 
     }
 
     @Suppress("Unused")
-    fun getForRemoteId(remoteId: Int) : Promise<IngredientLocal> {
+    override fun getForRemoteId(remoteId: Int) : Promise<IngredientLocal> {
         val promise = Promise<IngredientLocal>()
         Taskifier<IngredientLocal> { ingredient ->
             val status = when (ingredient) {
@@ -127,19 +128,6 @@ class IngredientSourceLocal private constructor(val application: Application) : 
         Taskifier<Unit> {
             promise.setResult(Promise.Status.SUCCESS, null)
         }.execute({db.ingredientDAO().deleteIngredient(item)})
-        return promise
-    }
-
-    @Suppress("Unused")
-    fun getIngredientForRemoteId(remoteId: Int) : Promise<IngredientLocal> {
-        val promise = Promise<IngredientLocal>()
-        Taskifier<IngredientLocal> { ingredient ->
-            val status = when (ingredient) {
-                null -> Promise.Status.FAILURE
-                else -> Promise.Status.SUCCESS
-            }
-            promise.setResult(status, ingredient)
-        }.execute({db.ingredientDAO().getIngredientForRemoteId(remoteId)})
         return promise
     }
 

@@ -9,7 +9,7 @@ import java.util.*
  *
  * @param T the type of data this source can provide
  */
-interface Source<T> {
+interface Source<T: Model> {
 
     /**
      * Requires all data from given data source

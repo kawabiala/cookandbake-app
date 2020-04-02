@@ -70,10 +70,10 @@ class RecipeRemote private constructor(
             }
 
             val lastModified = try {
-                if (jsonObject.isNull("lastModified")) {
+                if (jsonObject.isNull("last_modified")) {
                     null
                 } else {
-                    jsonObject.getLong("lastModified")
+                    jsonObject.getLong("last_modified")
                 }
             } catch (jsonException: JSONException) {
                 null

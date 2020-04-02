@@ -31,7 +31,7 @@ class IngredientRepository private constructor(val application: Application) {
 
     fun getAll(recipeId: Int) {
         fetchAll(recipeId)
-        syncIngredients {
+        syncIngredients(recipeId) {
             fetchAll(recipeId)
         }
     }
@@ -165,6 +165,10 @@ class IngredientRepository private constructor(val application: Application) {
 
     private fun syncIngredient(ingredientId: Int, callback: () -> Unit) {
         syncService.syncEntry<IngredientLocal, IngredientRemote>(ingredientId, callback)
+    }
+
+    private fun syncIngredients(recipeId: Int, callback: () -> Unit) {
+        syncService.syncByParentId<IngredientLocal, IngredientRemote>(recipeId, callback)
     }
 
     private fun syncIngredients(callback: () -> Unit) {

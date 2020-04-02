@@ -4,6 +4,7 @@ import android.app.Application
 import com.pingwinek.jens.cookandbake.db.DatabaseService
 import com.pingwinek.jens.cookandbake.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
+import com.pingwinek.jens.cookandbake.lib.sync.SourceLocal
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*
@@ -14,7 +15,7 @@ import java.util.*
  * @property application
  */
 class RecipeSourceLocal private constructor(val application: Application):
-    RecipeSource<RecipeLocal> {
+    RecipeSource<RecipeLocal>, SourceLocal<RecipeLocal> {
 
     private val db = DatabaseService.getDatabase(application)
 
@@ -93,7 +94,7 @@ class RecipeSourceLocal private constructor(val application: Application):
     }
 
     @Suppress("Unused")
-    fun getForRemoteId(remoteId: Int) : Promise<RecipeLocal> {
+    override fun getForRemoteId(remoteId: Int) : Promise<RecipeLocal> {
         val promise = Promise<RecipeLocal>()
         Taskifier<RecipeLocal> { recipe ->
             val status = when (recipe) {

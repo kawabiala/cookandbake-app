@@ -57,42 +57,42 @@ class SynchManagerTest {
     @Test
     fun testNewLocal() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.NEW_LOCAL)
-        testSynchManager.sync(null, testRemote) {}
+        testSynchManager.syncEntry(null, testRemote) {}
         assert(testSynchManager.testResult == "NewLocal")
     }
 
     @Test
     fun testNewRemote() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.NEW_REMOTE)
-        testSynchManager.sync(testLocal, null) {}
+        testSynchManager.syncEntry(testLocal, null) {}
         assert(testSynchManager.testResult == "NewRemote")
     }
 
     @Test
     fun testUpdateLocal() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.UPDATE_LOCAL)
-        testSynchManager.sync(testLocal, testRemote) {}
+        testSynchManager.syncEntry(testLocal, testRemote) {}
         assert(testSynchManager.testResult == "UpdateLocal")
     }
 
     @Test
     fun testUpdateRemote() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.UPDATE_REMOTE)
-        testSynchManager.sync(testLocal, testRemote) {}
+        testSynchManager.syncEntry(testLocal, testRemote) {}
         assert(testSynchManager.testResult == "UpdateRemote")
     }
 
     @Test
     fun testDeleteLocal() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.DELETE_LOCAL)
-        testSynchManager.sync(testLocal, null) {}
+        testSynchManager.syncEntry(testLocal, null) {}
         assert(testSynchManager.testResult == "DeleteLocal")
     }
 
     @Test
     fun testDeleteRemote() {
         Mockito.`when`(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.DELETE_REMOTE)
-        testSynchManager.sync(null, testRemote) {}
+        testSynchManager.syncEntry(null, testRemote) {}
         assert(testSynchManager.testResult == "DeleteRemote")
     }
 }

@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.pingwinek.jens.cookandbake.lib.sync.Model
 import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 import java.util.*
 

@@ -1,6 +1,6 @@
 package com.pingwinek.jens.cookandbake.sync
 
-import android.app.Application
+import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
 import com.pingwinek.jens.cookandbake.lib.sync.SyncManager
@@ -9,16 +9,51 @@ import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
 import com.pingwinek.jens.cookandbake.utils.Locker
+import java.util.*
 
 class RecipeSyncManager(
-    override val syncLogic: SyncLogic<RecipeLocal, RecipeRemote>,
-    val application: Application
-) : SyncManager<RecipeLocal, RecipeRemote>() {
-
-    private val recipeSourceLocal = RecipeSourceLocal.getInstance(application)
-    private val recipeSourceRemote = RecipeSourceRemote.getInstance(application)
+    private val recipeSourceLocal: RecipeSourceLocal,
+    private val recipeSourceRemote: RecipeSourceRemote,
+    syncLogic: SyncLogic<RecipeLocal, RecipeRemote>
+) : SyncManager<RecipeLocal, RecipeRemote>(recipeSourceLocal, recipeSourceRemote, syncLogic) {
 
     private val locker = Locker()
+
+    /**
+     * Recipe does not have a parent
+     *
+     * @param parentId
+     * @return returns a promise with always status [Promise.Status.FAILURE]
+     */
+    override fun getLocalParent(parentId: Int): Promise<ModelLocal> {
+        return Promise<ModelLocal>().apply {
+            setResult(Promise.Status.FAILURE, null)
+        }
+    }
+
+    /**
+     * Recipe has no parent
+     *
+     * @param parentId
+     * @return returns a promise, that has always status [Promise.Status.FAILURE]
+     */
+    override fun getLocalsByParent(parentId: Int): Promise<LinkedList<RecipeLocal>> {
+        return Promise<LinkedList<RecipeLocal>>().apply {
+            setResult(Promise.Status.FAILURE, null)
+        }
+    }
+
+    /**
+     * Recipe has no parent
+     *
+     * @param parentId
+     * @return returns a promise, that has always status [Promise.Status.FAILURE]
+     */
+    override fun getRemotesByParent(parentId: Int): Promise<LinkedList<RecipeRemote>> {
+        return Promise<LinkedList<RecipeRemote>>().apply {
+            setResult(Promise.Status.FAILURE, null)
+        }
+    }
 
     override fun newLocal(remote: RecipeRemote, onDone: () -> Unit) {
         recipeSourceLocal.new(RecipeLocal.newFromRemote(remote))
