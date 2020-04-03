@@ -24,7 +24,7 @@ class RecipeRemote private constructor(
         map["title"] = title
         map["description"] = description ?: ""
         map["instruction"] = instruction ?: ""
-        map["lastModified"] = lastModified.toString()
+        map["last_modified"] = lastModified.toString()
 
         return map
     }

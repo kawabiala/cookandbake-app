@@ -27,7 +27,7 @@ class IngredientRemote private constructor(
         map["quantity"] = quantity.toString()
         map["unity"] = unity ?: ""
         map["name"] = name
-        map["lastModified"] = lastModified.toString()
+        map["last_modified"] = lastModified.toString()
 
         return map
     }
@@ -74,10 +74,10 @@ class IngredientRemote private constructor(
             val name = jsonObject.optString("name", "IngredientRemote")
 
             val lastModified = try {
-                if (jsonObject.isNull("lastModified")) {
+                if (jsonObject.isNull("last_modified")) {
                     null
                 } else {
-                    jsonObject.getLong("lastModified")
+                    jsonObject.getLong("last_modified")
                 }
             } catch (jsonException: JSONException) {
                 null
