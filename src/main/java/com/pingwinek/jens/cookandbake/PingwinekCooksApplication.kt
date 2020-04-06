@@ -5,11 +5,14 @@ import android.util.Log
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
 import com.pingwinek.jens.cookandbake.sync.*
+import java.util.*
+import kotlin.collections.HashMap
 
 class PingwinekCooksApplication : Application() {
 
@@ -34,7 +37,8 @@ class PingwinekCooksApplication : Application() {
             this,
             IngredientSourceLocal.getInstance(this),
             IngredientSourceRemote.getInstance(this),
-            IngredientSyncLogic()))
+            IngredientSyncLogic())
+        )
         syncService.registerSyncManager(RecipeSyncManager(
             RecipeSourceLocal.getInstance(this),
             RecipeSourceRemote.getInstance(this),

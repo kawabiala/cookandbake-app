@@ -1,7 +1,7 @@
 package com.pingwinek.jens.cookandbake.lib.networkRequest
 
 import android.app.Application
-import com.pingwinek.jens.cookandbake.SingletonHolder
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import org.chromium.net.UploadDataProvider
 import org.json.JSONObject
 import java.net.URLEncoder

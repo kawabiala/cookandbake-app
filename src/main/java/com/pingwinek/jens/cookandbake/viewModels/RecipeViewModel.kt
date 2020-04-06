@@ -4,13 +4,14 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import java.util.*
 
-class RecipeViewModel(application: Application) : AndroidViewModel(application) {
+class RecipeViewModel(application: PingwinekCooksApplication) : AndroidViewModel(application) {
 
     private val recipeRepository = RecipeRepository.getInstance(application)
     private val ingredientRepository = IngredientRepository.getInstance(application)

@@ -1,23 +1,16 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
 import android.app.Application
-import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import com.pingwinek.jens.cookandbake.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
 import com.pingwinek.jens.cookandbake.utils.CallbackLoopCounter
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
 class SyncService private constructor(val application: Application) {
 
     val syncManagerIdentifiers = LinkedList<SyncManagerIdentifier<ModelLocal, Model>>()
-
-    private val networkRequest = NetworkRequest.Builder().apply {
-        addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-    }.build()
 
     private val netWorkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network?) {
@@ -25,10 +18,10 @@ class SyncService private constructor(val application: Application) {
         }
     }
 
-    private val connectivityManager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val internetConnectivityManager = InternetConnectivityManager.getInstance(application)
 
     init {
-        connectivityManager.registerNetworkCallback(networkRequest, netWorkCallback)
+        internetConnectivityManager.registerNetworkCallback(netWorkCallback)
     }
 
     @Suppress("Unchecked_Cast")

@@ -8,6 +8,7 @@ import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.models.Ingredients
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
 /**

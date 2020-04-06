@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.utils
 
-import com.pingwinek.jens.cookandbake.SingletonHolder
 import org.junit.Test
 
 class SingletonHolderTest {

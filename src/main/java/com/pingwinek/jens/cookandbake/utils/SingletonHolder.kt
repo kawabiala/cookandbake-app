@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.utils
 
 open class SingletonHolder<out T: Any, in A>(creator: (A) -> T) {
     private var creator: ((A) -> T)? = creator

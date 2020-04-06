@@ -4,7 +4,7 @@ import android.app.Application
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.RECIPEPATH
 import com.pingwinek.jens.cookandbake.models.Recipes
-import com.pingwinek.jens.cookandbake.SingletonHolder
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest

@@ -2,7 +2,7 @@ package com.pingwinek.jens.cookandbake.sources
 
 import android.app.Application
 import com.pingwinek.jens.cookandbake.db.DatabaseService
-import com.pingwinek.jens.cookandbake.SingletonHolder
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SourceLocal
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
