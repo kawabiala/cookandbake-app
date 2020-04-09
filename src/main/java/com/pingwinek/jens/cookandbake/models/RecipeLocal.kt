@@ -31,7 +31,7 @@ data class RecipeLocal(
     )
 
     override fun getUpdated(recipe: Recipe): RecipeLocal {
-        return RecipeLocal(id, remoteId, recipe.title, recipe.description, recipe.instruction, recipe.lastModified)
+        return RecipeLocal(id, remoteId, recipe.title, recipe.description, recipe.instruction)
     }
 
     fun getUpdated(title: String, description: String?, instruction: String?): RecipeLocal {

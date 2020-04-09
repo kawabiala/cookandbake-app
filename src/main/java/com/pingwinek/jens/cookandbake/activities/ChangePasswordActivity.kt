@@ -1,7 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -36,11 +34,11 @@ class ChangePasswordActivity : BaseActivity() {
         AuthService.getInstance(application).changePassword(
             findViewById<TextView>(R.id.cpaOldPassword).text.toString(),
             findViewById<TextView>(R.id.cpaNewPassword).text.toString()
-        ) { code, response ->
+        ) { code, _ ->
             when (code) {
                 200 -> {
                     setMessage("Password geändert")
-                    AuthService.getInstance(application).logout(){ code, response ->
+                    AuthService.getInstance(application).logout { _, _ ->
                         fillEmail()
                     }
                 }
@@ -55,7 +53,7 @@ class ChangePasswordActivity : BaseActivity() {
         val authService = AuthService.getInstance(application)
         val emailView = findViewById<TextView>(R.id.cpaEmailView)
         if (authService.hasStoredAccount()) {
-            emailView.text = "Angemeldet als: ${authService.getStoredAccount()?.getEmail()}"
+            emailView.text = getString(R.string.logged_in_as, authService.getStoredAccount()?.getEmail())
         } else {
             emailView.text = resources.getString(R.string.no_account)
         }

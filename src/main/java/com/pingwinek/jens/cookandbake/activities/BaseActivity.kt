@@ -70,7 +70,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 }
 
-class OptionMenu() {
+class OptionMenu {
 
     inner class OptionMenuItem(val itemName: String, val action: (Int) -> Boolean) {
         var iconId: Int? = null

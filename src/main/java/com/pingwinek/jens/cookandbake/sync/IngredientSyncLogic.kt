@@ -27,7 +27,7 @@ class IngredientSyncLogic :
             local.remoteId != remote!!.id -> SyncLogic.SyncAction.DO_NOTHING
 
             // CASE 7: remote has more recent updates, so we update local
-            local.lastModified <= remote.lastModified -> SyncLogic.SyncAction.UPDATE_LOCAL
+            local.lastModified < remote.lastModified -> SyncLogic.SyncAction.UPDATE_LOCAL
 
             // CASE 8: local has more recent updates, so we update remote
             local.lastModified > remote.lastModified -> SyncLogic.SyncAction.UPDATE_REMOTE

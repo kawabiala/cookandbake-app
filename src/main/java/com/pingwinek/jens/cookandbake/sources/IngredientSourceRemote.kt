@@ -1,12 +1,13 @@
 package com.pingwinek.jens.cookandbake.sources
 
-import android.app.Application
-import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
+import com.pingwinek.jens.cookandbake.INGREDIENTPATH
+import com.pingwinek.jens.cookandbake.RECIPEPATH
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.networkRequest.RetryManager
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
+import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.models.Ingredients
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
@@ -14,11 +15,11 @@ import java.util.*
 /**
  * Source for retrieving and manipulating ingredients in a remote database
  *
- * @property application the application instance of the Android app
+ * @property networkRequestProvider instance of [NetworkRequestProvider]
  */
-class IngredientSourceRemote private constructor(val application: Application) : IngredientSource<IngredientRemote> {
+class IngredientSourceRemote private constructor(private val networkRequestProvider: NetworkRequestProvider) : IngredientSource<IngredientRemote> {
 
-    private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
+    var retryManager: RetryManager? = null
 
     override fun getAll() : Promise<LinkedList<IngredientRemote>> {
         val networkRequest = networkRequestProvider.getNetworkRequest(INGREDIENTPATH, NetworkRequestProvider.Method.GET)
@@ -153,16 +154,11 @@ class IngredientSourceRemote private constructor(val application: Application) :
     }
 
     private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
-        AuthService.getInstance(application).onSessionInvalid { authCode, _ ->
-            if (authCode == 200) {
-                request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
-                    //Do nothing, especially don't loop
-                }
-                request.start()
-            }
+        retryManager?.let {
+            retry(status, code, response, request)
         }
     }
 
-    companion object : SingletonHolder<IngredientSourceRemote, Application>(::IngredientSourceRemote)
+    companion object : SingletonHolder<IngredientSourceRemote, NetworkRequestProvider   >(::IngredientSourceRemote)
 
 }

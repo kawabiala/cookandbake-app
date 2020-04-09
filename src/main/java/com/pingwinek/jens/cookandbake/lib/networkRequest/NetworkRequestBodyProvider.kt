@@ -5,7 +5,7 @@ import org.chromium.net.UploadDataSink
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
-class NetworkRequestBodyProvider(val body: String): UploadDataProvider() {
+class NetworkRequestBodyProvider(private val body: String): UploadDataProvider() {
 
     override fun getLength(): Long {
         return body.length.toLong()

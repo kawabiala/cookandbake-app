@@ -186,15 +186,15 @@ class SyncManagerTest {
                 add(testRemote)
             })
         }
-        doReturn(localListPromise).whenever(testSyncManager).getLocalsByParent(any<Int>())
-        doReturn(localPromise).whenever(testSyncManager).getLocalParent(any<Int>())
-        doReturn(remoteListPromise).whenever(testSyncManager).getRemotesByParent(any<Int>())
+        doReturn(localListPromise).whenever(testSyncManager).getLocalsByParent(any())
+        doReturn(localPromise).whenever(testSyncManager).getLocalParent(any())
+        doReturn(remoteListPromise).whenever(testSyncManager).getRemotesByParent(any())
         doNothing().whenever(testSyncManager).syncEntry(any(), any(), anyOrNull())
         testSyncManager.syncByParentId(1) {}
         inOrder(testSyncManager) {
-            verify(testSyncManager).getLocalsByParent(any<Int>())
-            verify(testSyncManager).getLocalParent(any<Int>())
-            verify(testSyncManager).getRemotesByParent(any<Int>())
+            verify(testSyncManager).getLocalsByParent(any())
+            verify(testSyncManager).getLocalParent(any())
+            verify(testSyncManager).getRemotesByParent(any())
             verify(testSyncManager).syncEntry(any(), any(), anyOrNull())
         }
     }

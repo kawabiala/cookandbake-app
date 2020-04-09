@@ -1,21 +1,15 @@
 package com.pingwinek.jens.cookandbake
 
-import com.pingwinek.jens.cookandbake.models.IngredientLocal
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
-import com.pingwinek.jens.cookandbake.models.RecipeRemote
-import java.util.*
-
 class SyncManagerTest {
 
     // Testdata-Lists
 
+    /*
     private val ingredientsLocal = LinkedList<IngredientLocal>()
     private val ingredientsRemote = LinkedList<IngredientRemote>()
     private val recipesLocal = LinkedList<RecipeLocal>()
     private val recipesRemote = LinkedList<RecipeRemote>()
 
-    /*
 
     //Mocks
 

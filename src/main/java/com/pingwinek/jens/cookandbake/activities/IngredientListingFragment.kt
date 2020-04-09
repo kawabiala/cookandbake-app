@@ -5,15 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.Utils.quantityToString
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
 import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
 import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
@@ -35,7 +35,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
         super.onCreate(savedInstanceState)
 
         recipeModel = activity?.run {
-            ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
+            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
                 .get(RecipeViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
@@ -54,7 +54,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
             adapter = ingredientListingAdapter
         }
 
-        recipeModel.ingredientListData.observe(this, Observer { ingredients ->
+        recipeModel.ingredientListData.observe( viewLifecycleOwner, Observer { ingredients ->
             ingredients?.let { newIngredientList ->
                 ingredientList.clear()
                 ingredientList.addAll(newIngredientList)
@@ -145,7 +145,7 @@ class IngredientListingAdapter(
         val quantityView: TextView = mView.quantityView
         val unityView: TextView = mView.unityView
         val nameView: TextView = mView.nameView
-        val buttonView = mView.deleteIngredientButton
+        val buttonView: ImageButton = mView.deleteIngredientButton
 
         override fun toString(): String {
             return super.toString() + " '" + nameView.text + "'"

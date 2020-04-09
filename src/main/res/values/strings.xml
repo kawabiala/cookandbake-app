@@ -5,13 +5,15 @@
     <string name="no">Nein</string>
 
     <string name="close">Schließen</string>
+    <string name="done">Fertig</string>
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
 
     <string name="login">Login</string>
     <string name="loginFailed">Login ist fehlgeschlagen.</string>
-    <string name="logged_in_as">%1$s (angemeldet)</string>
-    <string name="not_logged_in_as">%1$s (nicht angemeldet)</string>
+    <string name="is_logged_in">%1$s (angemeldet)</string>
+    <string name="logged_in_as">Angemeldet als: %1$s</string>
+    <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
 
     <string name="logout">Logout</string>
     <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
@@ -48,6 +50,7 @@
     <string name="quantity">Menge</string>
     <string name="unity">Einheit</string>
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
+    <string name="plus_new_ingredient">+ Neue Zutat</string>
 
     <string name="email">Email</string>
     <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>

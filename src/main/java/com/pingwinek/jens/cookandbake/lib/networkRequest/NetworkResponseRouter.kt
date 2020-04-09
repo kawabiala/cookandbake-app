@@ -24,10 +24,12 @@ class NetworkResponseRouter(val looper: Looper, networkRequest: NetworkRequest) 
         responseRoutes.registerDefaultRoute(responseRoute)
     }
 
+    @Suppress("Unused")
     fun registerDefaultSuccessRoute(responseRoute: (result: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         responseRoutes.registerDefaultSuccessRoute(responseRoute)
     }
 
+    @Suppress("Unused")
     fun registerDefaultFailedRoute(responseRoute: (result: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
         responseRoutes.registerDefaultFailedRoute(responseRoute)
     }

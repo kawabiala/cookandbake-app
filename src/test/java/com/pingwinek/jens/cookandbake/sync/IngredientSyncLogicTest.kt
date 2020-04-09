@@ -1,5 +1,7 @@
 package com.pingwinek.jens.cookandbake.sync
 
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
@@ -40,6 +42,10 @@ class IngredientSyncLogicTest {
         assert(ingredientSyncLogic.compare(ingredientLocalWithoutRemoteId, ingredientRemote) == SyncLogic.SyncAction.DO_NOTHING)
 
         // Case 7: remote is more recent -> update local
+        val ingredientRemote = mock<IngredientRemote>()
+        whenever(ingredientRemote.id).thenReturn(2)
+        Thread.sleep(1)
+        whenever(ingredientRemote.lastModified).thenReturn(Date().time)
         assert(ingredientSyncLogic.compare(ingredientLocalWithRemoteId, ingredientRemote) == SyncLogic.SyncAction.UPDATE_LOCAL)
 
         // Case 8: local is more recent -> update remote
@@ -47,5 +53,14 @@ class IngredientSyncLogicTest {
         val ingredientLocal = IngredientLocal(1, 2, 3, null, null, "Ingredient Local Most Recent")
         assert(ingredientSyncLogic.compare(ingredientLocal, ingredientRemote) == SyncLogic.SyncAction.UPDATE_REMOTE)
 
+        // Case 9: local and remote have same timestamp
+        val lastModified = Date().time
+        val local = mock<IngredientLocal>()
+        val remote = mock<IngredientRemote>()
+        whenever(local.remoteId).thenReturn(1)
+        whenever(remote.id).thenReturn(1)
+        whenever(local.lastModified).thenReturn(lastModified)
+        whenever(remote.lastModified).thenReturn(lastModified)
+        assert(ingredientSyncLogic.compare(local, remote) == SyncLogic.SyncAction.DO_NOTHING)
     }
 }

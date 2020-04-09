@@ -40,12 +40,13 @@ class NetworkRequestProvider private constructor(val application: Application) {
             params: Map<String, String>,
             contentType: ContentType
         ): UploadDataProvider {
-            return if (contentType == ContentType.APPLICATION_URLENCODED) {
-                NetworkRequestBodyProvider(toBody(params))
-            } else if (contentType == ContentType.APPLICATION_JSON) {
-                NetworkRequestBodyProvider(toJsonBody(params))
-            } else {
-                NetworkRequestBodyProvider(toBody(params))
+            return when (contentType) {
+                ContentType.APPLICATION_URLENCODED -> {
+                    NetworkRequestBodyProvider(toBody(params))
+                }
+                ContentType.APPLICATION_JSON -> {
+                    NetworkRequestBodyProvider(toJsonBody(params))
+                }
             }
         }
 

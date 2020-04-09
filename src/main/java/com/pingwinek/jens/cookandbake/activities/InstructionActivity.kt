@@ -1,15 +1,13 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
+import com.pingwinek.jens.cookandbake.OPTION_MENU_DONE
+import com.pingwinek.jens.cookandbake.R
 
 class InstructionActivity : BaseActivity() {
 

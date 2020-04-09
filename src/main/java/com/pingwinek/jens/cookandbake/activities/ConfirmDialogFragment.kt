@@ -4,13 +4,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
-import java.lang.ClassCastException
-import java.lang.IllegalStateException
 
 class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
 
-    lateinit var listener: ConfirmDialogListener
+    private lateinit var listener: ConfirmDialogListener
     private var confirmItemId: String? = null
     private var message: String = "You should provide a message with setArguments"
 
@@ -42,7 +39,7 @@ class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
         try {
             listener = context as ConfirmDialogListener
         } catch (exception: ClassCastException) {
-            throw ClassCastException((context.toString()) + " must implement ConfirmDialogListener")
+            throw ClassCastException("$context must implement ConfirmDialogListener")
         }
     }
 }

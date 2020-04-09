@@ -5,27 +5,33 @@
               android:orientation="horizontal">
 
     <TextView
+            android:id="@+id/quantityView"
             android:layout_width="90dp"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:id="@+id/quantityView"
-            android:layout_marginLeft="8dp"/>
+            android:layout_marginStart="8dp"
+            android:ems="10" />
     <TextView
             android:layout_width="89dp"
             android:layout_height="wrap_content"
             android:ems="10"
             android:id="@+id/unityView"/>
+
     <TextView
             android:id="@+id/nameView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceListItem"
             android:layout_weight="1"
-            android:gravity="left"/>
+            android:gravity="start"
+            android:textAppearance="?attr/textAppearanceListItem" />
+
     <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" app:srcCompat="@drawable/ic_action_delete"
             android:id="@+id/deleteIngredientButton"
-            android:backgroundTint="@color/colorBackground" android:padding="0dp" android:layout_marginRight="8dp"
-            android:onClick="deleteIngredientButton"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/colorBackground"
+            android:contentDescription="@string/delete"
+            android:onClick="deleteIngredientButton"
+            android:padding="0dp"
+            app:srcCompat="@drawable/ic_action_delete" />
 </LinearLayout>

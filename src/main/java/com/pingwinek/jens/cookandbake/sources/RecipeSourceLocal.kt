@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
-import android.app.Application
-import com.pingwinek.jens.cookandbake.db.DatabaseService
+import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SourceLocal
@@ -12,12 +11,10 @@ import java.util.*
 /**
  * Source to retrieve and manipulate local recipes
  *
- * @property application
+ * @property db
  */
-class RecipeSourceLocal private constructor(val application: Application):
+class RecipeSourceLocal private constructor(private val db: PingwinekCooksDB):
     RecipeSource<RecipeLocal>, SourceLocal<RecipeLocal> {
-
-    private val db = DatabaseService.getDatabase(application)
 
     override fun getAll() : Promise<LinkedList<RecipeLocal>> {
         val promise = Promise<LinkedList<RecipeLocal>>()
@@ -40,10 +37,12 @@ class RecipeSourceLocal private constructor(val application: Application):
     }
 
     override fun new(item: RecipeLocal) : Promise<RecipeLocal> {
-        var promise = Promise<RecipeLocal>()
+        val promise = Promise<RecipeLocal>()
         Taskifier<Long> { newRecipeId ->
             if (newRecipeId != null) {
-                promise = get(newRecipeId.toInt())
+                get(newRecipeId.toInt()).setResultHandler {
+                    promise.setResult(it.status, it.value)
+                }
             } else {
                 promise.setResult(Promise.Status.FAILURE, null)
             }
@@ -52,19 +51,23 @@ class RecipeSourceLocal private constructor(val application: Application):
     }
 
     override fun update(item: RecipeLocal) : Promise<RecipeLocal> {
-        var promise = Promise<RecipeLocal>()
+        val promise = Promise<RecipeLocal>()
         Taskifier<Unit> {
-            promise = get(item.id)
+            get(item.id).setResultHandler {
+                promise.setResult(it.status, it.value)
+            }
         }.execute({db.recipeDAO().update(item)})
         return promise
     }
 
     override fun delete(id: Int) : Promise<Unit> {
-        var promise = Promise<Unit>()
+        val promise = Promise<Unit>()
         get(id).setResultHandler { getResult ->
             val recipeLocal = getResult.value
             if (getResult.status == Promise.Status.SUCCESS && recipeLocal != null) {
-                promise = delete(recipeLocal)
+                delete(recipeLocal).setResultHandler {
+                    promise.setResult(it.status, it.value)
+                }
             } else {
                 promise.setResult(Promise.Status.FAILURE, null)
             }
@@ -73,11 +76,13 @@ class RecipeSourceLocal private constructor(val application: Application):
     }
 
     fun flagAsDeleted(id: Int) : Promise<RecipeLocal> {
-        var promise = Promise<RecipeLocal>()
+        val promise = Promise<RecipeLocal>()
         get(id).setResultHandler { getResult ->
             val recipeLocal = getResult.value
             if (getResult.status == Promise.Status.SUCCESS && recipeLocal != null) {
-                promise =update(recipeLocal.getDeleted())
+                update(recipeLocal.getDeleted()).setResultHandler {
+                    promise.setResult(it.status, it.value)
+                }
             } else {
                 promise.setResult(Promise.Status.FAILURE, recipeLocal)
             }
@@ -132,5 +137,5 @@ class RecipeSourceLocal private constructor(val application: Application):
         return promise
     }
 
-    companion object : SingletonHolder<RecipeSourceLocal, Application>(::RecipeSourceLocal)
+    companion object : SingletonHolder<RecipeSourceLocal, PingwinekCooksDB>(::RecipeSourceLocal)
 }

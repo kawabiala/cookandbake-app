@@ -3,7 +3,7 @@
 
     <item
             android:id="@+id/done"
-            android:title="Fertig"
+            android:title="@string/done"
             app:showAsAction="ifRoom"
             android:icon="@drawable/ic_action_done"/>
 </menu>

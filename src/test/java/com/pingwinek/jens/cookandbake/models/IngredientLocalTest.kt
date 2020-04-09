@@ -1,9 +1,5 @@
 package com.pingwinek.jens.cookandbake.models
 
-import com.pingwinek.jens.cookandbake.models.IngredientLocal
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
-import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import org.junit.Test
 import java.util.*
 

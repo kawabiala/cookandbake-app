@@ -1,23 +1,31 @@
 package com.pingwinek.jens.cookandbake.repos
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
+import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeLocal
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
-import com.pingwinek.jens.cookandbake.lib.sync.SyncService
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
-class RecipeRepository private constructor(val application: Application) {
+class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
-    private val recipeSourceLocal = RecipeSourceLocal.getInstance(application)
-    private val syncService = SyncService.getInstance(application)
+    private lateinit var recipeSourceLocal: RecipeSourceLocal
+    private lateinit var syncService: SyncService
+
+    init {
+        application.getServiceLocator().getService(RecipeSourceLocal::class.java)?.also {
+            recipeSourceLocal = it
+        } ?: throw NullPointerException("application.getServiceLocator().getService(RecipeSourceLocal::class.java) returns null")
+        application.getServiceLocator().getService(SyncService::class.java)?.also {
+            syncService = it
+        } ?: throw NullPointerException("application.getServiceLocator().getService(SyncService::class.java) returns null")
+    }
 
     private val repoListData = MutableLiveData<LinkedList<RecipeLocal>>()
     val recipeListData: LiveData<LinkedList<Recipe>> = Transformations.map(repoListData) {
@@ -148,6 +156,6 @@ class RecipeRepository private constructor(val application: Application) {
         syncService.sync<RecipeLocal, RecipeRemote>(callback)
     }
 
-    companion object : SingletonHolder<RecipeRepository, Application>(::RecipeRepository)
+    companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository)
 
 }

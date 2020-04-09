@@ -58,7 +58,6 @@ class ReusableNetworkRequest(
         requestBuilder.setHttpMethod(httpMethod.method)
 
         CookieStore.getCookies(URI(url).host).forEach { _cookie ->
-            Log.i("NetworkRequestProvider", "addCookie: $_cookie")
             requestBuilder.addHeader("Cookie", _cookie)
         }
 

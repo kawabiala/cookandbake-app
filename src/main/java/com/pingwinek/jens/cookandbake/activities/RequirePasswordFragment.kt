@@ -1,19 +1,17 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import android.widget.EditText
 import com.pingwinek.jens.cookandbake.R
-import java.lang.ClassCastException
-import java.lang.IllegalStateException
 
 class RequirePasswordFragment : androidx.fragment.app.DialogFragment() {
 
-    lateinit var listener: RequirePasswordListener
+    private lateinit var listener: RequirePasswordListener
     private var message: String = "You should provide a message with setArguments"
 
     override fun setArguments(args: Bundle?) {
@@ -36,10 +34,11 @@ class RequirePasswordFragment : androidx.fragment.app.DialogFragment() {
         try {
             listener = context as RequirePasswordListener
         } catch (exception: ClassCastException) {
-            throw ClassCastException((context.toString()) + " must implement RequirePasswordListener")
+            throw ClassCastException("$context must implement RequirePasswordListener")
         }
     }
 
+    @SuppressLint("InflateParams")
     private fun buildDialog(activity: Activity) : Dialog {
         val builder = AlertDialog.Builder(activity).apply {
             setMessage(message)

@@ -1,14 +1,13 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
-import android.app.Application
 import android.net.ConnectivityManager
 import android.net.Network
-import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
 import com.pingwinek.jens.cookandbake.utils.CallbackLoopCounter
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
-class SyncService private constructor(val application: Application) {
+class SyncService private constructor(internetConnectivityManager: InternetConnectivityManager) {
 
     val syncManagerIdentifiers = LinkedList<SyncManagerIdentifier<ModelLocal, Model>>()
 
@@ -17,8 +16,6 @@ class SyncService private constructor(val application: Application) {
             syncAll {}
         }
     }
-
-    private val internetConnectivityManager = InternetConnectivityManager.getInstance(application)
 
     init {
         internetConnectivityManager.registerNetworkCallback(netWorkCallback)
@@ -115,5 +112,5 @@ class SyncService private constructor(val application: Application) {
         }
     }
 
-    companion object : SingletonHolder<SyncService, Application>(::SyncService)
+    companion object : SingletonHolder<SyncService, InternetConnectivityManager>(::SyncService)
 }

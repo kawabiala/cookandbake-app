@@ -42,7 +42,7 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
                 return@setOnClickListener
             }
 
-            AuthService.getInstance(application).logout { code, response ->
+            AuthService.getInstance(application).logout { code, _ ->
                 fillEmail()
                 if (code != 200) {
                     AlertDialog.Builder(this).apply {
@@ -101,12 +101,16 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
     private fun fillEmail() {
         val authService = AuthService.getInstance(application)
 
-        val emailText = if (authService.isLoggedIn()) {
-            resources.getString(R.string.logged_in_as, authService.getStoredAccount()?.getEmail())
-        } else if (authService.hasStoredAccount()) {
-            resources.getString(R.string.not_logged_in_as, authService.getStoredAccount()?.getEmail())
-        } else {
-            resources.getString(R.string.no_account)
+        val emailText = when {
+            authService.isLoggedIn() -> {
+                resources.getString(R.string.is_logged_in, authService.getStoredAccount()?.getEmail())
+            }
+            authService.hasStoredAccount() -> {
+                resources.getString(R.string.is_not_logged_in, authService.getStoredAccount()?.getEmail())
+            }
+            else -> {
+                resources.getString(R.string.no_account)
+            }
         }
 
         findViewById<TextView>(R.id.maEmailView).text = emailText

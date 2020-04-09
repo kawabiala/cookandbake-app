@@ -8,7 +8,4 @@ import com.pingwinek.jens.cookandbake.models.Recipe
  *
  * @param T a subtype of [Recipe]
  */
-interface RecipeSource<T: Recipe> :
-    Source<T> {
-
-}
+interface RecipeSource<T: Recipe> : Source<T>

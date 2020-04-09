@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.lib.networkRequest
+package com.pingwinek.jens.cookandbake.lib
 
 import android.app.Application
 import android.content.Context

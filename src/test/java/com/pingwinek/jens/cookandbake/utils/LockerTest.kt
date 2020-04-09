@@ -1,7 +1,7 @@
 package com.pingwinek.jens.cookandbake.utils
 
-import com.pingwinek.jens.cookandbake.utils.Locker
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 
 class LockerTest {
 

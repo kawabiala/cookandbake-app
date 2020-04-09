@@ -1,9 +1,7 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
-import android.app.Application
 import com.nhaarman.mockitokotlin2.*
-import com.pingwinek.jens.cookandbake.TestUtils
-import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
 import org.junit.Before
 import org.junit.Test
 
@@ -14,12 +12,11 @@ class SyncServiceTest {
     private val testRemote = mock<Model>()
 
     init {
-        TestUtils.mockSingletonHolderInstance(InternetConnectivityManager::class, mockedInternetConnectivityManager)
         doNothing().whenever(mockedInternetConnectivityManager).registerNetworkCallback(any())
     }
 
     private val testSyncManager = mock<SyncManager<ModelLocal, Model>>()
-    private val testSyncService = SyncService.getInstance(mock<Application>())
+    private val testSyncService = SyncService.getInstance(mockedInternetConnectivityManager)
 
     @Before
     fun setup() {
@@ -49,13 +46,13 @@ class SyncServiceTest {
     fun testSync() {
         testSyncService.registerSyncManager(testSyncManager)
         testSyncService.syncEntry(testLocal, testRemote) {}
-        verify(testSyncManager).syncEntry(any<ModelLocal>(), any<Model>(), anyOrNull())
+        verify(testSyncManager).syncEntry(any(), any(), anyOrNull())
 
         testSyncService.syncEntry<ModelLocal, Model>(1) {}
-        verify(testSyncManager).syncEntry(any<Int>(), anyOrNull())
+        verify(testSyncManager).syncEntry(any(), anyOrNull())
 
         testSyncService.syncByParentId<ModelLocal, Model>(1) {}
-        verify(testSyncManager).syncByParentId(any<Int>(), anyOrNull())
+        verify(testSyncManager).syncByParentId(any(), anyOrNull())
 
         testSyncService.sync<ModelLocal, Model> {}
         verify(testSyncManager).sync(anyOrNull())

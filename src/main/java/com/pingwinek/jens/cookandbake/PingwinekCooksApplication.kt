@@ -2,24 +2,29 @@ package com.pingwinek.jens.cookandbake
 
 import android.app.Application
 import android.util.Log
+import com.pingwinek.jens.cookandbake.db.DatabaseService
+import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
 import com.pingwinek.jens.cookandbake.sync.*
-import java.util.*
-import kotlin.collections.HashMap
 
 class PingwinekCooksApplication : Application() {
 
     private val tag = this::class.java.name
 
+    private val serviceLocator = PingwinekCooksServiceLocator()
+
     override fun onCreate() {
         super.onCreate()
+
+        registerServices()
 
         // Global ResponseRoutings
         /*
@@ -32,17 +37,51 @@ class PingwinekCooksApplication : Application() {
             Log.i(tag, "defaultRoute for 401")
         }
 
-        val syncService = SyncService.getInstance(this)
+    }
+
+    fun getServiceLocator(): ServiceLocator {
+        return serviceLocator
+    }
+
+    private fun registerServices() {
+        val internetConnectivityManager = InternetConnectivityManager.getInstance(this)
+        serviceLocator.registerService(internetConnectivityManager)
+
+        val pingwinekCooksDB = DatabaseService.getDatabase(this)
+        val networkRequestProvider = NetworkRequestProvider.getInstance(this)
+
+        val authService = AuthService.getInstance(this)
+        serviceLocator.registerService(authService)
+
+        val retryManager = PingwinekCooksRetryManager(authService)
+
+        val ingredientSourceLocal = IngredientSourceLocal.getInstance(pingwinekCooksDB)
+        serviceLocator.registerService(ingredientSourceLocal)
+
+        val ingredientSourceRemote = IngredientSourceRemote.getInstance(networkRequestProvider)
+        ingredientSourceRemote.retryManager = retryManager
+        serviceLocator.registerService(ingredientSourceRemote)
+
+        val recipeSourceLocal = RecipeSourceLocal.getInstance(pingwinekCooksDB)
+        serviceLocator.registerService(recipeSourceLocal)
+
+        val recipeSourceRemote = RecipeSourceRemote.getInstance(networkRequestProvider)
+        recipeSourceRemote.retryManager = retryManager
+        serviceLocator.registerService(recipeSourceRemote)
+
+        val syncService = SyncService.getInstance(internetConnectivityManager)
         syncService.registerSyncManager(IngredientSyncManager(
-            this,
-            IngredientSourceLocal.getInstance(this),
-            IngredientSourceRemote.getInstance(this),
+            recipeSourceLocal,
+            ingredientSourceLocal,
+            ingredientSourceRemote,
             IngredientSyncLogic())
         )
         syncService.registerSyncManager(RecipeSyncManager(
-            RecipeSourceLocal.getInstance(this),
-            RecipeSourceRemote.getInstance(this),
-            RecipeSyncLogic()))
+            recipeSourceLocal,
+            recipeSourceRemote,
+            RecipeSyncLogic())
+        )
+        serviceLocator.registerService(syncService)
     }
 
 }

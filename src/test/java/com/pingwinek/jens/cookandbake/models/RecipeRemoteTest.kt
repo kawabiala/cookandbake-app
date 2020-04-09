@@ -1,7 +1,5 @@
 package com.pingwinek.jens.cookandbake.models
 
-import com.pingwinek.jens.cookandbake.models.RecipeLocal
-import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Test
@@ -51,7 +49,7 @@ class RecipeRemoteTest {
             .thenReturn("Recipe Description 1")
         `when`(jsonObject.isNull("description"))
             .thenReturn(false)
-        `when`(jsonObject.getLong("lastModified"))
+        `when`(jsonObject.getLong("last_modified"))
             .thenReturn(lastModified)
 
         val recipe = RecipeRemote.parse(jsonObject)
@@ -64,7 +62,7 @@ class RecipeRemoteTest {
         assert(recipeMap["id"] == "1")
         assert(recipeMap["title"] == "Recipe Remote 1")
         assert(recipeMap["description"] == "Recipe Description 1")
-        assert(recipeMap["lastModified"] == lastModified.toString())
+        assert(recipeMap["last_modified"] == lastModified.toString())
     }
 
     @Test
@@ -86,7 +84,7 @@ class RecipeRemoteTest {
         assert(recipeMap["id"] == "0")
         assert(recipeMap["title"] == "")
         assert(recipeMap["description"] == "")
-        assert(recipeMap["lastModified"] == 0.toString())
+        assert(recipeMap["last_modified"] == 0.toString())
     }
 
     @Test

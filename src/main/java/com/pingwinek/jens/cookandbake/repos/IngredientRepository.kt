@@ -1,23 +1,31 @@
 package com.pingwinek.jens.cookandbake.repos
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import com.pingwinek.jens.cookandbake.lib.networkRequest.InternetConnectivityManager
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.models.IngredientRemote
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
-class IngredientRepository private constructor(val application: Application) {
+class IngredientRepository private constructor(val application: PingwinekCooksApplication) {
 
-    private val ingredientSourceLocal = IngredientSourceLocal.getInstance(application)
-    private val syncService = SyncService.getInstance(application)
+    private lateinit var ingredientSourceLocal: IngredientSourceLocal
+    private lateinit var syncService: SyncService
+
+    init {
+        application.getServiceLocator().getService(IngredientSourceLocal::class.java)?.also {
+            ingredientSourceLocal = it
+        } ?: throw NullPointerException("application.getServiceLocator().getService(IngredientSourceLocal::class.java) returns null")
+        application.getServiceLocator().getService(SyncService::class.java)?.also {
+            syncService = it
+        } ?: throw NullPointerException("application.getServiceLocator().getService(SyncService::class.java) returns null")
+    }
 
     private val repoListData = MutableLiveData<LinkedList<IngredientLocal>>()
     val ingredientListData = Transformations.map(repoListData) {
@@ -172,10 +180,11 @@ class IngredientRepository private constructor(val application: Application) {
         syncService.syncByParentId<IngredientLocal, IngredientRemote>(recipeId, callback)
     }
 
+    @Suppress("Unused")
     private fun syncIngredients(callback: () -> Unit) {
         syncService.sync<IngredientLocal, IngredientRemote>(callback)
     }
 
-    companion object : SingletonHolder<IngredientRepository, Application>(::IngredientRepository)
+    companion object : SingletonHolder<IngredientRepository, PingwinekCooksApplication>(::IngredientRepository)
 
 }

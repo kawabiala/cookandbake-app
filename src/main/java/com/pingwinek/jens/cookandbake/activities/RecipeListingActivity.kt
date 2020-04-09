@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,14 +10,12 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.*
-
 
 const val EXTRA_RECIPE_ID = "recipeID"
 
@@ -42,9 +39,7 @@ class RecipeListingActivity : BaseActivity() {
             adapter = viewAdapter
         }
 
-        recipeListingModel =
-            ViewModelProviders.of(this, ViewModelProvider.AndroidViewModelFactory.getInstance(this.application))
-                .get(RecipeListingViewModel::class.java)
+        recipeListingModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(RecipeListingViewModel::class.java)
         val recipeListData = recipeListingModel.recipeListData
 
         recipeListData.observe(this, Observer { newRecipeList: LinkedList<Recipe>? ->

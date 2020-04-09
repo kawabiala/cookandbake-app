@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
-import android.app.Application
-import com.pingwinek.jens.cookandbake.db.DatabaseService
+import com.pingwinek.jens.cookandbake.db.PingwinekCooksDB
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SourceLocal
 import com.pingwinek.jens.cookandbake.models.IngredientLocal
@@ -9,9 +8,7 @@ import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import com.pingwinek.jens.cookandbake.utils.Taskifier
 import java.util.*
 
-class IngredientSourceLocal private constructor(val application: Application) : IngredientSource<IngredientLocal>, SourceLocal<IngredientLocal> {
-
-    private val db = DatabaseService.getDatabase(application)
+class IngredientSourceLocal private constructor(private val db: PingwinekCooksDB) : IngredientSource<IngredientLocal>, SourceLocal<IngredientLocal> {
 
     override fun getAll() : Promise<LinkedList<IngredientLocal>> {
         val promise = Promise<LinkedList<IngredientLocal>>()
@@ -55,7 +52,7 @@ class IngredientSourceLocal private constructor(val application: Application) : 
     }
 
     override fun new(item: IngredientLocal) : Promise<IngredientLocal> {
-        var promise = Promise<IngredientLocal>()
+        val promise = Promise<IngredientLocal>()
         /*
         remoteId is unique -> if we already have an ingredient with the same remoteId,
         we delete it, before we insert the new one
@@ -65,23 +62,31 @@ class IngredientSourceLocal private constructor(val application: Application) : 
                 val ingredientLocal = getResult.value
                 if (getResult.status == Promise.Status.SUCCESS && ingredientLocal != null) {
                     delete(ingredientLocal.id).setResultHandler {
-                        promise = doNew(item)
+                        doNew(item).setResultHandler {
+                            promise.setResult(it.status, it.value)
+                        }
                     }
                 } else {
-                    promise = doNew(item)
+                    doNew(item).setResultHandler {
+                        promise.setResult(it.status, it.value)
+                    }
                 }
             }
         } else {
-            promise = doNew(item)
+            doNew(item).setResultHandler {
+                promise.setResult(it.status, it.value)
+            }
         }
         return promise
     }
 
     private fun doNew(item: IngredientLocal) : Promise<IngredientLocal> {
-        var promise = Promise<IngredientLocal>()
+        val promise = Promise<IngredientLocal>()
         Taskifier<Long> { newIngredientId ->
             if (newIngredientId != null) {
-                promise = get(newIngredientId.toInt())
+                get(newIngredientId.toInt()).setResultHandler {
+                    promise.setResult(it.status, it.value)
+                }
             } else {
                 promise.setResult(Promise.Status.FAILURE, null)
             }
@@ -90,9 +95,11 @@ class IngredientSourceLocal private constructor(val application: Application) : 
     }
 
     override fun update(item: IngredientLocal) : Promise<IngredientLocal> {
-        var promise = Promise<IngredientLocal>()
+        val promise = Promise<IngredientLocal>()
         Taskifier<Unit> {
-            promise = get(item.id)
+            get(item.id).setResultHandler {
+                promise.setResult(it.status, it.value)
+            }
         }.execute({db.ingredientDAO().updateIngredient(item)})
         return promise
     }
@@ -111,11 +118,13 @@ class IngredientSourceLocal private constructor(val application: Application) : 
     }
 
     fun flagAsDeleted(id: Int) : Promise<IngredientLocal> {
-        var promise = Promise<IngredientLocal>()
+        val promise = Promise<IngredientLocal>()
         get(id).setResultHandler { getResult ->
             val ingredientLocal = getResult.value
             if (getResult.status == Promise.Status.SUCCESS && ingredientLocal != null) {
-                promise = update(ingredientLocal.getDeleted())
+                update(ingredientLocal.getDeleted()).setResultHandler {
+                    promise.setResult(it.status, it.value)
+                }
             } else {
                 promise.setResult(Promise.Status.FAILURE, ingredientLocal)
             }
@@ -131,6 +140,6 @@ class IngredientSourceLocal private constructor(val application: Application) : 
         return promise
     }
 
-    companion object : SingletonHolder<IngredientSourceLocal, Application>(::IngredientSourceLocal)
+    companion object : SingletonHolder<IngredientSourceLocal, PingwinekCooksDB>(::IngredientSourceLocal)
 
 }

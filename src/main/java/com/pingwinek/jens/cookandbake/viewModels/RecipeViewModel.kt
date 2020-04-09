@@ -11,10 +11,10 @@ import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import java.util.*
 
-class RecipeViewModel(application: PingwinekCooksApplication) : AndroidViewModel(application) {
+class RecipeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val recipeRepository = RecipeRepository.getInstance(application)
-    private val ingredientRepository = IngredientRepository.getInstance(application)
+    private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
+    private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
 
     var recipeId: Int? = null
 

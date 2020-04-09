@@ -6,12 +6,12 @@ import java.util.*
 
 class SyncHelperTest {
 
-    val local = mock<ModelLocal>()
-    val remote = mock<Model>()
+    private val local = mock<ModelLocal>()
+    private val remote = mock<Model>()
 
-    val testSyncManager = mock<SyncManager<ModelLocal, Model>>()
+    private val testSyncManager = mock<SyncManager<ModelLocal, Model>>()
 
-    val syncHelper = SyncHelper(testSyncManager) {}
+    private val syncHelper = SyncHelper(testSyncManager) {}
 
     @Test
     fun testSetLocalList() {

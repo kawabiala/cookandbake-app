@@ -1,7 +1,7 @@
 package com.pingwinek.jens.cookandbake.utils
 
-import com.pingwinek.jens.cookandbake.Utils.quantityToDouble
-import com.pingwinek.jens.cookandbake.Utils.quantityToString
+import com.pingwinek.jens.cookandbake.utils.Utils.quantityToDouble
+import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 import org.junit.Test
 
 class UtilsTest {

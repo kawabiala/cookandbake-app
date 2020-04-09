@@ -4,16 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.OPTION_MENU_DONE
 import com.pingwinek.jens.cookandbake.R
-import org.w3c.dom.Text
 
 class RecipeEditActivity : BaseActivity() {
 

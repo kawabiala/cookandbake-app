@@ -36,7 +36,7 @@ class NewPasswordActivity : BaseActivity() {
 
     fun onNewPasswordButton(view: View) {
         tempCode?.let {
-            AuthService.getInstance(application).newPassword(it, findViewById<TextView>(R.id.npaPassword).text.toString()) { code, response ->
+            AuthService.getInstance(application).newPassword(it, findViewById<TextView>(R.id.npaPassword).text.toString()) { code, _ ->
                 when (code) {
                     200 -> {
                         startActivity(Intent(this, LoginActivity::class.java))
@@ -50,6 +50,7 @@ class NewPasswordActivity : BaseActivity() {
         }
     }
 
+    @Suppress("Unused")
     private fun deleteMessage() {
         findViewById<TextView>(R.id.npaMessageView).apply {
             text = null

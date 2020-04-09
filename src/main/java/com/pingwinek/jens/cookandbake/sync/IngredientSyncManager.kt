@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.sync
 
-import android.app.Application
 import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SyncLogic
@@ -14,13 +13,11 @@ import com.pingwinek.jens.cookandbake.utils.Locker
 import java.util.*
 
 class IngredientSyncManager(
-    val application: Application,
+    private val recipeSourceLocal: RecipeSourceLocal,
     private val ingredientSourceLocal: IngredientSourceLocal,
     private val ingredientSourceRemote: IngredientSourceRemote,
-    private val syncLogic: SyncLogic<IngredientLocal, IngredientRemote>
+    syncLogic: SyncLogic<IngredientLocal, IngredientRemote>
 ) : SyncManager<IngredientLocal, IngredientRemote>(ingredientSourceLocal, ingredientSourceRemote, syncLogic) {
-
-    private var recipeSourceLocal = RecipeSourceLocal.getInstance(application)
 
     private val locker = Locker()
 
