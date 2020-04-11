@@ -154,9 +154,7 @@ class IngredientSourceRemote private constructor(private val networkRequestProvi
     }
 
     private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
-        retryManager?.let {
-            retry(status, code, response, request)
-        }
+        retryManager?.retry(status, code, response, request)
     }
 
     companion object : SingletonHolder<IngredientSourceRemote, NetworkRequestProvider   >(::IngredientSourceRemote)

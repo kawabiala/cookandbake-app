@@ -14,10 +14,13 @@ import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
 import com.pingwinek.jens.cookandbake.sync.*
+import org.json.JSONException
+import org.json.JSONObject
 
 class PingwinekCooksApplication : Application() {
 
     private val tag = this::class.java.name
+    private val verificationError = "Verification error"
 
     private val serviceLocator = PingwinekCooksServiceLocator()
 
@@ -33,8 +36,26 @@ class PingwinekCooksApplication : Application() {
          */
         GlobalNetworkResponseRoutes.registerGlobalResponseRoute(
             AbstractNetworkResponseRoutes.Result.SUCCESS, 401
-        ) { result, code, response, request ->
+        ) { _, _, _, _ ->
             Log.i(tag, "defaultRoute for 401")
+        }
+
+        /*
+        Code 404 might signal, that we have a verification error. In case we get
+        a verification error, we trigger logout.
+         */
+        GlobalNetworkResponseRoutes.registerGlobalResponseRoute(
+            AbstractNetworkResponseRoutes.Result.SUCCESS, 404
+        ) { _, _, response, _ ->
+            try {
+                val jsonObject = JSONObject(response)
+                val error = jsonObject.getString("error")
+                if (error == verificationError) {
+                    getServiceLocator().getService(AuthService::class.java)?.logout { _, _ ->}
+                }
+            } finally {
+                Log.e(tag, response)
+            }
         }
 
     }
