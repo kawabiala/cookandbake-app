@@ -14,16 +14,16 @@ class ChangePasswordActivity : BaseActivity() {
         addContentView(R.layout.activity_change_password)
 
         fillEmail()
-    }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_CLOSE, resources.getString(R.string.close)) {
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_CLOSE,
+                resources.getString(R.string.close),
+                R.drawable.ic_action_close_black,
+                true
+            ) {
                 finish()
                 true
-            }.apply {
-                iconId = R.drawable.ic_action_close
-                ifRoom = true
             }
         }
     }

@@ -1,16 +1,20 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import android.view.*
-import android.view.Menu.NONE
-import android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.OptionMenu
 
 /*
 Sets option menu, handles user interaction with login / logout and defines handler for login and logout events
  */
 abstract class BaseActivity : AppCompatActivity() {
+
+    val optionMenu = OptionMenu()
 
     /*
     /////////////////////////////////////////////
@@ -31,30 +35,18 @@ abstract class BaseActivity : AppCompatActivity() {
     / options Menue
     /////////////////////////////////////////////
      */
-
+/*
     protected open fun getOptionsMenu() : OptionMenu? {
         return null
     }
-
+*/
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        getOptionsMenu()?.apply {
-            getMenuEntries().iterator().forEach { optionMenuItem ->
-                if (menu?.findItem(optionMenuItem.key) == null) {
-                    val m = menu?.add(NONE, optionMenuItem.key, NONE, optionMenuItem.value.itemName)
-                    optionMenuItem.value.iconId?.let { icondId ->
-                        m?.setIcon(icondId)
-                    }
-                    if (optionMenuItem.value.ifRoom) {
-                        m?.setShowAsAction(SHOW_AS_ACTION_IF_ROOM)
-                    }
-                }
-            }
-        }
+        menu?.let { optionMenu.setMenu(it) }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return getOptionsMenu()?.invokeAction(item.itemId) ?: super.onOptionsItemSelected(item)
+        return optionMenu.invokeAction(item.itemId)
     }
 
     /*
@@ -69,7 +61,7 @@ abstract class BaseActivity : AppCompatActivity() {
         layoutInflater.inflate(viewId, baseLayout)
     }
 }
-
+/*
 class OptionMenu {
 
     inner class OptionMenuItem(val itemName: String, val action: (Int) -> Boolean) {
@@ -93,3 +85,5 @@ class OptionMenu {
         return options[itemId]?.action?.invoke(itemId) ?: false
     }
 }
+
+ */

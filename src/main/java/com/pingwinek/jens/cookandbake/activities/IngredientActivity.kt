@@ -32,16 +32,16 @@ class IngredientActivity : BaseActivity() {
         }
 
         ingredientView.requestFocus()
-    }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_DONE, resources.getString(R.string.save)) {
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_DONE,
+                resources.getString(R.string.save),
+                R.drawable.ic_action_done_black,
+                true
+            ) {
                 save()
                 true
-            }.apply {
-                iconId = R.drawable.ic_action_done
-                ifRoom = true
             }
         }
     }

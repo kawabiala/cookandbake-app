@@ -13,16 +13,16 @@ class ImpressumActivity : BaseActivity() {
 
         val url = intent?.extras?.getString("url") ?: ""
         findViewById<WebView>(R.id.impressumWebView).loadUrl(url)
-    }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_CLOSE, resources.getString(R.string.close)) {
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_CLOSE,
+                resources.getString(R.string.close),
+                R.drawable.ic_action_close_black,
+                true
+            ) {
                 finish()
                 true
-            }.apply {
-                iconId = R.drawable.ic_action_close
-                ifRoom = true
             }
         }
     }

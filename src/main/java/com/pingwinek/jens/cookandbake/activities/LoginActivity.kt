@@ -22,17 +22,8 @@ class LoginActivity : BaseActivity() {
         passwordView = findViewById(R.id.laPassword)
 
         doConfirm()
-    }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-
-        doConfirm()
-    }
-
-    override fun getOptionsMenu() : OptionMenu {
-        return OptionMenu().apply {
+        optionMenu.apply {
             addMenuEntry(OPTION_MENU_REGISTER, resources.getString(R.string.register)) {
                 startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
                 true
@@ -56,6 +47,13 @@ class LoginActivity : BaseActivity() {
                 true
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        doConfirm()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

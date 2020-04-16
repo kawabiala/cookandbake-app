@@ -15,17 +15,8 @@ import java.util.*
 
 class IngredientRepository private constructor(val application: PingwinekCooksApplication) {
 
-    private lateinit var ingredientSourceLocal: IngredientSourceLocal
-    private lateinit var syncService: SyncService
-
-    init {
-        application.getServiceLocator().getService(IngredientSourceLocal::class.java)?.also {
-            ingredientSourceLocal = it
-        } ?: throw NullPointerException("application.getServiceLocator().getService(IngredientSourceLocal::class.java) returns null")
-        application.getServiceLocator().getService(SyncService::class.java)?.also {
-            syncService = it
-        } ?: throw NullPointerException("application.getServiceLocator().getService(SyncService::class.java) returns null")
-    }
+    private val ingredientSourceLocal = application.getServiceLocator().getService(IngredientSourceLocal::class.java)
+    private val syncService = application.getServiceLocator().getService(SyncService::class.java)
 
     private val repoListData = MutableLiveData<LinkedList<IngredientLocal>>()
     val ingredientListData = Transformations.map(repoListData) {

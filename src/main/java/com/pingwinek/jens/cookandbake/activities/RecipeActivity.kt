@@ -63,17 +63,12 @@ class RecipeActivity : BaseActivity(),
             adapter = pagerAdapter
             tabLayout.setupWithViewPager(this)
         }
-    }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
+        optionMenu.apply {
             addMenuEntry(OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
                 delete()
                 true
-            }/*.apply {
-                iconId = R.drawable.ic_action_delete_black
-                ifRoom = true
-            }*/
+            }
         }
     }
 

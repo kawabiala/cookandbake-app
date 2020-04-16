@@ -1,11 +1,11 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
@@ -22,12 +22,11 @@ const val EXTRA_RECIPE_ID = "recipeID"
 class RecipeListingActivity : BaseActivity() {
 
     private lateinit var recipeListingModel: RecipeListingViewModel
+    private lateinit var authService: AuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_listing)
-
-        findViewById<ImageView>(R.id.floatingActionButton).setImageResource(R.drawable.ic_action_add)
 
         val recipeList = LinkedList<Recipe>()
 
@@ -51,28 +50,48 @@ class RecipeListingActivity : BaseActivity() {
                 viewAdapter.notifyDataSetChanged()
             }
         })
+
+        authService = recipeListingModel.authService
+        configureOptionMenu()
     }
 
     override fun onResume() {
         super.onResume()
         loadData()
-        /*
-        if (! AuthService.getInstance(application).isLoggedIn()) {
-            AlertDialog.Builder(this).apply {
-                setMessage("Kein User eingeloggt. Jetzt einloggen oder anmelden?")
-                setPositiveButton("Ja") { dialog, which ->
-                    startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
-                }
-                setNegativeButton("Nein") { _, _ ->
-                    // Do nothing
-                }
-            }.show()
+
+        if (authService.isLoggedIn()) {
+            optionMenu.addMenuEntry(
+                OPTION_MENU_LOGIN,
+                resources.getString(R.string.logged_in_as, authService.getStoredAccount()),
+                R.drawable.ic_login_person_black,
+                true
+            ) {
+                AlertDialog.Builder(this).apply {
+                    setMessage(resources.getString(
+                        R.string.logged_in_as,
+                        authService.getStoredAccount()?.getEmail()
+                    ))
+                    setPositiveButton("Ok") { _, _ ->
+                        // do nothing
+                    }
+                }.create().show()
+                true
+            }
+        } else {
+            optionMenu.addMenuEntry(
+                OPTION_MENU_LOGIN,
+                resources.getString(R.string.login),
+                R.drawable.ic_login_person_outline_black,
+                true
+                ) {
+                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
+                true
+            }
         }
-         */
     }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
+    private fun configureOptionMenu() {
+        optionMenu.apply {
             addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
                 startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true

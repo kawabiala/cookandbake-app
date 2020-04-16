@@ -14,16 +14,16 @@ class LostPasswordActivity : BaseActivity() {
         addContentView(R.layout.activity_lost_password)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
 
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_CLOSE, resources.getString(R.string.close)) {
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_CLOSE,
+                resources.getString(R.string.close),
+                R.drawable.ic_action_close_black,
+                true
+            ) {
                 finish()
                 true
-            }.apply {
-                iconId = R.drawable.ic_action_close
-                ifRoom = true
             }
         }
     }
@@ -31,7 +31,7 @@ class LostPasswordActivity : BaseActivity() {
     fun onLostPasswordButton(view: View) {
         deleteMessage()
 
-        AuthService.getInstance(application).lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, response ->
+        AuthService.getInstance(application).lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, _ ->
             when (code) {
                 200 -> {
                     setMessage(resources.getString(R.string.confirmationSent))

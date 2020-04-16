@@ -64,23 +64,23 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
             startActivity(Intent(this, ImpressumActivity::class.java)
                 .putExtra("url", DATAPROTECTIONPATH))
         }
+
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_CLOSE,
+                resources.getString(R.string.close),
+                R.drawable.ic_action_close_black,
+                true
+            ) {
+                finish()
+                true
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         fillEmail()
-    }
-
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_CLOSE, resources.getString(R.string.close)) {
-                finish()
-                true
-            }.apply {
-                iconId = R.drawable.ic_action_close
-                ifRoom = true
-            }
-        }
     }
 
     override fun onPositiveButton(password: String?) {

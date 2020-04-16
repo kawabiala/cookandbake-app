@@ -5,5 +5,5 @@
             android:id="@+id/done"
             android:title="@string/done"
             app:showAsAction="ifRoom"
-            android:icon="@drawable/ic_action_done"/>
+            android:icon="@drawable/ic_action_done_black"/>
 </menu>

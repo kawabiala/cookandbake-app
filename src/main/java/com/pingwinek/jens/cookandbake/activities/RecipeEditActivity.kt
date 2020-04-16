@@ -34,22 +34,15 @@ class RecipeEditActivity : BaseActivity() {
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(titleView, InputMethodManager.SHOW_IMPLICIT)
 
-    }
-/*
-    override fun onResume() {
-        super.onResume()
-
-
-    }
-*/
-    override fun getOptionsMenu(): OptionMenu {
-        return OptionMenu().apply {
-            addMenuEntry(OPTION_MENU_DONE, resources.getString(R.string.save)) {
+        optionMenu.apply {
+            addMenuEntry(
+                OPTION_MENU_DONE,
+                resources.getString(R.string.save),
+                R.drawable.ic_action_done_black,
+                true
+            ) {
                 save()
                 true
-            }.apply {
-                iconId = R.drawable.ic_action_done
-                ifRoom = true
             }
         }
     }
