@@ -43,6 +43,7 @@
     <string name="recipe_title">Rezepttitel</string>
     <string name="recipe_description">Kurzbeschreibung</string>
     <string name="recipe_delete_confirm">Wirklich das Rezept löschen?</string>
+    <string name="add_recipe">Rezept hinzufügen</string>
 
     <string name="ingredientRemote">Zutat</string>
     <string name="ingredients">Zutaten</string>
