@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,15 +23,24 @@ const val EXTRA_RECIPE_ID = "recipeID"
 class RecipeListingActivity : BaseActivity() {
 
     private lateinit var recipeListingModel: RecipeListingViewModel
-    private lateinit var authService: AuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_listing)
 
-        val recipeList = LinkedList<Recipe>()
+        recipeListingModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(RecipeListingViewModel::class.java)
 
+        val recipeListData = recipeListingModel.recipeListData
+        val recipeList = recipeListData.value ?: LinkedList()
         val viewAdapter = RecipeListingAdapter(recipeList)
+
+        recipeListData.observe(this, Observer {
+            Log.v(this::class.java.name, "recipeListData::observe notifyDataSetChanged")
+            viewAdapter.notifyDataSetChanged()
+        })
 
         findViewById<RecyclerView>(R.id.recipeList).apply {
             setHasFixedSize(true)
@@ -38,20 +48,6 @@ class RecipeListingActivity : BaseActivity() {
             adapter = viewAdapter
         }
 
-        recipeListingModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(RecipeListingViewModel::class.java)
-        val recipeListData = recipeListingModel.recipeListData
-
-        recipeListData.observe(this, Observer { newRecipeList: LinkedList<Recipe>? ->
-            newRecipeList?.let { nrl ->
-                recipeList.clear()
-                recipeList.addAll(nrl.sortedBy { recipe ->
-                    recipe.title
-                })
-                viewAdapter.notifyDataSetChanged()
-            }
-        })
-
-        authService = recipeListingModel.authService
         configureOptionMenu()
     }
 
@@ -59,17 +55,17 @@ class RecipeListingActivity : BaseActivity() {
         super.onResume()
         loadData()
 
-        if (authService.isLoggedIn()) {
+        if (recipeListingModel.authService.isLoggedIn()) {
             optionMenu.addMenuEntry(
                 OPTION_MENU_LOGIN,
-                resources.getString(R.string.logged_in_as, authService.getStoredAccount()),
+                resources.getString(R.string.logged_in_as, recipeListingModel.authService.getStoredAccount()?.getEmail()),
                 R.drawable.ic_login_person_black,
                 true
             ) {
                 AlertDialog.Builder(this).apply {
                     setMessage(resources.getString(
                         R.string.logged_in_as,
-                        authService.getStoredAccount()?.getEmail()
+                        recipeListingModel.authService.getStoredAccount()?.getEmail()
                     ))
                     setPositiveButton("Ok") { _, _ ->
                         // do nothing
@@ -151,10 +147,20 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
 
     override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
 
-        (viewHolder.recipeListItem.getViewById(R.id.itemTitle) as TextView).text = recipeList[position].title
-        (viewHolder.recipeListItem.getViewById(R.id.itemDescription) as TextView).text = recipeList[position].description
+        Log.v(this::class.java.name, "onBindViewHolder position $position")
+
+        viewHolder.recipeTitle.text = recipeList[position].title
+        viewHolder.recipeDescription.text = recipeList[position].description
         viewHolder.recipeListItem.tag = recipeList[position].id
     }
 }
 
-class RecipeListingViewHolder(val recipeListItem: ConstraintLayout) : RecyclerView.ViewHolder(recipeListItem)
+class RecipeListingViewHolder(val recipeListItem: ConstraintLayout) : RecyclerView.ViewHolder(recipeListItem) {
+
+    val recipeTitle = recipeListItem.getViewById(R.id.itemTitle) as TextView
+    val recipeDescription = recipeListItem.getViewById(R.id.itemDescription) as TextView
+
+    init {
+        Log.v(this::class.java.name, "RecipeListingViewHolder::init")
+    }
+}

@@ -46,6 +46,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         recipeId?.let {
+            println("Recipe update")
             recipeRepository.updateRecipe(it, title, description, instruction)
             return
         }
@@ -86,9 +87,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     fun delete() {
         recipeId?.let {
-            recipeRepository.deleteRecipe(it) {
-                loadData()
-            }
+            recipeRepository.deleteRecipe(it) {}
         }
     }
 

@@ -50,3 +50,9 @@ const val OPTION_MENU_MANAGE_ACCOUNT = 10
 const val OPTION_MENU_DELETE = 11
 
 const val SHARED_PREFERENCES_FILE = "preferences"
+
+/**
+ * 60000 milliseconds = 60 seconds = 1 minute
+ * this could go into a config file
+ */
+const val MIN_UPDATE_INTERVAL = 60000

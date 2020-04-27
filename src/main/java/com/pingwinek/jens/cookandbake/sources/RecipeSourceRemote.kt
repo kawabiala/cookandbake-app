@@ -1,14 +1,13 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import com.pingwinek.jens.cookandbake.RECIPEPATH
-import com.pingwinek.jens.cookandbake.models.Recipes
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import com.pingwinek.jens.cookandbake.models.RecipeRemote
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.lib.networkRequest.RetryManager
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
+import com.pingwinek.jens.cookandbake.models.RecipeRemote
+import com.pingwinek.jens.cookandbake.models.Recipes
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
 /**
@@ -26,15 +25,20 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         val promise = Promise<LinkedList<RecipeRemote>>()
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             promise.setResult(
                 Promise.Status.SUCCESS,
                 Recipes(response)
             )
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _ ->
             promise.setResult(Promise.Status.FAILURE, LinkedList())
+        }
+
+        val retryRequest = networkRequest.clone()
+
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { status, code, response ->
+            retryManager?.retry(status, code, response, retryRequest)
         }
         networkRequest.start()
         return promise
@@ -45,7 +49,7 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
 
         val promise = Promise<RecipeRemote>()
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             val recipes = Recipes(response)
             val recipe = if (recipes.isEmpty()) {
                 null
@@ -54,9 +58,14 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
             }
             promise.setResult(Promise.Status.SUCCESS, recipe)
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _ ->
             promise.setResult(Promise.Status.FAILURE, null)
+        }
+
+        val retryRequest = networkRequest.clone()
+
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { status, code, response ->
+            retryManager?.retry(status, code, response, retryRequest)
         }
         networkRequest.start()
         return promise
@@ -70,12 +79,11 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         val promise = Promise<RecipeRemote>()
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             val recipes = Recipes(response)
                 promise.setResult(Promise.Status.SUCCESS, recipes[0])
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _ ->
             promise.setResult(Promise.Status.FAILURE, null)
         }
         networkRequest.start()
@@ -90,12 +98,11 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         val promise = Promise<RecipeRemote>()
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             val recipes = Recipes(response)
                 promise.setResult(Promise.Status.SUCCESS, recipes[0])
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401, this::retry)
-        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _ ->
             promise.setResult(Promise.Status.FAILURE, null)
         }
         networkRequest.start()
@@ -107,18 +114,14 @@ class RecipeSourceRemote private constructor(private val networkRequestProvider:
 
         val promise = Promise<Unit>()
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, _, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, _ ->
             promise.setResult(Promise.Status.SUCCESS, null)
         }
-        networkResponseRouter.registerDefaultResponseRoute { _, _, _, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, _, _ ->
             promise.setResult(Promise.Status.FAILURE, null)
         }
         networkRequest.start()
         return promise
-    }
-
-    private fun retry(status: AbstractNetworkResponseRoutes.Result, code: Int, response: String, request: NetworkRequest) {
-        retryManager?.retry(status, code, response, request)
     }
 
     companion object : SingletonHolder<RecipeSourceRemote, NetworkRequestProvider>(::RecipeSourceRemote)

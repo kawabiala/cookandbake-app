@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
+import android.util.Log
 import com.pingwinek.jens.cookandbake.utils.CallbackLoopCounter
 import java.util.*
 
@@ -10,6 +11,7 @@ abstract class SyncManager<TLocal: ModelLocal, TRemote: Model>(
 ) {
 
     fun syncEntry(local: TLocal?, remote: TRemote?, onDone: () -> Unit) {
+        Log.v(this::class.java.name, "syncEntry local: $local remote: $remote")
         when (syncLogic.compare(local, remote)) {
             SyncLogic.SyncAction.NEW_LOCAL -> {
                 remote?.let { nonNullRemote ->
@@ -55,7 +57,7 @@ abstract class SyncManager<TLocal: ModelLocal, TRemote: Model>(
 
         getLocal(localId).setResultHandler { localResult ->
             val local = localResult.value
-            if (localResult.status == Promise.Status.SUCCESS && local != null) {
+            if (localResult.status == Promise.Status.SUCCESS && local != null && local.remoteId != null) {
                 getRemote(local).setResultHandler { remoteResult ->
                     val remote = remoteResult.value
                     if (remoteResult.status == Promise.Status.SUCCESS) {
@@ -64,6 +66,8 @@ abstract class SyncManager<TLocal: ModelLocal, TRemote: Model>(
                         onDone()
                     }
                 }
+            } else if (localResult.status == Promise.Status.SUCCESS && local != null) {
+                syncEntry(local, null, onDone)
             } else {
                 onDone()
             }

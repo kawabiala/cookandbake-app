@@ -137,6 +137,7 @@ class RecipeSyncManager(
     }
 
     override fun deleteRemote(remote: RecipeRemote, onDone: () -> Unit) {
+        println("delete remote $remote")
         recipeSourceRemote.delete(remote.id)
             .setResultHandler{
                 onDone()

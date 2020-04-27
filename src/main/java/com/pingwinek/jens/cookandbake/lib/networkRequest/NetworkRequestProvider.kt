@@ -25,7 +25,7 @@ class NetworkRequestProvider private constructor(val application: Application) {
         url: String,
         method: Method?
     ): NetworkRequest {
-        return ReusableNetworkRequest(
+        return ConfigurableNetworkRequest(
             url,
             Executors.newSingleThreadExecutor(),
             application,

@@ -3,21 +3,21 @@ package com.pingwinek.jens.cookandbake.lib.networkRequest
 object GlobalNetworkResponseRoutes : AbstractNetworkResponseRoutes() {
 
     @Suppress("Unused")
-    fun registerGlobalDefaultRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+    fun registerGlobalDefaultRoute(callback: (result: Result, code: Int, response: String) -> Unit) {
         defaultRoute = callback
     }
 
     @Suppress("Unused")
-    fun registerGlobalDefaultSuccessRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+    fun registerGlobalDefaultSuccessRoute(callback: (result: Result, code: Int, response: String) -> Unit) {
         defaultSuccessRoute = callback
     }
 
     @Suppress("Unused")
-    fun registerGlobalDefaultFailedRoute(callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+    fun registerGlobalDefaultFailedRoute(callback: (result: Result, code: Int, response: String) -> Unit) {
         defaultFailedRoute = callback
     }
 
-    fun registerGlobalResponseRoute(result: Result, code: Int, callback: (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit) {
+    fun registerGlobalResponseRoute(result: Result, code: Int, callback: (result: Result, code: Int, response: String) -> Unit) {
         when (result) {
             Result.SUCCESS -> successRoutes[code] = callback
             Result.FAILED -> failedRoutes[code] = callback

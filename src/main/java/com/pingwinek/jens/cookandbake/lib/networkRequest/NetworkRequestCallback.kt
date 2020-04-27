@@ -14,7 +14,9 @@ class NetworkRequestCallback(private val networkResponseRouter: NetworkResponseR
 
     override fun onReadCompleted(request: UrlRequest?, info: UrlResponseInfo?, byteBuffer: ByteBuffer?) {
         byteBuffer?.flip()
-        val str = StandardCharsets.UTF_8.decode(byteBuffer).toString()
+        val str = byteBuffer?.let {
+            StandardCharsets.UTF_8.decode(byteBuffer).toString()
+        }
         responseStringBuilder.append(str)
 
         request?.read(ByteBuffer.allocateDirect(capacity))

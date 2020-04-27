@@ -7,11 +7,11 @@ abstract class AbstractNetworkResponseRoutes {
         FAILED("failed")
     }
 
-    protected var defaultRoute: ((result: Result, code: Int, response: String, request: NetworkRequest) -> Unit)? = null
+    protected var defaultRoute: ((result: Result, code: Int, response: String) -> Unit)? = null
 
-    protected var defaultSuccessRoute: ((result: Result, code: Int, response: String, request: NetworkRequest) -> Unit)? = null
-    protected var defaultFailedRoute: ((result: Result, code: Int, response: String, request: NetworkRequest) -> Unit)? = null
+    protected var defaultSuccessRoute: ((result: Result, code: Int, response: String) -> Unit)? = null
+    protected var defaultFailedRoute: ((result: Result, code: Int, response: String) -> Unit)? = null
 
-    protected val successRoutes: MutableMap<Int, (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit> = mutableMapOf()
-    protected val failedRoutes: MutableMap<Int, (result: Result, code: Int, response: String, request: NetworkRequest) -> Unit> = mutableMapOf()
+    protected val successRoutes: MutableMap<Int, (result: Result, code: Int, response: String) -> Unit> = mutableMapOf()
+    protected val failedRoutes: MutableMap<Int, (result: Result, code: Int, response: String) -> Unit> = mutableMapOf()
 }

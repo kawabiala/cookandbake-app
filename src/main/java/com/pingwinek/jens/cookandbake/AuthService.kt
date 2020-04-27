@@ -16,10 +16,21 @@ import kotlin.collections.HashMap
 
 class AuthService private constructor(private val application: Application){
 
+    interface AuthenticationListener {
+        fun onLogin()
+        fun onLogout()
+    }
+
+    private val authListeners = LinkedList<AuthenticationListener>()
+
     private val method = NetworkRequestProvider.Method.POST
     private val contentType = NetworkRequestProvider.ContentType.APPLICATION_URLENCODED
     private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
     private val prefs = application.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+
+    fun registerAuthenticationListener(authenticationListener: AuthenticationListener) {
+        authListeners.add(authenticationListener)
+    }
 
     fun hasStoredAccount() : Boolean {
         return (Account.getStoredAccount(application) != null)
@@ -48,12 +59,12 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,201) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,201) { _, _, response ->
             Log.i(this::class.java.name, "register 201")
             Account.createStoredAccount(application, email)
             callback(201, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -77,11 +88,11 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "new Password 200")
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -105,19 +116,20 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "login 200")
             parseRefreshToken(response)?.let { refreshToken ->
                 Account.createStoredAccount(application, email, refreshToken)
             }
+            notifyOnLogin()
             callback(200, response)
         }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,206) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,206) { _, _, response ->
             Log.i(this::class.java.name, "login 206")
             Account.createStoredAccount(application, email)
             callback(206, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -138,12 +150,12 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "lost Password 200")
             Account.createStoredAccount(application, email)
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -169,11 +181,11 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "new Password 200")
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -203,11 +215,11 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "change Password 200")
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -241,7 +253,7 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "refresh 200")
             parseRefreshToken(response)?.let { refreshToken ->
                 params["email"]?.let {
@@ -250,7 +262,7 @@ class AuthService private constructor(private val application: Application){
             }
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
             if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
                 callback(-1, response)
             } else {
@@ -280,6 +292,7 @@ class AuthService private constructor(private val application: Application){
         }.apply()
 
         DatabaseService.resetDatabase(application)
+        notifyOnLogout()
 
         val params = HashMap<String, String>()
         params["email"] = email
@@ -289,11 +302,11 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "logout")
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { _, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, code, response ->
             Log.i(this::class.java.name, "logout on server failed")
             callback(code, response)
         }
@@ -311,7 +324,7 @@ class AuthService private constructor(private val application: Application){
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response, _ ->
+        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
             Log.i(this::class.java.name, "unsubscribe 200")
 
             prefs.edit().apply {
@@ -323,7 +336,7 @@ class AuthService private constructor(private val application: Application){
 
             callback(200, response)
         }
-        networkResponseRouter.registerDefaultResponseRoute { _, code, response, _ ->
+        networkResponseRouter.registerDefaultResponseRoute { _, code, response ->
             Log.i(this::class.java.name, "unsubscribe on server failed")
             callback(code, response)
         }
@@ -340,6 +353,18 @@ class AuthService private constructor(private val application: Application){
             }.apply()
         }
         return uuid
+    }
+
+    private fun notifyOnLogin() {
+        authListeners.forEach { listener ->
+            listener.onLogin()
+        }
+    }
+
+    private fun notifyOnLogout() {
+        authListeners.forEach { listener ->
+            listener.onLogout()
+        }
     }
 
     companion object : SingletonHolder<AuthService, Application>(::AuthService)

@@ -5,16 +5,18 @@ import android.util.Log
 import com.pingwinek.jens.cookandbake.db.DatabaseService
 import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
-import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
-import com.pingwinek.jens.cookandbake.sync.*
-import org.json.JSONException
+import com.pingwinek.jens.cookandbake.sync.IngredientSyncLogic
+import com.pingwinek.jens.cookandbake.sync.IngredientSyncManager
+import com.pingwinek.jens.cookandbake.sync.RecipeSyncLogic
+import com.pingwinek.jens.cookandbake.sync.RecipeSyncManager
 import org.json.JSONObject
 
 class PingwinekCooksApplication : Application() {
@@ -36,7 +38,7 @@ class PingwinekCooksApplication : Application() {
          */
         GlobalNetworkResponseRoutes.registerGlobalResponseRoute(
             AbstractNetworkResponseRoutes.Result.SUCCESS, 401
-        ) { _, _, _, _ ->
+        ) { _, _, _ ->
             Log.i(tag, "defaultRoute for 401")
         }
 
@@ -46,12 +48,12 @@ class PingwinekCooksApplication : Application() {
          */
         GlobalNetworkResponseRoutes.registerGlobalResponseRoute(
             AbstractNetworkResponseRoutes.Result.SUCCESS, 404
-        ) { _, _, response, _ ->
+        ) { _, _, response ->
             try {
                 val jsonObject = JSONObject(response)
                 val error = jsonObject.getString("error")
                 if (error == verificationError) {
-                    getServiceLocator().getService(AuthService::class.java)?.logout { _, _ ->}
+                    getServiceLocator().getService(AuthService::class.java).logout { _, _ ->}
                 }
             } finally {
                 Log.e(tag, response)

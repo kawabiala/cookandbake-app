@@ -7,20 +7,29 @@ import org.chromium.net.UploadDataProvider
 import org.chromium.net.UrlRequest
 import java.net.URI
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class ReusableNetworkRequest(
+class ConfigurableNetworkRequest private constructor(
     override val url: String,
     override val executor: ExecutorService,
     override val application: Application,
-    override val httpMethod: NetworkRequestProvider.Method
+    override val httpMethod: NetworkRequestProvider.Method,
+    private val networkResponseRouter: NetworkResponseRouter
 ) : NetworkRequest {
+
+    constructor(
+        url: String,
+        executor: ExecutorService,
+        application: Application,
+        httpMethod: NetworkRequestProvider.Method
+    ) : this(url, executor, application, httpMethod, NetworkResponseRouterImpl(application.mainLooper))
 
     private val cronetEngine = CronetEngine.Builder(application).build()
     private val headers: MutableMap<String, String> = mutableMapOf()
-    private val networkResponseRouter = NetworkResponseRouter(application.mainLooper, this)
-
     private var uploadDataProvider: UploadDataProvider? = null
     private var contentType: NetworkRequestProvider.ContentType? = null
+
+    private var urlRequest: UrlRequest? = null
 
     override fun addHeader(header: String, value: String) {
         headers[header] = value
@@ -35,10 +44,35 @@ class ReusableNetworkRequest(
         return networkResponseRouter
     }
 
-    override fun start(): UrlRequest {
-        val urlRequest = getUrlRequestBuilder(NetworkRequestCallback(networkResponseRouter)).build()
-        urlRequest.start()
-        return urlRequest
+    @Throws(Exception::class)
+    override fun start() {
+        if (urlRequest != null) {
+            throw Exception("You can't start this request twice")
+        }
+        urlRequest = getUrlRequestBuilder(NetworkRequestCallback(networkResponseRouter)).build().apply {
+            start()
+        }
+    }
+
+    override fun clone(): NetworkRequest {
+        val clonedRequest = ConfigurableNetworkRequest(
+            url,
+            Executors.newSingleThreadExecutor(),
+            application,
+            httpMethod,
+            (networkResponseRouter as NetworkResponseRouterImpl).clone()
+        )
+        headers.forEach { header ->
+            clonedRequest.addHeader(header.key, header.value)
+        }
+        uploadDataProvider?.let { nonNullUploadProvider ->
+            contentType?.let { nonNullContentType ->
+                clonedRequest.setUploadDataProvider(nonNullUploadProvider,
+                    nonNullContentType
+                )
+            }
+        }
+        return clonedRequest
     }
 
     private fun getUrlRequestBuilder(networkRequestCallback: NetworkRequestCallback) : UrlRequest.Builder {

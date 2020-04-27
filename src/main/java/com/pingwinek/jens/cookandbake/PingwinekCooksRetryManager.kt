@@ -14,7 +14,7 @@ class PingwinekCooksRetryManager(private val authService: AuthService) : RetryMa
     ) {
         authService.onSessionInvalid { authCode, _ ->
             if (authCode == 200) {
-                request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _, _ ->
+                request.obtainNetworkResponseRouter().registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS, 401) { _, _, _ ->
                     //Do nothing, especially don't loop
                 }
                 request.start()

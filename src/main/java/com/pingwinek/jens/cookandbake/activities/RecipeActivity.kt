@@ -30,8 +30,7 @@ class RecipeActivity : BaseActivity(),
         recipeModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        )
-            .get(RecipeViewModel::class.java)
+        ).get(RecipeViewModel::class.java)
 
         if (intent.hasExtra(EXTRA_RECIPE_ID)) {
             intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
@@ -179,8 +178,8 @@ class RecipeActivity : BaseActivity(),
         AlertDialog.Builder(this).apply {
             setMessage(R.string.recipe_delete_confirm)
             setPositiveButton(R.string.yes) { dialog, which ->
-                finish()
                 recipeModel.delete()
+                finish()
             }
             setNegativeButton(R.string.no) { _, _ ->
                 // Do nothing

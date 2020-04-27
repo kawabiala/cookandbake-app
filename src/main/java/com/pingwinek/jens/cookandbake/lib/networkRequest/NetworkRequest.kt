@@ -17,5 +17,7 @@ interface NetworkRequest {
 
     fun obtainNetworkResponseRouter() : NetworkResponseRouter
 
-    fun start(): UrlRequest
+    fun start()
+
+    fun clone(): NetworkRequest
 }

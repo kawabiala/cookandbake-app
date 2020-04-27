@@ -1,8 +1,10 @@
 package com.pingwinek.jens.cookandbake.repos
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import com.pingwinek.jens.cookandbake.AuthService
+import com.pingwinek.jens.cookandbake.MIN_UPDATE_INTERVAL
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
@@ -13,23 +15,50 @@ import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
-class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
+class RecipeRepository private constructor(val application: PingwinekCooksApplication) : AuthService.AuthenticationListener {
 
     private val recipeSourceLocal = application.getServiceLocator().getService(RecipeSourceLocal::class.java)
     private val syncService = application.getServiceLocator().getService(SyncService::class.java)
 
-    private val repoListData = MutableLiveData<LinkedList<RecipeLocal>>()
-    val recipeListData: LiveData<LinkedList<Recipe>> = Transformations.map(repoListData) {
-        LinkedList<Recipe>().apply {
-            it.forEach { recipeLocal ->
-                if (!recipeLocal.flagAsDeleted) {
-                    add(recipeLocal)
-                }
-            }
-        }
+    private val repoListData = MutableLiveData<LinkedList<Recipe>>()
+        .apply {
+            value = LinkedList()
     }
 
-    fun getAll() {
+    private var lastUpdated: Long = 0
+
+    val recipeListData: LiveData<LinkedList<Recipe>> = repoListData
+
+    init {
+        application.getServiceLocator()
+            .getService(AuthService::class.java)
+            .registerAuthenticationListener(this)
+        getAll()
+    }
+
+    override fun onLogin() {
+        lastUpdated = 0
+        getAll()
+        Log.i(this::class.java.name, "login")
+    }
+
+    override fun onLogout() {
+        Log.i(this::class.java.name, "logout")
+        clearRecipeList()
+    }
+
+    fun checkForUpdates() {
+        getAll()
+    }
+
+    private fun getAll() {
+        val now = Date().time
+        if (now - lastUpdated < MIN_UPDATE_INTERVAL) {
+            return
+        } else {
+            lastUpdated = now
+        }
+
         fetchAll()
         syncRecipes {
             fetchAll()
@@ -37,7 +66,13 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
     fun getRecipe(recipeId: Int) {
-        fetchRecipe(recipeId)
+        // if we already have the recipe, we skip retrieving it again from the local database
+        if (recipeListData.value?.find {
+                it.id == recipeId
+            } == null) {
+            fetchRecipe(recipeId)
+        }
+
         syncRecipe(recipeId) {
             fetchRecipe(recipeId)
         }
@@ -51,9 +86,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     ) {
         recipeSourceLocal.new(RecipeLocal(title, description, instruction))
             .setResultHandler{ result ->
-                val status = result.status
                 val newRecipe = result.value
-                if (status == Promise.Status.SUCCESS && newRecipe != null && confirmUpdate(newRecipe.id)) {
+                if (result.status == Promise.Status.SUCCESS && newRecipe != null && confirmUpdate(newRecipe.id)) {
                     updateRecipeList(newRecipe)
                     syncRecipe(newRecipe.id) {
                         fetchRecipe(newRecipe.id)
@@ -68,30 +102,30 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         description: String?,
         instruction: String?
     ) {
-        val recipe = repoListData.value?.find {
-            it.id == id
-        } ?: return
-
-        recipeSourceLocal.update(recipe.getUpdated(title, description, instruction))
-            .setResultHandler{ result ->
-                val status = result.status
-                val updatedRecipe = result.value
-                if (status == Promise.Status.SUCCESS && updatedRecipe != null) {
-                    updateRecipeList(updatedRecipe)
-                    syncRecipe(updatedRecipe.id) {
-                        fetchRecipe(updatedRecipe.id)
+        recipeSourceLocal.get(id).setResultHandler { recipeLocalResult ->
+            val recipeLocal = recipeLocalResult.value
+            if (recipeLocalResult.status == Promise.Status.SUCCESS && recipeLocal != null) {
+                recipeSourceLocal.update(recipeLocal.getUpdated(title, description, instruction))
+                    .setResultHandler{ result ->
+                        val updatedRecipe = result.value
+                        if (result.status == Promise.Status.SUCCESS && updatedRecipe != null) {
+                            updateRecipeList(updatedRecipe)
+                            syncRecipe(updatedRecipe.id) {
+                                fetchRecipe(updatedRecipe.id)
+                            }
+                        }
                     }
-                }
+            }
         }
+
     }
 
     fun deleteRecipe(recipeId: Int, callback: () -> Unit) {
         IngredientRepository.getInstance(application).deleteIngredientForRecipeId(recipeId) {
             recipeSourceLocal.flagAsDeleted(recipeId)
                 .setResultHandler { result ->
-                    val status = result.status
                     val recipe = result.value
-                    if (status == Promise.Status.SUCCESS && recipe != null) {
+                    if (result.status == Promise.Status.SUCCESS && recipe != null) {
                         updateRecipeList(recipe)
                         syncRecipe(recipe.id) {
                             fetchRecipe(recipe.id)
@@ -105,7 +139,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     private fun fetchAll() {
         recipeSourceLocal.getAll()
             .setResultHandler { result ->
-                repoListData.postValue(result.value)
+                result.value?.let { updateRecipeList(it) }
         }
     }
 
@@ -122,21 +156,46 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         }
     }
 
-    private fun updateRecipeList(updatedRecipe: RecipeLocal) {
-        val recipeList = repoListData.value ?: LinkedList()
-        recipeList.removeAll {
-            it.id == updatedRecipe.id
+    private fun updateRecipeList(updatedRecipeList: LinkedList<RecipeLocal>) {
+        repoListData.value = repoListData.value?.apply {
+            clear()
+            updatedRecipeList.forEach { updatedRecipe ->
+                if (!updatedRecipe.flagAsDeleted) add(updatedRecipe)
+            }
+            sortBy {
+                it.title
+            }
         }
-        recipeList.add(updatedRecipe)
-        repoListData.postValue(recipeList)
+    }
+
+    private fun updateRecipeList(updatedRecipe: RecipeLocal) {
+        repoListData.value = repoListData.value?.apply {
+            val recipe = find {
+                it.id == updatedRecipe.id
+            }
+            if (recipe?.lastModified == updatedRecipe.lastModified) return
+            removeAll {
+                it.id == updatedRecipe.id
+            }
+            if (!updatedRecipe.flagAsDeleted) add(updatedRecipe)
+            sortBy {
+                it.title
+            }
+        }
     }
 
     private fun removeFromRecipeList(recipeId: Int) {
-        val recipeList = repoListData.value ?: LinkedList()
-        recipeList.removeAll {
-            it.id == recipeId
+        repoListData.value = repoListData.value?.apply {
+            removeAll {
+                it.id == recipeId
+            }
         }
-        repoListData.postValue(recipeList)
+    }
+
+    private fun clearRecipeList() {
+        repoListData.value = repoListData.value?.apply {
+            clear()
+        }
     }
 
     private fun syncRecipe(recipeId: Int, callback: () -> Unit) {
