@@ -1,10 +1,13 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
+import android.text.Html
+import android.text.Spanned
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.ShareableRecipe
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
@@ -88,6 +91,14 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun delete() {
         recipeId?.let {
             recipeRepository.deleteRecipe(it) {}
+        }
+    }
+
+    fun getShareableRecipe(): ShareableRecipe? {
+        return recipeData.value?.let { recipe ->
+            ingredientListData.value?.let { ingredients ->
+                ShareableRecipe(recipe, ingredients)
+            }
         }
     }
 

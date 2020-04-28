@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Pingwinek Cooks</string>
+    <string name="pingwinekcooks">Pingwinek Cooks - die einfache Rezept-App</string>
 
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
@@ -8,6 +9,7 @@
     <string name="done">Fertig</string>
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
+    <string name="share">Teilen</string>
 
     <string name="login">Login</string>
     <string name="loginFailed">Login ist fehlgeschlagen.</string>

@@ -21,6 +21,27 @@ class RecipeActivity : BaseActivity(),
 
     private lateinit var recipeModel: RecipeViewModel
 
+    private val shareRecipeIntent = Intent.createChooser(
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(
+                Intent.EXTRA_HTML_TEXT,
+                recipeModel.getShareableRecipe()?.getHtml(
+                    resources.getString(R.string.pingwinekcooks)
+                ))
+            putExtra(
+                Intent.EXTRA_TEXT,
+                recipeModel.getShareableRecipe()?.getPlainText(
+                    resources.getString(R.string.pingwinekcooks)
+                ))
+            putExtra(
+                Intent.EXTRA_SUBJECT,
+                recipeModel.getShareableRecipe()?.subject)
+            type ="plain/text"
+        },
+        null
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe)
@@ -66,6 +87,14 @@ class RecipeActivity : BaseActivity(),
         optionMenu.apply {
             addMenuEntry(OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
                 delete()
+                true
+            }
+            addMenuEntry(
+                OPTION_MENU_SHARE,
+                resources.getString(R.string.share),
+                R.drawable.ic_action_share_black,
+                true) {
+                startActivity(shareRecipeIntent)
                 true
             }
         }
@@ -177,7 +206,7 @@ class RecipeActivity : BaseActivity(),
     fun delete() {
         AlertDialog.Builder(this).apply {
             setMessage(R.string.recipe_delete_confirm)
-            setPositiveButton(R.string.yes) { dialog, which ->
+            setPositiveButton(R.string.yes) { _, _ ->
                 recipeModel.delete()
                 finish()
             }
