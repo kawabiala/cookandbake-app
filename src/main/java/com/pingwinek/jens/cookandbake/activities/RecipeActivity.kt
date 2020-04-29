@@ -21,27 +21,6 @@ class RecipeActivity : BaseActivity(),
 
     private lateinit var recipeModel: RecipeViewModel
 
-    private val shareRecipeIntent = Intent.createChooser(
-        Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(
-                Intent.EXTRA_HTML_TEXT,
-                recipeModel.getShareableRecipe()?.getHtml(
-                    resources.getString(R.string.pingwinekcooks)
-                ))
-            putExtra(
-                Intent.EXTRA_TEXT,
-                recipeModel.getShareableRecipe()?.getPlainText(
-                    resources.getString(R.string.pingwinekcooks)
-                ))
-            putExtra(
-                Intent.EXTRA_SUBJECT,
-                recipeModel.getShareableRecipe()?.subject)
-            type ="plain/text"
-        },
-        null
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe)
@@ -94,7 +73,7 @@ class RecipeActivity : BaseActivity(),
                 resources.getString(R.string.share),
                 R.drawable.ic_action_share_black,
                 true) {
-                startActivity(shareRecipeIntent)
+                startActivity(getShareRecipeIntent())
                 true
             }
         }
@@ -145,9 +124,10 @@ class RecipeActivity : BaseActivity(),
                         val quantity = it.get(EXTRA_INGREDIENT_QUANTITY)?.run {
                             it.getDouble(EXTRA_INGREDIENT_QUANTITY)
                         }
+                        val quantityVerbal = it.getString(EXTRA_INGREDIENT_QUANTITY_VERBAL)
                         val unity = it.getString(EXTRA_INGREDIENT_UNITY)
                         if (name != null) {
-                            recipeModel.saveIngredient(id, name, quantity, unity)
+                            recipeModel.saveIngredient(id, name, quantity, quantityVerbal, unity)
                         }
                     }
                 }
@@ -164,6 +144,7 @@ class RecipeActivity : BaseActivity(),
                 intent.putExtra(EXTRA_INGREDIENT_ID, it.id)
                 intent.putExtra(EXTRA_INGREDIENT_NAME, it.name)
                 intent.putExtra(EXTRA_INGREDIENT_QUANTITY, it.quantity)
+                intent.putExtra(EXTRA_INGREDIENT_QUANTITY_VERBAL, it.quantityVerbal)
                 intent.putExtra(EXTRA_INGREDIENT_UNITY, it.unity)
             }
             startActivityForResult(intent, REQUEST_CODE_INGREDIENT)
@@ -215,6 +196,29 @@ class RecipeActivity : BaseActivity(),
             }
         }.show()
 
+    }
+
+    private fun getShareRecipeIntent(): Intent {
+        return Intent.createChooser(
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_HTML_TEXT,
+                    recipeModel.getShareableRecipe()?.getHtml(
+                        resources.getString(R.string.pingwinekcooks)
+                    ))
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    recipeModel.getShareableRecipe()?.getPlainText(
+                        resources.getString(R.string.pingwinekcooks)
+                    ))
+                putExtra(
+                    Intent.EXTRA_SUBJECT,
+                    recipeModel.getShareableRecipe()?.subject)
+                type ="plain/text"
+            },
+            null
+        )
     }
 }
 

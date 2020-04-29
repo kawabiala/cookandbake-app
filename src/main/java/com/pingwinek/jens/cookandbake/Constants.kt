@@ -28,6 +28,7 @@ const val EXTRA_RECIPE_INSTRUCTION = "com.pingwinek.jens.cookandbake.extraRecipe
 const val EXTRA_INGREDIENT_ID = "com.pingwinek.jens.cookandbake.extraIngredientID"
 const val EXTRA_INGREDIENT_NAME = "com.pingwinek.jens.cookandbake.extraIngredientName"
 const val EXTRA_INGREDIENT_QUANTITY = "com.pingwinek.jens.cookandbake.extraIngredientQuantity"
+const val EXTRA_INGREDIENT_QUANTITY_VERBAL = "com.pingwinek.jens.cookandbake.extraIngredientQuantityVerbal"
 const val EXTRA_INGREDIENT_UNITY = "com.pingwinek.jens.cookandbake.extraIngredientUnity"
 
 const val ACTION_REGISTER_CONFIRMATION_SENT = "com.pingwinek.jens.cookandbake.registerConfirmationSent"

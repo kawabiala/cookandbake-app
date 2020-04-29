@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
@@ -28,6 +29,8 @@ class IngredientActivity : BaseActivity() {
             ingredientView.text = it.getString(EXTRA_INGREDIENT_NAME)
             findViewById<TextView>(R.id.ingredientQuantity).text =
                 quantityToString(it.getDouble(EXTRA_INGREDIENT_QUANTITY))
+            findViewById<TextView>(R.id.ingredientQuantityVerbal).text =
+                it.getString(EXTRA_INGREDIENT_QUANTITY_VERBAL)
             findViewById<TextView>(R.id.ingredientUnity).text = it.getString(EXTRA_INGREDIENT_UNITY)
         }
 
@@ -47,13 +50,28 @@ class IngredientActivity : BaseActivity() {
     }
 
     private fun save() {
-        setResult(Activity.RESULT_OK, Intent().also {
-            it.putExtra(EXTRA_INGREDIENT_ID, ingredientId)
-            it.putExtra(EXTRA_INGREDIENT_NAME, findViewById<TextView>(R.id.ingredientName).text.toString())
-            it.putExtra(EXTRA_INGREDIENT_QUANTITY, quantityToDouble(findViewById<TextView>(R.id.ingredientQuantity).text.toString()))
-            it.putExtra(EXTRA_INGREDIENT_UNITY, findViewById<TextView>(R.id.ingredientUnity).text.toString())
-        })
-        finish()
+        val ingredientName = findViewById<TextView>(R.id.ingredientName).text.toString()
+        val ingredientQuantity = quantityToDouble(findViewById<TextView>(R.id.ingredientQuantity).text.toString())
+        val ingredientQuantityVerbal = findViewById<TextView>(R.id.ingredientQuantityVerbal).text.toString()
+        val ingredientUnity = findViewById<TextView>(R.id.ingredientUnity).text.toString()
+
+        if (ingredientQuantity == 0.0 && ingredientQuantityVerbal.isNotEmpty()) {
+            AlertDialog.Builder(this).apply {
+                setMessage(resources.getString(R.string.ingredient_quantity_unequal_verbal))
+                setPositiveButton("Ok") { _, _ ->
+                    // do nothing
+                }
+            }.create().show()
+        } else {
+            setResult(Activity.RESULT_OK, Intent().also {
+                it.putExtra(EXTRA_INGREDIENT_ID, ingredientId)
+                it.putExtra(EXTRA_INGREDIENT_NAME, ingredientName)
+                it.putExtra(EXTRA_INGREDIENT_QUANTITY, ingredientQuantity)
+                it.putExtra(EXTRA_INGREDIENT_QUANTITY_VERBAL, ingredientQuantityVerbal)
+                it.putExtra(EXTRA_INGREDIENT_UNITY, ingredientUnity)
+            })
+            finish()
+        }
     }
 
 }

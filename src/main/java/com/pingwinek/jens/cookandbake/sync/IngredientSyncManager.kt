@@ -101,6 +101,7 @@ class IngredientSyncManager(
                                             newIngredientRemote.id,
                                             local.recipeId,
                                             local.quantity,
+                                            local.quantityVerbal,
                                             local.unity,
                                             local.name
                                         )

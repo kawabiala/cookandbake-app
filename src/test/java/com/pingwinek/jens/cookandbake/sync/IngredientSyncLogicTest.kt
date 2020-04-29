@@ -13,9 +13,9 @@ class IngredientSyncLogicTest {
     private val ingredientSyncLogic = IngredientSyncLogic()
 
     private val nullIngredientLocal: IngredientLocal? = null
-    private val ingredientLocalWithRemoteId = IngredientLocal(1, 2, 3, null, null, "Ingredient Local 1")
-    private val ingredientLocalWithoutRemoteId = IngredientLocal(2, null, 3, null, null, "Ingredient Local 2")
-    private val ingredientLocalFlaggedAsDeleted = IngredientLocal(1, 2, 3, null, null, "Ingredient Local Deleted", Date().time, true)
+    private val ingredientLocalWithRemoteId = IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local 1")
+    private val ingredientLocalWithoutRemoteId = IngredientLocal(2, null, 3, null, null, null, "Ingredient Local 2")
+    private val ingredientLocalFlaggedAsDeleted = IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local Deleted", Date().time, true)
 
     private val nullIngredientRemote: IngredientRemote? = null
     private val ingredientRemote = IngredientRemote.fromLocal(ingredientLocalWithRemoteId, 3)
@@ -50,7 +50,7 @@ class IngredientSyncLogicTest {
 
         // Case 8: local is more recent -> update remote
         Thread.sleep(1)
-        val ingredientLocal = IngredientLocal(1, 2, 3, null, null, "Ingredient Local Most Recent")
+        val ingredientLocal = IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local Most Recent")
         assert(ingredientSyncLogic.compare(ingredientLocal, ingredientRemote) == SyncLogic.SyncAction.UPDATE_REMOTE)
 
         // Case 9: local and remote have same timestamp

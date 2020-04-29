@@ -1,8 +1,6 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
-import android.text.Html
-import android.text.Spanned
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
@@ -62,7 +60,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun saveIngredient(id: Int?, name: String, quantity: Double?, unity: String?) {
+    fun saveIngredient(id: Int?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
         if (name.isEmpty()) {
             return
         }
@@ -73,12 +71,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
         if (id == null) {
             recipeId?.let {
-                ingredientRepository.new(it, quantity, unity, name) {
+                ingredientRepository.new(it, quantity, quantityVerbal, unity, name) {
                     true
                 }
             }
         } else {
-            ingredientRepository.update(id, quantity, unity, name)
+            ingredientRepository.update(id, quantity, quantityVerbal, unity, name)
         }
     }
 

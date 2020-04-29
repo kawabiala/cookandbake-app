@@ -35,11 +35,7 @@ abstract class BaseActivity : AppCompatActivity() {
     / options Menue
     /////////////////////////////////////////////
      */
-/*
-    protected open fun getOptionsMenu() : OptionMenu? {
-        return null
-    }
-*/
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.let { optionMenu.setMenu(it) }
         return true
@@ -61,29 +57,3 @@ abstract class BaseActivity : AppCompatActivity() {
         layoutInflater.inflate(viewId, baseLayout)
     }
 }
-/*
-class OptionMenu {
-
-    inner class OptionMenuItem(val itemName: String, val action: (Int) -> Boolean) {
-        var iconId: Int? = null
-        var ifRoom: Boolean = false
-    }
-
-    private val options: MutableMap<Int, OptionMenuItem> = mutableMapOf()
-
-    fun addMenuEntry(itemId: Int, itemName: String, action: (Int) -> Boolean) : OptionMenuItem {
-        val optionMenuItem = OptionMenuItem(itemName, action)
-        options[itemId] = optionMenuItem
-        return optionMenuItem
-    }
-
-    fun getMenuEntries() : Map<Int, OptionMenuItem> {
-        return options
-    }
-
-    fun invokeAction(itemId: Int) : Boolean {
-        return options[itemId]?.action?.invoke(itemId) ?: false
-    }
-}
-
- */

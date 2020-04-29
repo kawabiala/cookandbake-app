@@ -12,9 +12,9 @@ class IngredientLocalTest {
         val date2 = Date().time
         Thread.sleep(1)
 
-        val ingredient1 = IngredientLocal(1, 2, 3, null, null, "Ingredient Local 1", date1)
+        val ingredient1 = IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local 1", date1)
         val ingredient2 = ingredient1.getUpdated(
-            IngredientLocal(4, 5, 6, null, null, "Ingredient Local 2", date2)
+            IngredientLocal(4, 5, 6, null, null, null, "Ingredient Local 2", date2)
         )
         Thread.sleep(1)
 
@@ -34,7 +34,7 @@ class IngredientLocalTest {
 
         Thread.sleep(1)
         val ingredientRemote = IngredientRemote.fromLocal(
-            IngredientLocal(1, 2, 3, null, null, "Ingredient Local 1"),
+            IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local 1"),
             4
         )
         Thread.sleep(1)

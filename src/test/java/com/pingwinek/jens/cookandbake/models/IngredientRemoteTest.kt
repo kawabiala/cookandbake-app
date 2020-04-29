@@ -22,12 +22,12 @@ class IngredientRemoteTest {
         val date2 = Date().time
 
         val ingredient1 = IngredientRemote.fromLocal(
-            IngredientLocal(1, 2, 3,null, null, "Ingredient Local 1", date1),
+            IngredientLocal(1, 2, 3,null, null, null, "Ingredient Local 1", date1),
             4
         )
         val ingredient2 = ingredient1.getUpdated(
             IngredientRemote.fromLocal(
-                IngredientLocal(5, 6, 7,null, null, "Ingredient Local 2", date2),
+                IngredientLocal(5, 6, 7,null, null, null, "Ingredient Local 2", date2),
                 8
             )
         )
@@ -94,7 +94,7 @@ class IngredientRemoteTest {
     @Test
     fun fromLocal1_test() {
         val ingredient = IngredientRemote.fromLocal(
-            IngredientLocal(1, 2, 3, null, null, "Ingredient Local 1"),
+            IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local 1"),
             4
         )
         assert(ingredient.id == 2)
@@ -104,7 +104,7 @@ class IngredientRemoteTest {
     @Test
     fun fromLocal2_test() {
         val ingredient = IngredientRemote.fromLocal(
-            IngredientLocal(1, null, 3, null, null, "Ingredient Local 1"),
+            IngredientLocal(1, null, 3, null, null, null, "Ingredient Local 1"),
             4
         )
         assert(ingredient.id == 0)
@@ -114,7 +114,7 @@ class IngredientRemoteTest {
     @Test
     fun newFromLocal_test() {
         val ingredient = IngredientRemote.newFromLocal(
-            IngredientLocal(1, 2, 3, null, null, "Ingredient Local 1"),
+            IngredientLocal(1, 2, 3, null, null, null, "Ingredient Local 1"),
             4
         )
         assert(ingredient.id == 0)

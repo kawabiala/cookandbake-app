@@ -47,16 +47,15 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
     fun new(
         recipeId: Int,
         quantity: Double?,
+        quantityVerbal: String?,
         unity: String?,
         name: String,
         confirmUpdate: (ingredientId: Int) -> Boolean
     ) {
-        Log.i(this::class.java.name, "new")
-        ingredientSourceLocal.new(IngredientLocal(recipeId, quantity, unity, name))
+        ingredientSourceLocal.new(IngredientLocal(recipeId, quantity, quantityVerbal, unity, name))
             .setResultHandler{ result ->
                 val status = result.status
                 val ingredientLocal = result.value
-                Log.i(this::class.java.name, "new: $status, $ingredientLocal")
                 if (status == Promise.Status.SUCCESS && ingredientLocal != null && confirmUpdate(ingredientLocal.id)) {
                     Log.i(this::class.java.name, "new confirmed")
                     updateIngredientList(ingredientLocal)
@@ -70,6 +69,7 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
     fun update(
         ingredientId: Int,
         quantity: Double?,
+        quantityVerbal: String?,
         unity: String?,
         name: String
     ) {
@@ -77,7 +77,7 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
             it.id == ingredientId
         } ?: return
 
-        doUpdate(ingredient.getUpdated(quantity, unity, name))
+        doUpdate(ingredient.getUpdated(quantity, quantityVerbal, unity, name))
     }
 
     fun deleteIngredient(ingredientId: Int, callback: () -> Unit) {

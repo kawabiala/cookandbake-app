@@ -13,6 +13,7 @@ data class IngredientLocal(
     override val remoteId: Int?,
     override val recipeId: Int,
     override val quantity: Double?,
+    override val quantityVerbal: String?,
     override val unity: String?,
     override val name: String,
     override var lastModified: Long = Date().time,
@@ -22,6 +23,7 @@ data class IngredientLocal(
     constructor(
         recipeId: Int,
         quantity: Double?,
+        quantityVerbal: String?,
         unity: String?,
         name: String
     ) : this(
@@ -29,20 +31,35 @@ data class IngredientLocal(
         null,
         recipeId,
         quantity,
+        quantityVerbal,
         unity,
         name
     )
 
     override fun getUpdated(ingredient: Ingredient): IngredientLocal {
-        return IngredientLocal(id, remoteId, recipeId, ingredient.quantity, ingredient.unity, ingredient.name)
+        return IngredientLocal(
+            id,
+            remoteId,
+            recipeId,
+            ingredient.quantity,
+            ingredient.quantityVerbal,
+            ingredient.unity,
+            ingredient.name)
     }
 
-    fun getUpdated(quantity: Double?, unity: String?, name: String): IngredientLocal {
-        return IngredientLocal(id, remoteId, recipeId, quantity, unity, name)
+    fun getUpdated(quantity: Double?, quantityVerbal: String?, unity: String?, name: String): IngredientLocal {
+        return IngredientLocal(
+            id,
+            remoteId,
+            recipeId,
+            quantity,
+            quantityVerbal,
+            unity,
+            name)
     }
 
     fun getDeleted(): IngredientLocal {
-        return IngredientLocal(id, remoteId, recipeId, quantity, unity, name, Date().time, true)
+        return IngredientLocal(id, remoteId, recipeId, quantity, quantityVerbal, unity, name, Date().time, true)
     }
 
     companion object {
@@ -53,6 +70,7 @@ data class IngredientLocal(
                 remote.id,
                 recipeId,
                 remote.quantity,
+                remote.quantityVerbal,
                 remote.unity,
                 remote.name,
                 remote.lastModified

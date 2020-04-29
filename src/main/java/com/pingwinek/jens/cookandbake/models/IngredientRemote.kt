@@ -7,6 +7,7 @@ class IngredientRemote private constructor(
     override val id: Int = 0,
     override val recipeId: Int,
     override val quantity: Double?,
+    override val quantityVerbal: String?,
     override val unity: String?,
     override val name: String,
     override var lastModified: Long
@@ -16,15 +17,17 @@ class IngredientRemote private constructor(
         id: Int,
         recipeId: Int,
         quantity: Double?,
+        quantityVerbal: String?,
         unity: String?,
         name: String
-    ) : this(id, recipeId, quantity, unity, name, 0)
+    ) : this(id, recipeId, quantity, quantityVerbal, unity, name, 0)
 
     fun asMap(): Map<String, String> {
         val map = HashMap<String, String>()
         map["id"] = id.toString()
         map["recipe_id"] = recipeId.toString()
         map["quantity"] = quantity.toString()
+        map["quantity_verbal"] = quantityVerbal.toString()
         map["unity"] = unity ?: ""
         map["name"] = name
         map["last_modified"] = lastModified.toString()
@@ -37,7 +40,14 @@ class IngredientRemote private constructor(
     }
 
     override fun getUpdated(ingredient: Ingredient): IngredientRemote {
-        return IngredientRemote(id, recipeId, ingredient.quantity, ingredient.unity, ingredient.name, ingredient.lastModified)
+        return IngredientRemote(
+            id,
+            recipeId,
+            ingredient.quantity,
+            ingredient.quantityVerbal,
+            ingredient.unity,
+            ingredient.name,
+            ingredient.lastModified)
     }
 
     companion object {
@@ -56,6 +66,16 @@ class IngredientRemote private constructor(
                     null
                 } else {
                     jsonObject.getDouble("quantity")
+                }
+            } catch (jsonException: JSONException) {
+                null
+            }
+
+            val quantityVerbal = try {
+                if (jsonObject.isNull("quantity_verbal")) {
+                    null
+                } else {
+                    jsonObject.getString("quantity_verbal")
                 }
             } catch (jsonException: JSONException) {
                 null
@@ -84,8 +104,8 @@ class IngredientRemote private constructor(
             }
 
             return when (lastModified) {
-                null -> IngredientRemote(id, recipeId, quantity, unity, name)
-                else -> IngredientRemote(id, recipeId, quantity, unity, name, lastModified)
+                null -> IngredientRemote(id, recipeId, quantity, quantityVerbal, unity, name)
+                else -> IngredientRemote(id, recipeId, quantity, quantityVerbal, unity, name, lastModified)
             }
         }
 
@@ -96,6 +116,7 @@ class IngredientRemote private constructor(
                     ingredientLocal.remoteId,
                     recipeId,
                     ingredientLocal.quantity,
+                    ingredientLocal.quantityVerbal,
                     ingredientLocal.unity,
                     ingredientLocal.name,
                     ingredientLocal.lastModified
@@ -108,6 +129,7 @@ class IngredientRemote private constructor(
                 0,
                 recipeId,
                 ingredientLocal.quantity,
+                ingredientLocal.quantityVerbal,
                 ingredientLocal.unity,
                 ingredientLocal.name,
                 ingredientLocal.lastModified
