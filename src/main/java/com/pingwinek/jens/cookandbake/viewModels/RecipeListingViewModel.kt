@@ -28,6 +28,10 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
 */
 
     fun loadData() {
-        recipeRepository.checkForUpdates()
+        loadData(false)
+    }
+
+    fun loadData(force: Boolean) {
+        recipeRepository.checkForUpdates(force)
     }
 }

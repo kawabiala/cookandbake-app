@@ -10,6 +10,7 @@
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
     <string name="share">Teilen</string>
+    <string name="refresh">Aktualisieren</string>
 
     <string name="login">Login</string>
     <string name="loginFailed">Login ist fehlgeschlagen.</string>

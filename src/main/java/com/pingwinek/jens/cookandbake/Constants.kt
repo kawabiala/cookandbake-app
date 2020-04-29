@@ -50,6 +50,7 @@ const val OPTION_MENU_DATAPROTECTION = 9
 const val OPTION_MENU_MANAGE_ACCOUNT = 10
 const val OPTION_MENU_DELETE = 11
 const val OPTION_MENU_SHARE = 12
+const val OPTION_MENU_REFRESH = 13
 
 const val SHARED_PREFERENCES_FILE = "preferences"
 

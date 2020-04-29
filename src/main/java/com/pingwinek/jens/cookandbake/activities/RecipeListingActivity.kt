@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
@@ -48,12 +49,18 @@ class RecipeListingActivity : BaseActivity() {
             adapter = viewAdapter
         }
 
+        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.recipeListSwipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener {
+            refresh()
+            swipeRefreshLayout.isRefreshing = false
+        }
+
         configureOptionMenu()
     }
 
     override fun onResume() {
         super.onResume()
-        loadData()
+        recipeListingModel.loadData()
 
         if (recipeListingModel.authService.isLoggedIn()) {
             optionMenu.addMenuEntry(
@@ -88,6 +95,10 @@ class RecipeListingActivity : BaseActivity() {
 
     private fun configureOptionMenu() {
         optionMenu.apply {
+            addMenuEntry(OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
+                refresh()
+                true
+            }
             addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
                 startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
@@ -113,8 +124,8 @@ class RecipeListingActivity : BaseActivity() {
         openRecipeItem(null)
     }
 
-    private fun loadData() {
-        recipeListingModel.loadData()
+    private fun refresh() {
+        recipeListingModel.loadData(true)
     }
 
     private fun openRecipeItem(itemId: Int?) {

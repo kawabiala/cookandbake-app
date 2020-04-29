@@ -37,8 +37,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
     override fun onLogin() {
-        lastUpdated = 0
-        getAll()
+        checkForUpdates(true)
         Log.i(this::class.java.name, "login")
     }
 
@@ -48,6 +47,13 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
     fun checkForUpdates() {
+        checkForUpdates(false)
+    }
+
+    fun checkForUpdates(force: Boolean) {
+        if (force) {
+            lastUpdated = 0
+        }
         getAll()
     }
 
