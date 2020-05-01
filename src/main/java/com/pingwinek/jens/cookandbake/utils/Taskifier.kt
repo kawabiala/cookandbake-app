@@ -1,25 +1,22 @@
 package com.pingwinek.jens.cookandbake.utils
 
-import android.os.AsyncTask
-import android.util.Log
-import java.lang.Exception
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
-class Taskifier<T>(val onResult: (T?) -> Unit) : AsyncTask<() -> T?, Any, T>() {
+class Taskifier<T>(val onResult: (T?) -> Unit) {
 
-    override fun doInBackground(vararg params: () -> T?): T? {
-        return if (params.isNotEmpty()) {
-            try {
-                params[0]()
-            } catch (e: Exception) {
-                Log.w(this::class.java.name, e.localizedMessage)
-                null
+    fun execute(doInBackground: () -> T?) {
+        runBlocking {
+            launch {
+                doInBackground(doInBackground)
             }
-        } else {
-            null
         }
     }
 
-    override fun onPostExecute(result: T?) {
-        onResult(result)
+    private suspend fun doInBackground(doInBackground: () -> T?) =
+        withContext(Dispatchers.IO) {
+        onResult(doInBackground())
     }
 }

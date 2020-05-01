@@ -2,8 +2,8 @@ package com.pingwinek.jens.cookandbake
 
 const val LOCAL_DOMAIN = "http://10.0.2.2/strato/pingwinek"
 const val REMOTE_DOMAIN = "https://www.pingwinek.de"
-//const val DOMAIN = REMOTE_DOMAIN
-const val DOMAIN = LOCAL_DOMAIN
+const val DOMAIN = REMOTE_DOMAIN
+//const val DOMAIN = LOCAL_DOMAIN
 const val BASEURL = "$DOMAIN/cookandbake"
 
 const val DATAPROTECTIONPATH = "$BASEURL/datenschutz"

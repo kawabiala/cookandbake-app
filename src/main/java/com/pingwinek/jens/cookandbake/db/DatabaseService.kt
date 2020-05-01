@@ -3,26 +3,23 @@ package com.pingwinek.jens.cookandbake.db
 import android.app.Application
 import android.os.AsyncTask
 import androidx.room.Room
+import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 
-class DatabaseService {
+class DatabaseService private constructor(application: Application){
 
-    companion object {
-        fun getDatabase(application: Application) : PingwinekCooksDB {
-            return Room.databaseBuilder(application, PingwinekCooksDB::class.java, "PingwinekCooks")
-                .fallbackToDestructiveMigration()
-                .build()
-        }
+    val pingwinekCooksDB = Room.databaseBuilder(application, PingwinekCooksDB::class.java, "PingwinekCooks")
+        .fallbackToDestructiveMigration()
+        .build()
 
-        fun resetDatabase(application: Application) {
-            class ResetInBackgroundTask :AsyncTask<Unit, Unit, Unit>() {
-                override fun doInBackground(vararg params: Unit?) {
-                    getDatabase(
-                        application
-                    ).clearAllTables()
-                }
+    fun resetDatabase() {
+        class ResetInBackgroundTask :AsyncTask<Unit, Unit, Unit>() {
+            override fun doInBackground(vararg params: Unit?) {
+                pingwinekCooksDB.clearAllTables()
             }
-            ResetInBackgroundTask().execute()
         }
+        ResetInBackgroundTask().execute()
     }
+
+    companion object : SingletonHolder<DatabaseService, Application>(::DatabaseService)
 
 }

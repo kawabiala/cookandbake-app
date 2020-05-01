@@ -70,7 +70,7 @@ class PingwinekCooksApplication : Application() {
         val internetConnectivityManager = InternetConnectivityManager.getInstance(this)
         serviceLocator.registerService(internetConnectivityManager)
 
-        val pingwinekCooksDB = DatabaseService.getDatabase(this)
+        val pingwinekCooksDB = DatabaseService.getInstance(this).pingwinekCooksDB
         val networkRequestProvider = NetworkRequestProvider.getInstance(this)
 
         val authService = AuthService.getInstance(this)
