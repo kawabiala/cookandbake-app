@@ -64,7 +64,7 @@ class RecipeListingActivity : BaseActivity() {
 
         if (recipeListingModel.authService.isLoggedIn()) {
             optionMenu.addMenuEntry(
-                OPTION_MENU_LOGIN,
+                R.id.OPTION_MENU_LOGIN,
                 resources.getString(R.string.logged_in_as, recipeListingModel.authService.getStoredAccount()?.getEmail()),
                 R.drawable.ic_login_person_black,
                 true
@@ -82,7 +82,7 @@ class RecipeListingActivity : BaseActivity() {
             }
         } else {
             optionMenu.addMenuEntry(
-                OPTION_MENU_LOGIN,
+                R.id.OPTION_MENU_LOGIN,
                 resources.getString(R.string.login),
                 R.drawable.ic_login_person_outline_black,
                 true
@@ -95,22 +95,23 @@ class RecipeListingActivity : BaseActivity() {
 
     private fun configureOptionMenu() {
         optionMenu.apply {
-            addMenuEntry(OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
+            addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
                 refresh()
                 true
             }
-            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
+            addMenuEntry(R.id.OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
                 startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
             }
-            addMenuEntry(OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
+            addMenuEntry(R.id.OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("url", IMPRESSUMPATH))
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
                 true
             }
-            addMenuEntry(OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
+            addMenuEntry(R.id.OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("url", DATAPROTECTIONPATH))
+//                    .putExtra("url", URL_DATAPROTECTION))
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
                 true
             }
         }

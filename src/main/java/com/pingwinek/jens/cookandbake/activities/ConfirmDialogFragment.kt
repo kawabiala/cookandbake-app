@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import com.pingwinek.jens.cookandbake.R
 
 class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
 
@@ -19,10 +20,10 @@ class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.setMessage(message)
-            builder.setPositiveButton("Löschen") { _, _ ->
+            builder.setPositiveButton(getString(R.string.delete)) { _, _ ->
                 listener.onPositiveButton(confirmItemId)
             }
-            builder.setNegativeButton("Abbrechen") { _, _ ->
+            builder.setNegativeButton(getString(R.string.close)) { _, _ ->
                 listener.onNegativeButton(confirmItemId)
             }
             return builder.create()

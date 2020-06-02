@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
 import android.webkit.WebView
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
 import com.pingwinek.jens.cookandbake.R
 
 class ImpressumActivity : BaseActivity() {
@@ -16,7 +15,7 @@ class ImpressumActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true

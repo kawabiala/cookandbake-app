@@ -13,20 +13,23 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_manage_account)
 
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+
         findViewById<TextView>(R.id.maUnsubscribeView).setOnClickListener {
-            if (! AuthService.getInstance(application).hasStoredAccount()) {
+            if (! authService.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
             val requirePasswordFragment = RequirePasswordFragment()
             requirePasswordFragment.arguments = Bundle().apply {
-                putString("message", "Konto wirklich löschen?")
+                putString("message", getString(R.string.confirmUnsubscribe))
             }
             requirePasswordFragment.show(supportFragmentManager, "requirePasswordManager")
         }
 
         findViewById<TextView>(R.id.maChangePasswordView).setOnClickListener {
-            if (! AuthService.getInstance(application).hasStoredAccount()) {
+            if (! authService.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
@@ -38,11 +41,11 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         }
 
         findViewById<TextView>(R.id.maLogoutView).setOnClickListener {
-            if (! AuthService.getInstance(application).hasStoredAccount()) {
+            if (! authService.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
-            AuthService.getInstance(application).logout { code, _ ->
+            authService.logout { code, _ ->
                 fillEmail()
                 if (code != 200) {
                     AlertDialog.Builder(this).apply {
@@ -57,17 +60,17 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
 
         findViewById<TextView>(R.id.maImpressumView).setOnClickListener {
             startActivity(Intent(this, ImpressumActivity::class.java)
-                .putExtra("url", IMPRESSUMPATH))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
         }
 
         findViewById<TextView>(R.id.maDatenschutzView).setOnClickListener {
             startActivity(Intent(this, ImpressumActivity::class.java)
-                .putExtra("url", DATAPROTECTIONPATH))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
         }
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true
@@ -84,8 +87,11 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
     }
 
     override fun onPositiveButton(password: String?) {
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+
         password?.let {
-            AuthService.getInstance(application).unsubscribe(password) { code, response ->
+            authService.unsubscribe(password) { code, response ->
                 when (code) {
                     200 -> fillEmail()
                     else -> Toast.makeText(this, response, Toast.LENGTH_LONG).show()
@@ -99,7 +105,8 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
     }
 
     private fun fillEmail() {
-        val authService = AuthService.getInstance(application)
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
 
         val emailText = when {
             authService.isLoggedIn() -> {

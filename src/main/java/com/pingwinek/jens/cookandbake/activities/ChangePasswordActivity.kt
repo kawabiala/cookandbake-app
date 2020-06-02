@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 
 class ChangePasswordActivity : BaseActivity() {
@@ -17,7 +17,7 @@ class ChangePasswordActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true
@@ -31,26 +31,29 @@ class ChangePasswordActivity : BaseActivity() {
     fun onNewPasswordButton(view: View) {
         deleteMessage()
 
-        AuthService.getInstance(application).changePassword(
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+        authService.changePassword(
             findViewById<TextView>(R.id.cpaOldPassword).text.toString(),
             findViewById<TextView>(R.id.cpaNewPassword).text.toString()
         ) { code, _ ->
             when (code) {
                 200 -> {
-                    setMessage("Password geändert")
-                    AuthService.getInstance(application).logout { _, _ ->
+                    setMessage(getString(R.string.PasswordChanged))
+                    authService.logout { _, _ ->
                         fillEmail()
                     }
                 }
                 else -> {
-                    setMessage("Password konnte nicht geändert werden")
+                    setMessage(getString(R.string.changePasswordFailed))
                 }
             }
         }
     }
 
     private fun fillEmail() {
-        val authService = AuthService.getInstance(application)
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
         val emailView = findViewById<TextView>(R.id.cpaEmailView)
         if (authService.hasStoredAccount()) {
             emailView.text = getString(R.string.logged_in_as, authService.getStoredAccount()?.getEmail())

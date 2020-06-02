@@ -38,7 +38,7 @@ class IngredientActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_DONE,
+                R.id.OPTION_MENU_DONE,
                 resources.getString(R.string.save),
                 R.drawable.ic_action_done_black,
                 true

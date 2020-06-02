@@ -13,7 +13,7 @@ class Recipes(jsonString: String) : LinkedList<RecipeRemote>() {
     private val recipes = try {
         JSONArray(jsonString)
     } catch (jsonException: JSONException) {
-        Log.e(tag, jsonException.message)
+        Log.e(tag, jsonException.message.toString())
         JSONArray()
     }
 

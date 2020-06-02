@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.pingwinek.jens.cookandbake.db.DatabaseService
@@ -14,7 +13,7 @@ import java.net.URI
 import java.util.*
 import kotlin.collections.HashMap
 
-class AuthService private constructor(private val application: Application){
+class AuthService private constructor(private val application: PingwinekCooksApplication) : RefreshManager.Refresh {
 
     interface AuthenticationListener {
         fun onLogin()
@@ -22,6 +21,7 @@ class AuthService private constructor(private val application: Application){
     }
 
     private val authListeners = LinkedList<AuthenticationListener>()
+    private val refreshManager = RefreshManager(this)
 
     private val method = NetworkRequestProvider.Method.POST
     private val contentType = NetworkRequestProvider.ContentType.APPLICATION_URLENCODED
@@ -55,7 +55,7 @@ class AuthService private constructor(private val application: Application){
         params["password"] = password
         params["dataprotection"] = dataprotection.toString()
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(REGISTERPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REGISTER), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -84,7 +84,7 @@ class AuthService private constructor(private val application: Application){
         params["email"] = email
         params["temp_code"] = tempCode
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(CONFIRMREGISTRATIONPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CONFIRMREGISTRATION), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -112,7 +112,7 @@ class AuthService private constructor(private val application: Application){
         params["password"] = password
         params["uuid"] = getUUID()
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(LOGINPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGIN), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -146,7 +146,7 @@ class AuthService private constructor(private val application: Application){
         val params = HashMap<String, String>()
         params["email"] = email
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(LOSTPASSWORDPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOSTPASSWORD), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -177,7 +177,7 @@ class AuthService private constructor(private val application: Application){
         params["temp_code"] = tempCode
         params["password"] = password
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(NEWPASSWORDPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_NEWPASSWORD), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -211,7 +211,7 @@ class AuthService private constructor(private val application: Application){
         params["password"] = oldPassword
         params["new_password"] = newPassword
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(CHANGEPASSWORDPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CHANGEPASSWORD), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -229,12 +229,21 @@ class AuthService private constructor(private val application: Application){
         networkRequest.start()
     }
 
-    fun onSessionInvalid(callback: (code: Int, response: String) -> Unit) {
-        loginWithRefreshToken(callback)
+    fun ensureSession(callback: (Boolean) -> Unit) {
+        val validUntil = GregorianCalendar().apply {
+            add(Calendar.SECOND, 60)
+        }.time
+        val cookie = CookieStore.getCookie(URI(BuildConfig.DOMAIN).host, COOKIE_NAME)
+        if (cookie == null || cookie.getExpires()?.before(validUntil) == true) {
+            refreshManager.refresh {
+                callback(it)
+            }
+        } else {
+            callback(true)
+        }
     }
 
-    private fun loginWithRefreshToken(callback: (code: Int, response: String) -> Unit) {
-
+    override fun doRefresh(callback: (code: Int, response: String) -> Unit) {
         if (! isLoggedIn()) {
             callback(-1, "no valid account")
             return
@@ -249,7 +258,7 @@ class AuthService private constructor(private val application: Application){
             params["uuid"] = getUUID()
         }
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(REFRESHPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REFRESH), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -272,7 +281,7 @@ class AuthService private constructor(private val application: Application){
         networkRequest.start()
     }
 
-    private fun parseRefreshToken(response: String) : String? {
+    private fun parseRefreshToken(response: String): String? {
 
         return try {
             JSONObject(response).getString("refresh_token")
@@ -283,7 +292,7 @@ class AuthService private constructor(private val application: Application){
     }
 
     fun logout(callback: (code: Int, response: String) -> Unit) {
-        CookieStore.removeCookies(URI(BASEURL).host)
+        CookieStore.removeCookies(application.getHost())
         val email = Account.getStoredAccount(application)?.getEmail() ?: return
 
         prefs.edit().apply {
@@ -298,7 +307,7 @@ class AuthService private constructor(private val application: Application){
         params["email"] = email
         params["uuid"] = getUUID()
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(LOGOUTPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGOUT), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -320,7 +329,7 @@ class AuthService private constructor(private val application: Application){
         params["email"] = email
         params["password"] = password
 
-        val networkRequest = networkRequestProvider.getNetworkRequest(UNSUBSCRIBEPATH, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_UNSUBSCRIBE), method)
         networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
@@ -332,7 +341,7 @@ class AuthService private constructor(private val application: Application){
                 remove("token")
             }.apply()
 
-            CookieStore.removeCookies(URI(BASEURL).host)
+            CookieStore.removeCookies(application.getHost())
 
             callback(200, response)
         }
@@ -367,5 +376,5 @@ class AuthService private constructor(private val application: Application){
         }
     }
 
-    companion object : SingletonHolder<AuthService, Application>(::AuthService)
+    companion object : SingletonHolder<AuthService, PingwinekCooksApplication>(::AuthService)
 }

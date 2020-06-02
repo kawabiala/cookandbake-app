@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+        <!ENTITY basepath "cookandbake">
+]>
+<resources>
+    <string name="URL_DATAPROTECTION" translatable="false">&basepath;/%1$s/datenschutz</string>
+    <string name="URL_IMPRESSUM" translatable="false">&basepath;/%1$s/impressum</string>
+
+    <string name="URL_REGISTER" translatable="false">&basepath;/auth/register</string>
+    <string name="URL_LOGIN" translatable="false">&basepath;/auth/login</string>
+    <string name="URL_LOGOUT" translatable="false">&basepath;/auth/logout</string>
+    <string name="URL_REFRESH" translatable="false">&basepath;/auth/refresh</string>
+    <string name="URL_LOSTPASSWORD" translatable="false">&basepath;/auth/lost_password</string>
+    <string name="URL_NEWPASSWORD" translatable="false">&basepath;/auth/new_password</string>
+    <string name="URL_CHANGEPASSWORD" translatable="false">&basepath;/auth/change_password</string>
+    <string name="URL_CONFIRMREGISTRATION" translatable="false">&basepath;/auth/confirm_registration</string>
+    <string name="URL_UNSUBSCRIBE" translatable="false">&basepath;/auth/unsubscribe</string>
+
+    <string name="URL_RECIPE" translatable="false">&basepath;/api/recipe</string>
+    <string name="URL_INGREDIENT" translatable="false">&basepath;/api/ingredient</string>
+</resources>

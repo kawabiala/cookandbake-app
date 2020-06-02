@@ -8,7 +8,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
-import com.pingwinek.jens.cookandbake.OPTION_MENU_DONE
 import com.pingwinek.jens.cookandbake.R
 
 class RecipeEditActivity : BaseActivity() {
@@ -36,7 +35,7 @@ class RecipeEditActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_DONE,
+                R.id.OPTION_MENU_DONE,
                 resources.getString(R.string.save),
                 R.drawable.ic_action_done_black,
                 true

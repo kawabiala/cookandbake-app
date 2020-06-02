@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 
 class LostPasswordActivity : BaseActivity() {
@@ -17,7 +17,7 @@ class LostPasswordActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true
@@ -31,7 +31,9 @@ class LostPasswordActivity : BaseActivity() {
     fun onLostPasswordButton(view: View) {
         deleteMessage()
 
-        AuthService.getInstance(application).lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, _ ->
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+        authService.lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, _ ->
             when (code) {
                 200 -> {
                     setMessage(resources.getString(R.string.confirmationSent))

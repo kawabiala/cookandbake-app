@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 
 class NewPasswordActivity : BaseActivity() {
@@ -23,7 +23,7 @@ class NewPasswordActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true
@@ -35,8 +35,11 @@ class NewPasswordActivity : BaseActivity() {
     }
 
     fun onNewPasswordButton(view: View) {
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+
         tempCode?.let {
-            AuthService.getInstance(application).newPassword(it, findViewById<TextView>(R.id.npaPassword).text.toString()) { code, _ ->
+            authService.newPassword(it, findViewById<TextView>(R.id.npaPassword).text.toString()) { code, _ ->
                 when (code) {
                     200 -> {
                         startActivity(Intent(this, LoginActivity::class.java))

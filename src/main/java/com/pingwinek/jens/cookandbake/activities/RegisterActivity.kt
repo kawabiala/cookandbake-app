@@ -12,8 +12,7 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.DATAPROTECTIONPATH
-import com.pingwinek.jens.cookandbake.OPTION_MENU_CLOSE
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 
 class RegisterActivity : BaseActivity() {
@@ -29,7 +28,7 @@ class RegisterActivity : BaseActivity() {
 
         optionMenu.apply {
             addMenuEntry(
-                OPTION_MENU_CLOSE,
+                R.id.OPTION_MENU_CLOSE,
                 resources.getString(R.string.close),
                 R.drawable.ic_action_close_black,
                 true
@@ -43,15 +42,18 @@ class RegisterActivity : BaseActivity() {
     fun registerButton(view: View) {
         deleteMessage()
 
-        if (AuthService.getInstance(application).hasStoredAccount()) {
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+
+        if (authService.hasStoredAccount()) {
             AlertDialog.Builder(this).apply {
-                setMessage("Soll der aktuelle Benutzer ausgeloggt werden?")
-                setPositiveButton("Ja") { _, _ ->
-                    AuthService.getInstance(application).logout { _, _ ->
+                setMessage(getString(R.string.confirmLogout))
+                setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    authService.logout { _, _ ->
                         register()
                     }
                 }
-                setNegativeButton("Nein") { _, _ -> }
+                setNegativeButton(getString(R.string.no)) { _, _ -> }
                 create()
                 show()
             }
@@ -62,7 +64,10 @@ class RegisterActivity : BaseActivity() {
     }
 
     private fun register() {
-        AuthService.getInstance(application).register(
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+
+        authService.register(
             findViewById<TextView>(R.id.raEmail).text.toString(),
             findViewById<TextView>(R.id.raPassword).text.toString(),
             findViewById<CheckBox>(R.id.raCheckBox).isChecked
@@ -93,7 +98,7 @@ class RegisterActivity : BaseActivity() {
         val clickableSpan = SimpleClickableSpan {
             startActivity(
                 Intent(this@RegisterActivity, ImpressumActivity::class.java)
-                    .putExtra("url", DATAPROTECTIONPATH))
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
         }
 
         val spannableAcceptanceText = SpannableString(resources.getText(R.string.declareAcceptanceOfDataprotection))

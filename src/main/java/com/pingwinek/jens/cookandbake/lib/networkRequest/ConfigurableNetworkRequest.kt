@@ -91,7 +91,7 @@ class ConfigurableNetworkRequest private constructor(
 
         requestBuilder.setHttpMethod(httpMethod.method)
 
-        CookieStore.getCookies(URI(url).host).forEach { _cookie ->
+        CookieStore.getCookiesAsStrings(URI(url).host).forEach { _cookie ->
             requestBuilder.addHeader("Cookie", _cookie)
         }
 

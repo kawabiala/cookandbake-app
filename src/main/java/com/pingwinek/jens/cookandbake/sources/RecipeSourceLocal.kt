@@ -20,7 +20,7 @@ class RecipeSourceLocal private constructor(private val db: PingwinekCooksDB):
         val promise = Promise<LinkedList<RecipeLocal>>()
         Taskifier<Array<RecipeLocal>> { recipes ->
             promise.setResult(Promise.Status.SUCCESS, LinkedList(recipes?.asList()))
-        }.execute({db.recipeDAO().selectAll()})
+        }.execute {db.recipeDAO().selectAll()}
         return promise
     }
 
@@ -56,7 +56,7 @@ class RecipeSourceLocal private constructor(private val db: PingwinekCooksDB):
             get(item.id).setResultHandler {
                 promise.setResult(it.status, it.value)
             }
-        }.execute({db.recipeDAO().update(item)})
+        }.execute {db.recipeDAO().update(item)}
         return promise
     }
 

@@ -47,11 +47,11 @@ class RequirePasswordFragment : androidx.fragment.app.DialogFragment() {
             setView(dialogView)
 
             val pwView = dialogView.findViewById<EditText>(R.id.dvPasswordView)
-            setPositiveButton("Löschen") { _, _ ->
+            setPositiveButton(getString(R.string.delete)) { _, _ ->
                 listener.onPositiveButton(pwView.text.toString())
             }
 
-            setNegativeButton("Abbrechen") { _, _ ->
+            setNegativeButton(getString(R.string.close)) { _, _ ->
                 listener.onNegativeButton()
             }
         }

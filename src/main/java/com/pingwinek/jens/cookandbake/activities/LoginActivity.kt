@@ -2,9 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.Menu.NONE
-import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import com.pingwinek.jens.cookandbake.*
@@ -24,25 +21,25 @@ class LoginActivity : BaseActivity() {
         doConfirm()
 
         optionMenu.apply {
-            addMenuEntry(OPTION_MENU_REGISTER, resources.getString(R.string.register)) {
+            addMenuEntry(R.id.OPTION_MENU_REGISTER, resources.getString(R.string.register)) {
                 startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
                 true
             }
-            addMenuEntry(OPTION_MENU_LOST_PASSWORD, resources.getString(R.string.lostPassword)) {
+            addMenuEntry(R.id.OPTION_MENU_LOST_PASSWORD, resources.getString(R.string.lostPassword)) {
                 startActivity(Intent(this@LoginActivity, LostPasswordActivity::class.java))
                 true
             }
-            addMenuEntry(OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
+            addMenuEntry(R.id.OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
                 startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
-                    .putExtra("url", IMPRESSUMPATH))
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
                 true
             }
-            addMenuEntry(OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
+            addMenuEntry(R.id.OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
                 startActivity(Intent(this@LoginActivity, ImpressumActivity::class.java)
-                    .putExtra("url", DATAPROTECTIONPATH))
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
                 true
             }
-            addMenuEntry(OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.close)) {
+            addMenuEntry(R.id.OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.close)) {
                 finish()
                 true
             }
@@ -56,27 +53,12 @@ class LoginActivity : BaseActivity() {
         doConfirm()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        if (menu?.findItem(OPTION_MENU_LOST_PASSWORD) == null) {
-            menu?.add(NONE, OPTION_MENU_LOST_PASSWORD, NONE, "Passwort vergessen")
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return if (item.itemId == OPTION_MENU_LOST_PASSWORD) {
-            startActivity(Intent(this, LostPasswordActivity::class.java))
-            true
-        } else {
-            super.onOptionsItemSelected(item)
-        }
-    }
-
     fun loginButton(view: View) {
         deleteMessage()
 
-        AuthService.getInstance(application).login(emailView.text.toString(), passwordView.text.toString()){ code, _ ->
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+        authService.login(emailView.text.toString(), passwordView.text.toString()){ code, _ ->
             when (code) {
                 200 -> {
                     startActivity(Intent(this, RecipeListingActivity::class.java))
@@ -122,7 +104,9 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun confirmTempCode(tempCode: String) {
-        AuthService.getInstance(application).confirmRegistration(tempCode) { code, _ ->
+        val authService = (application as PingwinekCooksApplication).getServiceLocator()
+            .getService(AuthService::class.java)
+        authService.confirmRegistration(tempCode) { code, _ ->
             when (code) {
                 200 -> {
                     setMessage(resources.getString(R.string.confirmationSucceeded))

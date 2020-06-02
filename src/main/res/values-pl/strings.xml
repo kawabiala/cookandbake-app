@@ -1,0 +1,69 @@
+<resources>
+    <string name="app_name">Pingwinek Cooks</string>
+    <string name="pingwinekcooks">Pingwinek Cooks - Twoja applikacja do przepisów</string>
+
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+
+    <string name="close">Zamknij</string>
+    <string name="done">Załatwione</string>
+    <string name="save">Zapamiętaj</string>
+    <string name="delete">Zmazaj</string>
+    <string name="share">Dziel</string>
+    <string name="refresh">Zaaktualizuj</string>
+
+    <string name="login">Login</string>
+    <string name="loginFailed">Login się nie udało</string>
+    <string name="is_logged_in">%1$s (zalogowane)</string>
+    <string name="logged_in_as">Zalogowane jako: %1$s</string>
+    <string name="is_not_logged_in">%1$s (nie zalogowane)</string>
+
+    <string name="logout">Logout</string>
+    <string name="logoutFailed">Logout się nie udało</string>
+    <string name="confirmLogout">Logout obecnege użytkownika?</string>
+
+    <string name="setPassword">Wpisać hasło</string>
+    <string name="password">Hasło</string>
+    <string name="lostPassword">Resetować hasło</string>
+    <string name="lostPasswordFailed">Resetowanie hasła się nie udało</string>
+    <string name="newPassword">Nowe hasło</string>
+    <string name="oldPassword">Stare hasło</string>
+    <string name="changePassword">Zmienić hasło</string>
+    <string name="PasswordChanged">Hasło zostało zmienione</string>
+    <string name="changePasswordFailed">Zmiana hasła się nie udało</string>
+
+    <string name="register">Załozić profil</string>
+    <string name="registrationFailed">Założenie profilu się nie udało</string>
+    <string name="unsubscribe">Zmazać profil</string>
+    <string name="confirmUnsubscribe">Naprawdę zmazać profil?</string>
+    <string name="no_account">Żaden profil zalogowany</string>
+    <string name="manage_account">Profil</string>
+    <string name="confirmationSucceeded">Profil jest potwierdzony</string>
+    <string name="confirmationFailed">Potwierdzenie profilu się nie udało</string>
+    <string name="declareAcceptanceOfDataprotection">Tak, zgadzam się z zapamiętaniem moich danych i akceptuję <annotation clickableArea="dataprotection">Politykę prywatności</annotation>.</string>
+
+    <string name="impressum">Impressum</string>
+    <string name="dataprotection">Polityka prywatności</string>
+
+    <string name="recipeLocal">Przepis</string>
+    <string name="recipes">Przepisy</string>
+    <string name="recipe_title">Tytuł przepisu</string>
+    <string name="recipe_description">Krótkie opisanie przepisu</string>
+    <string name="recipe_delete_confirm">Naprawdę zmazać przepis?</string>
+    <string name="add_recipe">Dodawać przepis</string>
+
+    <string name="ingredientRemote">Składnik</string>
+    <string name="ingredients">Składniki</string>
+    <string name="instruction">Instrukcja</string>
+    <string name="quantity">Ilość</string>
+    <string name="quantity_number">Ilość (liczba)</string>
+    <string name="quantity_verbal">Ilość (słownie, n.p. 1 – 2)</string>
+    <string name="ingredient_quantity_unequal_verbal">Do słownege określenia ilości trzeba także określić ilość jako liczbę.</string>
+    <string name="unity">Jedność</string>
+    <string name="write_instruction">Teraz instrukcję skompletować</string>
+    <string name="plus_new_ingredient">+ nowy składnik</string>
+
+    <string name="email">Email</string>
+    <string name="confirmationSent">Email z linkiem do potwierdzenia wysłany na podany adres.</string>
+
+</resources>

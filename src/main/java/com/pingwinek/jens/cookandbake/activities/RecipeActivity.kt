@@ -56,7 +56,10 @@ class RecipeActivity : BaseActivity(),
         titleView.setOnClickListener(onClickListener)
         descriptionView.setOnClickListener(onClickListener)
 
-        val pagerAdapter = RecipePagerAdapter(supportFragmentManager)
+        val pagerAdapter = RecipePagerAdapter(
+            supportFragmentManager,
+            resources.getString(R.string.ingredients),
+            resources.getString(R.string.instruction))
         val tabLayout = findViewById<TabLayout>(R.id.recipe_tablayout)
         findViewById<androidx.viewpager.widget.ViewPager>(R.id.recipeTabs).apply {
             adapter = pagerAdapter
@@ -64,12 +67,12 @@ class RecipeActivity : BaseActivity(),
         }
 
         optionMenu.apply {
-            addMenuEntry(OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
+            addMenuEntry(R.id.OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
                 delete()
                 true
             }
             addMenuEntry(
-                OPTION_MENU_SHARE,
+                R.id.OPTION_MENU_SHARE,
                 resources.getString(R.string.share),
                 R.drawable.ic_action_share_black,
                 true) {
@@ -215,15 +218,18 @@ class RecipeActivity : BaseActivity(),
                 putExtra(
                     Intent.EXTRA_SUBJECT,
                     recipeModel.getShareableRecipe()?.subject)
-                type ="plain/text"
+                type ="text/plain"
             },
             null
         )
     }
 }
 
-class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager) :
-    androidx.fragment.app.FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+class RecipePagerAdapter(
+    fragmentManager: androidx.fragment.app.FragmentManager,
+    private val ingredientTitle: String,
+    private val instructionTitle: String
+) : androidx.fragment.app.FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int): androidx.fragment.app.Fragment {
         return if (position == 0) {
@@ -239,9 +245,9 @@ class RecipePagerAdapter(fragmentManager: androidx.fragment.app.FragmentManager)
 
     override fun getPageTitle(position: Int): CharSequence? {
         return if (position == 0) {
-            "Zutaten"
+            ingredientTitle
         } else {
-            "Anleitung"
+            instructionTitle
         }
     }
 }

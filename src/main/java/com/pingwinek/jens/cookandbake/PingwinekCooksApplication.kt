@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
+import android.os.Build
 import android.util.Log
 import com.pingwinek.jens.cookandbake.db.DatabaseService
 import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
@@ -18,6 +19,7 @@ import com.pingwinek.jens.cookandbake.sync.IngredientSyncManager
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncLogic
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncManager
 import org.json.JSONObject
+import java.net.URI
 
 class PingwinekCooksApplication : Application() {
 
@@ -31,15 +33,17 @@ class PingwinekCooksApplication : Application() {
 
         registerServices()
 
-        // Global ResponseRoutings
+        // Global Response Routes
+        // Global response routes are valid unless they are overwritten in a network request
+
         /*
         Code 401 signals invalid session, e.g. due to missing or invalid cookie;
-        intended behavior is to try authentication based on refresh token
+        we should check for valid session before sending a network request;
          */
         GlobalNetworkResponseRoutes.registerGlobalResponseRoute(
             AbstractNetworkResponseRoutes.Result.SUCCESS, 401
         ) { _, _, _ ->
-            Log.i(tag, "defaultRoute for 401")
+            Log.w(tag, "Response code 401 might indicate, that we have no valid session. Generally, we should check for a valid session before sending a network request.")
         }
 
         /*
@@ -53,6 +57,7 @@ class PingwinekCooksApplication : Application() {
                 val jsonObject = JSONObject(response)
                 val error = jsonObject.getString("error")
                 if (error == verificationError) {
+                    Log.e(tag, "Logging out due to verification error")
                     getServiceLocator().getService(AuthService::class.java).logout { _, _ ->}
                 }
             } finally {
@@ -60,6 +65,20 @@ class PingwinekCooksApplication : Application() {
             }
         }
 
+    }
+
+    fun getURL(id: Int): String {
+        val domain = BuildConfig.DOMAIN
+        val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            resources.configuration.locales[0]
+        } else {
+            resources.configuration.locale
+        }
+        return "$domain/${getString(id, locale)}"
+    }
+
+    fun getHost(): String {
+        return URI(BuildConfig.DOMAIN).host
     }
 
     fun getServiceLocator(): ServiceLocator {
@@ -76,20 +95,24 @@ class PingwinekCooksApplication : Application() {
         val authService = AuthService.getInstance(this)
         serviceLocator.registerService(authService)
 
-        val retryManager = PingwinekCooksRetryManager(authService)
-
         val ingredientSourceLocal = IngredientSourceLocal.getInstance(pingwinekCooksDB)
         serviceLocator.registerService(ingredientSourceLocal)
 
-        val ingredientSourceRemote = IngredientSourceRemote.getInstance(networkRequestProvider)
-        ingredientSourceRemote.retryManager = retryManager
+        val ingredientSourceRemote = IngredientSourceRemote(
+            networkRequestProvider,
+            authService,
+            this
+        )
         serviceLocator.registerService(ingredientSourceRemote)
 
         val recipeSourceLocal = RecipeSourceLocal.getInstance(pingwinekCooksDB)
         serviceLocator.registerService(recipeSourceLocal)
 
-        val recipeSourceRemote = RecipeSourceRemote.getInstance(networkRequestProvider)
-        recipeSourceRemote.retryManager = retryManager
+        val recipeSourceRemote = RecipeSourceRemote(
+            networkRequestProvider,
+            authService,
+        this
+        )
         serviceLocator.registerService(recipeSourceRemote)
 
         val syncService = SyncService.getInstance(internetConnectivityManager)
