@@ -1,69 +1,69 @@
 <resources>
     <string name="app_name">Pingwinek Cooks</string>
-    <string name="pingwinekcooks">Pingwinek Cooks - die einfache Rezept-App</string>
+    <string name="pingwinekcooks">Pingwinek Cooks - easy to use recipe app</string>
 
-    <string name="yes">Ja</string>
-    <string name="no">Nein</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
-    <string name="close">Schließen</string>
-    <string name="done">Fertig</string>
-    <string name="save">Speichern</string>
-    <string name="delete">Löschen</string>
-    <string name="share">Teilen</string>
-    <string name="refresh">Aktualisieren</string>
+    <string name="close">Close</string>
+    <string name="done">Done</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="refresh">Refresh</string>
 
     <string name="login">Login</string>
-    <string name="loginFailed">Login ist fehlgeschlagen.</string>
-    <string name="is_logged_in">%1$s (angemeldet)</string>
-    <string name="logged_in_as">Angemeldet als: %1$s</string>
-    <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
+    <string name="loginFailed">Login failed.</string>
+    <string name="is_logged_in">%1$s (logged in)</string>
+    <string name="logged_in_as">Logged in as: %1$s</string>
+    <string name="is_not_logged_in">%1$s (not logged in)</string>
 
     <string name="logout">Logout</string>
-    <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
-    <string name="confirmLogout">Aktuellen Benutzer ausloggen?</string>
+    <string name="logoutFailed">Logout failed.</string>
+    <string name="confirmLogout">Log out current user?</string>
 
-    <string name="setPassword">Passwort setzen</string>
-    <string name="password">Passwort</string>
-    <string name="lostPassword">Passwort zurücksetzen</string>
-    <string name="lostPasswordFailed">Rücksetzen des Passworts fehlgeschlagen</string>
-    <string name="newPassword">Neues Passwort</string>
-    <string name="oldPassword">Bisheriges Passwort</string>
-    <string name="changePassword">Passwort ändern</string>
-    <string name="PasswordChanged">Passwort wurde geändert</string>
-    <string name="changePasswordFailed">Das Passwort konnte nicht geändert werden</string>
+    <string name="setPassword">Set password</string>
+    <string name="password">password</string>
+    <string name="lostPassword">Reset password</string>
+    <string name="lostPasswordFailed">Resetting password failed</string>
+    <string name="newPassword">New password</string>
+    <string name="oldPassword">Old password</string>
+    <string name="changePassword">Change password</string>
+    <string name="PasswordChanged">Password changed</string>
+    <string name="changePasswordFailed">Change password failed</string>
 
-    <string name="register">Profil anlegen</string>
-    <string name="registrationFailed">Profil anlegen fehlgeschlagen</string>
-    <string name="unsubscribe">Profil löschen</string>
-    <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
-    <string name="no_account">Kein Profil angemeldet</string>
-    <string name="manage_account">Profildaten</string>
-    <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
-    <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
-    <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
+    <string name="register">Register</string>
+    <string name="registrationFailed">Registration failed</string>
+    <string name="unsubscribe">Delete profile</string>
+    <string name="confirmUnsubscribe">Really delete profile?</string>
+    <string name="no_account">No profile logged in</string>
+    <string name="manage_account">Profile</string>
+    <string name="confirmationSucceeded">The profile is now confirmed.</string>
+    <string name="confirmationFailed">Confirmation of profile failed.</string>
+    <string name="declareAcceptanceOfDataprotection">Yes, I agree with storing my data and I accept the <annotation clickableArea="dataprotection">privacy statement</annotation>.</string>
 
     <string name="impressum">Impressum</string>
-    <string name="dataprotection">Datenschutz</string>
+    <string name="dataprotection">Privacy statement</string>
 
-    <string name="recipeLocal">Rezept</string>
-    <string name="recipes">Rezepte</string>
-    <string name="recipe_title">Rezepttitel</string>
-    <string name="recipe_description">Kurzbeschreibung</string>
-    <string name="recipe_delete_confirm">Wirklich das Rezept löschen?</string>
-    <string name="add_recipe">Rezept hinzufügen</string>
+    <string name="recipeLocal">Recipe</string>
+    <string name="recipes">Recipes</string>
+    <string name="recipe_title">Recipe name</string>
+    <string name="recipe_description">Short description</string>
+    <string name="recipe_delete_confirm">Really delete recipe?</string>
+    <string name="add_recipe">Add recipe</string>
 
-    <string name="ingredientRemote">Zutat</string>
-    <string name="ingredients">Zutaten</string>
-    <string name="instruction">Anleitung</string>
-    <string name="quantity">Menge</string>
-    <string name="quantity_number">Menge (Zahl)</string>
-    <string name="quantity_verbal">Menge (verbal, z.b. 1 bis 2)</string>
-    <string name="ingredient_quantity_unequal_verbal">Zur verbalen Menge muss auch eine Menge als Zahl angegeben werden.</string>
-    <string name="unity">Einheit</string>
-    <string name="write_instruction">Jetzt Anleitung ergänzen</string>
-    <string name="plus_new_ingredient">+ Neue Zutat</string>
+    <string name="ingredientRemote">Ingredient</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="instruction">Instruction</string>
+    <string name="quantity">Quantity</string>
+    <string name="quantity_number">Quantity (number)</string>
+    <string name="quantity_verbal">Quantity (verbal, e.g. 1–2)</string>
+    <string name="ingredient_quantity_unequal_verbal">If you define a verbal quantity, please also fill in the quantity as number.</string>
+    <string name="unity">Unity</string>
+    <string name="write_instruction">Add instruction</string>
+    <string name="plus_new_ingredient">+ new ingredient</string>
 
     <string name="email">Email</string>
-    <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
+    <string name="confirmationSent">An email with a confirmation link was sent to the given address.</string>
 
 </resources>

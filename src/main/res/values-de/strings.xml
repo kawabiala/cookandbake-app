@@ -1,0 +1,69 @@
+<resources>
+    <string name="app_name">Pingwinek Cooks</string>
+    <string name="pingwinekcooks">Pingwinek Cooks - die einfache Rezept-App</string>
+
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+
+    <string name="close">Schließen</string>
+    <string name="done">Fertig</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="share">Teilen</string>
+    <string name="refresh">Aktualisieren</string>
+
+    <string name="login">Login</string>
+    <string name="loginFailed">Login ist fehlgeschlagen.</string>
+    <string name="is_logged_in">%1$s (angemeldet)</string>
+    <string name="logged_in_as">Angemeldet als: %1$s</string>
+    <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
+
+    <string name="logout">Logout</string>
+    <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
+    <string name="confirmLogout">Aktuellen Benutzer ausloggen?</string>
+
+    <string name="setPassword">Passwort setzen</string>
+    <string name="password">Passwort</string>
+    <string name="lostPassword">Passwort zurücksetzen</string>
+    <string name="lostPasswordFailed">Rücksetzen des Passworts fehlgeschlagen</string>
+    <string name="newPassword">Neues Passwort</string>
+    <string name="oldPassword">Bisheriges Passwort</string>
+    <string name="changePassword">Passwort ändern</string>
+    <string name="PasswordChanged">Passwort wurde geändert</string>
+    <string name="changePasswordFailed">Das Passwort konnte nicht geändert werden</string>
+
+    <string name="register">Profil anlegen</string>
+    <string name="registrationFailed">Profil anlegen fehlgeschlagen</string>
+    <string name="unsubscribe">Profil löschen</string>
+    <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
+    <string name="no_account">Kein Profil angemeldet</string>
+    <string name="manage_account">Profildaten</string>
+    <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
+    <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
+    <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
+
+    <string name="impressum">Impressum</string>
+    <string name="dataprotection">Datenschutz</string>
+
+    <string name="recipeLocal">Rezept</string>
+    <string name="recipes">Rezepte</string>
+    <string name="recipe_title">Rezepttitel</string>
+    <string name="recipe_description">Kurzbeschreibung</string>
+    <string name="recipe_delete_confirm">Wirklich das Rezept löschen?</string>
+    <string name="add_recipe">Rezept hinzufügen</string>
+
+    <string name="ingredientRemote">Zutat</string>
+    <string name="ingredients">Zutaten</string>
+    <string name="instruction">Anleitung</string>
+    <string name="quantity">Menge</string>
+    <string name="quantity_number">Menge (Zahl)</string>
+    <string name="quantity_verbal">Menge (verbal, z.b. 1 bis 2)</string>
+    <string name="ingredient_quantity_unequal_verbal">Zur verbalen Menge muss auch eine Menge als Zahl angegeben werden.</string>
+    <string name="unity">Einheit</string>
+    <string name="write_instruction">Jetzt Anleitung ergänzen</string>
+    <string name="plus_new_ingredient">+ Neue Zutat</string>
+
+    <string name="email">Email</string>
+    <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
+
+</resources>
