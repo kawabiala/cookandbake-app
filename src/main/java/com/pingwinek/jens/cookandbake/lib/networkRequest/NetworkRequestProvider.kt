@@ -2,55 +2,63 @@ package com.pingwinek.jens.cookandbake.lib.networkRequest
 
 import android.app.Application
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import org.chromium.net.UploadDataProvider
 import org.json.JSONObject
 import java.net.URLEncoder
 import java.util.concurrent.Executors
 
+/**
+ * This is usually the starting point for network requests
+ */
 class NetworkRequestProvider private constructor(val application: Application) {
-
-    enum class Method(val method: String) {
-        GET("GET"),
-        POST("POST"),
-        PUT("PUT"),
-        DELETE("DELETE")
-    }
-
-    enum class ContentType(val contentType: String) {
-        APPLICATION_JSON("application/json"),
-        APPLICATION_URLENCODED("application/x-www-form-urlencoded")
-    }
 
     fun getNetworkRequest(
         url: String,
-        method: Method?
+        method: NetworkRequest.Method?
+    ): NetworkRequest {
+        return getHttpNetworkRequest(
+            url,
+            method ?: NetworkRequest.Method.GET
+        )
+    }
+
+    private fun getConfigurableNetworkRequest(
+        url: String,
+        method: NetworkRequest.Method?
     ): NetworkRequest {
         return ConfigurableNetworkRequest(
             url,
             Executors.newSingleThreadExecutor(),
             application,
-            method ?: Method.GET
+            method ?: NetworkRequest.Method.GET
+        )
+    }
+
+    private fun getCronetEngineNetworkRequest(
+        url: String,
+        method: NetworkRequest.Method?
+    ): CronetEngineNetworkRequest {
+        return CronetEngineNetworkRequest(
+            url,
+            application,
+            method ?: NetworkRequest.Method.GET
+        )
+    }
+
+    private fun getHttpNetworkRequest(
+        url: String,
+        method: NetworkRequest.Method?
+    ): HttpConnectionNetworkRequest {
+        return HttpConnectionNetworkRequest(
+            url,
+            application,
+            method ?: NetworkRequest.Method.GET
         )
     }
 
     companion object :
         SingletonHolder<NetworkRequestProvider, Application>(::NetworkRequestProvider) {
 
-        fun getUploadDataProvider(
-            params: Map<String, String>,
-            contentType: ContentType
-        ): UploadDataProvider {
-            return when (contentType) {
-                ContentType.APPLICATION_URLENCODED -> {
-                    NetworkRequestBodyProvider(toBody(params))
-                }
-                ContentType.APPLICATION_JSON -> {
-                    NetworkRequestBodyProvider(toJsonBody(params))
-                }
-            }
-        }
-
-        private fun toBody(params: Map<String, String>): String {
+        fun toBody(params: Map<String, String>): String {
 
             val bodyBuilder = StringBuilder()
             var first = true
@@ -70,7 +78,7 @@ class NetworkRequestProvider private constructor(val application: Application) {
             return bodyBuilder.toString()
         }
 
-        private fun toJsonBody(params: Map<String, String>): String {
+        fun toJsonBody(params: Map<String, String>): String {
             return JSONObject(params).toString()
         }
 

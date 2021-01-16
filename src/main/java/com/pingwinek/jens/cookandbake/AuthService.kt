@@ -3,12 +3,14 @@ package com.pingwinek.jens.cookandbake
 import android.content.Context
 import android.util.Log
 import com.pingwinek.jens.cookandbake.db.DatabaseService
-import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
-import com.pingwinek.jens.cookandbake.lib.networkRequest.CookieStore
-import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.networkRequest.*
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.ClassCastException
+import java.net.CookieHandler
+import java.net.CookieManager
+import java.net.HttpCookie
 import java.net.URI
 import java.util.*
 import kotlin.collections.HashMap
@@ -23,8 +25,8 @@ class AuthService private constructor(private val application: PingwinekCooksApp
     private val authListeners = LinkedList<AuthenticationListener>()
     private val refreshManager = RefreshManager(this)
 
-    private val method = NetworkRequestProvider.Method.POST
-    private val contentType = NetworkRequestProvider.ContentType.APPLICATION_URLENCODED
+    private val method = NetworkRequest.Method.POST
+    private val contentType = NetworkRequest.ContentType.APPLICATION_URLENCODED
     private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
     private val prefs = application.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
 
@@ -56,7 +58,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["dataprotection"] = dataprotection.toString()
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REGISTER), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,201) { _, _, response ->
@@ -85,7 +91,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["temp_code"] = tempCode
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CONFIRMREGISTRATION), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -113,7 +123,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["uuid"] = getUUID()
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGIN), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -147,7 +161,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["email"] = email
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOSTPASSWORD), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -178,7 +196,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["password"] = password
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_NEWPASSWORD), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -212,7 +234,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["new_password"] = newPassword
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CHANGEPASSWORD), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -230,11 +256,15 @@ class AuthService private constructor(private val application: PingwinekCooksApp
     }
 
     fun ensureSession(callback: (Boolean) -> Unit) {
-        val validUntil = GregorianCalendar().apply {
-            add(Calendar.SECOND, 60)
-        }.time
-        val cookie = CookieStore.getCookie(URI(BuildConfig.DOMAIN).host, COOKIE_NAME)
-        if (cookie == null || cookie.getExpires()?.before(validUntil) == true) {
+        val httpCookie: HttpCookie? = try {
+            val cookieManager = CookieHandler.getDefault() as CookieManager
+            cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { potentialCookie ->
+                potentialCookie.name == COOKIE_NAME
+            }
+        } catch (classCastException: ClassCastException) {
+            null
+        }
+        if (httpCookie == null || httpCookie.hasExpired()) {
             refreshManager.refresh {
                 callback(it)
             }
@@ -259,7 +289,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         }
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REFRESH), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -292,7 +326,16 @@ class AuthService private constructor(private val application: PingwinekCooksApp
     }
 
     fun logout(callback: (code: Int, response: String) -> Unit) {
-        CookieStore.removeCookies(application.getHost())
+        try {
+            val cookieManager = CookieHandler.getDefault() as CookieManager
+            val httpCookie = cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { potentialCookie ->
+                potentialCookie.name == COOKIE_NAME
+            }
+            cookieManager.cookieStore.remove(URI(BuildConfig.DOMAIN), httpCookie)
+        } catch (classCastException: ClassCastException) {
+            Log.w(this::class.java.name, "Could not delete cookies due to exception $classCastException")
+        }
+
         val email = Account.getStoredAccount(application)?.getEmail() ?: return
 
         prefs.edit().apply {
@@ -308,7 +351,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["uuid"] = getUUID()
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGOUT), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -330,7 +377,11 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         params["password"] = password
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_UNSUBSCRIBE), method)
-        networkRequest.setUploadDataProvider(NetworkRequestProvider.getUploadDataProvider(params, contentType), contentType)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
         val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
         networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -341,7 +392,15 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 remove("token")
             }.apply()
 
-            CookieStore.removeCookies(application.getHost())
+            try {
+                val cookieManager = CookieHandler.getDefault() as CookieManager
+                val httpCookie = cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { potentialCookie ->
+                    potentialCookie.name == COOKIE_NAME
+                }
+                cookieManager.cookieStore.remove(URI(BuildConfig.DOMAIN), httpCookie)
+            } catch (classCastException: ClassCastException) {
+                Log.w(this::class.java.name, "Could not delete cookies due to exception $classCastException")
+            }
 
             callback(200, response)
         }

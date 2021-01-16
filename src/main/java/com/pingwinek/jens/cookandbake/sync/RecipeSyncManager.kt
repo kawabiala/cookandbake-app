@@ -94,7 +94,8 @@ class RecipeSyncManager(
                                         newRecipeRemote.id,
                                         local.title,
                                         local.description,
-                                        local.instruction
+                                        local.instruction,
+                                        local.uri
                                     )
                                 ).setResultHandler {
                                     locker.unlock(local.id)

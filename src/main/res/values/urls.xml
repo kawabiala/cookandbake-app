@@ -18,4 +18,5 @@
 
     <string name="URL_RECIPE" translatable="false">&basepath;/api/recipe</string>
     <string name="URL_INGREDIENT" translatable="false">&basepath;/api/ingredient</string>
+    <string name="URL_FILES" translatable="false">&basepath;/api/files</string>
 </resources>

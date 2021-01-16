@@ -63,6 +63,11 @@
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
     <string name="plus_new_ingredient">+ Neue Zutat</string>
 
+    <string name="pdf">pdf</string>
+    <string name="add_pdf">pdf hinzufügen</string>
+    <string name="delete_pdf">pdf löschen</string>
+    <string name="pdf_delete_confirm">Wirklich das Pdf löschen?</string>
+
     <string name="email">Email</string>
     <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
 

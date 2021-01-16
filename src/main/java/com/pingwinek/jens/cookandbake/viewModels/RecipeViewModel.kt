@@ -1,15 +1,21 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.pingwinek.jens.cookandbake.lib.networkRequest.FileManagerRemote
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.ShareableRecipe
+import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
+import java.io.InputStream
 import java.util.*
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,6 +24,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
 
     var recipeId: Int? = null
+    var recipeFileInputStream = MutableLiveData<InputStream>()
 
     val recipeData: LiveData<Recipe?> = Transformations.map(recipeRepository.recipeListData) { recipeList ->
         recipeId?.let {
@@ -37,6 +44,26 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         recipeId?.let { id ->
             recipeRepository.getRecipe(id)
             ingredientRepository.getAll(id)
+        }
+    }
+
+    fun savePdf(inputStream: InputStream, type: String) {
+        recipeFileInputStream.value = inputStream
+
+        recipeId?.let {
+            recipeRepository.saveFile(it, inputStream, type)
+/*
+            FileManagerRemote(getApplication())
+                .saveFile(inputStream, type)
+                .setResultHandler { result ->
+                    if (result.status == Promise.Status.SUCCESS) {
+                        Log.i(this::class.java.name, "Uri: ${result.value}")
+                    } else {
+                        Log.i(this::class.java.name, "Saving file, but no inputstream provided")
+                    }
+                }
+
+ */
         }
     }
 

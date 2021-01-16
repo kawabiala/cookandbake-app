@@ -4,16 +4,19 @@ import android.app.Application
 import android.util.Log
 import org.chromium.net.CronetEngine
 import org.chromium.net.UploadDataProvider
+import org.chromium.net.UploadDataProviders
 import org.chromium.net.UrlRequest
+import java.net.CookieHandler
+import java.net.CookieManager
 import java.net.URI
+import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class ConfigurableNetworkRequest private constructor(
     override val url: String,
-    override val executor: ExecutorService,
-    override val application: Application,
-    override val httpMethod: NetworkRequestProvider.Method,
+    private val executor: ExecutorService,
+    val application: Application,
+    private val httpMethod: NetworkRequest.Method,
     private val networkResponseRouter: NetworkResponseRouter
 ) : NetworkRequest {
 
@@ -21,23 +24,23 @@ class ConfigurableNetworkRequest private constructor(
         url: String,
         executor: ExecutorService,
         application: Application,
-        httpMethod: NetworkRequestProvider.Method
+        httpMethod: NetworkRequest.Method
     ) : this(url, executor, application, httpMethod, NetworkResponseRouterImpl(application.mainLooper))
 
     private val cronetEngine = CronetEngine.Builder(application).build()
-    private val headers: MutableMap<String, String> = mutableMapOf()
     private var uploadDataProvider: UploadDataProvider? = null
-    private var contentType: NetworkRequestProvider.ContentType? = null
+    private var outputBuffer: ByteBuffer? = null
+    private var contentType: String? = null
 
     private var urlRequest: UrlRequest? = null
 
-    override fun addHeader(header: String, value: String) {
-        headers[header] = value
+    override fun setOutputBuffer(outputBuffer: ByteBuffer) {
+        this.outputBuffer = outputBuffer
+        this.uploadDataProvider = UploadDataProviders.create(outputBuffer)
     }
 
-    override fun setUploadDataProvider(uploadDataProvider: UploadDataProvider, contentType: NetworkRequestProvider.ContentType) {
-        this.uploadDataProvider = uploadDataProvider
-        this.contentType = contentType
+    override fun setContentType(contentType: NetworkRequest.ContentType) {
+        this.contentType = contentType.toString()
     }
 
     override fun obtainNetworkResponseRouter() : NetworkResponseRouter {
@@ -54,29 +57,8 @@ class ConfigurableNetworkRequest private constructor(
         }
     }
 
-    override fun clone(): NetworkRequest {
-        val clonedRequest = ConfigurableNetworkRequest(
-            url,
-            Executors.newSingleThreadExecutor(),
-            application,
-            httpMethod,
-            (networkResponseRouter as NetworkResponseRouterImpl).clone()
-        )
-        headers.forEach { header ->
-            clonedRequest.addHeader(header.key, header.value)
-        }
-        uploadDataProvider?.let { nonNullUploadProvider ->
-            contentType?.let { nonNullContentType ->
-                clonedRequest.setUploadDataProvider(nonNullUploadProvider,
-                    nonNullContentType
-                )
-            }
-        }
-        return clonedRequest
-    }
-
     private fun getUrlRequestBuilder(networkRequestCallback: NetworkRequestCallback) : UrlRequest.Builder {
-        val logMessage = "Request built with Url: $url, Method: $httpMethod"
+        var logMessage = "Request built with Url: $url, Method: $httpMethod"
 
         val requestBuilder = cronetEngine.newUrlRequestBuilder(
             url,
@@ -86,13 +68,19 @@ class ConfigurableNetworkRequest private constructor(
 
         if (uploadDataProvider != null) {
                 requestBuilder.setUploadDataProvider(uploadDataProvider, executor)
-                requestBuilder.addHeader("Content-Type", contentType?.contentType)
+                requestBuilder.addHeader("Content-Type", contentType)
+            logMessage = "$logMessage, UploadDataProvider: $uploadDataProvider, ContentType: $contentType"
         }
 
         requestBuilder.setHttpMethod(httpMethod.method)
 
-        CookieStore.getCookiesAsStrings(URI(url).host).forEach { _cookie ->
-            requestBuilder.addHeader("Cookie", _cookie)
+        try {
+            val cookieManager = CookieHandler.getDefault() as CookieManager
+            cookieManager.cookieStore.get(URI(url)).forEach { cookie ->
+                requestBuilder.addHeader("Cookie", cookie.toString())
+            }
+        } catch (classCastException: ClassCastException) {
+            Log.i(this::class.java.name, "Could not create cookie headers due to exception: $classCastException")
         }
 
         Log.i("NetworkRequestProvider", logMessage)

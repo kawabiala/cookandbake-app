@@ -25,6 +25,7 @@ const val ACTION_LOGIN_CONFIRMATION_SENT = "com.pingwinek.jens.cookandbake.regis
 const val REQUEST_CODE_TITLE = 1
 const val REQUEST_CODE_INSTRUCTION = 2
 const val REQUEST_CODE_INGREDIENT = 3
+const val REQUEST_CODE_PDF = 4
 
 const val SHARED_PREFERENCES_FILE = "preferences"
 

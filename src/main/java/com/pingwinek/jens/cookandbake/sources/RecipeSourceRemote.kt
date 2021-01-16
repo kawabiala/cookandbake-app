@@ -4,6 +4,7 @@ import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.models.RecipeRemote
@@ -28,7 +29,7 @@ class RecipeSourceRemote constructor(
 
         authService.ensureSession { success ->
             if (success) {
-                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequestProvider.Method.GET)
+                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequest.Method.GET)
                 val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
                 networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -55,7 +56,7 @@ class RecipeSourceRemote constructor(
 
         authService.ensureSession { success ->
             if (success) {
-                val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$id", NetworkRequestProvider.Method.GET)
+                val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$id", NetworkRequest.Method.GET)
 
                 val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
                 networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -84,10 +85,12 @@ class RecipeSourceRemote constructor(
 
         authService.ensureSession { success ->
             if (success) {
-                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequestProvider.Method.PUT)
-                networkRequest.setUploadDataProvider(
-                    NetworkRequestProvider.getUploadDataProvider(item.asMap(), NetworkRequestProvider.ContentType.APPLICATION_URLENCODED),
-                    NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
+                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequest.Method.PUT)
+                    .apply {
+                        setOutputString(NetworkRequestProvider.toBody(item.asMap()))
+                        setContentType(NetworkRequest.ContentType.APPLICATION_URLENCODED)
+                    }
+
                 val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
                 networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -110,10 +113,12 @@ class RecipeSourceRemote constructor(
 
         authService.ensureSession { success ->
             if (success) {
-                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequestProvider.Method.POST)
-                networkRequest.setUploadDataProvider(
-                    NetworkRequestProvider.getUploadDataProvider(item.asMap(), NetworkRequestProvider.ContentType.APPLICATION_URLENCODED),
-                    NetworkRequestProvider.ContentType.APPLICATION_URLENCODED)
+                val networkRequest = networkRequestProvider.getNetworkRequest(urlRecipe, NetworkRequest.Method.POST)
+                    .apply {
+                        setOutputString(NetworkRequestProvider.toBody(item.asMap()))
+                        setContentType(NetworkRequest.ContentType.APPLICATION_URLENCODED)
+                    }
+
                 val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
 
                 networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
@@ -141,7 +146,7 @@ class RecipeSourceRemote constructor(
 
         authService.ensureSession { success ->
             if (success) {
-                val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$id", NetworkRequestProvider.Method.DELETE)
+                val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$id", NetworkRequest.Method.DELETE)
 
                 val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
                 networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, _ ->
@@ -157,7 +162,4 @@ class RecipeSourceRemote constructor(
         }
         return promise
     }
-
-    //companion object : SingletonHolder<RecipeSourceRemote, NetworkRequestProvider>(::RecipeSourceRemote)
-
 }

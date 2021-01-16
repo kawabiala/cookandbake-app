@@ -8,6 +8,7 @@ import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRoutes
+import com.pingwinek.jens.cookandbake.lib.networkRequest.HostBasedCookieStore
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
@@ -19,6 +20,9 @@ import com.pingwinek.jens.cookandbake.sync.IngredientSyncManager
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncLogic
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncManager
 import org.json.JSONObject
+import java.net.CookieHandler
+import java.net.CookieManager
+import java.net.CookiePolicy
 import java.net.URI
 
 class PingwinekCooksApplication : Application() {
@@ -32,6 +36,9 @@ class PingwinekCooksApplication : Application() {
         super.onCreate()
 
         registerServices()
+
+        val cookieManager = CookieManager(HostBasedCookieStore(), CookiePolicy.ACCEPT_ORIGINAL_SERVER)
+        CookieHandler.setDefault(cookieManager)
 
         // Global Response Routes
         // Global response routes are valid unless they are overwritten in a network request

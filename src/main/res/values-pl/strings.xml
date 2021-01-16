@@ -63,6 +63,11 @@
     <string name="write_instruction">Teraz instrukcję skompletować</string>
     <string name="plus_new_ingredient">+ nowy składnik</string>
 
+    <string name="pdf">pdf</string>
+    <string name="add_pdf">Dodawać pdf</string>
+    <string name="delete_pdf">Zmazać pdf</string>
+    <string name="pdf_delete_confirm">Naprawdę zmazać pdf?</string>
+
     <string name="email">Email</string>
     <string name="confirmationSent">Email z linkiem do potwierdzenia wysłany na podany adres.</string>
 

@@ -63,6 +63,11 @@
     <string name="write_instruction">Add instruction</string>
     <string name="plus_new_ingredient">+ new ingredient</string>
 
+    <string name="pdf">pdf</string>
+    <string name="add_pdf">add pdf</string>
+    <string name="delete_pdf">Delete pdf</string>
+    <string name="pdf_delete_confirm">Really delete pdf?</string>
+
     <string name="email">Email</string>
     <string name="confirmationSent">An email with a confirmation link was sent to the given address.</string>
 

@@ -15,6 +15,7 @@
     <item name="OPTION_MENU_DATAPROTECTION" type="id"/>
     <item name="OPTION_MENU_MANAGE_ACCOUNT" type="id"/>
     <item name="OPTION_MENU_DELETE" type="id"/>
+    <item name="OPTION_MENU_DELETE_PDF" type="id"/>
     <item name="OPTION_MENU_SHARE" type="id"/>
     <item name="OPTION_MENU_REFRESH" type="id"/>
 </resources>

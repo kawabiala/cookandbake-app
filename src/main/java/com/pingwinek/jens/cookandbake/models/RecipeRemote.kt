@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.models
 
+import android.net.Uri
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -8,6 +9,7 @@ class RecipeRemote private constructor(
     override val title: String,
     override val description: String?,
     override val instruction: String?,
+    override val uri: String?,
     override var lastModified: Long
 ) : Recipe() {
 
@@ -15,8 +17,9 @@ class RecipeRemote private constructor(
         id: Int = 0,
         title: String,
         description: String?,
-        instruction: String?
-    ) : this(id, title, description, instruction, 0)
+        instruction: String?,
+        uri: String?
+    ) : this(id, title, description, instruction, uri,0)
 
     fun asMap(): Map<String, String> {
         val map = HashMap<String, String>()
@@ -24,6 +27,7 @@ class RecipeRemote private constructor(
         map["title"] = title
         map["description"] = description ?: ""
         map["instruction"] = instruction ?: ""
+        map["uri"] = uri ?: ""
         map["last_modified"] = lastModified.toString()
 
         return map
@@ -34,7 +38,7 @@ class RecipeRemote private constructor(
     }
 
     override fun getUpdated(recipe: Recipe): RecipeRemote {
-        return RecipeRemote(id, recipe.title, recipe.description, recipe.instruction, recipe.lastModified)
+        return RecipeRemote(id, recipe.title, recipe.description, recipe.instruction, recipe.uri, recipe.lastModified)
     }
 
     companion object {
@@ -69,6 +73,16 @@ class RecipeRemote private constructor(
                 null
             }
 
+            val uri = try {
+                if (jsonObject.isNull("uri")) {
+                    null
+                } else {
+                    jsonObject.getString("uri")
+                }
+            } catch (jsonException: JSONException) {
+                null
+            }
+
             val lastModified = try {
                 if (jsonObject.isNull("last_modified")) {
                     null
@@ -80,8 +94,8 @@ class RecipeRemote private constructor(
             }
 
             return when (lastModified) {
-                null -> RecipeRemote(id, title, description, instruction)
-                else -> RecipeRemote(id, title, description, instruction, lastModified)
+                null -> RecipeRemote(id, title, description, instruction, uri)
+                else -> RecipeRemote(id, title, description, instruction, uri, lastModified)
             }
         }
 
@@ -93,6 +107,7 @@ class RecipeRemote private constructor(
                     recipeLocal.title,
                     recipeLocal.description,
                     recipeLocal.instruction,
+                    recipeLocal.uri,
                     recipeLocal.lastModified
                 )
             }
@@ -107,6 +122,7 @@ class RecipeRemote private constructor(
                 recipeLocal.title,
                 recipeLocal.description,
                 recipeLocal.instruction,
+                recipeLocal.uri,
                 recipeLocal.lastModified
             )
         }
