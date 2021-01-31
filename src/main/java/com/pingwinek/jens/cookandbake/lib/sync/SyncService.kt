@@ -3,8 +3,10 @@ package com.pingwinek.jens.cookandbake.lib.sync
 import android.net.ConnectivityManager
 import android.net.Network
 import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
-import com.pingwinek.jens.cookandbake.utils.CallbackLoopCounter
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class SyncService private constructor(internetConnectivityManager: InternetConnectivityManager) {
@@ -13,7 +15,9 @@ class SyncService private constructor(internetConnectivityManager: InternetConne
 
     private val netWorkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network?) {
-            syncAll {}
+            CoroutineScope(Dispatchers.IO).launch {
+                syncAll()
+            }
         }
     }
 
@@ -62,44 +66,34 @@ class SyncService private constructor(internetConnectivityManager: InternetConne
         syncManagerIdentifiers.clear()
     }
 
-    inline fun <reified TLocal: ModelLocal, reified TRemote: Model> syncEntry(
+    suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model> syncEntry(
         local: TLocal?,
-        remote: TRemote?,
-        noinline onDone: () -> Unit
+        remote: TRemote?
     ) {
-        getSyncManager<TLocal, TRemote>()?.syncEntry(local, remote, onDone)
+        getSyncManager<TLocal, TRemote>()?.syncEntry(local, remote)
     }
 
-    inline fun <reified TLocal: ModelLocal, reified TRemote: Model>syncEntry(
-        localId: Int,
-        noinline onDone: () -> Unit
+    suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model>syncEntry(
+        localId: Int
     ) {
-        getSyncManager<TLocal, TRemote>()?.syncEntry(localId, onDone)
+        getSyncManager<TLocal, TRemote>()?.syncEntry(localId)
     }
 
-    inline fun <reified TLocal: ModelLocal, reified TRemote: Model> syncByParentId(
-        localParentId: Int,
-        noinline onDone: () -> Unit
+    suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model> syncByParentId(
+        localParentId: Int
     ) {
-        getSyncManager<TLocal, TRemote>()?.syncByParentId(localParentId, onDone)
+        getSyncManager<TLocal, TRemote>()?.syncByParentId(localParentId)
     }
 
-    inline fun <reified TLocal: ModelLocal, reified TRemote: Model> sync(
-        noinline onDone: () -> Unit
-    ) {
-        getSyncManager<TLocal, TRemote>()?.sync(onDone)
+    suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model> sync() {
+        getSyncManager<TLocal, TRemote>()?.sync()
     }
 
-    fun syncAll(onDone: () -> Unit) {
-        val syncTaskCounter = CallbackLoopCounter(onDone)
-        syncTaskCounter.taskStarted()
+    suspend fun syncAll() {
         syncManagerIdentifiers.forEach { syncManagerIdentifier ->
-            syncTaskCounter.taskStarted()
             val syncManager = syncManagerIdentifier.syncManager
-            syncManager.sync { syncTaskCounter.taskEnded() }
-
+            syncManager.sync()
         }
-        syncTaskCounter.taskEnded()
     }
 
     class SyncManagerIdentifier<TLocal: ModelLocal, TRemote: Model>(

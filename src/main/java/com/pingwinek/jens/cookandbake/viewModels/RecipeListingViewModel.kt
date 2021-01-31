@@ -3,10 +3,13 @@ package com.pingwinek.jens.cookandbake.viewModels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Transformations
+import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RecipeListingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -32,6 +35,8 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
     }
 
     fun loadData(force: Boolean) {
-        recipeRepository.checkForUpdates(force)
+        viewModelScope.launch(Dispatchers.IO) {
+            recipeRepository.checkForUpdates(force)
+        }
     }
 }

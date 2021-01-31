@@ -3,15 +3,36 @@ package com.pingwinek.jens.cookandbake.activities
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.AuthService
-import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class LostPasswordActivity : BaseActivity() {
+
+    private lateinit var authenticationViewModel: AuthenticationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_lost_password)
+
+        authenticationViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        ).get(AuthenticationViewModel::class.java)
+
+        authenticationViewModel.response.observe(this) { response ->
+            when (response.action) {
+                AuthService.AuthenticationAction.LOST_PASSWORD -> {
+                    if (response.code == 200) {
+                        setMessage(resources.getString(R.string.confirmationSent))
+                    } else {
+                        setMessage(resources.getString(R.string.lostPasswordFailed))
+                    }
+                }
+                else -> {}
+            }
+        }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -30,19 +51,7 @@ class LostPasswordActivity : BaseActivity() {
 
     fun onLostPasswordButton(view: View) {
         deleteMessage()
-
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
-        authService.lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString()) { code, _ ->
-            when (code) {
-                200 -> {
-                    setMessage(resources.getString(R.string.confirmationSent))
-                }
-                else -> {
-                    setMessage(resources.getString(R.string.lostPasswordFailed))
-                }
-            }
-        }
+        authenticationViewModel.lostPassword(findViewById<TextView>(R.id.lpaEmail).text.toString())
     }
 
     private fun deleteMessage() {

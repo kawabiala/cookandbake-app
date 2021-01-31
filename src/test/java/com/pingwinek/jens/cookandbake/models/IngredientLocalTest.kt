@@ -4,7 +4,7 @@ import org.junit.Test
 import java.util.*
 
 class IngredientLocalTest {
-
+/*
     @Test
     fun getUpdated_test() {
         val date1 = Date().time
@@ -53,4 +53,6 @@ class IngredientLocalTest {
         assert(ingredientLocal.name == "Ingredient Local 1")
         assert(ingredientLocal.lastModified == ingredientRemote.lastModified)
     }
+
+ */
 }

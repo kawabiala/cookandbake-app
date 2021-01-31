@@ -4,7 +4,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class Locker {
-
+/*
     private val lockedInstances = ConcurrentHashMap<Int, Long>()
 
     @Synchronized
@@ -25,5 +25,5 @@ class Locker {
             false
         }
     }
-
+*/
 }

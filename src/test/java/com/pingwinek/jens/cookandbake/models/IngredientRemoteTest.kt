@@ -11,7 +11,7 @@ import java.util.*
 
 @RunWith(MockitoJUnitRunner::class)
 class IngredientRemoteTest {
-
+/*
     @Mock
     private var jsonObject = JSONObject()
 
@@ -120,4 +120,6 @@ class IngredientRemoteTest {
         assert(ingredient.id == 0)
         assert(ingredient.recipeId == 4)
     }
+
+ */
 }

@@ -16,7 +16,7 @@ interface Source<T: Model> {
      *
      * @return a [Promise] containing a linked list of given type
      */
-    fun getAll() : Promise<LinkedList<T>>
+    suspend fun getAll() : LinkedList<T>
 
     /**
      * Requires one instance of given data
@@ -24,7 +24,7 @@ interface Source<T: Model> {
      * @param id of required instance
      * @return a [Promise] containing an instance of given type
      */
-    fun get(id: Int) : Promise<T>
+    suspend fun get(id: Int) : T?
 
     /**
      * Inserts a new instance to the given source.
@@ -32,7 +32,7 @@ interface Source<T: Model> {
      * @param item the instance to be inserted
      * @return a [Promise] containing the inserted instance
      */
-    fun new(item: T) : Promise<T>
+    suspend fun new(item: T) : T?
 
     /**
      * Updates the given instance in the source.
@@ -40,7 +40,7 @@ interface Source<T: Model> {
      * @param item The instance to be updated
      * @return a [Promise] containing the updated instance
      */
-    fun update(item: T) : Promise<T>
+    suspend fun update(item: T) : T?
 
     /**
      * Deletes the instance with the given id
@@ -48,5 +48,5 @@ interface Source<T: Model> {
      * @param id of the instance to be deleted
      * @return a [Promise]
      */
-    fun delete(id: Int) : Promise<Unit>
+    suspend fun delete(id: Int) : Boolean
 }

@@ -1,20 +1,16 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
-import android.net.Uri
-import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import com.pingwinek.jens.cookandbake.lib.networkRequest.FileManagerRemote
+import androidx.lifecycle.*
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.ShareableRecipe
-import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.util.*
 
@@ -42,8 +38,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     fun loadData() {
         recipeId?.let { id ->
-            recipeRepository.getRecipe(id)
-            ingredientRepository.getAll(id)
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.getRecipe(id)
+                ingredientRepository.getAll(id)
+            }
         }
     }
 
@@ -51,7 +49,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         recipeFileInputStream.value = inputStream
 
         recipeId?.let {
-            recipeRepository.saveFile(it, inputStream, type)
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.saveFile(it, inputStream, type)
+            }
 /*
             FileManagerRemote(getApplication())
                 .saveFile(inputStream, type)
@@ -74,15 +74,18 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         recipeId?.let {
-            println("Recipe update")
-            recipeRepository.updateRecipe(it, title, description, instruction)
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.updateRecipe(it, title, description, instruction)
+            }
             return
         }
 
         if (recipeId == null) {
-            recipeRepository.newRecipe(title, description, instruction) { newRecipeId ->
-                recipeId = newRecipeId
-                true
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.newRecipe(title, description, instruction) { newRecipeId ->
+                    recipeId = newRecipeId
+                    true
+                }
             }
         }
     }
@@ -98,24 +101,31 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
         if (id == null) {
             recipeId?.let {
-                ingredientRepository.new(it, quantity, quantityVerbal, unity, name) {
-                    true
+                viewModelScope.launch(Dispatchers.IO) {
+                    ingredientRepository.newIngredient(it, quantity, quantityVerbal, unity, name) {
+                        true
+                    }
                 }
             }
         } else {
-            ingredientRepository.update(id, quantity, quantityVerbal, unity, name)
+            viewModelScope.launch(Dispatchers.IO) {
+                ingredientRepository.updateIngredient(id, quantity, quantityVerbal, unity, name)
+            }
         }
     }
 
     fun deleteIngredient(ingredientId: Int) {
-        ingredientRepository.deleteIngredient(ingredientId) {
+        viewModelScope.launch(Dispatchers.IO) {
+            ingredientRepository.deleteIngredient(ingredientId)
             loadData()
         }
     }
 
     fun delete() {
         recipeId?.let {
-            recipeRepository.deleteRecipe(it) {}
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.deleteRecipe(it)
+            }
         }
     }
 

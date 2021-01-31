@@ -39,7 +39,6 @@ class RecipeListingActivity : BaseActivity() {
         val viewAdapter = RecipeListingAdapter(recipeList)
 
         recipeListData.observe(this, Observer {
-            Log.v(this::class.java.name, "recipeListData::observe notifyDataSetChanged")
             viewAdapter.notifyDataSetChanged()
         })
 
@@ -158,9 +157,6 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
     }
 
     override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
-
-        Log.v(this::class.java.name, "onBindViewHolder position $position")
-
         viewHolder.recipeTitle.text = recipeList[position].title
         viewHolder.recipeDescription.text = recipeList[position].description
         viewHolder.recipeListItem.tag = recipeList[position].id
@@ -168,11 +164,6 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
 }
 
 class RecipeListingViewHolder(val recipeListItem: ConstraintLayout) : RecyclerView.ViewHolder(recipeListItem) {
-
     val recipeTitle = recipeListItem.getViewById(R.id.itemTitle) as TextView
     val recipeDescription = recipeListItem.getViewById(R.id.itemDescription) as TextView
-
-    init {
-        Log.v(this::class.java.name, "RecipeListingViewHolder::init")
-    }
 }

@@ -11,15 +11,44 @@ import android.text.style.ClickableSpan
 import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class RegisterActivity : BaseActivity() {
+
+    private lateinit var authenticationViewModel: AuthenticationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_register)
+
+        authenticationViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        ).get(AuthenticationViewModel::class.java)
+
+        authenticationViewModel.response.observe(this) { response ->
+            when (response.action) {
+                AuthService.AuthenticationAction.REGISTER -> {
+                    if (response.code == 200) {
+                        setMessage(resources.getString(R.string.confirmationSent))
+                    } else {
+                        setMessage(resources.getString(R.string.registrationFailed))
+                    }
+                }
+                AuthService.AuthenticationAction.CONFIRM -> {
+                    if (response.code == 200) {
+                        setMessage(resources.getString(R.string.confirmationSucceeded))
+                    } else {
+                        setMessage(resources.getString(R.string.confirmationFailed))
+                    }
+                }
+                else -> {}
+            }
+        }
 
         findViewById<TextView>(R.id.raAcceptance).apply {
             text = getSpannableAcceptanceText()
@@ -42,42 +71,33 @@ class RegisterActivity : BaseActivity() {
     fun registerButton(view: View) {
         deleteMessage()
 
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
-
-        if (authService.hasStoredAccount()) {
+        if (authenticationViewModel.hasStoredAccount()) {
             AlertDialog.Builder(this).apply {
                 setMessage(getString(R.string.confirmLogout))
                 setPositiveButton(getString(R.string.yes)) { _, _ ->
-                    authService.logout { _, _ ->
-                        register()
-                    }
+                    logout()
+                    register()
                 }
                 setNegativeButton(getString(R.string.no)) { _, _ -> }
                 create()
                 show()
             }
         } else {
-            register()
+                register()
         }
 
     }
 
-    private fun register() {
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
+    private fun logout() {
+        authenticationViewModel.logout()
+    }
 
-        authService.register(
+    private fun register() {
+        authenticationViewModel.register(
             findViewById<TextView>(R.id.raEmail).text.toString(),
             findViewById<TextView>(R.id.raPassword).text.toString(),
             findViewById<CheckBox>(R.id.raCheckBox).isChecked
-            ) { code, _ ->
-            if (code == 201) {
-                setMessage(resources.getString(R.string.confirmationSent))
-            } else {
-                setMessage(resources.getString(R.string.registrationFailed))
-            }
-        }
+        )
     }
 
     private fun deleteMessage() {

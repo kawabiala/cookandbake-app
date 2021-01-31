@@ -4,16 +4,46 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class LoginActivity : BaseActivity() {
 
+    private lateinit var authenticationViewModel: AuthenticationViewModel
     private lateinit var emailView: TextView
     private lateinit var passwordView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_login)
+
+        authenticationViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        ).get(AuthenticationViewModel::class.java)
+
+        authenticationViewModel.response.observe(this) { response ->
+            when (response.action) {
+                AuthService.AuthenticationAction.LOGIN -> {
+                    if (response.code == 200) {
+                        goToHomeScreen()
+                    } else if (response.code == 206) {
+                        setMessage(resources.getString(R.string.confirmationSent))
+                    } else {
+                        setMessage(resources.getString(R.string.loginFailed))
+                    }
+                }
+                AuthService.AuthenticationAction.CONFIRM -> {
+                    if (response.code == 200) {
+                        setMessage(resources.getString(R.string.confirmationSucceeded))
+                    } else {
+                        setMessage(resources.getString(R.string.confirmationFailed))
+                    }
+                }
+                else -> {}
+            }
+        }
 
         emailView = findViewById(R.id.laEmail)
         passwordView = findViewById(R.id.laPassword)
@@ -55,23 +85,7 @@ class LoginActivity : BaseActivity() {
 
     fun loginButton(view: View) {
         deleteMessage()
-
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
-        authService.login(emailView.text.toString(), passwordView.text.toString()){ code, _ ->
-            when (code) {
-                200 -> {
-                    startActivity(Intent(this, RecipeListingActivity::class.java))
-                    finish()
-                }
-                206 -> {
-                    setMessage(resources.getString(R.string.confirmationSent))
-                }
-                else -> {
-                    setMessage(resources.getString(R.string.loginFailed))
-                }
-            }
-        }
+        authenticationViewModel.login(emailView.text.toString(), passwordView.text.toString())
     }
 
     private fun deleteMessage() {
@@ -86,6 +100,12 @@ class LoginActivity : BaseActivity() {
             text = message
             visibility = View.VISIBLE
         }
+    }
+
+    private fun goToHomeScreen() {
+        startActivity(Intent(this, RecipeListingActivity::class.java))
+//        startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME))
+        finish()
     }
 
     private fun doConfirm() {
@@ -104,17 +124,6 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun confirmTempCode(tempCode: String) {
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
-        authService.confirmRegistration(tempCode) { code, _ ->
-            when (code) {
-                200 -> {
-                    setMessage(resources.getString(R.string.confirmationSucceeded))
-                }
-                else -> {
-                    setMessage(resources.getString(R.string.confirmationFailed))
-                }
-            }
-        }
+        authenticationViewModel.confirmRegistration(tempCode)
     }
 }

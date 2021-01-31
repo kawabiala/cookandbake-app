@@ -16,7 +16,7 @@ class CronetEngineNetworkRequest private constructor(
     val application: Application,
     private val httpMethod: NetworkRequest.Method,
     private val networkResponseRouter: NetworkResponseRouter
-    ) : NetworkRequest {
+    ) : NetworkRequest_old {
 
     constructor(
         url: String,
@@ -56,7 +56,7 @@ class CronetEngineNetworkRequest private constructor(
         requestBuilder.setUploadDataProvider(uploadDataProvider, executorService)
     }
 
-    override fun setContentType(contentType: NetworkRequest.ContentType) {
+    override fun setContentType(contentType: NetworkRequest_old.ContentType) {
         requestBuilder.addHeader("Content-Type", contentType.toString())
     }
 

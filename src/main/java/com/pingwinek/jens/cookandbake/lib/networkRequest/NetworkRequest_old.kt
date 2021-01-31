@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService
  * The basic contract for network requests. Normally, a NetworkRequest is obtained from
  * the NetworkRequestProvider
  */
-interface NetworkRequest {
+interface NetworkRequest_old {
 
     enum class Method(val method: String) {
         GET("GET"),
@@ -63,7 +63,7 @@ interface NetworkRequest {
     fun setOutputBuffer(outputBuffer: ByteBuffer)
     fun setOutputString(outputString: String) { setOutputBuffer(StandardCharsets.UTF_8.encode(outputString))}
     fun setContentType(contentType: ContentType)
-//    fun obtainNetworkResponseRouter() : NetworkResponseRouter
+    fun obtainNetworkResponseRouter() : NetworkResponseRouter
 
-    suspend fun start() : NetworkResponse
+    fun start()
 }

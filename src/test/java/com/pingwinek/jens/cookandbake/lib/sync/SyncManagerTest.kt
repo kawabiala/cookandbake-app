@@ -1,6 +1,9 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.junit.Test
 import java.util.*
 
@@ -46,39 +49,39 @@ class SyncManagerTest {
         syncLogic: SyncLogic<TestLocal, TestRemote>
     ) : SyncManager<TestLocal, TestRemote>(testSourceLocal, testSourceRemote, syncLogic) {
 
-        override fun getLocalParent(parentId: Int): Promise<ModelLocal> {
+        override suspend fun getLocalParent(parentId: Int): ModelLocal? {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getLocalsByParent(parentId: Int): Promise<LinkedList<TestLocal>> {
+        override suspend fun getLocalsByParent(parentId: Int): LinkedList<TestLocal> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getRemotesByParent(parentId: Int): Promise<LinkedList<TestRemote>> {
+        override suspend fun getRemotesByParent(parentId: Int): LinkedList<TestRemote> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun newLocal(remote: TestRemote, onDone: () -> Unit) {
+        override suspend fun newLocal(remote: TestRemote) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun newRemote(local: TestLocal, onDone: () -> Unit) {
+        override suspend fun newRemote(local: TestLocal) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun updateLocal(local: TestLocal, remote: TestRemote, onDone: () -> Unit) {
+        override suspend fun updateLocal(local: TestLocal, remote: TestRemote) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun updateRemote(local: TestLocal, remote: TestRemote, onDone: () -> Unit) {
+        override suspend fun updateRemote(local: TestLocal, remote: TestRemote) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun deleteLocal(local: TestLocal, onDone: () -> Unit) {
+        override suspend fun deleteLocal(local: TestLocal) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun deleteRemote(remote: TestRemote, onDone: () -> Unit) {
+        override suspend fun deleteRemote(remote: TestRemote) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
@@ -101,50 +104,87 @@ class SyncManagerTest {
      */
     @Test
     fun testNewLocal() {
-        whenever(mockedSyncLogic.compare(isNull(), any())).thenReturn(SyncLogic.SyncAction.NEW_LOCAL)
-        doNothing().whenever(testSyncManager).newLocal(any(), anyOrNull())
-        testSyncManager.syncEntry(null, testRemote) {}
-        verify(testSyncManager).newLocal(any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(mockedSyncLogic.compare(isNull(), any())).thenReturn(SyncLogic.SyncAction.NEW_LOCAL)
+            doNothing().whenever(testSyncManager).newLocal(any())
+            testSyncManager.syncEntry(null, testRemote)
+            verify(testSyncManager).newLocal(any())
+        }
     }
 
     @Test
     fun testNewRemote() {
-        whenever(mockedSyncLogic.compare(any(), isNull())).thenReturn(SyncLogic.SyncAction.NEW_REMOTE)
-        doNothing().whenever(testSyncManager).newRemote(any(), anyOrNull())
-        testSyncManager.syncEntry(testLocal, null) {}
-        verify(testSyncManager).newRemote(any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(
+                mockedSyncLogic.compare(
+                    any(),
+                    isNull()
+                )
+            ).thenReturn(SyncLogic.SyncAction.NEW_REMOTE)
+            doNothing().whenever(testSyncManager).newRemote(any())
+            testSyncManager.syncEntry(testLocal, null)
+            verify(testSyncManager).newRemote(any())
+        }
     }
 
     @Test
     fun testUpdateLocal() {
-        whenever(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.UPDATE_LOCAL)
-        doNothing().whenever(testSyncManager).updateLocal(any(), any(), anyOrNull())
-        testSyncManager.syncEntry(testLocal, testRemote) {}
-        verify(testSyncManager).updateLocal(any(), any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(
+                mockedSyncLogic.compare(
+                    any(),
+                    any()
+                )
+            ).thenReturn(SyncLogic.SyncAction.UPDATE_LOCAL)
+            doNothing().whenever(testSyncManager).updateLocal(any(), any())
+            testSyncManager.syncEntry(testLocal, testRemote)
+            verify(testSyncManager).updateLocal(any(), any())
+        }
     }
 
     @Test
     fun testUpdateRemote() {
-        whenever(mockedSyncLogic.compare(any(), any())).thenReturn(SyncLogic.SyncAction.UPDATE_REMOTE)
-        doNothing().whenever(testSyncManager).updateRemote(any(), any(), anyOrNull())
-        testSyncManager.syncEntry(testLocal, testRemote) {}
-        verify(testSyncManager).updateRemote(any(), any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(
+                mockedSyncLogic.compare(
+                    any(),
+                    any()
+                )
+            ).thenReturn(SyncLogic.SyncAction.UPDATE_REMOTE)
+            doNothing().whenever(testSyncManager).updateRemote(any(), any())
+            testSyncManager.syncEntry(testLocal, testRemote)
+            verify(testSyncManager).updateRemote(any(), any())
+        }
     }
 
     @Test
     fun testDeleteLocal() {
-        whenever(mockedSyncLogic.compare(any(), isNull())).thenReturn(SyncLogic.SyncAction.DELETE_LOCAL)
-        doNothing().whenever(testSyncManager).deleteLocal(any(), anyOrNull())
-        testSyncManager.syncEntry(testLocal, null) {}
-        verify(testSyncManager).deleteLocal(any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(
+                mockedSyncLogic.compare(
+                    any(),
+                    isNull()
+                )
+            ).thenReturn(SyncLogic.SyncAction.DELETE_LOCAL)
+            doNothing().whenever(testSyncManager).deleteLocal(any())
+            testSyncManager.syncEntry(testLocal, null)
+            verify(testSyncManager).deleteLocal(any())
+        }
     }
 
     @Test
     fun testDeleteRemote() {
-        whenever(mockedSyncLogic.compare(isNull(), any())).thenReturn(SyncLogic.SyncAction.DELETE_REMOTE)
-        doNothing().whenever(testSyncManager).deleteRemote(any(), anyOrNull())
-        testSyncManager.syncEntry(null, testRemote) {}
-        verify(testSyncManager).deleteRemote(any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            whenever(
+                mockedSyncLogic.compare(
+                    isNull(),
+                    any()
+                )
+            ).thenReturn(SyncLogic.SyncAction.DELETE_REMOTE)
+            doNothing().whenever(testSyncManager).deleteRemote(any())
+            testSyncManager.syncEntry(null, testRemote)
+            verify(testSyncManager).deleteRemote(any())
+        }
     }
 
     /**
@@ -154,71 +194,77 @@ class SyncManagerTest {
      */
     @Test
     fun testSyncEntry() {
-        val localPromise = Promise<TestLocal>().apply {
-            setResult(Promise.Status.SUCCESS, testLocal)
-        }
-        val remotePromise = Promise<TestRemote>().apply {
-            setResult(Promise.Status.SUCCESS, testRemote)
-        }
-        doReturn(localPromise).whenever(testSyncManager).getLocal(any<Int>())
-        doReturn(remotePromise).whenever(testSyncManager).getRemote(any<TestLocal>())
-        doNothing().whenever(testSyncManager).syncEntry(any(), any(), anyOrNull())
-        testSyncManager.syncEntry(1) {}
-        inOrder(testSyncManager) {
-            verify(testSyncManager).getLocal(any<Int>())
-            verify(testSyncManager).getRemote(any<TestLocal>())
-            verify(testSyncManager).syncEntry(any(), any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            val localPromise = Promise<TestLocal>().apply {
+                setResult(Promise.Status.SUCCESS, testLocal)
+            }
+            val remotePromise = Promise<TestRemote>().apply {
+                setResult(Promise.Status.SUCCESS, testRemote)
+            }
+            doReturn(localPromise).whenever(testSyncManager).getLocal(any<Int>())
+            doReturn(remotePromise).whenever(testSyncManager).getRemote(any<TestLocal>())
+            doNothing().whenever(testSyncManager).syncEntry(any(), any())
+            testSyncManager.syncEntry(1)
+            inOrder(testSyncManager) {
+                verify(testSyncManager).getLocal(any<Int>())
+                verify(testSyncManager).getRemote(any<TestLocal>())
+                verify(testSyncManager).syncEntry(any(), any())
+            }
         }
     }
 
     @Test
     fun testSyncByParentId() {
-        val localListPromise = Promise<LinkedList<TestLocal>>().apply {
-            setResult(Promise.Status.SUCCESS, LinkedList<TestLocal>().apply {
-                add(testLocal)
-            })
-        }
-        val localPromise = Promise<TestLocal>().apply {
-            setResult(Promise.Status.SUCCESS, testLocal)
-        }
-        val remoteListPromise = Promise<LinkedList<TestRemote>>().apply {
-            setResult(Promise.Status.SUCCESS, LinkedList<TestRemote>().apply {
-                add(testRemote)
-            })
-        }
-        doReturn(localListPromise).whenever(testSyncManager).getLocalsByParent(any())
-        doReturn(localPromise).whenever(testSyncManager).getLocalParent(any())
-        doReturn(remoteListPromise).whenever(testSyncManager).getRemotesByParent(any())
-        doNothing().whenever(testSyncManager).syncEntry(any(), any(), anyOrNull())
-        testSyncManager.syncByParentId(1) {}
-        inOrder(testSyncManager) {
-            verify(testSyncManager).getLocalsByParent(any())
-            verify(testSyncManager).getLocalParent(any())
-            verify(testSyncManager).getRemotesByParent(any())
-            verify(testSyncManager).syncEntry(any(), any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            val localListPromise = Promise<LinkedList<TestLocal>>().apply {
+                setResult(Promise.Status.SUCCESS, LinkedList<TestLocal>().apply {
+                    add(testLocal)
+                })
+            }
+            val localPromise = Promise<TestLocal>().apply {
+                setResult(Promise.Status.SUCCESS, testLocal)
+            }
+            val remoteListPromise = Promise<LinkedList<TestRemote>>().apply {
+                setResult(Promise.Status.SUCCESS, LinkedList<TestRemote>().apply {
+                    add(testRemote)
+                })
+            }
+            doReturn(localListPromise).whenever(testSyncManager).getLocalsByParent(any())
+            doReturn(localPromise).whenever(testSyncManager).getLocalParent(any())
+            doReturn(remoteListPromise).whenever(testSyncManager).getRemotesByParent(any())
+            doNothing().whenever(testSyncManager).syncEntry(any(), any())
+            testSyncManager.syncByParentId(1)
+            inOrder(testSyncManager) {
+                verify(testSyncManager).getLocalsByParent(any())
+                verify(testSyncManager).getLocalParent(any())
+                verify(testSyncManager).getRemotesByParent(any())
+                verify(testSyncManager).syncEntry(any(), any())
+            }
         }
     }
 
     @Test
     fun testSync() {
-        val localListPromise = Promise<LinkedList<TestLocal>>().apply {
-            setResult(Promise.Status.SUCCESS, LinkedList<TestLocal>().apply {
-                add(testLocal)
-            })
-        }
-        val remoteListPromise = Promise<LinkedList<TestRemote>>().apply {
-            setResult(Promise.Status.SUCCESS, LinkedList<TestRemote>().apply {
-                add(testRemote)
-            })
-        }
-        doReturn(localListPromise).whenever(testSyncManager).getLocals()
-        doReturn(remoteListPromise).whenever(testSyncManager).getRemotes()
-        doNothing().whenever(testSyncManager).syncEntry(any(), any(), anyOrNull())
-        testSyncManager.sync {}
-        inOrder(testSyncManager) {
-            verify(testSyncManager).getLocals()
-            verify(testSyncManager).getRemotes()
-            verify(testSyncManager).syncEntry(any(), any(), anyOrNull())
+        CoroutineScope(Dispatchers.IO).launch {
+            val localListPromise = Promise<LinkedList<TestLocal>>().apply {
+                setResult(Promise.Status.SUCCESS, LinkedList<TestLocal>().apply {
+                    add(testLocal)
+                })
+            }
+            val remoteListPromise = Promise<LinkedList<TestRemote>>().apply {
+                setResult(Promise.Status.SUCCESS, LinkedList<TestRemote>().apply {
+                    add(testRemote)
+                })
+            }
+            doReturn(localListPromise).whenever(testSyncManager).getLocals()
+            doReturn(remoteListPromise).whenever(testSyncManager).getRemotes()
+            doNothing().whenever(testSyncManager).syncEntry(any(), any())
+            testSyncManager.sync()
+            inOrder(testSyncManager) {
+                verify(testSyncManager).getLocals()
+                verify(testSyncManager).getRemotes()
+                verify(testSyncManager).syncEntry(any(), any())
+            }
         }
     }
 }

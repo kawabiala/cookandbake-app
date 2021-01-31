@@ -4,20 +4,45 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
+import kotlinx.coroutines.*
 
 class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePasswordListener {
+
+    private lateinit var authenticationViewModel: AuthenticationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_manage_account)
 
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
+        authenticationViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        ).get(AuthenticationViewModel::class.java)
+
+        authenticationViewModel.response.observe(this) { response ->
+            when (response.action) {
+                AuthService.AuthenticationAction.LOGOUT -> {
+                    fillEmail()
+                    if (response.code != 200) {
+                        alert(resources.getString(R.string.logoutFailed))
+                    }
+                }
+                AuthService.AuthenticationAction.UNSUBSCRIBE -> {
+                    if (response.code == 200) {
+                        fillEmail()
+                    } else {
+                        alert(response.msg ?: "")
+                    }
+                }
+                else -> {}
+            }
+        }
 
         findViewById<TextView>(R.id.maUnsubscribeView).setOnClickListener {
-            if (! authService.hasStoredAccount()) {
+            if (! authenticationViewModel.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
@@ -29,7 +54,7 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         }
 
         findViewById<TextView>(R.id.maChangePasswordView).setOnClickListener {
-            if (! authService.hasStoredAccount()) {
+            if (! authenticationViewModel.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
@@ -41,21 +66,11 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         }
 
         findViewById<TextView>(R.id.maLogoutView).setOnClickListener {
-            if (! authService.hasStoredAccount()) {
+            if (! authenticationViewModel.hasStoredAccount()) {
                 return@setOnClickListener
             }
 
-            authService.logout { code, _ ->
-                fillEmail()
-                if (code != 200) {
-                    AlertDialog.Builder(this).apply {
-                        setMessage(resources.getString(R.string.logoutFailed))
-                        setPositiveButton("Ok") { _, _ ->
-                            // do nothing
-                        }
-                    }
-                }
-            }
+            authenticationViewModel.logout()
         }
 
         findViewById<TextView>(R.id.maImpressumView).setOnClickListener {
@@ -87,33 +102,31 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
     }
 
     override fun onPositiveButton(password: String?) {
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
+        if (password == null) return
 
-        password?.let {
-            authService.unsubscribe(password) { code, response ->
-                when (code) {
-                    200 -> fillEmail()
-                    else -> Toast.makeText(this, response, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+        authenticationViewModel.unsubscribe(password)
     }
 
     override fun onNegativeButton() {
         // Do nothing
     }
 
-    private fun fillEmail() {
-        val authService = (application as PingwinekCooksApplication).getServiceLocator()
-            .getService(AuthService::class.java)
-
-        val emailText = when {
-            authService.isLoggedIn() -> {
-                resources.getString(R.string.is_logged_in, authService.getStoredAccount()?.getEmail())
+    private fun alert(msg: String) {
+        AlertDialog.Builder(this).apply {
+            setMessage(msg)
+            setPositiveButton("Ok") { _, _ ->
+                // do nothing
             }
-            authService.hasStoredAccount() -> {
-                resources.getString(R.string.is_not_logged_in, authService.getStoredAccount()?.getEmail())
+        }
+    }
+
+    private fun fillEmail() {
+        val emailText = when {
+            authenticationViewModel.isLoggedIn() -> {
+                resources.getString(R.string.is_logged_in, authenticationViewModel.getStoredAccount()?.getEmail())
+            }
+            authenticationViewModel.hasStoredAccount() -> {
+                resources.getString(R.string.is_not_logged_in, authenticationViewModel.getStoredAccount()?.getEmail())
             }
             else -> {
                 resources.getString(R.string.no_account)

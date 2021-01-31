@@ -8,10 +8,7 @@ import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.ClassCastException
-import java.net.CookieHandler
-import java.net.CookieManager
-import java.net.HttpCookie
-import java.net.URI
+import java.net.*
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -34,199 +31,24 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         authListeners.add(authenticationListener)
     }
 
-    fun hasStoredAccount() : Boolean {
-        return (Account.getStoredAccount(application) != null)
-    }
-
     fun getStoredAccount() : Account? {
         return Account.getStoredAccount(application)
+    }
+
+    fun hasStoredAccount() : Boolean {
+        return (Account.getStoredAccount(application) != null)
     }
 
     fun isLoggedIn() : Boolean {
         return Account.getStoredAccount(application)?.hasRefreshToken() ?: false
     }
 
-    fun register(
-        email: String,
-        password: String,
-        dataprotection: Boolean,
-        callback: (code: Int, response: String) -> Unit
-    ) {
-        val params = HashMap<String, String>()
-        params["email"] = email
-        params["password"] = password
-        params["dataprotection"] = dataprotection.toString()
-
-        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REGISTER), method)
-            .apply {
-                setOutputString(NetworkRequestProvider.toBody(params))
-                setContentType(contentType)
-            }
-
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,201) { _, _, response ->
-            Log.i(this::class.java.name, "register 201")
-            Account.createStoredAccount(application, email)
-            callback(201, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
-    }
-
-    fun confirmRegistration(
-        tempCode: String,
-        callback: (code: Int, response: String) -> Unit
-    ) {
-        val email = Account.getStoredAccount(application)?.getEmail() ?: return
-
-        val params = HashMap<String, String>()
-        params["email"] = email
-        params["temp_code"] = tempCode
-
-        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CONFIRMREGISTRATION), method)
-            .apply {
-                setOutputString(NetworkRequestProvider.toBody(params))
-                setContentType(contentType)
-            }
-
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "new Password 200")
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
-    }
-
-    fun login(
-        email: String,
-        password: String,
-        callback: (code: Int, response: String) -> Unit)
-    {
-        val params = HashMap<String, String>()
-        params["email"] = email
-        params["password"] = password
-        params["uuid"] = getUUID()
-
-        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGIN), method)
-            .apply {
-                setOutputString(NetworkRequestProvider.toBody(params))
-                setContentType(contentType)
-            }
-
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "login 200")
-            parseRefreshToken(response)?.let { refreshToken ->
-                Account.createStoredAccount(application, email, refreshToken)
-            }
-            notifyOnLogin()
-            callback(200, response)
-        }
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,206) { _, _, response ->
-            Log.i(this::class.java.name, "login 206")
-            Account.createStoredAccount(application, email)
-            callback(206, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
-    }
-
-    fun lostPassword(
-        email: String,
-        callback: (code: Int, response: String) -> Unit
-    ) {
-        val params = HashMap<String, String>()
-        params["email"] = email
-
-        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOSTPASSWORD), method)
-            .apply {
-                setOutputString(NetworkRequestProvider.toBody(params))
-                setContentType(contentType)
-            }
-
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "lost Password 200")
-            Account.createStoredAccount(application, email)
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
-    }
-
-    fun newPassword(
-        tempCode: String,
-        password: String,
-        callback: (code: Int, response: String) -> Unit
-    ) {
-        val email = Account.getStoredAccount(application)?.getEmail() ?: return
-
-        val params = HashMap<String, String>()
-        params["email"] = email
-        params["temp_code"] = tempCode
-        params["password"] = password
-
-        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_NEWPASSWORD), method)
-            .apply {
-                setOutputString(NetworkRequestProvider.toBody(params))
-                setContentType(contentType)
-            }
-
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "new Password 200")
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
-    }
-
-    fun changePassword(
+    suspend fun changePassword(
         oldPassword: String,
-        newPassword: String,
-        callback: (code: Int, response: String) -> Unit
-    ) {
+        newPassword: String
+    ) : AuthenticationResponse {
         val email = Account.getStoredAccount(application)?.getEmail()
-        if (email == null ) {
-            callback(-1, "Kein Konto angemeldet")
-            return
-        }
+            ?: return AuthenticationResponse(AuthenticationAction.CHANGE_PASSWORD, -1, null)
 
         val params = HashMap<String, String>()
         params["email"] = email
@@ -239,53 +61,39 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 setContentType(contentType)
             }
 
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "change Password 200")
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
+        val networkResponse = networkRequest.start()
+        return translateResponse(AuthenticationAction.CHANGE_PASSWORD, networkResponse)
     }
 
-    fun ensureSession(callback: (Boolean) -> Unit) {
-        val httpCookie: HttpCookie? = try {
-            val cookieManager = CookieHandler.getDefault() as CookieManager
-            cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { potentialCookie ->
-                potentialCookie.name == COOKIE_NAME
-            }
-        } catch (classCastException: ClassCastException) {
-            null
-        }
-        if (httpCookie == null || httpCookie.hasExpired()) {
-            refreshManager.refresh {
-                callback(it)
-            }
-        } else {
-            callback(true)
-        }
-    }
+    suspend fun confirmRegistration(
+        tempCode: String
+    ) : AuthenticationResponse {
+        val email = Account.getStoredAccount(application)?.getEmail()
+            ?: return AuthenticationResponse(AuthenticationAction.CONFIRM, -1, null)
 
-    override fun doRefresh(callback: (code: Int, response: String) -> Unit) {
-        if (! isLoggedIn()) {
-            callback(-1, "no valid account")
-            return
-        }
-
-        val account = Account.getStoredAccount(application)
         val params = HashMap<String, String>()
+        params["email"] = email
+        params["temp_code"] = tempCode
 
-        account?.let {
-            params["email"] = it.getEmail() ?: return // should not be null, since we've checked isLoggedIn
-            params["refresh_token"] = it.getRefreshToken() ?: return // should not be null, since we've checked isLoggedIn
-            params["uuid"] = getUUID()
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_CONFIRMREGISTRATION), method)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
+        val networkResponse = networkRequest.start()
+        return translateResponse(AuthenticationAction.CONFIRM, networkResponse)
+    }
+
+    override suspend fun doRefresh() : Boolean {
+        val account = getStoredAccount() ?: return false
+        val email = account.getEmail() ?: return false
+        val refreshToken = account.getRefreshToken() ?: return false
+
+        val params = HashMap<String, String>().apply {
+            put("email", email)
+            put("refresh_token", refreshToken)
+            put("uuid", getUUID())
         }
 
         val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REFRESH), method)
@@ -294,58 +102,94 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 setContentType(contentType)
             }
 
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "refresh 200")
-            parseRefreshToken(response)?.let { refreshToken ->
-                params["email"]?.let {
-                    account?.setRefreshToken(refreshToken)
-                }
-            }
-            callback(200, response)
+        val networkResponse = networkRequest.start()
+        return if (networkResponse.succeeded() && networkResponse.code == 200) {
+            val responseString = networkResponse.responseAsString() ?: return false
+            val newToken = parseRefreshToken(responseString) ?: return false
+            account.setRefreshToken(newToken)
+            true
+        } else {
+            false
         }
-        networkResponseRouter.registerDefaultResponseRoute { status, code, response ->
-            if (status == AbstractNetworkResponseRoutes.Result.FAILED) {
-                callback(-1, response)
-            } else {
-                callback(code, response)
-            }
-        }
-        networkRequest.start()
     }
 
-    private fun parseRefreshToken(response: String): String? {
-
-        return try {
-            JSONObject(response).getString("refresh_token")
-        } catch (e: JSONException) {
+    suspend fun ensureSession() : Boolean {
+        val httpCookie: HttpCookie? = try {
+            val cookieManager = CookieHandler.getDefault() as CookieManager
+            cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { cookie ->
+                cookie.name == COOKIE_NAME
+            }
+        } catch (classCastException: ClassCastException) {
             null
         }
-
+        return if (httpCookie == null || httpCookie.hasExpired()) {
+            refreshManager.refresh()
+        } else {
+            true
+        }
     }
 
-    fun logout(callback: (code: Int, response: String) -> Unit) {
+    suspend fun login(
+        email: String,
+        password: String
+    ) : AuthenticationResponse {
+        val params = HashMap<String, String>()
+        params["email"] = email
+        params["password"] = password
+        params["uuid"] = getUUID()
+
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOGIN), method)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
+        val networkResponse = networkRequest.start()
+        val response = translateResponse(AuthenticationAction.LOGIN, networkResponse)
+
+        if (response.code == 200) {
+            response.msg?.let {
+                parseRefreshToken(it)?.let { refreshToken ->
+                    Account.createStoredAccount(application, email, refreshToken)
+                }
+            }
+            notifyOnLogin()
+        } else if (response.code == 206) {
+            Account.createStoredAccount(application, email)
+        }
+
+        return response
+    }
+
+    suspend fun logout() : AuthenticationResponse {
+        // first we remove the session cookie, if there is any
         try {
             val cookieManager = CookieHandler.getDefault() as CookieManager
-            val httpCookie = cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { potentialCookie ->
-                potentialCookie.name == COOKIE_NAME
+            val httpCookie = cookieManager.cookieStore.get(URI(BuildConfig.DOMAIN)).find { cookie ->
+                cookie.name == COOKIE_NAME
             }
             cookieManager.cookieStore.remove(URI(BuildConfig.DOMAIN), httpCookie)
         } catch (classCastException: ClassCastException) {
             Log.w(this::class.java.name, "Could not delete cookies due to exception $classCastException")
         }
 
-        val email = Account.getStoredAccount(application)?.getEmail() ?: return
+        // if we have no account or no email, we are not logged in
+        val email = getStoredAccount()?.getEmail()
+            ?: return AuthenticationResponse(AuthenticationAction.LOGOUT, -1, null)
 
+        // logout locally by removing refresh token and email from local storage
         prefs.edit().apply {
             remove("email")
             remove("token")
         }.apply()
 
+        // Delete all data from the local database
         DatabaseService.getInstance(application).resetDatabase()
         notifyOnLogout()
 
+        // Finally, we try to logout remote
+        // Basically, this is not really necessary, just in case someone hacked the session
+        // or even managed to get the refresh token
         val params = HashMap<String, String>()
         params["email"] = email
         params["uuid"] = getUUID()
@@ -356,21 +200,79 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 setContentType(contentType)
             }
 
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
-
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "logout")
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { _, code, response ->
-            Log.i(this::class.java.name, "logout on server failed")
-            callback(code, response)
-        }
-        networkRequest.start()
+        val networkResponse = networkRequest.start()
+        return translateResponse(AuthenticationAction.LOGOUT, networkResponse)
     }
 
-    fun unsubscribe(password: String, callback: (code: Int, response: String) -> Unit) {
-        val email = Account.getStoredAccount(application)?.getEmail() ?: return
+    suspend fun lostPassword(
+        email: String
+    ) : AuthenticationResponse {
+        val params = HashMap<String, String>()
+        params["email"] = email
+
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_LOSTPASSWORD), method)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
+        val networkResponse = networkRequest.start()
+        val response = translateResponse(AuthenticationAction.LOST_PASSWORD, networkResponse)
+
+        if (response.code == 200) {
+            Account.createStoredAccount(application, email)
+        }
+
+        return response
+    }
+
+    suspend fun newPassword(
+        tempCode: String,
+        password: String
+    ) : AuthenticationResponse {
+        val email = Account.getStoredAccount(application)?.getEmail()
+            ?: return AuthenticationResponse(AuthenticationAction.NEW_PASSWORD, -1, null)
+
+        val params = HashMap<String, String>()
+        params["email"] = email
+        params["temp_code"] = tempCode
+        params["password"] = password
+
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_NEWPASSWORD), method)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
+        val networkResponse = networkRequest.start()
+        return translateResponse(AuthenticationAction.NEW_PASSWORD, networkResponse)
+    }
+
+    suspend fun register(
+        email: String,
+        password: String,
+        dataprotection: Boolean
+    ) : AuthenticationResponse {
+        val params = HashMap<String, String>()
+        params["email"] = email
+        params["password"] = password
+        params["dataprotection"] = dataprotection.toString()
+
+        val networkRequest = networkRequestProvider.getNetworkRequest(application.getURL(R.string.URL_REGISTER), method)
+            .apply {
+                setOutputString(NetworkRequestProvider.toBody(params))
+                setContentType(contentType)
+            }
+
+        val networkResponse = networkRequest.start()
+        return translateResponse(AuthenticationAction.REGISTER, networkResponse)
+    }
+
+    suspend fun unsubscribe(
+        password: String
+    ) : AuthenticationResponse {
+        val email = getStoredAccount()?.getEmail()
+            ?: return AuthenticationResponse(AuthenticationAction.UNSUBSCRIBE, -1, null)
 
         val params = HashMap<String, String>()
         params["email"] = email
@@ -382,11 +284,13 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 setContentType(contentType)
             }
 
-        val networkResponseRouter = networkRequest.obtainNetworkResponseRouter()
+        val networkResponse = networkRequest.start()
+        var response = translateResponse(AuthenticationAction.UNSUBSCRIBE, networkResponse)
 
-        networkResponseRouter.registerResponseRoute(AbstractNetworkResponseRoutes.Result.SUCCESS,200) { _, _, response ->
-            Log.i(this::class.java.name, "unsubscribe 200")
-
+        if (response.code == 200) {
+            val logoutResponse = logout()
+            response = AuthenticationResponse(AuthenticationAction.UNSUBSCRIBE, logoutResponse.code, logoutResponse.msg)
+            /*
             prefs.edit().apply {
                 remove("email")
                 remove("token")
@@ -402,14 +306,10 @@ class AuthService private constructor(private val application: PingwinekCooksApp
                 Log.w(this::class.java.name, "Could not delete cookies due to exception $classCastException")
             }
 
-            callback(200, response)
-        }
-        networkResponseRouter.registerDefaultResponseRoute { _, code, response ->
-            Log.i(this::class.java.name, "unsubscribe on server failed")
-            callback(code, response)
+             */
         }
 
-        networkRequest.start()
+        return response
     }
 
     private fun getUUID() : String {
@@ -435,5 +335,41 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         }
     }
 
+    private fun parseRefreshToken(response: String): String? {
+        return try {
+            JSONObject(response).getString("refresh_token")
+        } catch (e: JSONException) {
+            null
+        }
+    }
+
+    private fun translateResponse(
+        action: AuthenticationAction,
+        response: NetworkResponse
+    ) : AuthenticationResponse {
+        return if (response.succeeded()) {
+            AuthenticationResponse(
+                    action,
+                    response.code,
+                    response.responseAsString()
+                )
+        } else {
+            AuthenticationResponse(action, -1, null)
+        }
+    }
+
     companion object : SingletonHolder<AuthService, PingwinekCooksApplication>(::AuthService)
+
+    enum class AuthenticationAction {
+        CHANGE_PASSWORD,
+        CONFIRM,
+        LOGIN,
+        LOGOUT,
+        LOST_PASSWORD,
+        NEW_PASSWORD,
+        REGISTER,
+        UNSUBSCRIBE
+    }
+
+    data class AuthenticationResponse(val action: AuthenticationAction, val code: Int, val msg: String?)
 }

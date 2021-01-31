@@ -18,7 +18,7 @@ class ConfigurableNetworkRequest private constructor(
     val application: Application,
     private val httpMethod: NetworkRequest.Method,
     private val networkResponseRouter: NetworkResponseRouter
-) : NetworkRequest {
+) : NetworkRequest_old {
 
     constructor(
         url: String,
@@ -39,7 +39,7 @@ class ConfigurableNetworkRequest private constructor(
         this.uploadDataProvider = UploadDataProviders.create(outputBuffer)
     }
 
-    override fun setContentType(contentType: NetworkRequest.ContentType) {
+    override fun setContentType(contentType: NetworkRequest_old.ContentType) {
         this.contentType = contentType.toString()
     }
 

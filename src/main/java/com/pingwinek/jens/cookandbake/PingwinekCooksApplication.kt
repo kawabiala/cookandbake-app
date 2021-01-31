@@ -19,6 +19,9 @@ import com.pingwinek.jens.cookandbake.sync.IngredientSyncLogic
 import com.pingwinek.jens.cookandbake.sync.IngredientSyncManager
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncLogic
 import com.pingwinek.jens.cookandbake.sync.RecipeSyncManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.CookieHandler
 import java.net.CookieManager
@@ -65,7 +68,9 @@ class PingwinekCooksApplication : Application() {
                 val error = jsonObject.getString("error")
                 if (error == verificationError) {
                     Log.e(tag, "Logging out due to verification error")
-                    getServiceLocator().getService(AuthService::class.java).logout { _, _ ->}
+                    CoroutineScope(Dispatchers.IO).launch {
+                        getServiceLocator().getService(AuthService::class.java).logout()
+                    }
                 }
             } finally {
                 Log.e(tag, response)

@@ -24,7 +24,7 @@ class NetworkRequestProvider private constructor(val application: Application) {
     private fun getConfigurableNetworkRequest(
         url: String,
         method: NetworkRequest.Method?
-    ): NetworkRequest {
+    ): NetworkRequest_old {
         return ConfigurableNetworkRequest(
             url,
             Executors.newSingleThreadExecutor(),

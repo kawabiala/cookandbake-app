@@ -6,7 +6,7 @@ import java.util.*
 class SyncHelper(
     private val syncManager: SyncManager<ModelLocal, Model>,
     private val onDone: () -> Unit
-) {
+) {/*
     private var localList: LinkedList<ModelLocal>? = null
     private var remoteList: LinkedList<Model>? = null
 
@@ -56,4 +56,4 @@ class SyncHelper(
         }
         syncTaskCounter.taskEnded()
     }
-}
+*/}

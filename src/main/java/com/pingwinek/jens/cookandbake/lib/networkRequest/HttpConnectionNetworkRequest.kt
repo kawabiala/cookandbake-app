@@ -2,14 +2,11 @@ package com.pingwinek.jens.cookandbake.lib.networkRequest
 
 import android.app.Application
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.net.*
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
-import java.nio.charset.StandardCharsets
 
 class HttpConnectionNetworkRequest private constructor(
     override val url: String,
@@ -40,19 +37,12 @@ class HttpConnectionNetworkRequest private constructor(
         this.contentType = contentType.toString()
     }
 
-    override fun obtainNetworkResponseRouter(): NetworkResponseRouter {
-        return networkResponseRouter
+    override suspend fun start() : NetworkResponse {
+        return doStart()
     }
 
-    override fun start() {
-        runBlocking {
-            launch {
-                doStart()
-            }
-        }
-    }
-
-    private suspend fun doStart() {
+    private suspend fun doStart() : NetworkResponse {
+        var response: NetworkResponse? = null
         withContext(Dispatchers.IO) {
             val connection = URL(url).openConnection() as HttpURLConnection
 
@@ -70,42 +60,20 @@ class HttpConnectionNetworkRequest private constructor(
                     writeOutput(it, outputStream)
                 }
 
-                val responseCode = connection.responseCode
-                val message = readInput(connection.inputStream)
-
-
-                networkResponseRouter.routeResponse(
-                    AbstractNetworkResponseRoutes.Result.SUCCESS,
-                    responseCode,
-                    message
-                )
+                response = NetworkResponse(connection)
             } catch (ioException: IOException) {
-                val responseCode = connection.responseCode
-                val message = readInput(connection.errorStream)
-
-                networkResponseRouter.routeResponse(
-                    AbstractNetworkResponseRoutes.Result.FAILED,
-                    responseCode,
-                    message
-                )
+                response = NetworkResponse(connection)
             } finally {
                 connection.disconnect()
             }
         }
+
+        return response ?: NetworkResponse(null)
     }
 
     private fun writeOutput(outputBuffer: ByteBuffer, outputStream: BufferedOutputStream) {
         val channel = Channels.newChannel(outputStream)
         channel.write(outputBuffer)
         outputStream.close()
-    }
-
-    private fun readInput(inputStream: InputStream) : String {
-        val reader = inputStream.bufferedReader(StandardCharsets.UTF_8)
-        val msg: String
-        reader.use {
-            msg = it.readText()
-        }
-        return msg
     }
 }

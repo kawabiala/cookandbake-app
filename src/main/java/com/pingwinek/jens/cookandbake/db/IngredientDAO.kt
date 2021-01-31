@@ -6,24 +6,45 @@ import com.pingwinek.jens.cookandbake.models.IngredientLocal
 @Dao
 interface IngredientDAO {
 
+    /**
+     * returns the rowId of the new entry
+     */
     @Insert
     fun insertIngredient(ingredientLocal: IngredientLocal) : Long
 
+    /**
+     * returns the number of updated rows
+     */
     @Update
-    fun updateIngredient(ingredientLocal: IngredientLocal)
+    fun updateIngredient(ingredientLocal: IngredientLocal) : Int
 
+    /**
+     * returns the number of deleted rows
+     */
     @Delete
-    fun deleteIngredient(ingredientLocal: IngredientLocal)
+    fun deleteIngredient(ingredientLocal: IngredientLocal) : Int
 
+    /**
+     * returns empty array if no results
+     */
     @Query("SELECT * FROM IngredientLocal")
-    fun getAll() : Array<IngredientLocal>
+    fun selectAll() : Array<IngredientLocal>
 
+    /**
+     * returns empty array if no results
+     */
     @Query("SELECT * FROM IngredientLocal WHERE recipeId = :recipeId")
-    fun getAllForRecipeId(recipeId: Int) : Array<IngredientLocal>
+    fun selectAllForRecipeId(recipeId: Int) : Array<IngredientLocal>
 
+    /**
+     * returns null if no result
+     */
     @Query("SELECT * FROM IngredientLocal WHERE remoteId = :remoteId")
-    fun getIngredientForRemoteId(remoteId: Int) : IngredientLocal?
+    fun selectIngredientForRemoteId(remoteId: Int) : IngredientLocal?
 
+    /**
+     * returns null if no result
+     */
     @Query("SELECT * FROM IngredientLocal WHERE rowid = :id")
-    fun getIngredient(id: Int) : IngredientLocal?
+    fun selectIngredient(id: Int) : IngredientLocal?
 }
