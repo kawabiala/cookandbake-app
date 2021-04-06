@@ -6,7 +6,8 @@ import com.pingwinek.jens.cookandbake.models.IngredientLocal
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.*
 
-class IngredientSourceLocal private constructor(private val db: PingwinekCooksDB) : IngredientSource<IngredientLocal>, SourceLocal<IngredientLocal> {
+class IngredientSourceLocal private constructor(private val db: PingwinekCooksDB)
+    : IngredientSource<IngredientLocal>, SourceLocal<IngredientLocal> {
 
     override suspend fun getAll() : LinkedList<IngredientLocal> {
         return LinkedList(db.ingredientDAO().selectAll().asList())
@@ -20,7 +21,6 @@ class IngredientSourceLocal private constructor(private val db: PingwinekCooksDB
         return db.ingredientDAO().selectIngredient(id)
     }
 
-    @Suppress("Unused")
     override suspend fun getForRemoteId(remoteId: Int) : IngredientLocal? {
         return db.ingredientDAO().selectIngredientForRemoteId(remoteId)
     }
@@ -57,7 +57,7 @@ class IngredientSourceLocal private constructor(private val db: PingwinekCooksDB
         return update(toDelete)
     }
 
-    private suspend fun delete(item: IngredientLocal) : Boolean {
+    private fun delete(item: IngredientLocal) : Boolean {
         return db.ingredientDAO().deleteIngredient(item) > 0
     }
 

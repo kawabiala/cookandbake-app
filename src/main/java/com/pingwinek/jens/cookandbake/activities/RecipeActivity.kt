@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -90,7 +91,7 @@ class RecipeActivity : BaseActivity(),
         recipeModel.recipeData.observe(this, { recipe: Recipe? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
-            if (recipe?.uri == null) {
+            if (!recipeModel.hasRecipeImage()) {
                 fab.setImageResource(R.drawable.ic_action_add_white)
             } else {
                 fab.setImageResource(R.drawable.ic_action_create_white)
@@ -227,9 +228,7 @@ class RecipeActivity : BaseActivity(),
                                 recipeModel.recipeData.value?.description ?: "",
                                 recipeModel.recipeData.value?.instruction ?: ""
                             )
-                            val inputStream = contentResolver.openInputStream(pdfUri) ?: return
-                            val type = contentResolver.getType(pdfUri) ?: return
-                            recipeModel.savePdf(inputStream, type)
+                            recipeModel.savePdf(pdfUri)
                         }
                     }
                 }
@@ -304,13 +303,7 @@ class RecipeActivity : BaseActivity(),
         AlertDialog.Builder(this).apply {
             setMessage(R.string.pdf_delete_confirm)
             setPositiveButton(R.string.yes) { _, _ ->
-                recipeModel.recipeData.value?.title?.let { title ->
-                    recipeModel.saveRecipe(
-                        title,
-                        recipeModel.recipeData.value?.description ?: "",
-                        recipeModel.recipeData.value?.instruction ?: ""
-                    )
-                }
+                recipeModel.deletePdf()
             }
             setNegativeButton(R.string.no) { _, _ ->
                 // Do nothing

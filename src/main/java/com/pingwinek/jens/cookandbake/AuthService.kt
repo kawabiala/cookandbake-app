@@ -47,7 +47,7 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         oldPassword: String,
         newPassword: String
     ) : AuthenticationResponse {
-        val email = Account.getStoredAccount(application)?.getEmail()
+        val email = getStoredAccount()?.getEmail()
             ?: return AuthenticationResponse(AuthenticationAction.CHANGE_PASSWORD, -1, null)
 
         val params = HashMap<String, String>()
@@ -68,7 +68,7 @@ class AuthService private constructor(private val application: PingwinekCooksApp
     suspend fun confirmRegistration(
         tempCode: String
     ) : AuthenticationResponse {
-        val email = Account.getStoredAccount(application)?.getEmail()
+        val email = getStoredAccount()?.getEmail()
             ?: return AuthenticationResponse(AuthenticationAction.CONFIRM, -1, null)
 
         val params = HashMap<String, String>()

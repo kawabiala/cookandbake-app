@@ -1,8 +1,11 @@
-package com.pingwinek.jens.cookandbake.lib.networkRequest
+package com.pingwinek.jens.cookandbake.sources
 
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.networkRequest.Multipart
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.InputStream
@@ -12,14 +15,25 @@ class FileManagerRemote(application: PingwinekCooksApplication) {
     private val networkRequestProvider = NetworkRequestProvider.getInstance(application)
     private val urlFiles = application.getURL(R.string.URL_FILES)
 
-    suspend fun saveFile(inputStream: InputStream, type: String?, name: String?): String?  {
+    suspend fun saveFile(inputStream: InputStream, type: String?): String?  {
         val contentType = type?.let { NetworkRequest.ContentType.find(it) } ?: return null
-        val fileName = name ?: "recipe"
-        val method = if (fileName == "recipe") {
-            NetworkRequest.Method.POST
-        } else {
-            NetworkRequest.Method.PUT
-        }
+        val fileName = "recipe"
+
+        return sendFile("$urlFiles/save", inputStream, fileName, contentType)
+    }
+
+    suspend fun changeFile(inputStream: InputStream, type: String?, name: String): String? {
+        val contentType = type?.let { NetworkRequest.ContentType.find(it) } ?: return null
+
+        return sendFile("$urlFiles/change", inputStream, name, contentType)
+    }
+
+    private suspend fun sendFile(
+        url: String,
+        inputStream: InputStream,
+        fileName: String,
+        contentType: NetworkRequest.ContentType
+    ) : String? {
 
         val multipartBuilder = Multipart.Builder()
             .apply {
@@ -27,11 +41,7 @@ class FileManagerRemote(application: PingwinekCooksApplication) {
             }
         val multipart = multipartBuilder.build()
 
-        return saveFile(multipart, method)
-    }
-
-    private suspend fun saveFile(multipart: Multipart, method: NetworkRequest.Method) : String? {
-        val networkRequest = networkRequestProvider.getNetworkRequest(urlFiles, method)
+        val networkRequest = networkRequestProvider.getNetworkRequest(url, NetworkRequest.Method.POST)
             .apply {
                 setOutputBuffer(multipart.getContent())
                 setContentType(multipart.getContentType())
@@ -43,6 +53,7 @@ class FileManagerRemote(application: PingwinekCooksApplication) {
                 parseFileManagerResponse(it)
             }
         } else {
+            Log.i(this::class.java.name, "Saving file failed with code ${response.code} and message ${response.responseAsString()}")
             null
         }
     }

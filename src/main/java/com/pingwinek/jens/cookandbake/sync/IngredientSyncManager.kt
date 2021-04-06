@@ -44,7 +44,7 @@ class IngredientSyncManager(
         // Make sure that remote ingredient is not created twice
         Mutex().withLock {
             // Check if remote ingredient has been created in the meantime
-            if (ingredientSourceLocal.get(local.id) != null) return
+            if (ingredientSourceLocal.get(local.id)?.remoteId != null) return
 
             // Retrieve remote recipe id
             val remoteRecipeId = recipeSourceLocal.toRemoteId(local.recipeId) ?: return

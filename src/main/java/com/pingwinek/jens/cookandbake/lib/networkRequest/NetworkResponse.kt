@@ -48,6 +48,11 @@ class NetworkResponse(
             reader.use {
                 msg = it?.readText()
             }
+        } catch (ioException: IOException) {
+            val reader = connection?.errorStream?.bufferedReader(StandardCharsets.UTF_8)
+            reader.use {
+                msg = it?.readText()
+            }
         } finally {
             connection?.disconnect()
         }

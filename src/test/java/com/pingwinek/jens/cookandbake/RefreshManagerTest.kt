@@ -1,14 +1,13 @@
 package com.pingwinek.jens.cookandbake
 
-import com.nhaarman.mockitokotlin2.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
 class RefreshManagerTest {
 

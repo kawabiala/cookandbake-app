@@ -64,8 +64,8 @@ class RecipeSyncManager(
                 newRecipe.id,
                 local.title,
                 local.description,
-                local.instruction,
-                local.uri)
+                local.instruction
+                )
             )
         }
     }
