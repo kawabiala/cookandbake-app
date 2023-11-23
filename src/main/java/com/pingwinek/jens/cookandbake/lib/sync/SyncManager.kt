@@ -72,7 +72,7 @@ abstract class SyncManager<TLocal: ModelLocal, TRemote: Model>(
         sync(locals, remotes)
     }
 
-    private suspend fun sync(locals: List<TLocal>, remotes: List<TRemote>) {
+    suspend fun sync(locals: List<TLocal>, remotes: List<TRemote>) {
         locals.forEach { local ->
             val remote = remotes.find {
                 it.id == local.remoteId

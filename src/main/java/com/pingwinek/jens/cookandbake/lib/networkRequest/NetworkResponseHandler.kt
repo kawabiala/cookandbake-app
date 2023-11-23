@@ -8,8 +8,8 @@ import android.os.Message
 open class NetworkResponseHandler(val looper: Looper) {
 
     private val handler = object : Handler(looper) {
-        override fun handleMessage(msg: Message?) {
-            val status = msg?.data?.getString("status", "") ?: ""
+        override fun handleMessage(msg: Message) {
+            val status = msg.data?.getString("status", "") ?: ""
             val result = if (status == AbstractNetworkResponseRoutes.Result.SUCCESS.result) {
                 AbstractNetworkResponseRoutes.Result.SUCCESS
             } else {
@@ -17,8 +17,8 @@ open class NetworkResponseHandler(val looper: Looper) {
             }
             handleResponse(
                 result,
-                msg?.data?.getInt("code", -1) ?: -1,
-                msg?.data?.getString("response", "") ?: ""
+                msg.data?.getInt("code", -1) ?: -1,
+                msg.data?.getString("response", "") ?: ""
             )
         }
     }

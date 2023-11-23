@@ -19,16 +19,19 @@ class FileSourceRemote(
     private val urlRecipe = application.getURL(R.string.URL_RECIPE)
     private val urlFile = application.getURL(R.string.URL_FILES)
 
-    override suspend fun getAllForEntityId(recipeId: Int): LinkedList<FileRemote> {
+    override suspend fun getAllForEntityId(entity: String, entityId: Int): LinkedList<FileRemote> {
         if (!authService.ensureSession()) return LinkedList()
-
-        val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$recipeId/files/", NetworkRequest.Method.GET)
+        TODO ("not implemented yet")
+/*
+        val networkRequest = networkRequestProvider.getNetworkRequest("$urlRecipe/$entityId/files/", NetworkRequest.Method.GET)
         val response = networkRequest.start()
         return if (response.succeeded() && response.code == 200) {
             parseFiles(response) ?: LinkedList()
         } else {
             LinkedList<FileRemote>()
         }
+
+ */
     }
 
     override suspend fun getAll(): LinkedList<FileRemote> {

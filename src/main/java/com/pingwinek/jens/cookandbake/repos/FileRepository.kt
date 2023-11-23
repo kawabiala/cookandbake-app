@@ -81,7 +81,7 @@ class FileRepository private constructor(private val application: PingwinekCooks
     private suspend fun syncFilesForEntityId(entity: String, entityId: Int) {
         val locals = fileSourceLocal.getAllForEntityId(entity, entityId)
         val remotes = fileSourceRemote.getAllForEntityId(entityId)
-        syncService.sync<FileLocal, FileRemote>(locals, remotes)
+        syncService.sync(locals, remotes)
     }
 
     private fun updateFileList(fileList: LinkedList<FileLocal>) {

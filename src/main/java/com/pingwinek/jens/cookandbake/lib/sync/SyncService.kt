@@ -14,7 +14,7 @@ class SyncService private constructor(internetConnectivityManager: InternetConne
     val syncManagerIdentifiers = LinkedList<SyncManagerIdentifier<ModelLocal, Model>>()
 
     private val netWorkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network?) {
+        override fun onAvailable(network: Network) {
             CoroutineScope(Dispatchers.IO).launch {
                 syncAll()
             }
@@ -77,6 +77,13 @@ class SyncService private constructor(internetConnectivityManager: InternetConne
         localId: Int
     ) {
         getSyncManager<TLocal, TRemote>()?.syncEntry(localId)
+    }
+
+    suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model> sync(
+            locals: List<TLocal>,
+            remotes: List<TRemote>
+    ) {
+        getSyncManager<TLocal, TRemote>()?.sync(locals, remotes)
     }
 
     suspend inline fun <reified TLocal: ModelLocal, reified TRemote: Model> syncByParentId(
