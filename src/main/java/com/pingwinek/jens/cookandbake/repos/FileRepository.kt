@@ -80,7 +80,8 @@ class FileRepository private constructor(private val application: PingwinekCooks
 
     private suspend fun syncFilesForEntityId(entity: String, entityId: Int) {
         val locals = fileSourceLocal.getAllForEntityId(entity, entityId)
-        val remotes = fileSourceRemote.getAllForEntityId(entityId)
+        // TODO fix function getAllForEntityId
+        val remotes = fileSourceRemote.getAllForEntityId("BugSuppressingPlaceholder", entityId)
         syncService.sync(locals, remotes)
     }
 

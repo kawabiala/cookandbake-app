@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
@@ -8,6 +9,7 @@ import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.File
 import java.io.InputStream
 
 class FileManagerRemote(application: PingwinekCooksApplication) {
@@ -26,6 +28,11 @@ class FileManagerRemote(application: PingwinekCooksApplication) {
         val contentType = type?.let { NetworkRequest.ContentType.find(it) } ?: return null
 
         return sendFile("$urlFiles/change", inputStream, name, contentType)
+    }
+
+    suspend fun load(fileName: String): ParcelFileDescriptor {
+        //TODO write proper function load
+        return ParcelFileDescriptor.open(File("NoIdeaWhatPath"), ParcelFileDescriptor.MODE_READ_ONLY)
     }
 
     private suspend fun sendFile(

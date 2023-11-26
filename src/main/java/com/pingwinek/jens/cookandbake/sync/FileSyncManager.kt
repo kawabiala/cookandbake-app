@@ -47,7 +47,10 @@ class FileSyncManager(
 
     override suspend fun newLocal(remote: FileRemote) {
         val parcelFileDescriptor = fileManagerRemote.load(remote.fileName)
+        /*
         val fileName = fileManagerLocal.newFile(parcelFileDescriptor, remote.fileName)
+
+         */
         val recipeLocal = remote.entityId?.let { recipeSourceLocal.getForRemoteId(it) }
         fileSourceLocal.new(
             FileLocal(
@@ -69,11 +72,13 @@ class FileSyncManager(
             val remoteRecipeId = local.entityId?.let { recipeSourceLocal.toRemoteId(it) }
 
             // Create remote file from local file and remote recipe id
+            //TODO replace placeholder for Entity
             val newFile = fileSourceRemote.new(
                 FileRemote(
                     0,
                     local.fileName,
                     remoteRecipeId,
+                    "EntityPlaceHolder",
                     local.lastModified
                 )) ?: return
 
