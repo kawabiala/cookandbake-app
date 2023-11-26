@@ -1,7 +1,7 @@
 package com.pingwinek.jens.cookandbake.repos
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.models.Ingredient
@@ -17,7 +17,7 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
     private val syncService = application.getServiceLocator().getService(SyncService::class.java)
 
     private val repoListData = MutableLiveData<LinkedList<IngredientLocal>>()
-    val ingredientListData = Transformations.map(repoListData) {
+    val ingredientListData = repoListData.map() {
         LinkedList<Ingredient>().apply {
             it.forEach { ingredientLocal ->
                 if (!ingredientLocal.flagAsDeleted) {
@@ -124,8 +124,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
     }
 
     private fun removeFromIngredientList(ingredientId: Int) {
-        val updatedList = repoListData.value
-        updatedList?.removeAll {
+        val updatedList = repoListData.value ?: LinkedList()
+        updatedList.removeAll {
             it.id == ingredientId
         }
         repoListData.postValue(updatedList)

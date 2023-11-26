@@ -2,7 +2,7 @@ package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
@@ -19,7 +19,7 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
     val recipeListData = recipeRepository.recipeListData
 
 /*
-    val searchIndex = Transformations.map(recipeRepository.recipeListData) { recipeList ->
+    val searchIndex = recipeRepository.recipeListData.map() { recipeList ->
         HashMap<String, Recipe>().apply {
             recipeList.forEach { recipe ->
                 recipe.title.split(" ").forEach{ subString ->

@@ -12,11 +12,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
+import com.pingwinek.jens.cookandbake.databinding.FragmentIngredientListingBinding
+import com.pingwinek.jens.cookandbake.databinding.RecyclerviewIngredientListItemBinding
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
-import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
+//import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
+//import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
 import java.util.*
 
 /**
@@ -25,6 +27,9 @@ import java.util.*
  * [IngredientListingFragment.OnListFragmentInteractionListener] interface.
  */
 class IngredientListingFragment : androidx.fragment.app.Fragment() {
+
+    private var _binding: FragmentIngredientListingBinding? = null
+    private val binding get() = _binding!!
 
     private var listener: OnListFragmentInteractionListener? = null
     private lateinit var recipeModel: RecipeViewModel
@@ -42,14 +47,17 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_ingredient_listing, container, false)
+    ): View {
+        _binding = FragmentIngredientListingBinding.inflate(inflater, container, false)
+        val view = binding.root
+        //val view = inflater.inflate(R.layout.fragment_ingredient_listing, container, false)
 
         val ingredientListingAdapter = IngredientListingAdapter(ingredientList, listener)
 
-        view.list.apply {
+        binding.list.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = ingredientListingAdapter
         }
@@ -62,11 +70,16 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
             }
         })
 
-        view.addIngredientButton.setOnClickListener {
+        binding.addIngredientButton.setOnClickListener {
             listener?.onListFragmentInteraction(null)
         }
 
         return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onAttach(context: Context) {
@@ -109,21 +122,19 @@ class IngredientListingAdapter(
     private val listener: OnListFragmentInteractionListener?
 ) : RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
 
-    private val onClickListener: View.OnClickListener
+    private var _binding: RecyclerviewIngredientListItemBinding? = null
+    private val binding get() = _binding!!
 
-    init {
-        onClickListener = View.OnClickListener { v ->
-            val ingredient = v.tag as Ingredient?
-            // Notify the active callbacks interface (the activity, if the fragment is attached to
-            // one) that an item has been selected.
-            listener?.onListFragmentInteraction(ingredient)
-        }
+    private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
+        val ingredient = v.tag as Ingredient?
+        // Notify the active callbacks interface (the activity, if the fragment is attached to
+        // one) that an item has been selected.
+        listener?.onListFragmentInteraction(ingredient)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.recyclerview_ingredient_list_item, parent, false)
-        return ViewHolder(view)
+        _binding = RecyclerviewIngredientListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -141,6 +152,18 @@ class IngredientListingAdapter(
 
     override fun getItemCount(): Int = ingredientList.size
 
+    inner class ViewHolder(val mBinding: RecyclerviewIngredientListItemBinding) : RecyclerView.ViewHolder(mBinding.root) {
+        val mView = mBinding.root
+        val quantityView: TextView = mBinding.quantityView
+        val unityView: TextView = mBinding.unityView
+        val nameView: TextView = mBinding.nameView
+        val buttonView: ImageButton = mBinding.deleteIngredientButton
+
+        override fun toString(): String {
+            return super.toString() + " '" + nameView.text + "'"
+        }
+    }
+/*
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val quantityView: TextView = mView.quantityView
         val unityView: TextView = mView.unityView
@@ -151,4 +174,6 @@ class IngredientListingAdapter(
             return super.toString() + " '" + nameView.text + "'"
         }
     }
+
+ */
 }

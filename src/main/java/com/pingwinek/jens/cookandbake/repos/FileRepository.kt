@@ -2,7 +2,7 @@ package com.pingwinek.jens.cookandbake.repos
 
 import android.os.ParcelFileDescriptor
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
@@ -26,7 +26,7 @@ class FileRepository private constructor(private val application: PingwinekCooks
     private val syncService = application.getServiceLocator().getService(SyncService::class.java)
 
     private val repoListData = MutableLiveData<LinkedList<FileLocal>>()
-    val fileListData = Transformations.map(repoListData) {
+    val fileListData = repoListData.map() {
         LinkedList<File>().apply {
             it.forEach { file ->
                 if (!file.flagAsDeleted) {

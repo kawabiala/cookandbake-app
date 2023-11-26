@@ -28,7 +28,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     var recipeId: Int? = null
 
-    val recipeData: LiveData<Recipe?> = Transformations.map(recipeRepository.recipeListData) { recipeList ->
+    val recipeData: LiveData<Recipe?> = recipeRepository.recipeListData.map() { recipeList ->
         recipeId?.let {
             recipeList.find { recipe ->
                 recipe.id == recipeId
@@ -36,13 +36,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    val ingredientListData: LiveData<LinkedList<Ingredient>> = Transformations.map(ingredientRepository.ingredientListData) { ingredientList ->
+    val ingredientListData: LiveData<LinkedList<Ingredient>> = ingredientRepository.ingredientListData.map() { ingredientList ->
         LinkedList(ingredientList.filter { ingredient ->
             ingredient.recipeId == recipeId
         })
     }
 
-    val fileListData: LiveData<LinkedList<File>> = Transformations.map(fileRepository.fileListData) { fileList ->
+    val fileListData: LiveData<LinkedList<File>> = fileRepository.fileListData.map() { fileList ->
         LinkedList(fileList.filter { file ->
             file.entityId == recipeId && file.entity == "recipe"
         })

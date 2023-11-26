@@ -1,8 +1,17 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+//apply plugin: 'com.android.application'
+//apply plugin: 'kotlin-android'
 //apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlin-kapt'
+//apply plugin: 'com.google.devtools.ksp'
 //apply plugin: 'org.jetbrains.dokka'
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    //id 'kotlin-android-extensions'
+    //id 'com.google.devtools.ksp'
+}
 
 android {
     compileSdk 34
@@ -35,12 +44,15 @@ android {
             //jvmTarget = '1.8'
             jvmTarget = '17'
         }
+        }
+    buildFeatures {
+        viewBinding true
     }
     namespace 'com.pingwinek.jens.cookandbake'
 }
 
 dependencies {
-    def room_version = '2.2.6'
+    def room_version = '2.6.0'
     def mockito_version = "2.13.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -66,14 +78,16 @@ dependencies {
     implementation 'com.google.android.gms:play-services-cronet:18.0.1'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt("androidx.room:room-compiler:$room_version")
+    //ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
     implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
 //    testImplementation "androidx.room:room-testing:$room_version"
 
     // Check for memory leaks (actually mainly UI related)

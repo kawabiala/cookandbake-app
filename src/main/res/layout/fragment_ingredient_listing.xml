@@ -8,7 +8,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
-            android:name="com.pingwinek.jens.cookandbake.IngridientFragment"
+            android:name="com.pingwinek.jens.cookandbake.IngredientFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layoutManager="LinearLayoutManager"
