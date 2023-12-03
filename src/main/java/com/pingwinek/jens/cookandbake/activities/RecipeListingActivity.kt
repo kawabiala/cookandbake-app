@@ -14,6 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
@@ -24,10 +27,13 @@ const val EXTRA_RECIPE_ID = "recipeID"
 class RecipeListingActivity : BaseActivity() {
 
     private lateinit var recipeListingModel: RecipeListingViewModel
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe_listing)
+
+        auth = Firebase.auth
 
         recipeListingModel = ViewModelProvider
             .AndroidViewModelFactory
@@ -60,7 +66,7 @@ class RecipeListingActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         recipeListingModel.loadData()
-
+/*
         if (recipeListingModel.authService.isLoggedIn()) {
             optionMenu.addMenuEntry(
                 R.id.OPTION_MENU_LOGIN,
@@ -86,6 +92,38 @@ class RecipeListingActivity : BaseActivity() {
                 R.drawable.ic_login_person_outline_black,
                 true
                 ) {
+                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
+                true
+            }
+        }
+
+ */
+
+        if (auth.currentUser != null) {
+            optionMenu.addMenuEntry(
+                R.id.OPTION_MENU_LOGIN,
+                resources.getString(R.string.logged_in_as, auth.currentUser!!.email),
+                R.drawable.ic_login_person_black,
+                true
+            ) {
+                AlertDialog.Builder(this).apply {
+                    setMessage(resources.getString(
+                        R.string.logged_in_as,
+                        auth.currentUser!!.email
+                    ))
+                    setPositiveButton("Ok") { _, _ ->
+                        // do nothing
+                    }
+                }.create().show()
+                true
+            }
+        } else {
+            optionMenu.addMenuEntry(
+                R.id.OPTION_MENU_LOGIN,
+                resources.getString(R.string.login),
+                R.drawable.ic_login_person_outline_black,
+                true
+            ) {
                 startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
             }

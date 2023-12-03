@@ -94,6 +94,10 @@ dependencies {
 
     //Firebase
     implementation platform('com.google.firebase:firebase-bom:32.6.0')
+    implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-database' //version determined by firebase-bom
+    
 //    testImplementation "androidx.room:room-testing:$room_version"
 
     // Check for memory leaks (actually mainly UI related)

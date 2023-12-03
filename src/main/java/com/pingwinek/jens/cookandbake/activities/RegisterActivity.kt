@@ -12,6 +12,9 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
@@ -19,12 +22,15 @@ import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class RegisterActivity : BaseActivity() {
 
-    private lateinit var authenticationViewModel: AuthenticationViewModel
+    //private lateinit var authenticationViewModel: AuthenticationViewModel
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_register)
 
+        auth = Firebase.auth
+        /*
         authenticationViewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory(application)
@@ -49,6 +55,7 @@ class RegisterActivity : BaseActivity() {
                 else -> {}
             }
         }
+         */
 
         findViewById<TextView>(R.id.raAcceptance).apply {
             text = getSpannableAcceptanceText()
@@ -71,7 +78,8 @@ class RegisterActivity : BaseActivity() {
     fun registerButton(view: View) {
         deleteMessage()
 
-        if (authenticationViewModel.hasStoredAccount()) {
+        //if (authenticationViewModel.hasStoredAccount()) {
+        if (auth.currentUser != null) {
             AlertDialog.Builder(this).apply {
                 setMessage(getString(R.string.confirmLogout))
                 setPositiveButton(getString(R.string.yes)) { _, _ ->
@@ -89,15 +97,29 @@ class RegisterActivity : BaseActivity() {
     }
 
     private fun logout() {
-        authenticationViewModel.logout()
+        //authenticationViewModel.logout()
+        auth.signOut()
     }
 
     private fun register() {
+        /*
         authenticationViewModel.register(
             findViewById<TextView>(R.id.raEmail).text.toString(),
             findViewById<TextView>(R.id.raPassword).text.toString(),
             findViewById<CheckBox>(R.id.raCheckBox).isChecked
         )
+
+         */
+        auth.createUserWithEmailAndPassword(
+            findViewById<TextView>(R.id.raEmail).text.toString(),
+            findViewById<TextView>(R.id.raPassword).text.toString()
+        ).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                setMessage("Registration successful")
+            } else {
+                setMessage("Registration failed")
+            }
+        }
     }
 
     private fun deleteMessage() {
