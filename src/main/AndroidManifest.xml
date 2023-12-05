@@ -15,7 +15,8 @@
 
         <activity
                 android:name=".activities.RecipeListingActivity"
-                android:launchMode="singleTask">
+                android:launchMode="singleTask"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -55,7 +56,8 @@
         <activity
                 android:name=".activities.LoginActivity"
                 android:label="@string/login"
-                android:launchMode="singleTask">
+                android:launchMode="singleTask"
+                android:exported="true">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -86,7 +88,9 @@
                 android:name=".activities.ChangePasswordActivity"
                 android:label="@string/changePassword"
                 android:launchMode="singleTop" />
-        <activity android:name=".activities.NewPasswordActivity">
+        <activity
+                android:name=".activities.NewPasswordActivity"
+                android:exported="true">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
