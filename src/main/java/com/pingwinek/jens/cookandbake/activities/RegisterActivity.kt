@@ -22,7 +22,6 @@ import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class RegisterActivity : BaseActivity() {
 
-    //private lateinit var authenticationViewModel: AuthenticationViewModel
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,32 +29,6 @@ class RegisterActivity : BaseActivity() {
         addContentView(R.layout.activity_register)
 
         auth = Firebase.auth
-        /*
-        authenticationViewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        ).get(AuthenticationViewModel::class.java)
-
-        authenticationViewModel.response.observe(this) { response ->
-            when (response.action) {
-                AuthService.AuthenticationAction.REGISTER -> {
-                    if (response.code == 200) {
-                        setMessage(resources.getString(R.string.confirmationSent))
-                    } else {
-                        setMessage(resources.getString(R.string.registrationFailed))
-                    }
-                }
-                AuthService.AuthenticationAction.CONFIRM -> {
-                    if (response.code == 200) {
-                        setMessage(resources.getString(R.string.confirmationSucceeded))
-                    } else {
-                        setMessage(resources.getString(R.string.confirmationFailed))
-                    }
-                }
-                else -> {}
-            }
-        }
-         */
 
         findViewById<TextView>(R.id.raAcceptance).apply {
             text = getSpannableAcceptanceText()
@@ -78,7 +51,6 @@ class RegisterActivity : BaseActivity() {
     fun registerButton(view: View) {
         deleteMessage()
 
-        //if (authenticationViewModel.hasStoredAccount()) {
         if (auth.currentUser != null) {
             AlertDialog.Builder(this).apply {
                 setMessage(getString(R.string.confirmLogout))
@@ -97,19 +69,10 @@ class RegisterActivity : BaseActivity() {
     }
 
     private fun logout() {
-        //authenticationViewModel.logout()
         auth.signOut()
     }
 
     private fun register() {
-        /*
-        authenticationViewModel.register(
-            findViewById<TextView>(R.id.raEmail).text.toString(),
-            findViewById<TextView>(R.id.raPassword).text.toString(),
-            findViewById<CheckBox>(R.id.raCheckBox).isChecked
-        )
-
-         */
         auth.createUserWithEmailAndPassword(
             findViewById<TextView>(R.id.raEmail).text.toString(),
             findViewById<TextView>(R.id.raPassword).text.toString()
@@ -135,7 +98,7 @@ class RegisterActivity : BaseActivity() {
             visibility = View.VISIBLE
         }
     }
-
+//TODO rework Datenschutz
     private fun getSpannableAcceptanceText() : SpannableString {
         val clickableSpan = SimpleClickableSpan {
             startActivity(

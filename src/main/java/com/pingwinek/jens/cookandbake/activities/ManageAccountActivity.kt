@@ -5,44 +5,25 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import kotlinx.coroutines.*
 
 class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePasswordListener {
 
-    private lateinit var authenticationViewModel: AuthenticationViewModel
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_manage_account)
 
-        authenticationViewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        ).get(AuthenticationViewModel::class.java)
-
-        authenticationViewModel.response.observe(this) { response ->
-            when (response.action) {
-                AuthService.AuthenticationAction.LOGOUT -> {
-                    fillEmail()
-                    if (response.code != 200) {
-                        alert(resources.getString(R.string.logoutFailed))
-                    }
-                }
-                AuthService.AuthenticationAction.UNSUBSCRIBE -> {
-                    if (response.code == 200) {
-                        fillEmail()
-                    } else {
-                        alert(response.msg ?: "")
-                    }
-                }
-                else -> {}
-            }
-        }
+        auth = Firebase.auth
 
         findViewById<TextView>(R.id.maUnsubscribeView).setOnClickListener {
-            if (! authenticationViewModel.hasStoredAccount()) {
+            if (auth.currentUser == null) {
                 return@setOnClickListener
             }
 
@@ -54,7 +35,7 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         }
 
         findViewById<TextView>(R.id.maChangePasswordView).setOnClickListener {
-            if (! authenticationViewModel.hasStoredAccount()) {
+            if (auth.currentUser == null) {
                 return@setOnClickListener
             }
 
@@ -66,13 +47,13 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
         }
 
         findViewById<TextView>(R.id.maLogoutView).setOnClickListener {
-            if (! authenticationViewModel.hasStoredAccount()) {
+            if (auth.currentUser == null) {
                 return@setOnClickListener
             }
 
-            authenticationViewModel.logout()
+            auth.signOut()
         }
-
+//TODO Dataprotection
         findViewById<TextView>(R.id.maImpressumView).setOnClickListener {
             startActivity(Intent(this, ImpressumActivity::class.java)
                 .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
@@ -104,7 +85,8 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
     override fun onPositiveButton(password: String?) {
         if (password == null) return
 
-        authenticationViewModel.unsubscribe(password)
+        //TODO delete account + all data
+//        authenticationViewModel.unsubscribe(password)
     }
 
     override fun onNegativeButton() {
@@ -122,11 +104,8 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
 
     private fun fillEmail() {
         val emailText = when {
-            authenticationViewModel.isLoggedIn() -> {
-                resources.getString(R.string.is_logged_in, authenticationViewModel.getStoredAccount()?.getEmail())
-            }
-            authenticationViewModel.hasStoredAccount() -> {
-                resources.getString(R.string.is_not_logged_in, authenticationViewModel.getStoredAccount()?.getEmail())
+            auth.currentUser != null -> {
+                resources.getString(R.string.is_logged_in, auth.currentUser!!.email)
             }
             else -> {
                 resources.getString(R.string.no_account)

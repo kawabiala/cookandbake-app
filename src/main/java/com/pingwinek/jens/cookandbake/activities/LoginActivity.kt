@@ -5,12 +5,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.*
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class LoginActivity : BaseActivity() {
 
-    private lateinit var authenticationViewModel: AuthenticationViewModel
+//    private lateinit var authenticationViewModel: AuthenticationViewModel
+    private lateinit var auth: FirebaseAuth
     private lateinit var emailView: TextView
     private lateinit var passwordView: TextView
 
@@ -18,6 +22,8 @@ class LoginActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_login)
 
+        auth = Firebase.auth
+/*
         authenticationViewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory(application)
@@ -44,6 +50,8 @@ class LoginActivity : BaseActivity() {
                 else -> {}
             }
         }
+
+ */
 
         emailView = findViewById(R.id.laEmail)
         passwordView = findViewById(R.id.laPassword)
@@ -85,7 +93,8 @@ class LoginActivity : BaseActivity() {
 
     fun loginButton(view: View) {
         deleteMessage()
-        authenticationViewModel.login(emailView.text.toString(), passwordView.text.toString())
+//        authenticationViewModel.login(emailView.text.toString(), passwordView.text.toString())
+        auth.signInWithEmailAndPassword(emailView.text.toString(), passwordView.text.toString())
     }
 
     private fun deleteMessage() {
@@ -124,6 +133,6 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun confirmTempCode(tempCode: String) {
-        authenticationViewModel.confirmRegistration(tempCode)
+//        authenticationViewModel.confirmRegistration(tempCode)
     }
 }
