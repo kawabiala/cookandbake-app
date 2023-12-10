@@ -11,6 +11,8 @@ import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRo
 import com.pingwinek.jens.cookandbake.lib.networkRequest.HostBasedCookieStore
 import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
 import com.pingwinek.jens.cookandbake.lib.sync.SyncService
+import com.pingwinek.jens.cookandbake.sources.FileSourceLocal
+import com.pingwinek.jens.cookandbake.sources.FileSourceRemote
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
@@ -126,6 +128,16 @@ class PingwinekCooksApplication : Application() {
         this
         )
         serviceLocator.registerService(recipeSourceRemote)
+
+        val fileSourceLocal = FileSourceLocal.getInstance(pingwinekCooksDB)
+        serviceLocator.registerService(fileSourceLocal)
+
+        val fileSourceRemote = FileSourceRemote(
+            networkRequestProvider,
+            authService,
+            this
+        )
+        serviceLocator.registerService(fileSourceRemote)
 
         val syncService = SyncService.getInstance(internetConnectivityManager)
         syncService.registerSyncManager(IngredientSyncManager(

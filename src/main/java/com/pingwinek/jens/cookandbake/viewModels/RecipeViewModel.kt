@@ -98,7 +98,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch(Dispatchers.IO) {
                 recipeRepository.getRecipe(id)
                 ingredientRepository.getAll(id)
-                fileRepository.getFilesForEntityId("recipe", id)
+                //fileRepository.getFilesForEntityId("recipe", id)
             }
         }
     }

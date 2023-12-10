@@ -91,11 +91,14 @@ class RecipeActivity : BaseActivity(),
         recipeModel.recipeData.observe(this, { recipe: Recipe? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
+            /*
             if (!recipeModel.hasRecipeImage()) {
                 fab.setImageResource(R.drawable.ic_action_add_white)
             } else {
                 fab.setImageResource(R.drawable.ic_action_create_white)
             }
+
+             */
         })
 
         val onClickListener = { _: View ->
