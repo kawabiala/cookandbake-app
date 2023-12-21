@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -13,7 +12,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY_VERBAL
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_UNITY
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
+import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.REQUEST_CODE_INGREDIENT
+import com.pingwinek.jens.cookandbake.REQUEST_CODE_INSTRUCTION
+import com.pingwinek.jens.cookandbake.REQUEST_CODE_PDF
+import com.pingwinek.jens.cookandbake.REQUEST_CODE_TITLE
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
@@ -80,7 +91,7 @@ class RecipeActivity : BaseActivity(),
         ).get(RecipeViewModel::class.java)
 
         if (intent.hasExtra(EXTRA_RECIPE_ID)) {
-            intent.extras?.getInt(EXTRA_RECIPE_ID)?.let { id ->
+            intent.extras?.getString(EXTRA_RECIPE_ID)?.let { id ->
                 recipeModel.recipeId = id
             }
         }
@@ -88,7 +99,7 @@ class RecipeActivity : BaseActivity(),
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
-        recipeModel.recipeData.observe(this, { recipe: Recipe? ->
+        recipeModel.recipeData.observe(this) { recipe: Recipe? ->
             titleView.text = recipe?.title
             descriptionView.text = recipe?.description
             /*
@@ -99,7 +110,7 @@ class RecipeActivity : BaseActivity(),
             }
 
              */
-        })
+        }
 
         val onClickListener = { _: View ->
             startActivityForResult(Intent(this, RecipeEditActivity::class.java).also {
@@ -204,7 +215,7 @@ class RecipeActivity : BaseActivity(),
                 if (resultCode == Activity.RESULT_OK) {
                     data?.extras?.let {
                         val id = it.get(EXTRA_INGREDIENT_ID)?.run {
-                            it.getInt(EXTRA_INGREDIENT_ID)
+                            it.getString(EXTRA_INGREDIENT_ID)
                         }
                         val name = it.getString(EXTRA_INGREDIENT_NAME)
                         val quantity = it.get(EXTRA_INGREDIENT_QUANTITY)?.run {
@@ -231,7 +242,7 @@ class RecipeActivity : BaseActivity(),
                                 recipeModel.recipeData.value?.description ?: "",
                                 recipeModel.recipeData.value?.instruction ?: ""
                             )
-                            recipeModel.savePdf(pdfUri)
+                            //recipeModel.savePdf(pdfUri)
                         }
                     }
                 }
@@ -259,7 +270,7 @@ class RecipeActivity : BaseActivity(),
 
         val ingredient = recipeModel.ingredientListData.value?.find { item ->
             try {
-                item.id == button.tag.toString().toInt()
+                item.id == button.tag.toString()
             } catch (exception: NumberFormatException) {
                 false
             }
@@ -274,13 +285,8 @@ class RecipeActivity : BaseActivity(),
     }
 
     override fun onPositiveButton(confirmItemId: String?) {
-        confirmItemId?.let { idAsString ->
-            try {
-                val idAsInt = idAsString.toInt()
-                recipeModel.deleteIngredient(idAsInt)
-            } catch (exception: NumberFormatException) {
-                Log.e(this::class.java.name, "Cannot parse $confirmItemId into Integer")
-            }
+        confirmItemId?.let { id ->
+            recipeModel.deleteIngredient(id)
         }
     }
 
@@ -306,7 +312,7 @@ class RecipeActivity : BaseActivity(),
         AlertDialog.Builder(this).apply {
             setMessage(R.string.pdf_delete_confirm)
             setPositiveButton(R.string.yes) { _, _ ->
-                recipeModel.deletePdf()
+                //recipeModel.deletePdf()
             }
             setNegativeButton(R.string.no) { _, _ ->
                 // Do nothing

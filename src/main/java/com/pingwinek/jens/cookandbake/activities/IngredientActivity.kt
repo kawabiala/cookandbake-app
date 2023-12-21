@@ -5,13 +5,19 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY_VERBAL
+import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_UNITY
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToDouble
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 
 class IngredientActivity : BaseActivity() {
 
-    private var ingredientId: Int? = null
+    private var ingredientId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +30,7 @@ class IngredientActivity : BaseActivity() {
         intent?.extras?.let {
             supportActionBar?.title = it.getString(EXTRA_RECIPE_TITLE)
             it.get(EXTRA_INGREDIENT_ID)?.run {
-                ingredientId = it.getInt(EXTRA_INGREDIENT_ID)
+                ingredientId = it.getString(EXTRA_INGREDIENT_ID)
             }
             ingredientView.text = it.getString(EXTRA_INGREDIENT_NAME)
             findViewById<TextView>(R.id.ingredientQuantity).text =

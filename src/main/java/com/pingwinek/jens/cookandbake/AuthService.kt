@@ -2,15 +2,18 @@ package com.pingwinek.jens.cookandbake
 
 import android.content.Context
 import android.util.Log
-import com.pingwinek.jens.cookandbake.db.DatabaseService
-import com.pingwinek.jens.cookandbake.lib.networkRequest.*
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
+import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkResponse
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.ClassCastException
-import java.net.*
-import java.util.*
-import kotlin.collections.HashMap
+import java.net.CookieHandler
+import java.net.CookieManager
+import java.net.HttpCookie
+import java.net.URI
+import java.util.LinkedList
+import java.util.UUID
 
 class AuthService private constructor(private val application: PingwinekCooksApplication) : RefreshManager.Refresh {
 
@@ -184,7 +187,7 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         }.apply()
 
         // Delete all data from the local database
-        DatabaseService.getInstance(application).resetDatabase()
+        //DatabaseService.getInstance(application).resetDatabase()
         notifyOnLogout()
 
         // Finally, we try to logout remote

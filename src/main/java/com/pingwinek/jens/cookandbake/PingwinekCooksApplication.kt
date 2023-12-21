@@ -3,24 +3,13 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import android.os.Build
 import android.util.Log
-import com.pingwinek.jens.cookandbake.db.DatabaseService
-import com.pingwinek.jens.cookandbake.lib.InternetConnectivityManager
+import com.google.firebase.firestore.FirebaseFirestore
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.lib.networkRequest.AbstractNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.GlobalNetworkResponseRoutes
 import com.pingwinek.jens.cookandbake.lib.networkRequest.HostBasedCookieStore
-import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequestProvider
-import com.pingwinek.jens.cookandbake.lib.sync.SyncService
-import com.pingwinek.jens.cookandbake.sources.FileSourceLocal
-import com.pingwinek.jens.cookandbake.sources.FileSourceRemote
-import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
-import com.pingwinek.jens.cookandbake.sources.IngredientSourceRemote
-import com.pingwinek.jens.cookandbake.sources.RecipeSourceLocal
-import com.pingwinek.jens.cookandbake.sources.RecipeSourceRemote
-import com.pingwinek.jens.cookandbake.sync.IngredientSyncLogic
-import com.pingwinek.jens.cookandbake.sync.IngredientSyncManager
-import com.pingwinek.jens.cookandbake.sync.RecipeSyncLogic
-import com.pingwinek.jens.cookandbake.sync.RecipeSyncManager
+import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
+import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -100,58 +89,16 @@ class PingwinekCooksApplication : Application() {
     }
 
     private fun registerServices() {
+        /*
         val internetConnectivityManager = InternetConnectivityManager.getInstance(this)
         serviceLocator.registerService(internetConnectivityManager)
 
-        val pingwinekCooksDB = DatabaseService.getInstance(this).pingwinekCooksDB
-        val networkRequestProvider = NetworkRequestProvider.getInstance(this)
+        */
+        val recipeSourceFB = RecipeSourceFB.getInstance(FirebaseFirestore.getInstance())
+        serviceLocator.registerService(recipeSourceFB)
 
-        val authService = AuthService.getInstance(this)
-        serviceLocator.registerService(authService)
-
-        val ingredientSourceLocal = IngredientSourceLocal.getInstance(pingwinekCooksDB)
-        serviceLocator.registerService(ingredientSourceLocal)
-
-        val ingredientSourceRemote = IngredientSourceRemote(
-            networkRequestProvider,
-            authService,
-            this
-        )
-        serviceLocator.registerService(ingredientSourceRemote)
-
-        val recipeSourceLocal = RecipeSourceLocal.getInstance(pingwinekCooksDB)
-        serviceLocator.registerService(recipeSourceLocal)
-
-        val recipeSourceRemote = RecipeSourceRemote(
-            networkRequestProvider,
-            authService,
-        this
-        )
-        serviceLocator.registerService(recipeSourceRemote)
-
-        val fileSourceLocal = FileSourceLocal.getInstance(pingwinekCooksDB)
-        serviceLocator.registerService(fileSourceLocal)
-
-        val fileSourceRemote = FileSourceRemote(
-            networkRequestProvider,
-            authService,
-            this
-        )
-        serviceLocator.registerService(fileSourceRemote)
-
-        val syncService = SyncService.getInstance(internetConnectivityManager)
-        syncService.registerSyncManager(IngredientSyncManager(
-            recipeSourceLocal,
-            ingredientSourceLocal,
-            ingredientSourceRemote,
-            IngredientSyncLogic())
-        )
-        syncService.registerSyncManager(RecipeSyncManager(
-            recipeSourceLocal,
-            recipeSourceRemote,
-            RecipeSyncLogic())
-        )
-        serviceLocator.registerService(syncService)
+        val ingredientSourceFB = IngredientSourceFB.getInstance(FirebaseFirestore.getInstance())
+        serviceLocator.registerService(ingredientSourceFB)
     }
 
 }

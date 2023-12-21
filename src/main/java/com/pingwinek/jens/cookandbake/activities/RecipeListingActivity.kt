@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,10 +16,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.pingwinek.jens.cookandbake.*
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
-import java.util.*
+import java.util.LinkedList
 
 const val EXTRA_RECIPE_ID = "recipeID"
 
@@ -44,9 +44,10 @@ class RecipeListingActivity : BaseActivity() {
         val recipeList = recipeListData.value ?: LinkedList()
         val viewAdapter = RecipeListingAdapter(recipeList)
 
-        recipeListData.observe(this, Observer {
+        recipeListData.observe(this) {
+            //Log.i(this::class.java.name, "change observed")
             viewAdapter.notifyDataSetChanged()
-        })
+        }
 
         findViewById<RecyclerView>(R.id.recipeList).apply {
             setHasFixedSize(true)
@@ -182,6 +183,7 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
 
+        Log.i(this::class.java.name, "onCreateViewHolder")
         val constraintLayout = LayoutInflater.from(parent.context)
             .inflate(R.layout.recyclerview_recipe_list_item, parent, false) as ConstraintLayout
 
@@ -191,10 +193,12 @@ class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
     }
 
     override fun getItemCount(): Int {
+        Log.i(this::class.java.name, "getItemCount: ${recipeList.size}")
         return recipeList.size
     }
 
     override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
+        Log.i(this::class.java.name, "onBindViewHolderForPosition $position")
         viewHolder.recipeTitle.text = recipeList[position].title
         viewHolder.recipeDescription.text = recipeList[position].description
         viewHolder.recipeListItem.tag = recipeList[position].id

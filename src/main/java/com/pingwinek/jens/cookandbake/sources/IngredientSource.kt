@@ -19,5 +19,5 @@ interface IngredientSource<T : Ingredient> :
      * @param recipeId the id of the recipe, to which the ingredients belong
      * @return a [Promise] with a linked list of the given subtype of [Ingredient]
      */
-    suspend fun getAllForRecipeId(recipeId: Int) : LinkedList<T>
+    suspend fun getAllForRecipeId(recipeId: String) : LinkedList<T>
 }

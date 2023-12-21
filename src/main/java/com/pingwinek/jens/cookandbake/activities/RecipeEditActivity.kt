@@ -6,9 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
@@ -30,27 +27,6 @@ class RecipeEditActivity : BaseActivity() {
 
         intent.extras?.getString(EXTRA_RECIPE_DESCRIPTION)?.let { description ->
             descriptionView.text = description
-        }
-
-        // TODO remove this smoke test
-        val auth = Firebase.auth
-        val userID = auth.uid ?: ""
-
-        val db = Firebase.firestore
-
-        val recipe = db.collection("user")
-            .document(userID)
-            .collection("recipe")
-            .document("recipeID")
-
-        recipe.get().addOnSuccessListener { document ->
-            if (document != null) {
-                titleView.text = document.getString("title")
-            } else {
-                titleView.text = "something went wrong"
-            }
-        }.addOnFailureListener { exception ->
-            titleView.text = exception.toString()
         }
 
         titleView.requestFocus()

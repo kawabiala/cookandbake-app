@@ -1,11 +1,9 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +31,7 @@ class PdfFragment : androidx.fragment.app.Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_pdf, container, false)
         val pdfView = view.findViewById<ImageView>(R.id.pdfView)
-
+/*
         recipeModel.fileListData.observe(viewLifecycleOwner) { fileList ->
             if (!fileList.isEmpty()) {
                 recipeModel.loadFile(fileList[0].fileName)
@@ -43,6 +41,8 @@ class PdfFragment : androidx.fragment.app.Fragment() {
         recipeModel.file.observe(viewLifecycleOwner) { parcelFileDescriptor ->
             pdfView.setImageBitmap(generateBitmap(parcelFileDescriptor))
         }
+
+ */
 /*
         pdfView.setOnClickListener {
             Log.i(this::class.java.name, "click")

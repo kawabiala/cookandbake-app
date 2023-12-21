@@ -3,61 +3,43 @@ package com.pingwinek.jens.cookandbake.repos
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
-import com.pingwinek.jens.cookandbake.lib.sync.SyncService
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.models.IngredientLocal
-import com.pingwinek.jens.cookandbake.models.IngredientRemote
-import com.pingwinek.jens.cookandbake.sources.IngredientSourceLocal
+import com.pingwinek.jens.cookandbake.models.IngredientFB
+import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import java.util.*
+import java.util.LinkedList
 
 class IngredientRepository private constructor(val application: PingwinekCooksApplication) {
 
-    private val ingredientSourceLocal = application.getServiceLocator().getService(IngredientSourceLocal::class.java)
-    private val syncService = application.getServiceLocator().getService(SyncService::class.java)
+    private val ingredientSourceFB = application.getServiceLocator().getService(IngredientSourceFB::class.java)
 
-    private val repoListData = MutableLiveData<LinkedList<IngredientLocal>>()
+    private val repoListData = MutableLiveData<LinkedList<IngredientFB>>()
     val ingredientListData = repoListData.map() {
         LinkedList<Ingredient>().apply {
-            it.forEach { ingredientLocal ->
-                if (!ingredientLocal.flagAsDeleted) {
-                    add(ingredientLocal)
-                }
+            it.forEach { ingredientFB ->
+                add(ingredientFB)
             }
         }
     }
 
-    suspend fun getAll(recipeId: Int) {
-        updateIngredientList(ingredientSourceLocal.getAllForRecipeId(recipeId))
-        syncIngredients(recipeId)
-        updateIngredientList(ingredientSourceLocal.getAllForRecipeId(recipeId))
-    }
-
-    @Suppress("Unused")
-    suspend fun getIngredient(ingredientId: Int) {
-        fetchIngredient(ingredientId)
-        syncIngredient(ingredientId)
-        fetchIngredient(ingredientId)
+    suspend fun getAll(recipeId: String) {
+        updateIngredientList(ingredientSourceFB.getAllForRecipeId(recipeId))
     }
 
     suspend fun newIngredient(
-        recipeId: Int,
+        recipeId: String,
         quantity: Double?,
         quantityVerbal: String?,
         unity: String?,
-        name: String,
-        confirmUpdate: (ingredientId: Int) -> Boolean
-    ) {
-        val ingredientLocal = ingredientSourceLocal.new(IngredientLocal(recipeId, quantity, quantityVerbal, unity, name))
-        if (confirmUpdate(ingredientLocal.id)) {
-            updateIngredientList(ingredientLocal)
-            syncIngredient(ingredientLocal.id)
-            fetchIngredient(ingredientLocal.id)
-        }
+        name: String
+    ) : IngredientFB? {
+        val ingredientFB = ingredientSourceFB.new(IngredientFB(recipeId, quantity, quantityVerbal, unity, name))
+        updateIngredientList(ingredientFB)
+        return ingredientFB
     }
 
     suspend fun updateIngredient(
-        ingredientId: Int,
+        ingredientId: String,
         quantity: Double?,
         quantityVerbal: String?,
         unity: String?,
@@ -70,41 +52,36 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         updateIngredient(ingredient.getUpdated(quantity, quantityVerbal, unity, name))
     }
 
-    suspend fun deleteIngredient(ingredientId: Int) {
-        val ingredient = ingredientSourceLocal.flagAsDeleted(ingredientId) ?: return
-        updateIngredientList(ingredient)
-        syncIngredient(ingredient.id)
-        fetchIngredient(ingredient.id)
+    suspend fun deleteIngredient(ingredientId: String) {
+        val ingredient = repoListData.value?.find {
+            it.id == ingredientId
+        } ?: return
+        deleteIngredient(ingredient)
     }
 
-    suspend fun deleteIngredientForRecipeId(recipeId: Int) {
-        ingredientSourceLocal.getAllForRecipeId(recipeId).forEach { ingredient ->
-            deleteIngredient(ingredient.id)
+    suspend fun deleteIngredientForRecipeId(recipeId: String) {
+        ingredientSourceFB.getAllForRecipeId(recipeId).forEach { ingredient ->
+            deleteIngredient(ingredient)
         }
     }
 
-    private suspend fun updateIngredient(ingredientLocal: IngredientLocal) {
-        val updatedIngredient = ingredientSourceLocal.update(ingredientLocal) ?: return
+    private suspend fun updateIngredient(ingredientFB: IngredientFB) {
+        val updatedIngredient = ingredientSourceFB.update(ingredientFB)
         updateIngredientList(updatedIngredient)
-        syncIngredient(updatedIngredient.id)
-        fetchIngredient(updatedIngredient.id)
     }
 
-    private suspend fun fetchIngredient(ingredientId: Int) {
-        val ingredient = ingredientSourceLocal.get(ingredientId)
-        if (ingredient != null) {
-            updateIngredientList(ingredient)
-        } else {
-            removeFromIngredientList(ingredientId)
-        }
+    private suspend fun deleteIngredient(ingredient: IngredientFB) : Boolean {
+        val result = ingredientSourceFB.delete(ingredient)
+        removeFromIngredientList(ingredient.id)
+        return result
     }
 
-    private fun updateIngredientList(updatedIngredientList: LinkedList<IngredientLocal>) {
-        val updatedList = repoListData.value ?: LinkedList<IngredientLocal>()
+    private fun updateIngredientList(updatedIngredientList: LinkedList<IngredientFB>) {
+        val updatedList = repoListData.value ?: LinkedList<IngredientFB>()
         updatedList.apply {
             clear()
             updatedIngredientList.forEach { updatedIngredient ->
-                if (!updatedIngredient.flagAsDeleted) add(updatedIngredient)
+                add(updatedIngredient)
             }
             sortBy {
                 val unity = it.unity ?: "zzz"
@@ -114,7 +91,7 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         repoListData.postValue(updatedList)
     }
 
-    private fun updateIngredientList(ingredient: IngredientLocal) {
+    private fun updateIngredientList(ingredient: IngredientFB) {
         val updatedList = repoListData.value ?: LinkedList()
         updatedList.removeAll {
             it.id == ingredient.id
@@ -123,25 +100,12 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         repoListData.postValue(updatedList)
     }
 
-    private fun removeFromIngredientList(ingredientId: Int) {
+    private fun removeFromIngredientList(ingredientId: String) {
         val updatedList = repoListData.value ?: LinkedList()
         updatedList.removeAll {
             it.id == ingredientId
         }
         repoListData.postValue(updatedList)
-    }
-
-    private suspend fun syncIngredient(ingredientId: Int) {
-        syncService.syncEntry<IngredientLocal, IngredientRemote>(ingredientId)
-    }
-
-    private suspend fun syncIngredients(recipeId: Int) {
-        syncService.syncByParentId<IngredientLocal, IngredientRemote>(recipeId)
-    }
-
-    @Suppress("Unused")
-    private suspend fun syncIngredients() {
-        syncService.sync<IngredientLocal, IngredientRemote>()
     }
 
     companion object : SingletonHolder<IngredientRepository, PingwinekCooksApplication>(::IngredientRepository)

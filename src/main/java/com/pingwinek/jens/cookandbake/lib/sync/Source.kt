@@ -1,6 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib.sync
 
-import java.util.*
+import java.util.LinkedList
 
 /**
  * Interface for data sources. All methods return a [Promise],
@@ -24,7 +24,7 @@ interface Source<T: Model> {
      * @param id of required instance
      * @return a [Promise] containing an instance of given type
      */
-    suspend fun get(id: Int) : T?
+    suspend fun get(id: String) : T?
 
     /**
      * Inserts a new instance to the given source.
@@ -48,5 +48,5 @@ interface Source<T: Model> {
      * @param id of the instance to be deleted
      * @return a [Promise]
      */
-    suspend fun delete(id: Int) : Boolean
+    suspend fun delete(item: T) : Boolean
 }

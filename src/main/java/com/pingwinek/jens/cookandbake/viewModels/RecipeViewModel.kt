@@ -1,32 +1,28 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
-import android.net.Uri
-import android.os.ParcelFileDescriptor
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.ShareableRecipe
-import com.pingwinek.jens.cookandbake.lib.networkRequest.NetworkRequest
-import com.pingwinek.jens.cookandbake.models.File
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.repos.FileRepository
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
-import java.util.*
-import kotlin.NoSuchElementException
+import java.util.LinkedList
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
-    private val fileRepository = FileRepository.getInstance(application as PingwinekCooksApplication)
+    //private val fileRepository = FileRepository.getInstance(application as PingwinekCooksApplication)
     private val contentResolver = application.contentResolver
 
-    var recipeId: Int? = null
+    var recipeId: String? = null
 
     val recipeData: LiveData<Recipe?> = recipeRepository.recipeListData.map() { recipeList ->
         recipeId?.let {
@@ -41,7 +37,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             ingredient.recipeId == recipeId
         })
     }
-
+/*
     val fileListData: LiveData<LinkedList<File>> = fileRepository.fileListData.map() { fileList ->
         LinkedList(fileList.filter { file ->
             file.entityId == recipeId && file.entity == "recipe"
@@ -49,7 +45,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     val file = MutableLiveData<ParcelFileDescriptor>()
-
+*/
     fun delete() {
         recipeId?.let {
             viewModelScope.launch(Dispatchers.IO) {
@@ -58,13 +54,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun deleteIngredient(ingredientId: Int) {
+    fun deleteIngredient(ingredientId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             ingredientRepository.deleteIngredient(ingredientId)
             loadData()
         }
     }
-
+/*
     fun deletePdf() {
         recipeData.value?.id?.let {
             viewModelScope.launch(Dispatchers.IO) {
@@ -72,7 +68,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
-
+*/
     fun getShareableRecipe(): ShareableRecipe? {
         return recipeData.value?.let { recipe ->
             ingredientListData.value?.let { ingredients ->
@@ -80,7 +76,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
-
+/*
     private fun getFile() : File? {
         return try {
             fileListData.value?.first
@@ -92,7 +88,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun hasRecipeImage() : Boolean {
         return getFile() != null
     }
-
+*/
     fun loadData() {
         recipeId?.let { id ->
             viewModelScope.launch(Dispatchers.IO) {
@@ -102,7 +98,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
-
+/*
     fun loadFile(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val parcelFileDescriptor = fileRepository.loadFile(name)
@@ -110,6 +106,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+ */
+/*
     fun savePdf(pdfUri: Uri) {
         val pfd = contentResolver.openFileDescriptor(pdfUri, "rw") ?: return
         val type = contentResolver.getType(pdfUri) ?: return
@@ -128,6 +126,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+ */
+
     fun saveRecipe(title: String, description: String, instruction: String) {
         if (title.isEmpty()) {
             return
@@ -139,15 +139,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         } ?: run {
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.newRecipe(title, description, instruction) { newRecipeId ->
-                    recipeId = newRecipeId
-                    true
-                }
+                recipeId = recipeRepository.newRecipe(title, description, instruction)?.id
             }
         }
     }
 
-    fun saveIngredient(id: Int?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
+    fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
         if (name.isEmpty()) {
             return
         }
@@ -159,9 +156,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         if (id == null) {
             recipeId?.let {
                 viewModelScope.launch(Dispatchers.IO) {
-                    ingredientRepository.newIngredient(it, quantity, quantityVerbal, unity, name) {
-                        true
-                    }
+                    ingredientRepository.newIngredient(it, quantity, quantityVerbal, unity, name)
                 }
             }
         } else {
