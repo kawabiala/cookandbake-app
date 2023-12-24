@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.sources
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
@@ -17,6 +18,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
     private val auth: FirebaseAuth = Firebase.auth
     private val basePath: String = "/user"
 
+    //TODO Check if needed or remove from interface
     override suspend fun getAll() : LinkedList<IngredientFB> {
         var list = LinkedList<IngredientFB>()
         /*
@@ -35,7 +37,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         if (auth.currentUser != null) {
             list = getAll(buildIngredientsCollRef(auth.uid!!, recipeId))
         } else {
-
+            Log.i(this::class.java.name, "unauthorized getAll")
         }
         return list
     }
@@ -46,7 +48,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         if (auth.currentUser != null) {
 
         } else {
-
+            Log.i(this::class.java.name, "unauthorized get")
         }
         return ingredientFB
     }
@@ -56,7 +58,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         if (auth.currentUser != null) {
             ingredientFB = new(buildIngredientsCollRef(auth.uid!!, item.recipeId), item)
         } else {
-
+            Log.i(this::class.java.name, "unauthorized new")
         }
         return ingredientFB
     }
@@ -66,7 +68,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         if (auth.currentUser != null) {
             ingredientFB = update(buildIngredientDocRef(auth.uid!!, item.recipeId, item.id), item)
         } else {
-
+            Log.i(this::class.java.name, "unauthorized update")
         }
         return ingredientFB
     }
@@ -75,6 +77,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         return if (auth.currentUser != null) {
             delete(buildIngredientDocRef(auth.uid!!, item.recipeId, item.id))
         } else {
+            Log.i(this::class.java.name, "unauthorized delete")
             false
         }
     }

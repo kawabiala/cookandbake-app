@@ -1,7 +1,9 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,5 +48,10 @@ class InstructionFragment : androidx.fragment.app.Fragment() {
         }
 
         return view
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Log.i(this::class.java.name, context.toString())
     }
 }

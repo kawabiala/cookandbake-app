@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,13 +43,17 @@ class RecipeListingActivity : BaseActivity() {
             .create(RecipeListingViewModel::class.java)
 
         val recipeListData = recipeListingModel.recipeListData
-        val recipeList = recipeListData.value ?: LinkedList()
-        val viewAdapter = RecipeListingAdapter(recipeList)
-
+//        var recipeList = recipeListData.value ?: LinkedList()
+        //val viewAdapter = RecipeListingAdapter(recipeList)
+        val viewAdapter = RecipeListingAdapter(recipeListData, this)
+/*
         recipeListData.observe(this) {
-            //Log.i(this::class.java.name, "change observed")
+            Log.i(this::class.java.name, "change observed - list size: ${it.size}")
+            recipeList = it
             viewAdapter.notifyDataSetChanged()
         }
+
+ */
 
         findViewById<RecyclerView>(R.id.recipeList).apply {
             setHasFixedSize(true)
@@ -156,7 +162,7 @@ class RecipeListingActivity : BaseActivity() {
     }
 
     fun onRecipeItemClick(recipeItem: View) {
-        openRecipeItem(recipeItem.tag as Int)
+        openRecipeItem(recipeItem.tag as String)
     }
 
     fun onNewRecipeClick(button: View) {
@@ -164,22 +170,31 @@ class RecipeListingActivity : BaseActivity() {
     }
 
     private fun refresh() {
-        recipeListingModel.loadData(true)
+        recipeListingModel.loadData()
     }
 
-    private fun openRecipeItem(itemId: Int?) {
+    private fun openRecipeItem(itemId: String?) {
         val intent = Intent(this, RecipeActivity::class.java)
-        itemId?.let { _itemId ->
+        itemId?.let {
             intent.apply {
-                putExtra(EXTRA_RECIPE_ID, _itemId)
+                putExtra(EXTRA_RECIPE_ID, it)
             }
         }
         startActivity(intent)
     }
 }
 
-class RecipeListingAdapter(private var recipeList: LinkedList<Recipe>) :
+class RecipeListingAdapter(recipeListData: LiveData<LinkedList<Recipe>>, owner: LifecycleOwner) :
     RecyclerView.Adapter<RecipeListingViewHolder>() {
+
+    private var recipeList: LinkedList<Recipe>
+    init {
+        recipeList = recipeListData.value ?: LinkedList()
+        recipeListData.observe(owner) {
+            recipeList = it
+            notifyDataSetChanged()
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
 

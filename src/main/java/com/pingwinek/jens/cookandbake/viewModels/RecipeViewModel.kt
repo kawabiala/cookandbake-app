@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake.viewModels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
@@ -22,42 +23,35 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     //private val fileRepository = FileRepository.getInstance(application as PingwinekCooksApplication)
     private val contentResolver = application.contentResolver
 
+    private val privateRecipeData = MutableLiveData<Recipe>()
+    val recipeData: LiveData<Recipe> = privateRecipeData.map { mutableRecipe ->
+        mutableRecipe
+    }
+
+    private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
+        value = LinkedList()
+    }
+    val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData.map { mutableList ->
+        LinkedList(mutableList)
+    }
     var recipeId: String? = null
 
-    val recipeData: LiveData<Recipe?> = recipeRepository.recipeListData.map() { recipeList ->
-        recipeId?.let {
-            recipeList.find { recipe ->
-                recipe.id == recipeId
-            }
-        }
-    }
-
-    val ingredientListData: LiveData<LinkedList<Ingredient>> = ingredientRepository.ingredientListData.map() { ingredientList ->
-        LinkedList(ingredientList.filter { ingredient ->
-            ingredient.recipeId == recipeId
-        })
-    }
-/*
-    val fileListData: LiveData<LinkedList<File>> = fileRepository.fileListData.map() { fileList ->
-        LinkedList(fileList.filter { file ->
-            file.entityId == recipeId && file.entity == "recipe"
-        })
-    }
-
-    val file = MutableLiveData<ParcelFileDescriptor>()
-*/
-    fun delete() {
-        recipeId?.let {
+    //TODO update recipeData and ingredientListData
+    fun deleteRecipe() {
+        recipeData.value?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.deleteRecipe(it)
+                recipeRepository.delete(it)
+                ingredientListData.value?.let { ingredients ->
+                    ingredients.forEach { deleteIngredient(it) }
+                }
             }
         }
     }
 
-    fun deleteIngredient(ingredientId: String) {
+    fun deleteIngredient(ingredient: Ingredient) {
         viewModelScope.launch(Dispatchers.IO) {
-            ingredientRepository.deleteIngredient(ingredientId)
-            loadData()
+            ingredientRepository.delete(ingredient)
+            //loadIngredients()
         }
     }
 /*
@@ -92,12 +86,19 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun loadData() {
         recipeId?.let { id ->
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.getRecipe(id)
-                ingredientRepository.getAll(id)
+                privateRecipeData.postValue(recipeRepository.get(id))
+                loadIngredients()
                 //fileRepository.getFilesForEntityId("recipe", id)
             }
         }
     }
+
+    private suspend fun loadIngredients() {
+        recipeId?.let { id ->
+            privateIngredientListData.postValue(ingredientRepository.getAll(id))
+        }
+    }
+
 /*
     fun loadFile(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -127,41 +128,46 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     }
 
  */
+    fun saveRecipe(title: String, description: String) {
+        saveRecipe(title, description, recipeData.value?.instruction ?: "")
+    }
 
     fun saveRecipe(title: String, description: String, instruction: String) {
         if (title.isEmpty()) {
             return
         }
 
-        recipeId?.let {
+        recipeData.value?.let {recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.updateRecipe(it, title, description, instruction)
+                privateRecipeData.postValue(recipeRepository.updateRecipe(recipe, title, description, instruction))
             }
         } ?: run {
             viewModelScope.launch(Dispatchers.IO) {
-                recipeId = recipeRepository.newRecipe(title, description, instruction)?.id
+                recipeRepository.newRecipe(title, description, instruction).let { recipe ->
+                    recipeId = recipe.id
+                    privateRecipeData.postValue(recipe)
+                }
             }
         }
     }
 
+    //TODO update ingredientListData
     fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
         if (name.isEmpty()) {
             return
         }
 
-        if (recipeId == null) {
-            return
-        }
-
-        if (id == null) {
-            recipeId?.let {
-                viewModelScope.launch(Dispatchers.IO) {
-                    ingredientRepository.newIngredient(it, quantity, quantityVerbal, unity, name)
-                }
-            }
-        } else {
+        recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                ingredientRepository.updateIngredient(id, quantity, quantityVerbal, unity, name)
+                if (id == null) {
+                    ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name)
+                } else {
+                    ingredientListData.value?.find { ingredient ->
+                        ingredient.id == id
+                    }?.let { ingredient ->
+                        ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name)
+                    }
+                }
             }
         }
     }

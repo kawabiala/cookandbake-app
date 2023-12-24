@@ -6,7 +6,6 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.pingwinek.jens.cookandbake.lib.sync.Model
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeout
 import java.util.LinkedList
@@ -19,7 +18,7 @@ abstract class FirestoreDataAccessManager {
 
     private class OnSuccessListener<T>(val onSuccessAction: (T) -> Unit) : com.google.android.gms.tasks.OnSuccessListener<T> {
         override fun onSuccess(result: T) {
-            Log.i(this::class.java.name, "onSuccess")
+            Log.i(this::class.java.name, " onSuccess: ${result.toString()}")
             onSuccessAction(result)
         }
 
@@ -41,36 +40,37 @@ abstract class FirestoreDataAccessManager {
 
     }
 
-
     companion object {
         const val TIMEOUT: Long = 10000 // 10sec
 
-        suspend fun <T : Model> getAll(collectionReference: CollectionReference, /*cls: Class<T>,*/ instantiator: (QueryDocumentSnapshot) -> T) : LinkedList<T> {
+        suspend fun <T> getAll(collectionReference: CollectionReference, instantiator: (QueryDocumentSnapshot) -> T) : LinkedList<T> {
             val list = LinkedList<T>()
             Log.i(this::class.java.name, "before suspendedFunction")
-            suspendedFunction(collectionReference.get()).forEach { queryDocumentSnapshot ->
-                //list.add(cls.getDeclaredConstructor(QueryDocumentSnapshot::class.java).newInstance(queryDocumentSnapshot))
+            val qs = suspendedFunction(collectionReference.get())
+            Log.i(this::class.java.name, "returned querySnapshot has size ${qs.size()}")
+            qs.forEach { queryDocumentSnapshot ->
+                Log.i(this::class.java.name, "queryDocumentSnapshot ${queryDocumentSnapshot.toString()}")
                 list.add(instantiator(queryDocumentSnapshot))
             }
-            Log.i(this::class.java.name, "after suspendedFunction")
+            Log.i(this::class.java.name, "after suspendedFunction - list size: ${list.size}")
             return list
         }
 
-        suspend fun <T: Model> get(documentReference: DocumentReference, instantiator: (DocumentSnapshot) -> T) : T {
+        suspend fun <T> get(documentReference: DocumentReference, instantiator: (DocumentSnapshot) -> T) : T {
             return instantiator(suspendedFunction(documentReference.get()))
         }
 
-        suspend fun <T: Model> new(collectionReference: CollectionReference, insertItem: Any, instantiator: (DocumentSnapshot) -> T) : T {
+        suspend fun <T> new(collectionReference: CollectionReference, insertItem: Any, instantiator: (DocumentSnapshot) -> T) : T {
             val docRef = suspendedFunction(collectionReference.add(insertItem))
             return get(docRef, instantiator)
         }
 
-        suspend fun <T: Model> update(documentReference: DocumentReference, updateItem: Any, instantiator: (DocumentSnapshot) -> T) : T {
+        suspend fun <T> update(documentReference: DocumentReference, updateItem: Any, instantiator: (DocumentSnapshot) -> T) : T {
             suspendedFunction(documentReference.set(updateItem))
             return get(documentReference, instantiator)
         }
 
-        suspend fun <T: Model> delete(documentReference: DocumentReference, instantiator: (Void) -> Boolean) : Boolean {
+        suspend fun <T> delete(documentReference: DocumentReference, instantiator: (Void) -> Boolean) : Boolean {
             return instantiator(suspendedFunction(documentReference.delete()))
         }
 

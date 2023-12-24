@@ -8,6 +8,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -21,10 +24,7 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.REQUEST_CODE_INGREDIENT
 import com.pingwinek.jens.cookandbake.REQUEST_CODE_INSTRUCTION
-import com.pingwinek.jens.cookandbake.REQUEST_CODE_PDF
-import com.pingwinek.jens.cookandbake.REQUEST_CODE_TITLE
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
@@ -33,13 +33,35 @@ class RecipeActivity : BaseActivity(),
     IngredientListingFragment.OnListFragmentInteractionListener,
     ConfirmDialogFragment.ConfirmDialogListener {
 
+    private class ActivityResultCallback(val onActivityResultHandler: (Intent) -> Unit) : androidx.activity.result.ActivityResultCallback<ActivityResult> {
+        override fun onActivityResult(result: ActivityResult) {
+            if (result.resultCode == RESULT_OK) {
+                result.data?.let {
+                    onActivityResultHandler(it)
+                }
+            }
+        }
+    }
+
     private lateinit var recipeModel: RecipeViewModel
+    private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
+    private lateinit var saveIngredientLauncher: ActivityResultLauncher<Intent>
+    private lateinit var savePdfLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        recipeModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        ).get(RecipeViewModel::class.java)
+
+        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
+        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
+        savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
 
         // the fab needs to sit in the Activity, does not work in the Fragment
         val fab = findViewById<FloatingActionButton>(R.id.recipeFab)
@@ -74,21 +96,14 @@ class RecipeActivity : BaseActivity(),
 
  */
             } else {
-                startActivityForResult(
-                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        //flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/pdf"
-                    },
-                    REQUEST_CODE_PDF
-                )
+                val pdfIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    //flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/pdf"
+                }
+                savePdfLauncher.launch(pdfIntent)
             }
         }
-
-        recipeModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        ).get(RecipeViewModel::class.java)
 
         if (intent.hasExtra(EXTRA_RECIPE_ID)) {
             intent.extras?.getString(EXTRA_RECIPE_ID)?.let { id ->
@@ -113,10 +128,12 @@ class RecipeActivity : BaseActivity(),
         }
 
         val onClickListener = { _: View ->
-            startActivityForResult(Intent(this, RecipeEditActivity::class.java).also {
-                it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
-                it.putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
-            }, REQUEST_CODE_TITLE)
+            val editIntent = Intent(this, RecipeEditActivity::class.java)
+            with(editIntent) {
+                putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
+                putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
+            }
+            saveRecipeLauncher.launch(editIntent)
         }
 
         titleView.setOnClickListener(onClickListener)
@@ -183,19 +200,6 @@ class RecipeActivity : BaseActivity(),
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQUEST_CODE_TITLE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    data?.extras?.let {
-                        it.getString(EXTRA_RECIPE_TITLE)?.let { title ->
-                            recipeModel.saveRecipe(
-                                title,
-                                it.getString(EXTRA_RECIPE_DESCRIPTION, ""),
-                                recipeModel.recipeData.value?.instruction ?: ""
-                            )
-                        }
-                    }
-                }
-            }
             REQUEST_CODE_INSTRUCTION -> {
                 if (resultCode == Activity.RESULT_OK) {
                     data?.extras?.let {
@@ -207,42 +211,6 @@ class RecipeActivity : BaseActivity(),
                                     instruction
                                 )
                             }
-                        }
-                    }
-                }
-            }
-            REQUEST_CODE_INGREDIENT -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    data?.extras?.let {
-                        val id = it.get(EXTRA_INGREDIENT_ID)?.run {
-                            it.getString(EXTRA_INGREDIENT_ID)
-                        }
-                        val name = it.getString(EXTRA_INGREDIENT_NAME)
-                        val quantity = it.get(EXTRA_INGREDIENT_QUANTITY)?.run {
-                            it.getDouble(EXTRA_INGREDIENT_QUANTITY)
-                        }
-                        val quantityVerbal = it.getString(EXTRA_INGREDIENT_QUANTITY_VERBAL)
-                        val unity = it.getString(EXTRA_INGREDIENT_UNITY)
-                        if (name != null) {
-                            recipeModel.saveIngredient(id, name, quantity, quantityVerbal, unity)
-                        }
-                    }
-                }
-            }
-            REQUEST_CODE_PDF -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    data?.data?.let { pdfUri ->
-                        recipeModel.recipeData.value?.title?.let { title ->
-                            contentResolver.takePersistableUriPermission(
-                                pdfUri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            )
-                            recipeModel.saveRecipe(
-                                title,
-                                recipeModel.recipeData.value?.description ?: "",
-                                recipeModel.recipeData.value?.instruction ?: ""
-                            )
-                            //recipeModel.savePdf(pdfUri)
                         }
                     }
                 }
@@ -262,7 +230,7 @@ class RecipeActivity : BaseActivity(),
                 intent.putExtra(EXTRA_INGREDIENT_QUANTITY_VERBAL, it.quantityVerbal)
                 intent.putExtra(EXTRA_INGREDIENT_UNITY, it.unity)
             }
-            startActivityForResult(intent, REQUEST_CODE_INGREDIENT)
+            saveIngredientLauncher.launch(intent)
         }
     }
 
@@ -286,7 +254,11 @@ class RecipeActivity : BaseActivity(),
 
     override fun onPositiveButton(confirmItemId: String?) {
         confirmItemId?.let { id ->
-            recipeModel.deleteIngredient(id)
+            recipeModel.ingredientListData.value?.find { ingredient ->
+                ingredient.id == id
+            }?.let { ingredient ->
+                recipeModel.deleteIngredient(ingredient)
+            }
         }
     }
 
@@ -298,7 +270,7 @@ class RecipeActivity : BaseActivity(),
         AlertDialog.Builder(this).apply {
             setMessage(R.string.recipe_delete_confirm)
             setPositiveButton(R.string.yes) { _, _ ->
-                recipeModel.delete()
+                recipeModel.deleteRecipe()
                 finish()
             }
             setNegativeButton(R.string.no) { _, _ ->
@@ -343,6 +315,49 @@ class RecipeActivity : BaseActivity(),
             null
         )
     }
+
+    private fun saveIngredient(data: Intent) {
+        data.extras?.let {
+            it.getString(EXTRA_INGREDIENT_NAME)?.let { name ->
+                recipeModel.saveIngredient(
+                    it.getString(EXTRA_INGREDIENT_ID),
+                    name,
+                    it.getDouble(EXTRA_INGREDIENT_QUANTITY),
+                    it.getString(EXTRA_INGREDIENT_QUANTITY_VERBAL),
+                    it.getString(EXTRA_INGREDIENT_UNITY)
+                )
+            }
+        }
+    }
+
+    private fun savePdf(data: Intent) {
+        data.data?.let { pdfUri ->
+            recipeModel.recipeData.value?.title?.let { title ->
+                contentResolver.takePersistableUriPermission(
+                    pdfUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                recipeModel.saveRecipe(
+                    title,
+                    recipeModel.recipeData.value?.description ?: "",
+                    recipeModel.recipeData.value?.instruction ?: ""
+                )
+                //recipeModel.savePdf(pdfUri)
+            }
+        }
+    }
+
+    private fun saveRecipe(data: Intent) {
+        data.extras?.let {
+            it.getString(EXTRA_RECIPE_TITLE)?.let { title ->
+                recipeModel.saveRecipe(
+                    title,
+                    it.getString(EXTRA_RECIPE_DESCRIPTION, "")
+                )
+            }
+        }
+    }
+
 }
 
 class RecipePagerAdapter(

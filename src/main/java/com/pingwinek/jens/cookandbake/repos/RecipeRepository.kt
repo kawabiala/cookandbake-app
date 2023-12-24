@@ -1,48 +1,18 @@
 package com.pingwinek.jens.cookandbake.repos
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
-    /*
-    private val fileManagerRemote = FileManagerRemote(application)
-    private val fileManagerLocal = FileManagerLocal(application)
-
-     */
-
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
 
-    private val repoListData = MutableLiveData<LinkedList<RecipeFB>>().apply {
-        value = LinkedList<RecipeFB>()
-    }
-    val recipeListData = repoListData.map() {
-        LinkedList<Recipe>().apply {
-            it.forEach { recipeFB ->
-                add(recipeFB)
-            }
-        }
-    }
-
     private var lastUpdated: Long = 0
-
-    //val recipeListData: LiveData<LinkedList<Recipe>> = repoListData
-
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            getAll()
-        }
-    }
 
     /* TODO: Check for login and logout
     override fun onLogin() {
@@ -57,39 +27,33 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
      */
 
-    suspend fun checkForUpdates() {
-        checkForUpdates(false)
+    suspend fun delete(recipe: Recipe) {
+        recipeSourceFB.delete(recipe as RecipeFB)
     }
 
-    suspend fun checkForUpdates(force: Boolean) {
-        if (force) {
-            lastUpdated = 0
+    /*
+        suspend fun deletePdf(recipeId: Int) {
+            val recipe = recipeSourceLocal.get(recipeId) ?: return
+            updateRecipe(RecipeLocal(
+                recipe.id,
+                recipe.remoteId,
+                recipe.title,
+                recipe.description,
+                recipe.instruction
+            ))
         }
-        getAll()
+
+     */
+
+    suspend fun getAll(): LinkedList<Recipe> {
+        return LinkedList<Recipe>(recipeSourceFB.getAll())
     }
 
-    suspend fun deleteRecipe(recipeId: String) {
-        val recipeFB = repoListData.value?.find {
-            it.id == recipeId
-        } ?: return
-        IngredientRepository.getInstance(application).deleteIngredientForRecipeId(recipeId)
-        deleteRecipe(recipeFB)
-        getAll()
-    }
-/*
-    suspend fun deletePdf(recipeId: Int) {
-        val recipe = recipeSourceLocal.get(recipeId) ?: return
-        updateRecipe(RecipeLocal(
-            recipe.id,
-            recipe.remoteId,
-            recipe.title,
-            recipe.description,
-            recipe.instruction
-        ))
+    suspend fun get(id: String): Recipe {
+        return recipeSourceFB.get(id)
     }
 
- */
-
+    /*
     private suspend fun getAll() {
         /*
         val now = Date().time
@@ -104,6 +68,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         updateRecipeList(recipeSourceFB.getAll())
     }
 
+     */
+
     suspend fun getRecipe(recipeId: String) {
         fetchRecipe(recipeId)
     }
@@ -112,38 +78,28 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         title: String,
         description: String?,
         instruction: String?
-    ) : RecipeFB? {
-        val newRecipe = recipeSourceFB.new(RecipeFB(title, description, instruction))
-        newRecipe?.let { updateRecipeList(it) }
-        return newRecipe
+    ) : RecipeFB {
+        return recipeSourceFB.new(RecipeFB(title, description, instruction))
     }
-
+/*
     suspend fun saveFile(recipeId: Int, inputStream: InputStream, type: String) {
-        /*
         val name = getFileName(recipeId)
         val localName = name ?: generateLocalName(recipeId, type)
         saveFileLocal(inputStream, localName)
         saveFileRemote(recipeId, inputStream, type, name)
-
-         */
     }
 
+ */
+
     suspend fun updateRecipe(
-        id: String,
+        recipe: Recipe,
         title: String,
         description: String?,
         instruction: String?
-    ) {
-        val recipeToUpdate = RecipeFB(id, title, description, instruction)
-        updateRecipe(recipeToUpdate)
+    ): Recipe {
+        return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction))
     }
 
-    private fun clearRecipeList() {
-        val updatedList = repoListData.value?.apply {
-            clear()
-        }
-        repoListData.postValue(updatedList)
-    }
 /*
     private fun deleteFileLocal(name: String) {
         val externalFilesDir = application.applicationContext.getExternalFilesDir(null) ?: return
@@ -155,13 +111,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         }
     }
 */
-    private suspend fun fetchRecipe(recipeId: String) {
-        val recipe = recipeSourceFB.get(recipeId)
-        if (recipe != null) {
-            updateRecipeList(recipe)
-        } else {
-            removeFromRecipeList(recipeId)
-        }
+    private suspend fun fetchRecipe(recipeId: String) : Recipe {
+        return recipeSourceFB.get(recipeId)
     }
 /*
     private suspend fun generateLocalName(recipeId: Int, type: String) : String {
@@ -175,21 +126,6 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
 */
-    private suspend fun deleteRecipe(recipeFB: RecipeFB) : Boolean {
-        val result = recipeSourceFB.delete(recipeFB)
-        removeFromRecipeList(recipeFB.id)
-        return result
-    }
-
-    private fun removeFromRecipeList(recipeId: String) {
-        val updatedList = repoListData.value?.apply {
-            removeAll {
-                it.id == recipeId
-            }
-        }
-        repoListData.postValue(updatedList)
-    }
-
     private suspend fun saveFileLocal(inputStream: InputStream, name: String) {
         TODO()
         /*
@@ -241,41 +177,6 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
   */
-
-    private suspend fun updateRecipe(recipe: RecipeFB) {
-        val updatedRecipe = recipeSourceFB.update(recipe) ?: return
-        updateRecipeList(updatedRecipe)
-    }
-
-    private fun updateRecipeList(updatedRecipe: RecipeFB) {
-        val updatedList = repoListData.value?.apply {
-            val recipe = find {
-                it.id == updatedRecipe.id
-            }
-            //if (recipe?.lastModified == updatedRecipe.lastModified) return
-            removeAll {
-                it.id == updatedRecipe.id
-            }
-            add(updatedRecipe)
-            sortBy {
-                it.title
-            }
-        }
-        repoListData.postValue(updatedList)
-    }
-
-    private fun updateRecipeList(updatedRecipeList: LinkedList<RecipeFB>) {
-        val updatedList = repoListData.value?.apply {
-            clear()
-            updatedRecipeList.forEach { updatedRecipe ->
-                add(updatedRecipe)
-            }
-            sortBy {
-                it.title
-            }
-        }
-        repoListData.postValue(updatedList)
-    }
 
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository)
 
