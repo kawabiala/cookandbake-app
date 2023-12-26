@@ -4,27 +4,37 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import com.pingwinek.jens.cookandbake.R
+import androidx.appcompat.app.AppCompatDialogFragment
 
-class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
+//class ConfirmDialogFragment : androidx.fragment.app.DialogFragment() {
+class ConfirmDialogFragment(
+    val onPositiveButton: (String?) -> Unit,
+    val onNegativeButton: (String?) -> Unit
+) : AppCompatDialogFragment() {
 
     private lateinit var listener: ConfirmDialogListener
     private var confirmItemId: String? = null
     private var message: String = "You should provide a message with setArguments"
+    private var posButtonText = "Ok"
+    private var negButtonText = "Cancel"
 
     override fun setArguments(args: Bundle?) {
-        confirmItemId = args?.getString("remoteId")
+        confirmItemId = args?.getString("confirmItemId")
         message = args?.getString("message") ?: ""
+        posButtonText = args?.getString("posButtonText") ?: posButtonText
+        negButtonText = args?.getString("negButtonText") ?: negButtonText
     }
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.setMessage(message)
-            builder.setPositiveButton(getString(R.string.delete)) { _, _ ->
-                listener.onPositiveButton(confirmItemId)
+            builder.setPositiveButton(posButtonText) { _, _ ->
+                onPositiveButton(confirmItemId)
+                //listener.onPositiveButton(confirmItemId)
             }
-            builder.setNegativeButton(getString(R.string.close)) { _, _ ->
-                listener.onNegativeButton(confirmItemId)
+            builder.setNegativeButton(negButtonText) { _, _ ->
+                onNegativeButton(confirmItemId)
+                //listener.onNegativeButton(confirmItemId)
             }
             return builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")

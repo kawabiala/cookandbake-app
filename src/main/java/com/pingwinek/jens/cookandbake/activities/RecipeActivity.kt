@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
@@ -24,14 +23,12 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.REQUEST_CODE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeActivity : BaseActivity(),
-    IngredientListingFragment.OnListFragmentInteractionListener,
-    ConfirmDialogFragment.ConfirmDialogListener {
+    IngredientListingFragment.OnListFragmentInteractionListener {
 
     private class ActivityResultCallback(val onActivityResultHandler: (Intent) -> Unit) : androidx.activity.result.ActivityResultCallback<ActivityResult> {
         override fun onActivityResult(result: ActivityResult) {
@@ -47,21 +44,29 @@ class RecipeActivity : BaseActivity(),
     private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
     private lateinit var saveIngredientLauncher: ActivityResultLauncher<Intent>
     private lateinit var savePdfLauncher: ActivityResultLauncher<Intent>
+    lateinit var saveInstructionLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addContentView(R.layout.activity_recipe)
+
+        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
+        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
+        savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
+        saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         recipeModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        ).get(RecipeViewModel::class.java)
+        )[RecipeViewModel::class.java]
 
-        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
-        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
-        savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
+        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
+            intent.extras?.getString(EXTRA_RECIPE_ID)?.let { id ->
+                recipeModel.recipeId = id
+            }
+        }
 
         // the fab needs to sit in the Activity, does not work in the Fragment
         val fab = findViewById<FloatingActionButton>(R.id.recipeFab)
@@ -105,12 +110,6 @@ class RecipeActivity : BaseActivity(),
             }
         }
 
-        if (intent.hasExtra(EXTRA_RECIPE_ID)) {
-            intent.extras?.getString(EXTRA_RECIPE_ID)?.let { id ->
-                recipeModel.recipeId = id
-            }
-        }
-
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
@@ -127,7 +126,7 @@ class RecipeActivity : BaseActivity(),
              */
         }
 
-        val onClickListener = { _: View ->
+        val onEditRecipeClickListener = { _: View ->
             val editIntent = Intent(this, RecipeEditActivity::class.java)
             with(editIntent) {
                 putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
@@ -136,8 +135,8 @@ class RecipeActivity : BaseActivity(),
             saveRecipeLauncher.launch(editIntent)
         }
 
-        titleView.setOnClickListener(onClickListener)
-        descriptionView.setOnClickListener(onClickListener)
+        titleView.setOnClickListener(onEditRecipeClickListener)
+        descriptionView.setOnClickListener(onEditRecipeClickListener)
 
         val pagerAdapter = RecipePagerAdapter(
             supportFragmentManager,
@@ -198,28 +197,21 @@ class RecipeActivity : BaseActivity(),
         recipeModel.loadData()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REQUEST_CODE_INSTRUCTION -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    data?.extras?.let {
-                        it.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
-                            recipeModel.recipeData.value?.title?.let { title ->
-                                recipeModel.saveRecipe(
-                                    title,
-                                    recipeModel.recipeData.value?.description ?: "",
-                                    instruction
-                                )
-                            }
-                        }
-                    }
+    override fun onListFragmentDeleteIngredient(ingredient: Ingredient) {
+        AlertDialog.Builder(this).apply {
+            setMessage("Zutat ${ingredient.name} wirklich löschen?")
+            setPositiveButton(getString(R.string.delete)) { _, _ ->
+                recipeModel.ingredientListData.value?.find { toDelete ->
+                    toDelete.id == ingredient.id
+                }?.let { ingredient ->
+                    recipeModel.deleteIngredient(ingredient)
                 }
             }
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
+            setNegativeButton(getString(R.string.close)) { _, _ -> /* do nothing */ }
+        }.show()
     }
 
-    override fun onListFragmentInteraction(ingredient: Ingredient?) {
+    override fun onListFragmentSaveIngredient(ingredient: Ingredient?) {
         val intent = Intent(this, IngredientActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
             intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
@@ -234,39 +226,7 @@ class RecipeActivity : BaseActivity(),
         }
     }
 
-    fun deleteIngredientButton(button: View) {
-
-        val ingredient = recipeModel.ingredientListData.value?.find { item ->
-            try {
-                item.id == button.tag.toString()
-            } catch (exception: NumberFormatException) {
-                false
-            }
-        }
-
-        val confirmDialog = ConfirmDialogFragment()
-        val args = Bundle()
-        args.putString("message", "Zutat ${ingredient?.name} wirklich löschen?")
-        args.putString("remoteId", button.tag.toString())
-        confirmDialog.arguments = args
-        confirmDialog.show(supportFragmentManager, "DeleteIngredient${button.tag}")
-    }
-
-    override fun onPositiveButton(confirmItemId: String?) {
-        confirmItemId?.let { id ->
-            recipeModel.ingredientListData.value?.find { ingredient ->
-                ingredient.id == id
-            }?.let { ingredient ->
-                recipeModel.deleteIngredient(ingredient)
-            }
-        }
-    }
-
-    override fun onNegativeButton(confirmItemId: String?) {
-        //Do nothing
-    }
-
-    fun delete() {
+    private fun delete() {
         AlertDialog.Builder(this).apply {
             setMessage(R.string.recipe_delete_confirm)
             setPositiveButton(R.string.yes) { _, _ ->
@@ -326,6 +286,20 @@ class RecipeActivity : BaseActivity(),
                     it.getString(EXTRA_INGREDIENT_QUANTITY_VERBAL),
                     it.getString(EXTRA_INGREDIENT_UNITY)
                 )
+            }
+        }
+    }
+
+    private fun saveInstruction(data: Intent) {
+        data.extras?.let {
+            it.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
+                recipeModel.recipeData.value?.title?.let { title ->
+                    recipeModel.saveRecipe(
+                        title,
+                        recipeModel.recipeData.value?.description ?: "",
+                        instruction
+                    )
+                }
             }
         }
     }

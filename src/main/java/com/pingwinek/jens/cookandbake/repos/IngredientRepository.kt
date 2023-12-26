@@ -25,8 +25,15 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         quantityVerbal: String?,
         unity: String?,
         name: String
-    ) : IngredientFB {
-        return ingredientSourceFB.new(IngredientFB(recipeId, quantity, quantityVerbal, unity, name))
+    ) : Ingredient {
+        return ingredientSourceFB.new(
+            IngredientFB(
+                recipeId,
+                quantity,
+                quantityVerbal,
+                unity,
+                name)
+        )
     }
 
     suspend fun update(

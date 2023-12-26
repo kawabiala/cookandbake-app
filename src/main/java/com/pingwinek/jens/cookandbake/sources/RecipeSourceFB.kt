@@ -95,19 +95,19 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
     }
 
     private suspend fun add(collRef: CollectionReference, recipeFB: RecipeFB) : RecipeFB {
-        return FirestoreDataAccessManager.new(collRef, recipeFB) {
+        return FirestoreDataAccessManager.new(collRef, recipeFB.documentData) {
             RecipeFB(it)
         }
     }
 
     private suspend fun update(docRef: DocumentReference, recipeFB: RecipeFB) : RecipeFB {
-        return FirestoreDataAccessManager.update(docRef, recipeFB) {
+        return FirestoreDataAccessManager.update(docRef, recipeFB.documentData) {
             RecipeFB(it)
         }
     }
 
     private suspend fun delete(docRef: DocumentReference) : Boolean {
-        return FirestoreDataAccessManager.delete<RecipeFB>(docRef) {
+        return FirestoreDataAccessManager.delete(docRef) {
             true
         }
     }

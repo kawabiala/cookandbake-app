@@ -31,7 +31,6 @@
             android:layout_marginEnd="8dp"
             android:backgroundTint="@color/colorBackground"
             android:contentDescription="@string/delete"
-            android:onClick="deleteIngredientButton"
             android:padding="0dp"
             app:srcCompat="@drawable/ic_action_delete_rose" />
 </LinearLayout>

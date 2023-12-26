@@ -35,7 +35,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
     override suspend fun getAllForRecipeId(recipeId: String) : LinkedList<IngredientFB> {
         var list = LinkedList<IngredientFB>()
         if (auth.currentUser != null) {
-            list = getAll(buildIngredientsCollRef(auth.uid!!, recipeId))
+            list = getAll(buildIngredientsCollRef(auth.uid!!, recipeId), recipeId)
         } else {
             Log.i(this::class.java.name, "unauthorized getAll")
         }
@@ -82,45 +82,49 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         }
     }
 
-    private suspend fun getAll(collRef: CollectionReference) : LinkedList<IngredientFB> {
+    private suspend fun getAll(collRef: CollectionReference, recipeID: String) : LinkedList<IngredientFB> {
         return FirestoreDataAccessManager.getAll(collRef) {
-            IngredientFB(it)
+            IngredientFB(it, recipeID)
         }
     }
 
-    private suspend fun get(documentReference: DocumentReference) : IngredientFB {
+    private suspend fun get(documentReference: DocumentReference, recipeID: String) : IngredientFB {
         return FirestoreDataAccessManager.get(documentReference) {
-            IngredientFB(it)
+            IngredientFB(it, recipeID)
         }
     }
 
-    private suspend fun new(collRef: CollectionReference, item: IngredientFB) : IngredientFB {
-        return FirestoreDataAccessManager.new(collRef, item) {
-            IngredientFB(it)
+    private suspend fun new(collRef: CollectionReference, ingredientFB: IngredientFB) : IngredientFB {
+        return FirestoreDataAccessManager.new(collRef, ingredientFB.documentData) {
+            IngredientFB(it, ingredientFB.recipeId)
         }
     }
 
-    private suspend fun update(docRef: DocumentReference, item: IngredientFB) : IngredientFB {
-        return FirestoreDataAccessManager.update(docRef, item) {
-            IngredientFB(it)
+    private suspend fun update(docRef: DocumentReference, ingredientFB: IngredientFB) : IngredientFB {
+        return FirestoreDataAccessManager.update(docRef, ingredientFB.documentData) {
+            IngredientFB(it, ingredientFB.recipeId)
         }
     }
 
     private suspend fun delete(docRef: DocumentReference) : Boolean {
-        return FirestoreDataAccessManager.delete<IngredientFB>(docRef) {
+        return FirestoreDataAccessManager.delete(docRef) {
             true
         }
     }
 
+    //TODO handle exceptions
     private fun buildRecipesCollRef(userID: String) : CollectionReference {
+        if (userID.isEmpty()) throw IllegalArgumentException("userID size 0 not allowed")
         return firestore.collection(basePath).document(userID).collection("recipe")
     }
 
     private fun buildIngredientsCollRef(userID: String, recipeID: String) : CollectionReference {
+        if (recipeID.isEmpty()) throw IllegalArgumentException("recipeID size 0 not allowed")
         return buildRecipesCollRef(userID).document(recipeID).collection("ingredient")
     }
 
     private fun buildIngredientDocRef(userID: String, recipeID: String, ingredientID: String) : DocumentReference {
+        if (ingredientID.isEmpty()) throw IllegalArgumentException("ingredientID size 0 not allowed")
         return buildIngredientsCollRef(userID, recipeID).document(ingredientID)
     }
 

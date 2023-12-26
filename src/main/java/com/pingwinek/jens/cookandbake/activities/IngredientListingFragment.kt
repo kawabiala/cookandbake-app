@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.activities
 
+
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,19 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.lifecycle.Observer
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.activities.IngredientListingFragment.OnListFragmentInteractionListener
 import com.pingwinek.jens.cookandbake.databinding.FragmentIngredientListingBinding
 import com.pingwinek.jens.cookandbake.databinding.RecyclerviewIngredientListItemBinding
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-//import kotlinx.android.synthetic.main.fragment_ingredient_listing.view.*
-//import kotlinx.android.synthetic.main.recyclerview_ingredient_list_item.view.*
-import java.util.*
+import java.util.LinkedList
 
 /**
  * A fragment representing a list of Items.
@@ -33,8 +32,6 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
 
     private var listener: OnListFragmentInteractionListener? = null
     private lateinit var recipeModel: RecipeViewModel
-
-    private var ingredientList = LinkedList<Ingredient>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,25 +50,16 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
     ): View {
         _binding = FragmentIngredientListingBinding.inflate(inflater, container, false)
         val view = binding.root
-        //val view = inflater.inflate(R.layout.fragment_ingredient_listing, container, false)
 
-        val ingredientListingAdapter = IngredientListingAdapter(ingredientList, listener)
+        val ingredientListingAdapter = IngredientListingAdapter(recipeModel.ingredientListData, listener, viewLifecycleOwner)
 
         binding.list.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = ingredientListingAdapter
         }
 
-        recipeModel.ingredientListData.observe( viewLifecycleOwner, Observer { ingredients ->
-            ingredients?.let { newIngredientList ->
-                ingredientList.clear()
-                ingredientList.addAll(newIngredientList)
-                ingredientListingAdapter.notifyDataSetChanged()
-            }
-        })
-
         binding.addIngredientButton.setOnClickListener {
-            listener?.onListFragmentInteraction(null)
+            listener?.onListFragmentSaveIngredient(null)
         }
 
         return view
@@ -109,7 +97,9 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
      */
     interface OnListFragmentInteractionListener {
 
-        fun onListFragmentInteraction(ingredient: Ingredient?)
+        fun onListFragmentSaveIngredient(ingredient: Ingredient?)
+
+        fun onListFragmentDeleteIngredient(ingredient: Ingredient)
     }
 }
 
@@ -118,18 +108,22 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
  * specified [OnListFragmentInteractionListener].
  */
 class IngredientListingAdapter(
-    private val ingredientList: List<Ingredient>,
-    private val listener: OnListFragmentInteractionListener?
+    ingredientListData: LiveData<LinkedList<Ingredient>>,
+    private val listener: OnListFragmentInteractionListener?,
+    owner: LifecycleOwner
 ) : RecyclerView.Adapter<IngredientListingAdapter.ViewHolder>() {
 
     private var _binding: RecyclerviewIngredientListItemBinding? = null
     private val binding get() = _binding!!
 
-    private val onClickListener: View.OnClickListener = View.OnClickListener { v ->
-        val ingredient = v.tag as Ingredient?
-        // Notify the active callbacks interface (the activity, if the fragment is attached to
-        // one) that an item has been selected.
-        listener?.onListFragmentInteraction(ingredient)
+    private var ingredientList: LinkedList<Ingredient>
+
+    init {
+        ingredientList = ingredientListData.value ?: LinkedList()
+        ingredientListData.observe(owner) {
+            ingredientList = it
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -142,17 +136,17 @@ class IngredientListingAdapter(
         holder.quantityView.text = quantityToString(ingredient.quantity)
         holder.unityView.text = ingredient.unity
         holder.nameView.text = ingredient.name
-        holder.buttonView.tag = ingredient.id
-
-        with(holder.mView) {
-            tag = ingredient
-            setOnClickListener(onClickListener)
+        holder.buttonView.setOnClickListener {
+            listener?.onListFragmentDeleteIngredient(ingredient)
+        }
+        holder.mView.setOnClickListener{
+                listener?.onListFragmentSaveIngredient(ingredient)
         }
     }
 
     override fun getItemCount(): Int = ingredientList.size
 
-    inner class ViewHolder(val mBinding: RecyclerviewIngredientListItemBinding) : RecyclerView.ViewHolder(mBinding.root) {
+    inner class ViewHolder(mBinding: RecyclerviewIngredientListItemBinding) : RecyclerView.ViewHolder(mBinding.root) {
         val mView = mBinding.root
         val quantityView: TextView = mBinding.quantityView
         val unityView: TextView = mBinding.unityView
@@ -163,17 +157,4 @@ class IngredientListingAdapter(
             return super.toString() + " '" + nameView.text + "'"
         }
     }
-/*
-    inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        val quantityView: TextView = mView.quantityView
-        val unityView: TextView = mView.unityView
-        val nameView: TextView = mView.nameView
-        val buttonView: ImageButton = mView.deleteIngredientButton
-
-        override fun toString(): String {
-            return super.toString() + " '" + nameView.text + "'"
-        }
-    }
-
- */
 }

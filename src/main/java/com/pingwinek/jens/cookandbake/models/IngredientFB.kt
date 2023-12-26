@@ -36,9 +36,9 @@ data class IngredientFB(
         name
     )
 
-    constructor(document: DocumentSnapshot) : this(
+    constructor(document: DocumentSnapshot, recipeId: String) : this(
         document.id,
-        document.getString("recipeID") ?: "",
+        recipeId,
         document.getDouble("quantity"),
         document.getString("quantityVerbal"),
         document.getString("unity"),
@@ -56,30 +56,5 @@ data class IngredientFB(
             ingredient.quantityVerbal,
             ingredient.unity,
             ingredient.name)
-    }
-
-    fun getUpdated(quantity: Double?, quantityVerbal: String?, unity: String?, name: String): IngredientFB {
-        return IngredientFB(
-            id,
-            recipeId,
-            quantity,
-            quantityVerbal,
-            unity,
-            name)
-    }
-
-    companion object {
-
-        fun newFromRemote(remote: IngredientFB, recipeId: String) : IngredientFB {
-            return IngredientFB(
-                "",
-                recipeId,
-                remote.quantity,
-                remote.quantityVerbal,
-                remote.unity,
-                remote.name,
-                remote.lastModified
-            )
-        }
     }
 }

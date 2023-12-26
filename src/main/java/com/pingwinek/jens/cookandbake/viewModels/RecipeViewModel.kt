@@ -42,7 +42,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch(Dispatchers.IO) {
                 recipeRepository.delete(it)
                 ingredientListData.value?.let { ingredients ->
-                    ingredients.forEach { deleteIngredient(it) }
+                    ingredients.forEach {
+                        ingredientRepository.delete(it)
+                    }
                 }
             }
         }
@@ -51,7 +53,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun deleteIngredient(ingredient: Ingredient) {
         viewModelScope.launch(Dispatchers.IO) {
             ingredientRepository.delete(ingredient)
-            //loadIngredients()
+            loadIngredients()
         }
     }
 /*
@@ -151,7 +153,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    //TODO update ingredientListData
     fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
         if (name.isEmpty()) {
             return
@@ -159,7 +160,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                if (id == null) {
+                if (id.isNullOrEmpty()) {
                     ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name)
                 } else {
                     ingredientListData.value?.find { ingredient ->

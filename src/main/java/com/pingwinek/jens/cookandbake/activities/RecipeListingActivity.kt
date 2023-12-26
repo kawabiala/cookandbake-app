@@ -3,7 +3,6 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,17 +42,7 @@ class RecipeListingActivity : BaseActivity() {
             .create(RecipeListingViewModel::class.java)
 
         val recipeListData = recipeListingModel.recipeListData
-//        var recipeList = recipeListData.value ?: LinkedList()
-        //val viewAdapter = RecipeListingAdapter(recipeList)
         val viewAdapter = RecipeListingAdapter(recipeListData, this)
-/*
-        recipeListData.observe(this) {
-            Log.i(this::class.java.name, "change observed - list size: ${it.size}")
-            recipeList = it
-            viewAdapter.notifyDataSetChanged()
-        }
-
- */
 
         findViewById<RecyclerView>(R.id.recipeList).apply {
             setHasFixedSize(true)
@@ -73,38 +62,6 @@ class RecipeListingActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         recipeListingModel.loadData()
-/*
-        if (recipeListingModel.authService.isLoggedIn()) {
-            optionMenu.addMenuEntry(
-                R.id.OPTION_MENU_LOGIN,
-                resources.getString(R.string.logged_in_as, recipeListingModel.authService.getStoredAccount()?.getEmail()),
-                R.drawable.ic_login_person_black,
-                true
-            ) {
-                AlertDialog.Builder(this).apply {
-                    setMessage(resources.getString(
-                        R.string.logged_in_as,
-                        recipeListingModel.authService.getStoredAccount()?.getEmail()
-                    ))
-                    setPositiveButton("Ok") { _, _ ->
-                        // do nothing
-                    }
-                }.create().show()
-                true
-            }
-        } else {
-            optionMenu.addMenuEntry(
-                R.id.OPTION_MENU_LOGIN,
-                resources.getString(R.string.login),
-                R.drawable.ic_login_person_outline_black,
-                true
-                ) {
-                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
-                true
-            }
-        }
-
- */
 
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(
@@ -198,7 +155,6 @@ class RecipeListingAdapter(recipeListData: LiveData<LinkedList<Recipe>>, owner: 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
 
-        Log.i(this::class.java.name, "onCreateViewHolder")
         val constraintLayout = LayoutInflater.from(parent.context)
             .inflate(R.layout.recyclerview_recipe_list_item, parent, false) as ConstraintLayout
 
@@ -208,12 +164,10 @@ class RecipeListingAdapter(recipeListData: LiveData<LinkedList<Recipe>>, owner: 
     }
 
     override fun getItemCount(): Int {
-        Log.i(this::class.java.name, "getItemCount: ${recipeList.size}")
         return recipeList.size
     }
 
     override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
-        Log.i(this::class.java.name, "onBindViewHolderForPosition $position")
         viewHolder.recipeTitle.text = recipeList[position].title
         viewHolder.recipeDescription.text = recipeList[position].description
         viewHolder.recipeListItem.tag = recipeList[position].id
