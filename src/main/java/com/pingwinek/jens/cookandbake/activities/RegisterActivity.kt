@@ -9,16 +9,12 @@ import android.text.SpannableString
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
-import android.widget.CheckBox
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.pingwinek.jens.cookandbake.AuthService
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class RegisterActivity : BaseActivity() {
 

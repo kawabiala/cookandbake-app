@@ -81,9 +81,20 @@
         </activity>
         <activity
                 android:name=".activities.LostPasswordActivity"
+                android:exported="true"
                 android:label="@string/lostPassword"
                 android:launchMode="singleTop"
-                android:parentActivityName=".activities.LoginActivity" />
+                android:parentActivityName=".activities.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="https"/>
+                <data android:host="cookandbake.page.link"/>
+            </intent-filter>
+        </activity>
         <activity
                 android:name=".activities.ChangePasswordActivity"
                 android:label="@string/changePassword"
@@ -112,6 +123,10 @@
                 <data android:pathPattern="/cookandbake/lost_password/.*" />
             </intent-filter>
         </activity>
+        <activity
+                android:name=".activities.SignInActivity"
+                android:label="Profile"
+                android:launchMode="singleTop"/>
     </application>
 
 </manifest>

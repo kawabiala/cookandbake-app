@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -70,6 +69,7 @@ class RecipeListingActivity : BaseActivity() {
                 R.drawable.ic_login_person_black,
                 true
             ) {
+                /*
                 AlertDialog.Builder(this).apply {
                     setMessage(resources.getString(
                         R.string.logged_in_as,
@@ -79,6 +79,9 @@ class RecipeListingActivity : BaseActivity() {
                         // do nothing
                     }
                 }.create().show()
+
+                 */
+                startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
                 true
             }
         } else {
@@ -88,7 +91,8 @@ class RecipeListingActivity : BaseActivity() {
                 R.drawable.ic_login_person_outline_black,
                 true
             ) {
-                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
+                startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
+//                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
             }
         }

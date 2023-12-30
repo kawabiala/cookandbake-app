@@ -32,7 +32,9 @@
     <string name="PasswordChanged">Passwort wurde geändert</string>
     <string name="changePasswordFailed">Das Passwort konnte nicht geändert werden</string>
 
+    <string name="profile">Profil</string>
     <string name="register">Profil anlegen</string>
+    <string name="registrationIncomplete">Registrierung unvollständig</string>
     <string name="registrationFailed">Profil anlegen fehlgeschlagen</string>
     <string name="unsubscribe">Profil löschen</string>
     <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
@@ -41,6 +43,7 @@
     <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
     <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
     <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
+    <string name="sendVerificationEmail">Bestätigungs-Link senden</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>
