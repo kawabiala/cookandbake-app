@@ -9,11 +9,9 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.view.isVisible
-import com.google.firebase.auth.ActionCodeSettings
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class SignInActivity : BaseActivity() {
 
@@ -52,10 +50,11 @@ class SignInActivity : BaseActivity() {
 
     private lateinit var registerView: ViewSettings
     private lateinit var signInView: ViewSettings
+    private lateinit var resetPasswordView: ViewSettings
     private lateinit var unverifiedView: ViewSettings
     private lateinit var verifiedView: ViewSettings
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var authenticationViewModel: AuthenticationViewModel
 
     private var verificationLink: String? = null
     private var asRegistrationView: Boolean = true
@@ -68,6 +67,11 @@ class SignInActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         addContentView(R.layout.activity_signin)
+
+        authenticationViewModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(AuthenticationViewModel::class.java)
 
         // Assign fields to vars
 
@@ -108,6 +112,16 @@ class SignInActivity : BaseActivity() {
             showDelete = true
         )
 
+        resetPasswordView = ViewSettings(
+            headerLeftCaption = getString(R.string.setPassword),
+            buttonRightCaption = getString(R.string.setPassword),
+            buttonLeftAction = closeAction,
+            buttonRightAction = resetPasswordAction,
+            showOnlyLeftHeader = true,
+            showReset = true,
+            showPrivacy = false
+        )
+
         unverifiedView = ViewSettings(
             headerLeftCaption = getString(R.string.registrationIncomplete),
             buttonLeftCaption =  getString(R.string.close),
@@ -136,20 +150,40 @@ class SignInActivity : BaseActivity() {
             showDelete = true
         )
 
-        // other
+        // Observers
 
-        verificationLink = intent.data?.toString()
+        authenticationViewModel.linkMode.observe(this) {
+            when(it) {
+                AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
+                AuthenticationViewModel.EmailLinkMode.VERIFY -> verifyEmailAction()
+                else -> { /* do nothing */ }
+            }
+        }
+
+        authenticationViewModel.email.observe(this) {
+            with(emailEditText.text) {
+                clear()
+                append(authenticationViewModel.email.value)
+            }
+        }
+
+        //TODO observer on result + alert etc.
+
     }
 
     override fun onResume() {
         super.onResume()
         manageView()
+        authenticationViewModel.retrieveEmail()
+        authenticationViewModel.checkActionCodeForIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
-        verificationLink = intent?.data?.toString()
+        authenticationViewModel.retrieveEmail()
+        intent?.let {
+            authenticationViewModel.checkActionCodeForIntent(it)
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,21 +191,14 @@ class SignInActivity : BaseActivity() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun manageView() {
-        if (auth.currentUser == null) {
+        if (!authenticationViewModel.isSignedIn()) {
             if (asRegistrationView) {
                 applyViewSettings(registerView)
             } else {
                 applyViewSettings(signInView)
             }
-        } else if (auth.currentUser!!.isAnonymous) {
-            // not supported
-        } else if (!auth.currentUser!!.isEmailVerified) {
-            val email = auth.currentUser!!.email
-            if (!email.isNullOrEmpty() && !verificationLink.isNullOrEmpty()) {
-                tryVerification(email, verificationLink!!)
-            } else {
-                applyViewSettings(unverifiedView)
-            }
+        } else if (!authenticationViewModel.isSignedInAndVerified()) {
+            applyViewSettings(unverifiedView)
         } else {
             applyViewSettings(verifiedView)
         }
@@ -227,13 +254,7 @@ class SignInActivity : BaseActivity() {
     }
 
     private fun adaptEmail(editEmail: Boolean) {
-        emailEditText.apply {
-            with(text) {
-                clear()
-                append(auth.currentUser?.email ?: "")
-            }
-            isEnabled = editEmail
-        }
+        emailEditText.isEnabled = editEmail
     }
 
     private fun adaptPassword(showPassword: Boolean) {
@@ -245,7 +266,7 @@ class SignInActivity : BaseActivity() {
     private fun adaptReset(showReset: Boolean) {
         resetTextView.apply {
             isVisible = showReset
-            setOnClickListener { resetAction() }
+            setOnClickListener { sendResetEmailAction() }
         }
     }
 
@@ -291,99 +312,56 @@ class SignInActivity : BaseActivity() {
         Log.i(this::class.java.name, "Register")
         val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
-        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.i(this::class.java.name, "new user created")
-                sendEmailVerificationAction()
-                //auth.currentUser?.let { user -> sendVerificationEmail(user) }
-            } else {
-                Log.i(this::class.java.name, "exception: ${task.exception}")
-            }
-        }
-        // TODO alert with message, then close
+
+        authenticationViewModel.register(email, password)
     }
 
     private val signInAction: () -> Unit = {
         Log.i(this::class.java.name, "Sign in")
         val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
-        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.i(this::class.java.name, "user signed in")
-                auth.currentUser?.let { user ->
-                    if (user.isEmailVerified) {
-                        finish()
-                    } else {
-                        sendEmailVerificationAction()
-                    }
-                }
-            } else {
-                Log.i(this::class.java.name, "exception: ${task.exception}")
-            }
-        }
-        // TODO alert with message, then close
+
+        authenticationViewModel.signIn(email, password)
     }
 
     private val sendEmailVerificationAction: () -> Unit = {
         Log.i(this::class.java.name, "Send Email Verification")
-        auth.currentUser?.let { user -> sendVerificationEmail(user) }
+        authenticationViewModel.sendVerificationEmail()
     }
 
-    private val resetAction: () -> Unit = {
+    private val sendResetEmailAction: () -> Unit = {
         Log.i(this::class.java.name, "Reset")
-        // TODO
+        val email = emailEditText.text.toString()
+        authenticationViewModel.sendPasswordResetEmail(email)
+    }
+
+    private val resetPasswordAction: () -> Unit = {
+        Log.i(this::class.java.name, "Reset Password")
+        val password = passwordEditText.text.toString()
+        authenticationViewModel.oobCode.value?.let { oobCode ->
+            authenticationViewModel.resetPassword(password, oobCode)
+        }
     }
 
     private val signOutAction: () -> Unit = {
         Log.i(this::class.java.name, "Sign out")
-        auth.signOut()
+        authenticationViewModel.signOut()
     }
 
     private val deleteAction: () -> Unit = {
         Log.i(this::class.java.name, "Delete")
-        auth.currentUser?.apply {
-            delete().addOnCompleteListener{ task ->
-                //TODO
-            }
+        authenticationViewModel.deleteAccount()
+    }
+
+    private val verifyEmailAction: () -> Unit = {
+        Log.i(this::class.java.name, "Verify Email")
+        authenticationViewModel.oobCode.value?.let { oobCode ->
+            authenticationViewModel.verifyEmail(oobCode)
         }
     }
 
     private val closeAction: () -> Unit = {
         Log.i(this::class.java.name, "Close")
         finish()
-    }
-
-    private fun sendVerificationEmail(user: FirebaseUser) {
-        val actionCodeSettings = ActionCodeSettings.newBuilder().apply {
-            setAndroidPackageName(
-                "com.pingwinek.jens.cookandbake",
-                true,
-                null)
-            setHandleCodeInApp(true)
-            setUrl("https://www.pingwinek.de/cookandbake")
-        }.build()
-
-        val task = user.let { auth.sendSignInLinkToEmail(it.email!!, actionCodeSettings) }
-        task.addOnSuccessListener {
-            Log.i(this::class.java.name, "email sent")
-        }.addOnFailureListener {
-            Log.i(this::class.java.name, "exception: $it")
-        }.addOnCanceledListener {
-            Log.i(this::class.java.name, "sending email canceled")
-        }
-    }
-
-    private fun tryVerification(email: String, verificationLink: String) {
-        if (auth.isSignInWithEmailLink(verificationLink)) {
-            val credential = EmailAuthProvider.getCredentialWithLink(email, verificationLink)
-            auth.currentUser!!.reauthenticate(credential)
-                .addOnCompleteListener{ task ->
-                    if (task.isSuccessful) {
-                        Log.i(this::class.java.name, "successfully reauthenticated")
-                    } else {
-                        Log.i(this::class.java.name, "exception: ${task.exception}")
-                    }
-                }
-        }
     }
 }
