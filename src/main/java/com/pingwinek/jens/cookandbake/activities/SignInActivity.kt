@@ -114,6 +114,7 @@ class SignInActivity : BaseActivity() {
 
         resetPasswordView = ViewSettings(
             headerLeftCaption = getString(R.string.setPassword),
+            buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.setPassword),
             buttonLeftAction = closeAction,
             buttonRightAction = resetPasswordAction,
@@ -165,6 +166,15 @@ class SignInActivity : BaseActivity() {
                 clear()
                 append(authenticationViewModel.email.value)
             }
+        }
+
+        authenticationViewModel.result.observe(this) {
+            if (authenticationViewModel.result.value == AuthenticationViewModel.ResultType.EXCEPTION) {
+                Log.e(this::class.java.name, "exception: ${authenticationViewModel.errorMessage.value.toString()}")
+            } else {
+                Log.i(this::class.java.name, authenticationViewModel.result.value?.name ?: "")
+            }
+            manageView()
         }
 
         //TODO observer on result + alert etc.
@@ -355,9 +365,7 @@ class SignInActivity : BaseActivity() {
 
     private val verifyEmailAction: () -> Unit = {
         Log.i(this::class.java.name, "Verify Email")
-        authenticationViewModel.oobCode.value?.let { oobCode ->
-            authenticationViewModel.verifyEmail(oobCode)
-        }
+        authenticationViewModel.verifyEmail(intent.data.toString())
     }
 
     private val closeAction: () -> Unit = {

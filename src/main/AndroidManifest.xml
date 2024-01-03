@@ -86,34 +86,6 @@
                 android:parentActivityName=".activities.LoginActivity">
         </activity>
         <activity
-                android:name=".activities.ChangePasswordActivity"
-                android:label="@string/changePassword"
-                android:launchMode="singleTop" />
-        <activity
-                android:name=".activities.NewPasswordActivity"
-                android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="https" />
-                <data android:host="pingwinek.de" />
-                <data android:pathPattern="/cookandbake/lost_password/.*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" />
-                <data android:host="www.pingwinek.de" />
-                <data android:pathPattern="/cookandbake/lost_password/.*" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.SignInActivity"
             android:label="Profile"
             android:exported="true"

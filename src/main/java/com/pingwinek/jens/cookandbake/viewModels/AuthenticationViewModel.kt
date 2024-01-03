@@ -3,21 +3,28 @@ package com.pingwinek.jens.cookandbake.viewModels
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.ActionCodeResult
 import com.google.firebase.auth.ActionCodeSettings
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class AuthenticationViewModel(application: Application) : AndroidViewModel(application), FirebaseAuth.AuthStateListener {
+
+    class PingwinekAuthenticationException(message: String) : Exception(message) {
+
+        override fun toString(): String {
+            return "${this::class.java.name}: ${super.toString()}"
+        }
+    }
 
     enum class ResultType() {
         ACCOUNT_CREATED,
@@ -45,6 +52,16 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     val oobCode = MutableLiveData<String>()
     val email = MutableLiveData<String>()
 
+    private var emailFromIntent: String? = null
+
+    init {
+        auth.addAuthStateListener(this)
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Implement Authentication State Listener
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     override fun onAuthStateChanged(p0: FirebaseAuth) {
         if (auth.currentUser == null) {
             result.postValue(ResultType.SIGNED_OUT)
@@ -52,9 +69,75 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun retrieveEmail() {
-        auth.currentUser?.let { user ->
-            email.postValue(user.email)
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Authentication Functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun checkActionCodeForIntent(intent: Intent) {
+        if (intent.data == null) {
+            Log.i(this::class.java.name, "no intent data")
+            return
+        }
+
+        val actionCode = extractActionCode(intent)
+        if (actionCode == null) {
+            postError("no action code available")
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val actionCodeResult = suspendedFunction(auth.checkActionCode(actionCode))
+                when (actionCodeResult.operation) {
+                    0 -> {
+                        oobCode.postValue(actionCode!!)
+                        actionCodeResult.info?.let {
+                            emailFromIntent = it.email
+                        }
+                        linkMode.postValue(EmailLinkMode.RESET)
+                    }
+
+                    1 -> {
+                        oobCode.postValue(actionCode!!)
+                        actionCodeResult.info?.let {
+                            emailFromIntent = it.email
+                        }
+                        linkMode.postValue(EmailLinkMode.VERIFY)
+                    }
+
+                    4 -> {
+                        oobCode.postValue(actionCode!!)
+                        actionCodeResult.info?.let {
+                            emailFromIntent = it.email
+                        }
+                        linkMode.postValue(EmailLinkMode.VERIFY)
+                    }
+
+                    else -> {
+                        linkMode.postValue(EmailLinkMode.UNKNOWN)
+                        postError("unknown action code for operation ${actionCodeResult.operation}")
+                    }
+                }
+            } catch (exception: Exception) {
+                postError(exception.toString())
+            }
+        }
+    }
+
+    fun deleteAccount() {
+        if (auth.currentUser == null) {
+            postError("no signed in user")
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                suspendedFunction(auth.currentUser!!.delete())
+                result.postValue(ResultType.ACCOUNT_DELETED)
+                email.postValue("")
+            } catch (exception: Exception) {
+                postError(exception.toString())
+            }
         }
     }
 
@@ -64,212 +147,117 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     fun isSignedInAndVerified(): Boolean = isSignedIn() && isVerified()
 
-    fun checkActionCodeForIntent(intent: Intent) {
-        val actionCode = extractActionCode(intent)
-        if (actionCode == null) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("no action code available")
-            return
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<ActionCodeResult>> { continuation ->
-                auth.checkActionCode(actionCode).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-            if (task.isSuccessful) {
-                val actionCodeResult = task.result
-                when (actionCodeResult.operation) {
-                    0 -> {
-                        linkMode.postValue(EmailLinkMode.RESET)
-                        oobCode.postValue(actionCode!!)
-                        actionCodeResult.info?.let {
-                            email.postValue(it.email)
-                        }
-                    }
-
-                    1 -> {
-                        linkMode.postValue(EmailLinkMode.VERIFY)
-                        oobCode.postValue(actionCode!!)
-                        actionCodeResult.info?.let {
-                            email.postValue(it.email)
-                        }
-                    }
-
-                    else -> {
-                        result.postValue(ResultType.EXCEPTION)
-                        errorMessage.postValue("unknown action code")
-                        linkMode.postValue(EmailLinkMode.UNKNOWN)
-                    }
-                }
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
-            }
-        }
-    }
-
-    fun deleteAccount() {
-        if (auth.currentUser == null) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("no signed in user")
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<Void>> { continuation ->
-                auth.currentUser!!.delete().addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-            if (task.isSuccessful) {
-                result.postValue(ResultType.ACCOUNT_DELETED)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
-            }
-        }
-    }
-
     fun register(email: String, password: String) {
         if (email.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("email is empty string")
+            postError("email is empty string")
             return
         }
 
         if (password.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("password is empty string")
+            postError("password is empty string")
             return
         }
 
+        var registrationSuccessful = false
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<AuthResult>> { continuation ->
-                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-
-
-            if (task.isSuccessful) {
+            try {
+                suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
                 result.postValue(ResultType.ACCOUNT_CREATED)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+                registrationSuccessful = true
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
         }
+        Log.i(this::class.java.name, "registration: viewModelScope exited")
+        if (registrationSuccessful) sendVerificationEmail()
     }
 
     fun resetPassword(password: String, actionCode: String) {
+/*
         if (auth.currentUser == null) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("no signed in user available")
+            postError("no signed in user available")
             return
         }
-        if (auth.currentUser!!.email != email.value) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("provided code not valid for signed in user")
+ */
+        if (auth.currentUser != null && auth.currentUser!!.email != emailFromIntent) {
+            postError("provided code not valid for signed in user")
             return
         }
         if (password.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("email is empty string")
+            postError("email is empty string")
             return
         }
         if (actionCode.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("action code is empty string")
+            postError("action code is empty string")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<Void>> { continuation ->
-                auth.confirmPasswordReset(actionCode, password).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-            if (task.isSuccessful) {
+            try {
+                suspendedFunction(auth.confirmPasswordReset(actionCode, password))
                 result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
+        }
+    }
+
+    fun retrieveEmail() {
+        auth.currentUser?.let { user ->
+            email.postValue(user.email)
         }
     }
 
     fun sendPasswordResetEmail(email: String) {
         if (email.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("email is empty string")
+            postError("email is empty string")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<Void>> { continuation ->
-                auth.sendPasswordResetEmail(email, getActionCodeSettings()).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-
-            if (task.isSuccessful) {
+            try {
+                suspendedFunction(auth.sendPasswordResetEmail(email, getActionCodeSettings()))
                 result.postValue(ResultType.PASSWORD_RESET_SENT)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
         }
     }
 
     fun sendVerificationEmail() {
         if (auth.currentUser == null) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("no signed in user available")
+            postError("no signed in user available")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<Void>> { continuation ->
-                auth.currentUser!!.sendEmailVerification(getActionCodeSettings()).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-
-            if (task.isSuccessful) {
+            try {
+                //suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings()))
+                suspendedFunction(auth.sendSignInLinkToEmail(auth.currentUser!!.email!!, getActionCodeSettings()))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
         }
     }
 
     fun signIn(email: String, password: String) {
         if (email.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("email is empty string")
+            postError("email is empty string")
             return
         }
 
         if (password.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("password is empty string")
+            postError("password is empty string")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<AuthResult>> { continuation ->
-                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-
-
-            if (task.isSuccessful) {
+            try {
+                suspendedFunction(auth.signInWithEmailAndPassword(email, password))
                 result.postValue(ResultType.SIGNED_IN)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
         }
     }
@@ -278,37 +266,44 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         auth.signOut()
     }
 
-    fun verifyEmail(actionCode: String) {
+    fun verifyEmail(verificationLink: String) {
         if (auth.currentUser == null) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("no signed in user available")
+            postError("no signed in user available")
             return
         }
-        if (auth.currentUser!!.email != email.value) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("provided code not valid for signed in user")
+        if (auth.currentUser!!.email != emailFromIntent) {
+            postError("provided code not valid for signed in user")
             return
         }
-        if (actionCode.isEmpty()) {
-            result.postValue(ResultType.EXCEPTION)
-            errorMessage.postValue("action code is empty string")
+        if (verificationLink.isEmpty()) {
+            postError("verification link is empty string")
+            return
+        }
+        if (!auth.isSignInWithEmailLink(verificationLink)) {
+            postError("verification link is not valid")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val task = suspendCoroutine<Task<Void>> { continuation ->
-                val credential = EmailAuthProvider.getCredentialWithLink(auth.currentUser!!.email!!, actionCode)
-                auth.currentUser!!.reauthenticate(credential).addOnCompleteListener { task ->
-                    continuation.resume(task)
-                }
-            }
-            if (task.isSuccessful) {
+            try {
+                val credential = EmailAuthProvider.getCredentialWithLink(auth.currentUser!!.email!!, verificationLink)
+                suspendedFunction(auth.currentUser!!.reauthenticate(credential))
                 result.postValue(ResultType.EMAIL_VERIFIED)
-            } else {
-                result.postValue(ResultType.EXCEPTION)
-                errorMessage.postValue(task.exception.toString())
+            } catch (exception: Exception) {
+                postError(exception.toString())
             }
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Support Functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private fun extractActionCode(intent: Intent): String? {
+        return intent.data?.getQueryParameter("link")
+            ?.let { innerUri ->
+                Uri.parse(innerUri).getQueryParameter("oobCode")
+            }
     }
 
     private fun getActionCodeSettings(): ActionCodeSettings {
@@ -322,10 +317,24 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }.build()
     }
 
-    private fun extractActionCode(intent: Intent): String? {
-        return intent.data?.getQueryParameter("link")
-            ?.let { innerUri ->
-                Uri.parse(innerUri).getQueryParameter("oobCode")
+    private fun postError(message: String) {
+        errorMessage.postValue(message)
+        result.postValue(ResultType.EXCEPTION)
+    }
+
+    private fun postError(exception: Exception) {
+        postError(exception.toString())
+    }
+
+    private suspend fun <T> suspendedFunction(task: Task<T>): T {
+        return suspendCoroutine { continuation ->
+            task.addOnCompleteListener { resultingTask ->
+                if (resultingTask.isSuccessful) {
+                    continuation.resume(task.result)
+                } else {
+                    continuation.resumeWithException(task.exception ?: Exception("Unknown exception - something went wrong"))
+                }
             }
+        }
     }
 }

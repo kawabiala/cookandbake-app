@@ -4,13 +4,11 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.pingwinek.jens.cookandbake.*
-import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
-import kotlinx.coroutines.*
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.R
 
 class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePasswordListener {
 
@@ -39,7 +37,7 @@ class ManageAccountActivity : BaseActivity(), RequirePasswordFragment.RequirePas
                 return@setOnClickListener
             }
 
-            startActivity(Intent(this, ChangePasswordActivity::class.java))
+            //startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
 
         findViewById<TextView>(R.id.maLoginView).setOnClickListener {
