@@ -9,7 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ActionCodeSettings
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,17 +18,22 @@ import kotlin.coroutines.suspendCoroutine
 
 class AuthenticationViewModel(application: Application) : AndroidViewModel(application), FirebaseAuth.AuthStateListener {
 
-    class PingwinekAuthenticationException(message: String) : Exception(message) {
+    class PingwinekAuthenticationException(private val exception: Exception) : Exception(exception) {
+
+        constructor(message: String): this(Exception(message))
 
         override fun toString(): String {
-            return "${this::class.java.name}: ${super.toString()}"
+            return if (exception is PingwinekAuthenticationException) {
+                exception.toString()
+            } else {
+                "${this::class.java.name}: ${super.toString()}"
+            }
         }
     }
 
     enum class ResultType() {
         ACCOUNT_CREATED,
         VERIFICATION_EMAIL_SENT,
-        EMAIL_VERIFIED,
         SIGNED_IN,
         PASSWORD_RESET_SENT,
         PASSWORD_RESET_CONFIRMED,
@@ -39,20 +43,19 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     enum class EmailLinkMode {
-        VERIFY,
         RESET,
         UNKNOWN
     }
 
-    val auth = FirebaseAuth.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     val result = MutableLiveData<ResultType>()
-    val errorMessage = MutableLiveData<String>()
+    var errorMessage: String = ""
     val linkMode = MutableLiveData<EmailLinkMode>()
-    val oobCode = MutableLiveData<String>()
     val email = MutableLiveData<String>()
 
     private var emailFromIntent: String? = null
+    private var oobCode: String = ""
 
     init {
         auth.addAuthStateListener(this)
@@ -90,13 +93,13 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 val actionCodeResult = suspendedFunction(auth.checkActionCode(actionCode))
                 when (actionCodeResult.operation) {
                     0 -> {
-                        oobCode.postValue(actionCode!!)
+                        oobCode = actionCode
                         actionCodeResult.info?.let {
                             emailFromIntent = it.email
                         }
                         linkMode.postValue(EmailLinkMode.RESET)
                     }
-
+/*
                     1 -> {
                         oobCode.postValue(actionCode!!)
                         actionCodeResult.info?.let {
@@ -112,7 +115,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                         }
                         linkMode.postValue(EmailLinkMode.VERIFY)
                     }
-
+*/
                     else -> {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
                         postError("unknown action code for operation ${actionCodeResult.operation}")
@@ -136,7 +139,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 result.postValue(ResultType.ACCOUNT_DELETED)
                 email.postValue("")
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(exception)
             }
         }
     }
@@ -165,18 +168,12 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(exception)
             }
         }
     }
 
-    fun resetPassword(password: String, actionCode: String) {
-/*
-        if (auth.currentUser == null) {
-            postError("no signed in user available")
-            return
-        }
- */
+    fun resetPassword(password: String) {
         if (auth.currentUser != null && auth.currentUser!!.email != emailFromIntent) {
             postError("provided code not valid for signed in user")
             return
@@ -185,14 +182,14 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             postError("email is empty string")
             return
         }
-        if (actionCode.isEmpty()) {
+        if (oobCode.isEmpty()) {
             postError("action code is empty string")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.confirmPasswordReset(actionCode, password))
+                suspendedFunction(auth.confirmPasswordReset(oobCode, password))
                 result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
             } catch (exception: Exception) {
                 postError(exception.toString())
@@ -214,10 +211,13 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.sendPasswordResetEmail(email, getActionCodeSettings(true)))
+                suspendedFunction(
+                    auth.sendPasswordResetEmail(
+                        email,
+                        getActionCodeSettings(true)))
                 result.postValue(ResultType.PASSWORD_RESET_SENT)
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(exception)
             }
         }
     }
@@ -230,11 +230,12 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
-                //suspendedFunction(auth.sendSignInLinkToEmail(auth.currentUser!!.email!!, getActionCodeSettings()))
+                suspendedFunction(
+                    auth.currentUser!!.sendEmailVerification(
+                        getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(exception)
             }
         }
     }
@@ -255,7 +256,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 suspendedFunction(auth.signInWithEmailAndPassword(email, password))
                 result.postValue(ResultType.SIGNED_IN)
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(exception)
             }
         }
     }
@@ -264,6 +265,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         auth.signOut()
     }
 
+/*
     fun verifyEmail(password: String, intent: Intent) {
         if (auth.currentUser == null) {
             postError("no signed in user available")
@@ -293,6 +295,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+*/
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Support Functions
@@ -317,12 +320,12 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun postError(message: String) {
-        errorMessage.postValue(message)
-        result.postValue(ResultType.EXCEPTION)
+        postError(PingwinekAuthenticationException(message))
     }
 
     private fun postError(exception: Exception) {
-        postError(exception.toString())
+        errorMessage = PingwinekAuthenticationException(exception).toString()
+        result.postValue(ResultType.EXCEPTION)
     }
 
     private suspend fun <T> suspendedFunction(task: Task<T>): T {

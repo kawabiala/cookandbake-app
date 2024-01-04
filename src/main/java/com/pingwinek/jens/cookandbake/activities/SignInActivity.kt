@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -8,12 +9,17 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class SignInActivity : BaseActivity() {
+
+    //TODO Reset password when not signed in does not work properly
+    //TODO Status after email verification is not updated
+    //TODO Sign out message shown too often -> reload before checking isVerified
 
     /**
      *
@@ -52,12 +58,10 @@ class SignInActivity : BaseActivity() {
     private lateinit var signInView: ViewSettings
     private lateinit var resetPasswordView: ViewSettings
     private lateinit var unverifiedView: ViewSettings
-    private lateinit var verifyEmailView: ViewSettings
     private lateinit var verifiedView: ViewSettings
 
     private lateinit var authenticationViewModel: AuthenticationViewModel
 
-    private var verificationLink: String? = null
     private var asRegistrationView: Boolean = true
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,18 +142,6 @@ class SignInActivity : BaseActivity() {
             showDelete = true
         )
 
-        verifyEmailView = ViewSettings(
-            headerLeftCaption = "Confirm with Password",
-            buttonLeftCaption = getString(R.string.close),
-            buttonRightCaption = "Confirm",
-            buttonLeftAction = closeAction,
-            buttonRightAction = verifyEmailAction,
-            editEmail = false,
-            showOnlyLeftHeader = true,
-            showReset = true,
-            showPrivacy = false
-        )
-
         verifiedView = ViewSettings(
             headerLeftCaption = getString(R.string.profile),
             buttonRightCaption = getString(R.string.close),
@@ -166,11 +158,58 @@ class SignInActivity : BaseActivity() {
 
         // Observers
 
+        authenticationViewModel.result.observe(this) {
+            when (authenticationViewModel.result.value) {
+                AuthenticationViewModel.ResultType.ACCOUNT_CREATED -> {
+                    toast("Account created")
+                }
+                AuthenticationViewModel.ResultType.VERIFICATION_EMAIL_SENT -> {
+                    alert(
+                        "Authentication Message",
+                        "A verification email has been sent to your inbox.",
+                        closeAction)
+                }
+                AuthenticationViewModel.ResultType.SIGNED_IN -> {
+                    alert(
+                        "Sign in successful",
+                        "you are signed in",
+                        closeAction)
+                }
+                AuthenticationViewModel.ResultType.SIGNED_OUT -> {
+                    alert(
+                        "Sign out successful",
+                        "You can now sign in again")
+                }
+                AuthenticationViewModel.ResultType.ACCOUNT_DELETED -> {
+                    alert(
+                        "Account deleted",
+                        "You can register a new account")
+                }
+                AuthenticationViewModel.ResultType.PASSWORD_RESET_SENT -> {
+                    alert(
+                        "Reset Email Sent",
+                        "You have received an email with a reset link. Check your inbox. If you have not received an email, please, make sure that the provided email is correct and that you have an account with PingwinekCooks!")
+                }
+                AuthenticationViewModel.ResultType.PASSWORD_RESET_CONFIRMED -> {
+                    alert(
+                        "Password reset",
+                        "Your password is reset. Don't forget to remember it.")
+                }
+                AuthenticationViewModel.ResultType.EXCEPTION -> {
+                    alert(
+                        "Exception",
+                        authenticationViewModel.errorMessage)
+                }
+                else -> { alert(
+                    "Message",
+                    "Sorry, this message should not appear at all.") }
+            }
+            manageView()
+        }
+
         authenticationViewModel.linkMode.observe(this) {
-            when(it) {
-                AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
-                AuthenticationViewModel.EmailLinkMode.VERIFY -> applyViewSettings(verifyEmailView)
-                else -> { /* do nothing */ }
+            if (it == AuthenticationViewModel.EmailLinkMode.RESET) {
+                applyViewSettings(resetPasswordView)
             }
         }
 
@@ -180,18 +219,6 @@ class SignInActivity : BaseActivity() {
                 append(authenticationViewModel.email.value)
             }
         }
-
-        authenticationViewModel.result.observe(this) {
-            if (authenticationViewModel.result.value == AuthenticationViewModel.ResultType.EXCEPTION) {
-                Log.e(this::class.java.name, "exception: ${authenticationViewModel.errorMessage.value.toString()}")
-            } else {
-                Log.i(this::class.java.name, authenticationViewModel.result.value?.name ?: "")
-            }
-            manageView()
-        }
-
-        //TODO observer on result + alert etc.
-
     }
 
     override fun onResume() {
@@ -361,9 +388,7 @@ class SignInActivity : BaseActivity() {
     private val resetPasswordAction: () -> Unit = {
         Log.i(this::class.java.name, "Reset Password")
         val password = passwordEditText.text.toString()
-        authenticationViewModel.oobCode.value?.let { oobCode ->
-            authenticationViewModel.resetPassword(password, oobCode)
-        }
+        authenticationViewModel.resetPassword(password)
     }
 
     private val signOutAction: () -> Unit = {
@@ -375,15 +400,37 @@ class SignInActivity : BaseActivity() {
         Log.i(this::class.java.name, "Delete")
         authenticationViewModel.deleteAccount()
     }
-
+/*
     private val verifyEmailAction: () -> Unit = {
         Log.i(this::class.java.name, "Verify Email")
         val password = passwordEditText.text.toString()
         authenticationViewModel.verifyEmail(password, intent)
     }
-
+*/
     private val closeAction: () -> Unit = {
         Log.i(this::class.java.name, "Close")
         finish()
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Other functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private fun alert(title: String?, message: String, action: (() -> Unit)?) {
+        AlertDialog.Builder(this).apply {
+            setMessage(message)
+            title?.let { setTitle(it) }
+            setPositiveButton("Ok") { _, _ ->
+                action?.let { it() }
+            }.create().show()
+        }
+    }
+
+    private fun alert(title: String?, message: String) {
+        alert(title, message) {}
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }
