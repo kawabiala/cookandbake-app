@@ -52,6 +52,7 @@ class SignInActivity : BaseActivity() {
     private lateinit var signInView: ViewSettings
     private lateinit var resetPasswordView: ViewSettings
     private lateinit var unverifiedView: ViewSettings
+    private lateinit var verifyEmailView: ViewSettings
     private lateinit var verifiedView: ViewSettings
 
     private lateinit var authenticationViewModel: AuthenticationViewModel
@@ -137,6 +138,18 @@ class SignInActivity : BaseActivity() {
             showDelete = true
         )
 
+        verifyEmailView = ViewSettings(
+            headerLeftCaption = "Confirm with Password",
+            buttonLeftCaption = getString(R.string.close),
+            buttonRightCaption = "Confirm",
+            buttonLeftAction = closeAction,
+            buttonRightAction = verifyEmailAction,
+            editEmail = false,
+            showOnlyLeftHeader = true,
+            showReset = true,
+            showPrivacy = false
+        )
+
         verifiedView = ViewSettings(
             headerLeftCaption = getString(R.string.profile),
             buttonRightCaption = getString(R.string.close),
@@ -156,7 +169,7 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.linkMode.observe(this) {
             when(it) {
                 AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
-                AuthenticationViewModel.EmailLinkMode.VERIFY -> verifyEmailAction()
+                AuthenticationViewModel.EmailLinkMode.VERIFY -> applyViewSettings(verifyEmailView)
                 else -> { /* do nothing */ }
             }
         }
@@ -365,7 +378,8 @@ class SignInActivity : BaseActivity() {
 
     private val verifyEmailAction: () -> Unit = {
         Log.i(this::class.java.name, "Verify Email")
-        authenticationViewModel.verifyEmail(intent.data.toString())
+        val password = passwordEditText.text.toString()
+        authenticationViewModel.verifyEmail(password, intent)
     }
 
     private val closeAction: () -> Unit = {

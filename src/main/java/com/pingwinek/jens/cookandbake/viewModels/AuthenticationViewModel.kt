@@ -158,18 +158,16 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
-        var registrationSuccessful = false
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
                 result.postValue(ResultType.ACCOUNT_CREATED)
-                registrationSuccessful = true
+                suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
+                result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
                 postError(exception.toString())
             }
         }
-        Log.i(this::class.java.name, "registration: viewModelScope exited")
-        if (registrationSuccessful) sendVerificationEmail()
     }
 
     fun resetPassword(password: String, actionCode: String) {
@@ -216,7 +214,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.sendPasswordResetEmail(email, getActionCodeSettings()))
+                suspendedFunction(auth.sendPasswordResetEmail(email, getActionCodeSettings(true)))
                 result.postValue(ResultType.PASSWORD_RESET_SENT)
             } catch (exception: Exception) {
                 postError(exception.toString())
@@ -232,8 +230,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                //suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings()))
-                suspendedFunction(auth.sendSignInLinkToEmail(auth.currentUser!!.email!!, getActionCodeSettings()))
+                suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
+                //suspendedFunction(auth.sendSignInLinkToEmail(auth.currentUser!!.email!!, getActionCodeSettings()))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
                 postError(exception.toString())
@@ -266,28 +264,29 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         auth.signOut()
     }
 
-    fun verifyEmail(verificationLink: String) {
+    fun verifyEmail(password: String, intent: Intent) {
         if (auth.currentUser == null) {
             postError("no signed in user available")
             return
         }
-        if (auth.currentUser!!.email != emailFromIntent) {
-            postError("provided code not valid for signed in user")
-            return
-        }
-        if (verificationLink.isEmpty()) {
+        if (password.isEmpty()) {
             postError("verification link is empty string")
             return
         }
-        if (!auth.isSignInWithEmailLink(verificationLink)) {
+        if (!auth.isSignInWithEmailLink(intent.data.toString())) {
             postError("verification link is not valid")
             return
         }
 
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val credential = EmailAuthProvider.getCredentialWithLink(auth.currentUser!!.email!!, verificationLink)
+                val credentialWithLink = EmailAuthProvider.getCredentialWithLink(auth.currentUser!!.email!!, intent.data.toString())
+                suspendedFunction(auth.currentUser!!.reauthenticate(credentialWithLink))
+                Log.i(this::class.java.name, "isVerified: ${isVerified()}")
+                val credential = EmailAuthProvider.getCredential(auth.currentUser!!.email!!, password)
                 suspendedFunction(auth.currentUser!!.reauthenticate(credential))
+                Log.i(this::class.java.name, "isVerified: ${isVerified()}")
                 result.postValue(ResultType.EMAIL_VERIFIED)
             } catch (exception: Exception) {
                 postError(exception.toString())
@@ -306,14 +305,14 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             }
     }
 
-    private fun getActionCodeSettings(): ActionCodeSettings {
+    private fun getActionCodeSettings(handleInApp: Boolean): ActionCodeSettings {
         return ActionCodeSettings.newBuilder().apply {
             setAndroidPackageName(
                 "com.pingwinek.jens.cookandbake",
                 true,
                 null)
-            handleCodeInApp = true
-            url = "https://www.pingwinek.de/cookandbake"
+            handleCodeInApp = handleInApp
+            url = "https://pingwinekcooks.firebaseapp.com"
         }.build()
     }
 
