@@ -20,6 +20,7 @@ class SignInActivity : BaseActivity() {
     //TODO Reset password when not signed in does not work properly
     //TODO Status after email verification is not updated
     //TODO Sign out message shown too often -> reload before checking isVerified
+    //TODO Accept data policy
 
     /**
      *
@@ -63,6 +64,7 @@ class SignInActivity : BaseActivity() {
     private lateinit var authenticationViewModel: AuthenticationViewModel
 
     private var asRegistrationView: Boolean = true
+    private var currentView: ViewSettings = ViewSettings()
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Lifecycle Functions
@@ -123,6 +125,7 @@ class SignInActivity : BaseActivity() {
             buttonRightCaption = getString(R.string.setPassword),
             buttonLeftAction = closeAction,
             buttonRightAction = resetPasswordAction,
+            editEmail = false,
             showOnlyLeftHeader = true,
             showReset = true,
             showPrivacy = false
@@ -193,7 +196,8 @@ class SignInActivity : BaseActivity() {
                 AuthenticationViewModel.ResultType.PASSWORD_RESET_CONFIRMED -> {
                     alert(
                         "Password reset",
-                        "Your password is reset. Don't forget to remember it.")
+                        "Your password is reset. You can now sign in.")
+                    applyViewSettings(signInView)
                 }
                 AuthenticationViewModel.ResultType.EXCEPTION -> {
                     alert(
@@ -204,7 +208,6 @@ class SignInActivity : BaseActivity() {
                     "Message",
                     "Sorry, this message should not appear at all.") }
             }
-            manageView()
         }
 
         authenticationViewModel.linkMode.observe(this) {
@@ -219,20 +222,41 @@ class SignInActivity : BaseActivity() {
                 append(authenticationViewModel.email.value)
             }
         }
+
+        authenticationViewModel.authStatus.observe(this) { authStatus ->
+            when (authStatus) {
+                AuthenticationViewModel.AuthStatus.SIGNED_OUT -> {
+                    if (currentView != resetPasswordView) resetView()
+                }
+                AuthenticationViewModel.AuthStatus.SIGNED_IN -> {
+                    if (currentView != resetPasswordView) applyViewSettings(unverifiedView)
+                }
+                AuthenticationViewModel.AuthStatus.VERIFIED -> {
+                    if (currentView != resetPasswordView) applyViewSettings(verifiedView)
+                }
+                else -> {}
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        manageView()
+        resetView()
+
+        authenticationViewModel.checkAuthStatus()
         authenticationViewModel.retrieveEmail()
         authenticationViewModel.checkActionCodeForIntent(intent)
     }
 
+    /**
+     * Called before onResume:
+     * if there is a new intent, update the intent for this activity - otherwise the original
+     * intent would be used; compare documentation in [android.app.Activity]
+     */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        authenticationViewModel.retrieveEmail()
         intent?.let {
-            authenticationViewModel.checkActionCodeForIntent(it)
+            this.intent = it
         }
     }
 
@@ -240,6 +264,7 @@ class SignInActivity : BaseActivity() {
     // Manage View
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /*
     private fun manageView() {
         if (!authenticationViewModel.isSignedIn()) {
             if (asRegistrationView) {
@@ -254,7 +279,19 @@ class SignInActivity : BaseActivity() {
         }
     }
 
+     */
+
+    private fun resetView() {
+        if (asRegistrationView) {
+            applyViewSettings(registerView)
+        } else {
+            applyViewSettings(signInView)
+        }
+    }
+
     private fun applyViewSettings(settings: ViewSettings) {
+        currentView = settings
+
         adaptHeaderLeft(settings.headerLeftCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
         adaptHeaderRight(settings.headerRightCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
         adaptEmail(settings.editEmail)
@@ -279,7 +316,7 @@ class SignInActivity : BaseActivity() {
             }
             setOnClickListener {
                 asRegistrationView = true
-                manageView()
+                resetView()
             }
         }
     }
@@ -298,7 +335,7 @@ class SignInActivity : BaseActivity() {
             }
             setOnClickListener {
                 asRegistrationView = false
-                manageView()
+                resetView()
             }
         }
     }
@@ -358,6 +395,16 @@ class SignInActivity : BaseActivity() {
     // Auth-Actions
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private val closeAction: () -> Unit = {
+        Log.i(this::class.java.name, "Close")
+        finish()
+    }
+
+    private val deleteAction: () -> Unit = {
+        Log.i(this::class.java.name, "Delete")
+        authenticationViewModel.deleteAccount()
+    }
+
     private val registerAction: () -> Unit = {
         Log.i(this::class.java.name, "Register")
         val email = emailEditText.text.toString()
@@ -366,12 +413,10 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.register(email, password)
     }
 
-    private val signInAction: () -> Unit = {
-        Log.i(this::class.java.name, "Sign in")
-        val email = emailEditText.text.toString()
+    private val resetPasswordAction: () -> Unit = {
+        Log.i(this::class.java.name, "Reset Password")
         val password = passwordEditText.text.toString()
-
-        authenticationViewModel.signIn(email, password)
+        authenticationViewModel.resetPassword(password)
     }
 
     private val sendEmailVerificationAction: () -> Unit = {
@@ -385,31 +430,17 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.sendPasswordResetEmail(email)
     }
 
-    private val resetPasswordAction: () -> Unit = {
-        Log.i(this::class.java.name, "Reset Password")
+    private val signInAction: () -> Unit = {
+        Log.i(this::class.java.name, "Sign in")
+        val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
-        authenticationViewModel.resetPassword(password)
+
+        authenticationViewModel.signIn(email, password)
     }
 
     private val signOutAction: () -> Unit = {
         Log.i(this::class.java.name, "Sign out")
         authenticationViewModel.signOut()
-    }
-
-    private val deleteAction: () -> Unit = {
-        Log.i(this::class.java.name, "Delete")
-        authenticationViewModel.deleteAccount()
-    }
-/*
-    private val verifyEmailAction: () -> Unit = {
-        Log.i(this::class.java.name, "Verify Email")
-        val password = passwordEditText.text.toString()
-        authenticationViewModel.verifyEmail(password, intent)
-    }
-*/
-    private val closeAction: () -> Unit = {
-        Log.i(this::class.java.name, "Close")
-        finish()
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

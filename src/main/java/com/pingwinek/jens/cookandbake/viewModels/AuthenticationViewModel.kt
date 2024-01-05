@@ -47,15 +47,26 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         UNKNOWN
     }
 
+    enum class AuthStatus {
+        SIGNED_OUT,
+        SIGNED_IN,
+        VERIFIED
+    }
+
     private val auth = FirebaseAuth.getInstance()
 
     val result = MutableLiveData<ResultType>()
-    var errorMessage: String = ""
     val linkMode = MutableLiveData<EmailLinkMode>()
     val email = MutableLiveData<String>()
+    /*
+    Call via changeStatus to make sure, that value is only updated, when status changes
+     */
+    val authStatus = MutableLiveData<AuthStatus>()
+
+    var errorMessage: String = ""
 
     private var emailFromIntent: String? = null
-    private var oobCode: String = ""
+    private var oobCode: String? = null
 
     init {
         auth.addAuthStateListener(this)
@@ -68,6 +79,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     override fun onAuthStateChanged(p0: FirebaseAuth) {
         if (auth.currentUser == null) {
             result.postValue(ResultType.SIGNED_OUT)
+            changeAuthStatus(AuthStatus.SIGNED_OUT)
             email.postValue("")
         }
     }
@@ -77,6 +89,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun checkActionCodeForIntent(intent: Intent) {
+        emailFromIntent = null
         if (intent.data == null) {
             Log.i(this::class.java.name, "no intent data")
             return
@@ -91,38 +104,40 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val actionCodeResult = suspendedFunction(auth.checkActionCode(actionCode))
-                when (actionCodeResult.operation) {
-                    0 -> {
-                        oobCode = actionCode
-                        actionCodeResult.info?.let {
-                            emailFromIntent = it.email
-                        }
-                        linkMode.postValue(EmailLinkMode.RESET)
+                if (actionCodeResult.operation == 0) {
+                    oobCode = actionCode
+                    actionCodeResult.info?.let {
+                        emailFromIntent = it.email
                     }
-/*
-                    1 -> {
-                        oobCode.postValue(actionCode!!)
-                        actionCodeResult.info?.let {
-                            emailFromIntent = it.email
-                        }
-                        linkMode.postValue(EmailLinkMode.VERIFY)
-                    }
-
-                    4 -> {
-                        oobCode.postValue(actionCode!!)
-                        actionCodeResult.info?.let {
-                            emailFromIntent = it.email
-                        }
-                        linkMode.postValue(EmailLinkMode.VERIFY)
-                    }
-*/
-                    else -> {
+                    linkMode.postValue(EmailLinkMode.RESET)
+                } else {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
                         postError("unknown action code for operation ${actionCodeResult.operation}")
-                    }
                 }
             } catch (exception: Exception) {
                 postError(exception.toString())
+            }
+        }
+    }
+
+    fun checkAuthStatus() {
+        if (auth.currentUser == null) {
+            changeAuthStatus(AuthStatus.SIGNED_OUT)
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                suspendedFunction(auth.currentUser!!.reload())
+                if (auth.currentUser == null) {
+                    changeAuthStatus(AuthStatus.SIGNED_OUT)
+                } else if (auth.currentUser!!.isEmailVerified) {
+                    changeAuthStatus(AuthStatus.VERIFIED)
+                } else {
+                    changeAuthStatus(AuthStatus.SIGNED_IN)
+                }
+            } catch (exception: Exception) {
+                changeAuthStatus(AuthStatus.SIGNED_OUT)
             }
         }
     }
@@ -137,6 +152,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             try {
                 suspendedFunction(auth.currentUser!!.delete())
                 result.postValue(ResultType.ACCOUNT_DELETED)
+                changeAuthStatus(AuthStatus.SIGNED_OUT)
                 email.postValue("")
             } catch (exception: Exception) {
                 postError(exception)
@@ -167,6 +183,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 result.postValue(ResultType.ACCOUNT_CREATED)
                 suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
+                changeAuthStatus(AuthStatus.SIGNED_IN)
             } catch (exception: Exception) {
                 postError(exception)
             }
@@ -179,27 +196,43 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             return
         }
         if (password.isEmpty()) {
-            postError("email is empty string")
+            postError("password is empty string")
             return
         }
-        if (oobCode.isEmpty()) {
-            postError("action code is empty string")
+        if (oobCode.isNullOrEmpty()) {
+            postError("action code is null or empty")
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.confirmPasswordReset(oobCode, password))
+                suspendedFunction(auth.confirmPasswordReset(oobCode!!, password))
                 result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
+                changeAuthStatus(AuthStatus.SIGNED_OUT)
             } catch (exception: Exception) {
                 postError(exception.toString())
+            } finally {
+                emailFromIntent = null
+                oobCode = null
             }
         }
     }
 
     fun retrieveEmail() {
-        auth.currentUser?.let { user ->
-            email.postValue(user.email)
+        if (auth.currentUser == null) {
+            email.postValue("")
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    auth.currentUser!!.reload()
+                    auth.currentUser?.let { user ->
+                        email.postValue(user.email)
+                    }
+                } catch (exception: Exception) {
+                    email.postValue("")
+                    postError("Error when retrieving email $exception")
+                }
+            }
         }
     }
 
@@ -255,6 +288,16 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             try {
                 suspendedFunction(auth.signInWithEmailAndPassword(email, password))
                 result.postValue(ResultType.SIGNED_IN)
+
+                suspendedFunction(auth.currentUser!!.reload())
+
+                if (auth.currentUser == null) {
+                    changeAuthStatus(AuthStatus.SIGNED_OUT)
+                } else if (auth.currentUser!!.isEmailVerified) {
+                    changeAuthStatus(AuthStatus.VERIFIED)
+                } else {
+                    changeAuthStatus(AuthStatus.SIGNED_IN)
+                }
             } catch (exception: Exception) {
                 postError(exception)
             }
@@ -265,41 +308,15 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         auth.signOut()
     }
 
-/*
-    fun verifyEmail(password: String, intent: Intent) {
-        if (auth.currentUser == null) {
-            postError("no signed in user available")
-            return
-        }
-        if (password.isEmpty()) {
-            postError("verification link is empty string")
-            return
-        }
-        if (!auth.isSignInWithEmailLink(intent.data.toString())) {
-            postError("verification link is not valid")
-            return
-        }
-
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val credentialWithLink = EmailAuthProvider.getCredentialWithLink(auth.currentUser!!.email!!, intent.data.toString())
-                suspendedFunction(auth.currentUser!!.reauthenticate(credentialWithLink))
-                Log.i(this::class.java.name, "isVerified: ${isVerified()}")
-                val credential = EmailAuthProvider.getCredential(auth.currentUser!!.email!!, password)
-                suspendedFunction(auth.currentUser!!.reauthenticate(credential))
-                Log.i(this::class.java.name, "isVerified: ${isVerified()}")
-                result.postValue(ResultType.EMAIL_VERIFIED)
-            } catch (exception: Exception) {
-                postError(exception.toString())
-            }
-        }
-    }
-*/
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Support Functions
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private fun changeAuthStatus(newAuthStatus: AuthStatus) {
+        if (newAuthStatus != authStatus.value && authStatus.value != null) {
+            authStatus.postValue(newAuthStatus)
+        }
+    }
 
     private fun extractActionCode(intent: Intent): String? {
         return intent.data?.getQueryParameter("link")
