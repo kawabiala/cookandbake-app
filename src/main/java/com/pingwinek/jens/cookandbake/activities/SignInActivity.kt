@@ -17,11 +17,6 @@ import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class SignInActivity : BaseActivity() {
 
-    //TODO Reset password when not signed in does not work properly
-    //TODO Status after email verification is not updated
-    //TODO Sign out message shown too often -> reload before checking isVerified
-    //TODO Accept data policy
-
     /**
      *
      */
@@ -181,12 +176,18 @@ class SignInActivity : BaseActivity() {
                 AuthenticationViewModel.ResultType.SIGNED_OUT -> {
                     alert(
                         "Sign out successful",
-                        "You can now sign in again")
+                        "You can now sign in again") {
+                        asRegistrationView = false
+                        resetView()
+                    }
                 }
                 AuthenticationViewModel.ResultType.ACCOUNT_DELETED -> {
                     alert(
                         "Account deleted",
-                        "You can register a new account")
+                        "You can register a new account") {
+                        asRegistrationView = true
+                        resetView()
+                    }
                 }
                 AuthenticationViewModel.ResultType.PASSWORD_RESET_SENT -> {
                     alert(
@@ -197,7 +198,8 @@ class SignInActivity : BaseActivity() {
                     alert(
                         "Password reset",
                         "Your password is reset. You can now sign in.")
-                    applyViewSettings(signInView)
+                    asRegistrationView = false
+                    applyViewSettings(signInView) // resetView won't work in this case
                 }
                 AuthenticationViewModel.ResultType.EXCEPTION -> {
                     alert(
@@ -263,23 +265,6 @@ class SignInActivity : BaseActivity() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Manage View
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /*
-    private fun manageView() {
-        if (!authenticationViewModel.isSignedIn()) {
-            if (asRegistrationView) {
-                applyViewSettings(registerView)
-            } else {
-                applyViewSettings(signInView)
-            }
-        } else if (!authenticationViewModel.isSignedInAndVerified()) {
-            applyViewSettings(unverifiedView)
-        } else {
-            applyViewSettings(verifiedView)
-        }
-    }
-
-     */
 
     private fun resetView() {
         if (asRegistrationView) {
@@ -397,6 +382,7 @@ class SignInActivity : BaseActivity() {
 
     private val closeAction: () -> Unit = {
         Log.i(this::class.java.name, "Close")
+        startActivity(Intent(this, RecipeListingActivity::class.java))
         finish()
     }
 
@@ -409,8 +395,9 @@ class SignInActivity : BaseActivity() {
         Log.i(this::class.java.name, "Register")
         val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
+        val dataPolicyChecked = checkBox.isChecked
 
-        authenticationViewModel.register(email, password)
+        authenticationViewModel.register(email, password, dataPolicyChecked)
     }
 
     private val resetPasswordAction: () -> Unit = {

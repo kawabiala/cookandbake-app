@@ -12,13 +12,24 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class AuthenticationViewModel(application: Application) : AndroidViewModel(application), FirebaseAuth.AuthStateListener {
+/**
+ * TODO check email format, check password security - at registration
+ */
+class AuthenticationViewModel(application: Application) : AndroidViewModel(application) {
 
-    class PingwinekAuthenticationException(private val exception: Exception) : Exception(exception) {
+    private class AuthStateListener(private val continuation: Continuation<Boolean>): FirebaseAuth.AuthStateListener {
+        override fun onAuthStateChanged(auth: FirebaseAuth) {
+            continuation.resume (auth.currentUser != null)
+        }
+
+    }
+
+    private class PingwinekAuthenticationException(private val exception: Exception) : Exception(exception) {
 
         constructor(message: String): this(Exception(message))
 
@@ -67,22 +78,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     private var emailFromIntent: String? = null
     private var oobCode: String? = null
-
-    init {
-        auth.addAuthStateListener(this)
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Implement Authentication State Listener
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    override fun onAuthStateChanged(p0: FirebaseAuth) {
-        if (auth.currentUser == null) {
-            result.postValue(ResultType.SIGNED_OUT)
-            changeAuthStatus(AuthStatus.SIGNED_OUT)
-            email.postValue("")
-        }
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Authentication Functions
@@ -160,13 +155,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun isSignedIn(): Boolean = auth.currentUser != null
-
-    fun isVerified(): Boolean = auth.currentUser?.isEmailVerified ?: false
-
-    fun isSignedInAndVerified(): Boolean = isSignedIn() && isVerified()
-
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String, dataPolicyChecked: Boolean) {
         if (email.isEmpty()) {
             postError("email is empty string")
             return
@@ -174,6 +163,11 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         if (password.isEmpty()) {
             postError("password is empty string")
+            return
+        }
+
+        if (!dataPolicyChecked) {
+            postError("Please, agree with the data protection policy")
             return
         }
 
@@ -305,7 +299,34 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun signOut() {
-        auth.signOut()
+        try {
+            viewModelScope.launch(Dispatchers.IO) {
+                /*
+                auth.signOut() does not provide a task, but only triggers an event, that
+                a listener can receive.
+
+                We temporarily add a listener and remove it immediately after signOut to
+                avoid signOut messages in cases like password reset, account deletion or
+                resuming the activity.
+                 */
+                var authStateListener: AuthStateListener?
+                val signedOut = suspendCoroutine { continuation ->
+                    authStateListener = AuthStateListener(continuation)
+                    auth.addAuthStateListener(authStateListener!!)
+                    auth.signOut()
+                }
+
+                authStateListener?.let { auth.removeAuthStateListener(it) }
+
+                if (signedOut) {
+                    result.postValue(ResultType.SIGNED_OUT)
+                    changeAuthStatus(AuthStatus.SIGNED_OUT)
+                    email.postValue("")
+                }
+            }
+        } catch (exception: Exception) {
+            postError(exception)
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +334,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun changeAuthStatus(newAuthStatus: AuthStatus) {
-        if (newAuthStatus != authStatus.value && authStatus.value != null) {
+        if (newAuthStatus != authStatus.value) {
             authStatus.postValue(newAuthStatus)
         }
     }
