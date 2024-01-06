@@ -12,24 +12,31 @@
     <string name="share">Dziel</string>
     <string name="refresh">Zaaktualizuj</string>
 
+    <string name="authenticationMessage">Wiadomość o autentyfikacji</string>
+    <string name="errorMessage">Wiadomość o błędzie</string>
+
     <string name="login">Login</string>
     <string name="loginFailed">Login się nie udało</string>
+    <string name="loggedIn">Jesteś zalogowane</string>
     <string name="is_logged_in">%1$s (zalogowane)</string>
     <string name="logged_in_as">Zalogowane jako: %1$s</string>
     <string name="is_not_logged_in">%1$s (nie zalogowane)</string>
 
     <string name="logout">Logout</string>
+    <string name="loggedOut">Jesteś wylogowane</string>
     <string name="logoutFailed">Logout się nie udało</string>
     <string name="confirmLogout">Logout obecnege użytkownika?</string>
 
     <string name="setPassword">Wpisać hasło</string>
     <string name="password">Hasło</string>
     <string name="lostPassword">Resetować hasło</string>
+    <string name="lostPasswordSent">Email do resetowania hasła został wysłany.</string>
+    <string name="lostPasswordSentLong">mail do resetowania hasła został wysłany. Jeśli nie dostałeś emailu, sprawdź, aby adres emailowy się zgadzał. Może nie ma konto pod tym emailem?</string>
     <string name="lostPasswordFailed">Resetowanie hasła się nie udało</string>
     <string name="newPassword">Nowe hasło</string>
     <string name="oldPassword">Stare hasło</string>
     <string name="changePassword">Zmienić hasło</string>
-    <string name="PasswordChanged">Hasło zostało zmienione</string>
+    <string name="PasswordChanged">Hasło zostało zmienione. Możesz go używać na login.</string>
     <string name="changePasswordFailed">Zmiana hasła się nie udało</string>
 
     <string name="profile">Profil</string>
@@ -44,6 +51,9 @@
     <string name="confirmationFailed">Potwierdzenie profilu się nie udało</string>
     <string name="declareAcceptanceOfDataprotection">Tak, zgadzam się z zapamiętaniem moich danych i akceptuję <annotation clickableArea="dataprotection">Politykę prywatności</annotation>.</string>
     <string name="sendVerificationEmail">Wysłać link do weryfikacji emailu</string>
+
+    <string name="accountCreated">Konto zostało założone.</string>
+    <string name="accountDeleted">Konto zostało zmazane.</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Polityka prywatności</string>

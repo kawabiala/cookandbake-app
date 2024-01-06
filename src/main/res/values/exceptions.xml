@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unknownException">Something went wrong</string>
+    <string name="noSignedInUser">No user is signed in</string>
+    <string name="deleteFailed">Deleting account failed: %1$s</string>
+</resources>

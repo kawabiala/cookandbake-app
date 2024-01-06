@@ -12,24 +12,31 @@
     <string name="share">Teilen</string>
     <string name="refresh">Aktualisieren</string>
 
+    <string name="authenticationMessage">Authentication Message</string>
+    <string name="errorMessage">Fehlermeldung</string>
+
     <string name="login">Login</string>
     <string name="loginFailed">Login ist fehlgeschlagen.</string>
+    <string name="loggedIn">Du bist jetzt eingeloggt</string>
     <string name="is_logged_in">%1$s (angemeldet)</string>
     <string name="logged_in_as">Angemeldet als: %1$s</string>
     <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
 
     <string name="logout">Logout</string>
+    <string name="loggedOut">Du bist jetzt ausgeloggt.</string>
     <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
     <string name="confirmLogout">Aktuellen Benutzer ausloggen?</string>
 
     <string name="setPassword">Passwort setzen</string>
     <string name="password">Passwort</string>
     <string name="lostPassword">Passwort zurücksetzen</string>
+    <string name="lostPasswordSent">Eine Email zum Zurücksetzen des Passworts wurde versendet.</string>
+    <string name="lostPasswordSentLong">Eine Email zum Zurücksetzen des Passworts wurde versendet. Wenn Du keine Email erhalten hast, prüfe nach, ob die Email-Adresse korrekt ist. Vielleicht hast Du kein Konto mit dieser Email?</string>
     <string name="lostPasswordFailed">Rücksetzen des Passworts fehlgeschlagen</string>
     <string name="newPassword">Neues Passwort</string>
     <string name="oldPassword">Bisheriges Passwort</string>
     <string name="changePassword">Passwort ändern</string>
-    <string name="PasswordChanged">Passwort wurde geändert</string>
+    <string name="PasswordChanged">Das Passwort wurde geändert. Du kannst Dich jetzt einloggen.</string>
     <string name="changePasswordFailed">Das Passwort konnte nicht geändert werden</string>
 
     <string name="profile">Profil</string>
@@ -44,6 +51,9 @@
     <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
     <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
     <string name="sendVerificationEmail">Bestätigungs-Link senden</string>
+
+    <string name="accountCreated">Das Konto wurde angelegt</string>
+    <string name="accountDeleted">Das Konto wurde gelöscht</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>

@@ -12,24 +12,31 @@
     <string name="share">Share</string>
     <string name="refresh">Refresh</string>
 
+    <string name="authenticationMessage">Authentication Message</string>
+    <string name="errorMessage">Error Message</string>
+
     <string name="login">Login</string>
     <string name="loginFailed">Login failed.</string>
+    <string name="loggedIn">You are signed in</string>
     <string name="is_logged_in">%1$s (logged in)</string>
     <string name="logged_in_as">Logged in as: %1$s</string>
     <string name="is_not_logged_in">%1$s (not logged in)</string>
 
     <string name="logout">Logout</string>
+    <string name="loggedOut">You are signed out</string>
     <string name="logoutFailed">Logout failed.</string>
     <string name="confirmLogout">Log out current user?</string>
 
     <string name="setPassword">Set password</string>
     <string name="password">password</string>
     <string name="lostPassword">Reset password</string>
+    <string name="lostPasswordSent">Password reset email was sent.</string>
+    <string name="lostPasswordSentLong">Password reset email was sent. If you have not received an email, make sure the email address correct. Maybe you do not have an account with this email address?</string>
     <string name="lostPasswordFailed">Resetting password failed</string>
     <string name="newPassword">New password</string>
     <string name="oldPassword">Old password</string>
     <string name="changePassword">Change password</string>
-    <string name="PasswordChanged">Password changed</string>
+    <string name="PasswordChanged">Your password is reset. You can now sign in.</string>
     <string name="changePasswordFailed">Change password failed</string>
 
     <string name="profile">Profil</string>
@@ -44,6 +51,9 @@
     <string name="confirmationFailed">Confirmation of profile failed.</string>
     <string name="declareAcceptanceOfDataprotection">Yes, I agree with storing my data and I accept the <annotation clickableArea="dataprotection">privacy statement</annotation>.</string>
     <string name="sendVerificationEmail">Send verification email</string>
+
+    <string name="accountCreated">Account created</string>
+    <string name="accountDeleted">Account deleted</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Privacy statement</string>

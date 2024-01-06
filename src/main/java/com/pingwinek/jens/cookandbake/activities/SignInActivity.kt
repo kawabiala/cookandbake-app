@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -159,56 +158,54 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.result.observe(this) {
             when (authenticationViewModel.result.value) {
                 AuthenticationViewModel.ResultType.ACCOUNT_CREATED -> {
-                    toast("Account created")
+                    toast(getString(R.string.accountCreated))
                 }
                 AuthenticationViewModel.ResultType.VERIFICATION_EMAIL_SENT -> {
                     alert(
-                        "Authentication Message",
-                        "A verification email has been sent to your inbox.",
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.confirmationSent),
                         closeAction)
                 }
                 AuthenticationViewModel.ResultType.SIGNED_IN -> {
                     alert(
-                        "Sign in successful",
-                        "you are signed in",
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.loggedIn),
                         closeAction)
                 }
                 AuthenticationViewModel.ResultType.SIGNED_OUT -> {
                     alert(
-                        "Sign out successful",
-                        "You can now sign in again") {
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.loggedOut)) {
                         asRegistrationView = false
                         resetView()
                     }
                 }
                 AuthenticationViewModel.ResultType.ACCOUNT_DELETED -> {
                     alert(
-                        "Account deleted",
-                        "You can register a new account") {
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.accountDeleted)) {
                         asRegistrationView = true
                         resetView()
                     }
                 }
                 AuthenticationViewModel.ResultType.PASSWORD_RESET_SENT -> {
                     alert(
-                        "Reset Email Sent",
-                        "You have received an email with a reset link. Check your inbox. If you have not received an email, please, make sure that the provided email is correct and that you have an account with PingwinekCooks!")
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.lostPasswordSentLong))
                 }
                 AuthenticationViewModel.ResultType.PASSWORD_RESET_CONFIRMED -> {
                     alert(
-                        "Password reset",
-                        "Your password is reset. You can now sign in.")
+                        getString(R.string.authenticationMessage),
+                        getString(R.string.PasswordChanged))
                     asRegistrationView = false
                     applyViewSettings(signInView) // resetView won't work in this case
                 }
                 AuthenticationViewModel.ResultType.EXCEPTION -> {
                     alert(
-                        "Exception",
+                        getString(R.string.errorMessage),
                         authenticationViewModel.errorMessage)
                 }
-                else -> { alert(
-                    "Message",
-                    "Sorry, this message should not appear at all.") }
+                else -> {}
             }
         }
 
@@ -381,18 +378,15 @@ class SignInActivity : BaseActivity() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private val closeAction: () -> Unit = {
-        Log.i(this::class.java.name, "Close")
         startActivity(Intent(this, RecipeListingActivity::class.java))
         finish()
     }
 
     private val deleteAction: () -> Unit = {
-        Log.i(this::class.java.name, "Delete")
         authenticationViewModel.deleteAccount()
     }
 
     private val registerAction: () -> Unit = {
-        Log.i(this::class.java.name, "Register")
         val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
         val dataPolicyChecked = checkBox.isChecked
@@ -401,24 +395,20 @@ class SignInActivity : BaseActivity() {
     }
 
     private val resetPasswordAction: () -> Unit = {
-        Log.i(this::class.java.name, "Reset Password")
         val password = passwordEditText.text.toString()
         authenticationViewModel.resetPassword(password)
     }
 
     private val sendEmailVerificationAction: () -> Unit = {
-        Log.i(this::class.java.name, "Send Email Verification")
         authenticationViewModel.sendVerificationEmail()
     }
 
     private val sendResetEmailAction: () -> Unit = {
-        Log.i(this::class.java.name, "Reset")
         val email = emailEditText.text.toString()
         authenticationViewModel.sendPasswordResetEmail(email)
     }
 
     private val signInAction: () -> Unit = {
-        Log.i(this::class.java.name, "Sign in")
         val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
 
@@ -426,7 +416,6 @@ class SignInActivity : BaseActivity() {
     }
 
     private val signOutAction: () -> Unit = {
-        Log.i(this::class.java.name, "Sign out")
         authenticationViewModel.signOut()
     }
 
@@ -438,7 +427,7 @@ class SignInActivity : BaseActivity() {
         AlertDialog.Builder(this).apply {
             setMessage(message)
             title?.let { setTitle(it) }
-            setPositiveButton("Ok") { _, _ ->
+            setPositiveButton(getString(R.string.ok)) { _, _ ->
                 action?.let { it() }
             }.create().show()
         }

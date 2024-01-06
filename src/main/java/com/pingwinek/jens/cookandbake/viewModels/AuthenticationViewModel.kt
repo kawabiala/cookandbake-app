@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
+import com.pingwinek.jens.cookandbake.BuildConfig
+import com.pingwinek.jens.cookandbake.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.Continuation
@@ -86,15 +88,10 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     fun checkActionCodeForIntent(intent: Intent) {
         emailFromIntent = null
         if (intent.data == null) {
-            Log.i(this::class.java.name, "no intent data")
             return
         }
 
-        val actionCode = extractActionCode(intent)
-        if (actionCode == null) {
-            postError("no action code available")
-            return
-        }
+        val actionCode = extractActionCode(intent) ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -107,10 +104,10 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                     linkMode.postValue(EmailLinkMode.RESET)
                 } else {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
-                        postError("unknown action code for operation ${actionCodeResult.operation}")
                 }
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(getString(R.string.unknownException))
+                logError(exception)
             }
         }
     }
@@ -139,7 +136,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     fun deleteAccount() {
         if (auth.currentUser == null) {
-            postError("no signed in user")
+            postError(getString(R.string.noSignedInUser))
             return
         }
 
@@ -150,7 +147,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 changeAuthStatus(AuthStatus.SIGNED_OUT)
                 email.postValue("")
             } catch (exception: Exception) {
-                postError(exception)
+                postError(getString(R.string.deleteFailed, exception.localizedMessage))
+                logError(exception)
             }
         }
     }
@@ -346,15 +344,38 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             }
     }
 
+    /**
+     * Provides the [ActionCodeSettings] for verification and reset password emails. Uses
+     * [BuildConfig.APPLICATION_ID] from the gradle build configuration as package name. The
+     * redirect URL for redirecting to the app after verification is configured in urls.xml.
+     *
+     * @param handleInApp false for verification email and true for reset password email
+     *
+     * The verification email cannot be handled inside the app due to missing verification method
+     * in the Firebase Auth api. The reset password email needs to be handled in the app, where
+     * we can set a new password.
+     */
     private fun getActionCodeSettings(handleInApp: Boolean): ActionCodeSettings {
         return ActionCodeSettings.newBuilder().apply {
             setAndroidPackageName(
-                "com.pingwinek.jens.cookandbake",
+                BuildConfig.APPLICATION_ID,
                 true,
                 null)
             handleCodeInApp = handleInApp
-            url = "https://pingwinekcooks.firebaseapp.com"
+            url = getApplication<Application>().getString(R.string.URL_VERIFY_REDIRECT)
         }.build()
+    }
+
+    private fun getString(id: Int): String {
+        return getApplication<Application>().getString(id)
+    }
+
+    private fun getString(id: Int, placeholder: String?): String {
+        return getApplication<Application>().getString(id, placeholder)
+    }
+
+    private fun logError(exception: Exception) {
+        Log.e(this::class.java.name, exception.toString())
     }
 
     private fun postError(message: String) {
