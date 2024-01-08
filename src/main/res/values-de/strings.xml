@@ -16,7 +16,6 @@
     <string name="errorMessage">Fehlermeldung</string>
 
     <string name="login">Login</string>
-    <string name="loginFailed">Login ist fehlgeschlagen.</string>
     <string name="loggedIn">Du bist jetzt eingeloggt</string>
     <string name="is_logged_in">%1$s (angemeldet)</string>
     <string name="logged_in_as">Angemeldet als: %1$s</string>
@@ -24,7 +23,6 @@
 
     <string name="logout">Logout</string>
     <string name="loggedOut">Du bist jetzt ausgeloggt.</string>
-    <string name="logoutFailed">Logout ist fehlgeschlagen.</string>
     <string name="confirmLogout">Aktuellen Benutzer ausloggen?</string>
 
     <string name="setPassword">Passwort setzen</string>
@@ -42,7 +40,6 @@
     <string name="profile">Profil</string>
     <string name="register">Profil anlegen</string>
     <string name="registrationIncomplete">Registrierung unvollständig</string>
-    <string name="registrationFailed">Profil anlegen fehlgeschlagen</string>
     <string name="unsubscribe">Profil löschen</string>
     <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
     <string name="no_account">Kein Profil angemeldet</string>

@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="unknownException">Something went wrong</string>
+
     <string name="noSignedInUser">No user is signed in</string>
     <string name="deleteFailed">Deleting account failed: %1$s</string>
+    <string name="registrationFailed">Registration failed: $1%s</string>
+    <string name="loginFailed">Login failed: $1%s</string>
+    <string name="logoutFailed">Logout failed: $1%s</string>
+    <string name="resetFailed">Reset password failed: $1%s</string>
+    <string name="retrieveEmailFailed">Retrieving email failed: $1%s</string>
+    <string name="resetForWrongEmail">The reset link is not valid for the signed in user</string>
+    <string name="sendVerificationFailed">Send verification email failed: $1%s</string>
+    <string name="sendResetFailed">Send password reset email failed: $1%s</string>
+
+    <string name="emailMalformatted">The email is empty or not correctly formatted</string>
+    <string name="passwordMalformatted">The password is empty or not correctly formatted</string>
+
+    <string name="dataProtectionNotChecked">Please, agree with the data protection policy</string>
+
 </resources>

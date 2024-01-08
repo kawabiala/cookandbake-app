@@ -17,7 +17,6 @@
     <string name="errorMessage">Error Message</string>
 
     <string name="login">Login</string>
-    <string name="loginFailed">Login failed.</string>
     <string name="loggedIn">You are signed in</string>
     <string name="is_logged_in">%1$s (logged in)</string>
     <string name="logged_in_as">Logged in as: %1$s</string>
@@ -25,7 +24,6 @@
 
     <string name="logout">Logout</string>
     <string name="loggedOut">You are signed out</string>
-    <string name="logoutFailed">Logout failed.</string>
     <string name="confirmLogout">Log out current user?</string>
 
     <string name="setPassword">Set password</string>
@@ -43,7 +41,6 @@
     <string name="profile">Profil</string>
     <string name="register">Register</string>
     <string name="registrationIncomplete">Registration Incomplete</string>
-    <string name="registrationFailed">Registration failed</string>
     <string name="unsubscribe">Delete profile</string>
     <string name="confirmUnsubscribe">Really delete profile?</string>
     <string name="no_account">No profile logged in</string>

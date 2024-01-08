@@ -155,17 +155,17 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     fun register(email: String, password: String, dataPolicyChecked: Boolean) {
         if (email.isEmpty()) {
-            postError("email is empty string")
+            postError(getString(R.string.emailMalformatted))
             return
         }
 
         if (password.isEmpty()) {
-            postError("password is empty string")
+            postError(getString(R.string.passwordMalformatted))
             return
         }
 
         if (!dataPolicyChecked) {
-            postError("Please, agree with the data protection policy")
+            postError(getString(R.string.dataProtectionNotChecked))
             return
         }
 
@@ -177,22 +177,24 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
                 changeAuthStatus(AuthStatus.SIGNED_IN)
             } catch (exception: Exception) {
-                postError(exception)
+                postError(getString(R.string.registrationFailed, exception.localizedMessage))
+                logError(exception)
             }
         }
     }
 
     fun resetPassword(password: String) {
         if (auth.currentUser != null && auth.currentUser!!.email != emailFromIntent) {
-            postError("provided code not valid for signed in user")
+            postError(getString(R.string.resetForWrongEmail))
             return
         }
         if (password.isEmpty()) {
-            postError("password is empty string")
+            postError(getString(R.string.passwordMalformatted))
             return
         }
         if (oobCode.isNullOrEmpty()) {
-            postError("action code is null or empty")
+            postError(getString(R.string.unknownException))
+            logError(Exception("action code is null or empty"))
             return
         }
 
@@ -202,7 +204,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
                 changeAuthStatus(AuthStatus.SIGNED_OUT)
             } catch (exception: Exception) {
-                postError(exception.toString())
+                postError(getString(R.string.resetFailed, exception.localizedMessage))
+                logError(exception)
             } finally {
                 emailFromIntent = null
                 oobCode = null
@@ -222,7 +225,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                     }
                 } catch (exception: Exception) {
                     email.postValue("")
-                    postError("Error when retrieving email $exception")
+                    postError(getString(R.string.retrieveEmailFailed, exception.localizedMessage))
+                    logError(exception)
                 }
             }
         }
@@ -230,7 +234,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     fun sendPasswordResetEmail(email: String) {
         if (email.isEmpty()) {
-            postError("email is empty string")
+            postError(getString(R.string.emailMalformatted))
             return
         }
 
@@ -242,14 +246,15 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                         getActionCodeSettings(true)))
                 result.postValue(ResultType.PASSWORD_RESET_SENT)
             } catch (exception: Exception) {
-                postError(exception)
+                postError(getString(R.string.sendResetFailed, exception.localizedMessage))
+                logError(exception)
             }
         }
     }
 
     fun sendVerificationEmail() {
         if (auth.currentUser == null) {
-            postError("no signed in user available")
+            postError(getString(R.string.noSignedInUser))
             return
         }
 
@@ -260,19 +265,20 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                         getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
-                postError(exception)
+                postError(getString(R.string.sendVerificationEmail, exception.localizedMessage))
+                logError(exception)
             }
         }
     }
 
     fun signIn(email: String, password: String) {
         if (email.isEmpty()) {
-            postError("email is empty string")
+            postError(getString(R.string.emailMalformatted))
             return
         }
 
         if (password.isEmpty()) {
-            postError("password is empty string")
+            postError(getString(R.string.passwordMalformatted))
             return
         }
 
@@ -291,7 +297,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                     changeAuthStatus(AuthStatus.SIGNED_IN)
                 }
             } catch (exception: Exception) {
-                postError(exception)
+                postError(getString(R.string.loginFailed, exception.localizedMessage))
+                logError(exception)
             }
         }
     }
@@ -323,7 +330,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 }
             }
         } catch (exception: Exception) {
-            postError(exception)
+            postError(getString(R.string.logoutFailed, exception.localizedMessage))
+            logError(exception)
         }
     }
 
@@ -393,7 +401,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 if (resultingTask.isSuccessful) {
                     continuation.resume(task.result)
                 } else {
-                    continuation.resumeWithException(task.exception ?: Exception("Unknown exception - something went wrong"))
+                    continuation.resumeWithException(task.exception ?: Exception(getString(R.string.unknownException)))
                 }
             }
         }
