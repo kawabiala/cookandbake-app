@@ -20,10 +20,8 @@ import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import java.util.LinkedList
-
-// TODO move into Constants.kt - is also used in RecipeActivity
-const val EXTRA_RECIPE_ID = "recipeID"
 
 class RecipeListingActivity : BaseActivity() {
 

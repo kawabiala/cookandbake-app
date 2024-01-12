@@ -10,7 +10,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.OptionMenu
 
 /*
-Sets option menu, handles user interaction with login / logout and defines handler for login and logout events
+Sets option menu
  */
 abstract class BaseActivity : AppCompatActivity() {
 

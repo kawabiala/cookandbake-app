@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.models
 
 import com.google.firebase.firestore.DocumentSnapshot
-import com.pingwinek.jens.cookandbake.lib.sync.ModelLocal
 
 data class RecipeFB(
     override val id: String,

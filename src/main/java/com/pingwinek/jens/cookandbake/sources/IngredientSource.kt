@@ -1,9 +1,8 @@
 package com.pingwinek.jens.cookandbake.sources
 
-import com.pingwinek.jens.cookandbake.lib.sync.Promise
 import com.pingwinek.jens.cookandbake.lib.sync.Source
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import java.util.*
+import java.util.LinkedList
 
 /**
  * Interface for retrieving and manipulating ingredients
@@ -17,7 +16,7 @@ interface IngredientSource<T : Ingredient> :
      * Retrieves all ingredients for a given recipe
      *
      * @param recipeId the id of the recipe, to which the ingredients belong
-     * @return a [Promise] with a linked list of the given subtype of [Ingredient]
+     * @return a linked list of the given subtype of [Ingredient]
      */
     suspend fun getAllForRecipeId(recipeId: String) : LinkedList<T>
 }
