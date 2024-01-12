@@ -22,6 +22,7 @@ import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
+// TODO move into Constants.kt - is also used in RecipeActivity
 const val EXTRA_RECIPE_ID = "recipeID"
 
 class RecipeListingActivity : BaseActivity() {
@@ -69,18 +70,6 @@ class RecipeListingActivity : BaseActivity() {
                 R.drawable.ic_login_person_black,
                 true
             ) {
-                /*
-                AlertDialog.Builder(this).apply {
-                    setMessage(resources.getString(
-                        R.string.logged_in_as,
-                        auth.currentUser!!.email
-                    ))
-                    setPositiveButton("Ok") { _, _ ->
-                        // do nothing
-                    }
-                }.create().show()
-
-                 */
                 startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
                 true
             }
@@ -92,7 +81,6 @@ class RecipeListingActivity : BaseActivity() {
                 true
             ) {
                 startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
-//                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
             }
         }
@@ -102,10 +90,6 @@ class RecipeListingActivity : BaseActivity() {
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
                 refresh()
-                true
-            }
-            addMenuEntry(R.id.OPTION_MENU_MANAGE_ACCOUNT, resources.getString(R.string.manage_account)) {
-                startActivity(Intent(this@RecipeListingActivity, ManageAccountActivity::class.java))
                 true
             }
             addMenuEntry(R.id.OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {

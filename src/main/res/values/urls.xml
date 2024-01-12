@@ -7,7 +7,7 @@
     <string name="URL_IMPRESSUM" translatable="false">&basepath;/%1$s/impressum</string>
 
     <string name="URL_VERIFY_REDIRECT" translatable="false">https://pingwinekcooks.firebaseapp.com</string>
-<!--
+<!-- old -->
     <string name="URL_REGISTER" translatable="false">&basepath;/auth/register</string>
     <string name="URL_LOGIN" translatable="false">&basepath;/auth/login</string>
     <string name="URL_LOGOUT" translatable="false">&basepath;/auth/logout</string>
@@ -21,5 +21,4 @@
     <string name="URL_RECIPE" translatable="false">&basepath;/api/recipe</string>
     <string name="URL_INGREDIENT" translatable="false">&basepath;/api/ingredient</string>
     <string name="URL_FILES" translatable="false">&basepath;/api/files</string>
-    -->
 </resources>

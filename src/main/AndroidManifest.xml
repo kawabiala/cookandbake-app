@@ -43,48 +43,8 @@
                 android:parentActivityName=".activities.RecipeActivity" />
 
         <activity
-                android:name=".activities.ManageAccountActivity"
-                android:label="@string/manage_account"
-                android:launchMode="singleTop"/>
-        <activity
                 android:name=".activities.ImpressumActivity"
                 android:launchMode="singleTop"/>
-        <activity
-                android:name=".activities.RegisterActivity"
-                android:label="@string/register"
-                android:launchMode="singleTop" />
-        <activity
-                android:name=".activities.LoginActivity"
-                android:label="@string/login"
-                android:launchMode="singleTask"
-                android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="https" />
-                <data android:host="pingwinek.de" />
-                <data android:pathPattern="/cookandbake/confirm_registration/.*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" />
-                <data android:host="www.pingwinek.de" />
-                <data android:pathPattern="/cookandbake/confirm_registration/.*" />
-            </intent-filter>
-        </activity>
-        <activity
-                android:name=".activities.LostPasswordActivity"
-                android:label="@string/lostPassword"
-                android:launchMode="singleTop"
-                android:parentActivityName=".activities.LoginActivity">
-        </activity>
         <activity
             android:name=".activities.SignInActivity"
             android:label="Profile"
