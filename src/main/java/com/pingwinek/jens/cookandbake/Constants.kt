@@ -10,3 +10,6 @@ const val EXTRA_INGREDIENT_NAME = "com.pingwinek.jens.cookandbake.extraIngredien
 const val EXTRA_INGREDIENT_QUANTITY = "com.pingwinek.jens.cookandbake.extraIngredientQuantity"
 const val EXTRA_INGREDIENT_QUANTITY_VERBAL = "com.pingwinek.jens.cookandbake.extraIngredientQuantityVerbal"
 const val EXTRA_INGREDIENT_UNITY = "com.pingwinek.jens.cookandbake.extraIngredientUnity"
+
+const val UNKNOWN_EXCEPTIOM = "unknown exception"
+const val TIMEOUT: Long = 10000

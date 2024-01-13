@@ -1,17 +1,17 @@
-package com.pingwinek.jens.cookandbake
+package com.pingwinek.jens.cookandbake.lib.firestore
 
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.ActionCodeResult
+import android.net.Uri
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
+import com.pingwinek.jens.cookandbake.BuildConfig
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.LinkedList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
-class AuthService private constructor(private val application: PingwinekCooksApplication) {
+class FirebaseAuthService private constructor(private val application: PingwinekCooksApplication) {
 
     interface AuthenticationListener {
         fun onLogin()
@@ -52,25 +52,15 @@ class AuthService private constructor(private val application: PingwinekCooksApp
 
     private val auth = FirebaseAuth.getInstance()
 
-    suspend fun checkActionCode(actionCode: String): AuthServiceResult<ActionCodeResult> {
-        var result: ActionCodeResult? = null
-        var exception: Exception? = null
+    @Throws(SuspendedCoroutineWrapper.SuspendedCoroutineException::class)
+    suspend fun getEmailForResetActionCode(actionCode: String): String? {
+        val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
 
-        val isSucess = try {
-            val actionCodeResult = suspendedFunction(auth.checkActionCode(actionCode))
-            if (actionCodeResult.operation == 0) {
-                result = actionCodeResult
-                true
-            } else {
-                exception = Exception("unknown action code")
-                false
-            }
-        } catch (e: Exception) {
-            exception = e
-            false
-
+        return if (actionCodeResult.operation == 0) {
+            actionCodeResult.info?.email
+        } else {
+            null
         }
-        return AuthServiceResult(isSucess, result, exception)
     }
 
 
@@ -96,19 +86,16 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         }.build()
     }
 
-    private suspend fun <T> suspendedFunction(task: Task<T>): T {
-        return suspendCoroutine { continuation ->
-            task.addOnCompleteListener { resultingTask ->
-                if (resultingTask.isSuccessful) {
-                    continuation.resume(task.result)
-                } else {
-                    continuation.resumeWithException(task.exception ?: Exception("Unknown exception - something went wrong"))
-                }
-            }
-        }
-    }
+    companion object : SingletonHolder<FirebaseAuthService, PingwinekCooksApplication>(::FirebaseAuthService) {
 
-    companion object : SingletonHolder<AuthService, PingwinekCooksApplication>(::AuthService)
+        fun extractActionCode(link: Uri): String? {
+            return link.getQueryParameter("link")
+                ?.let { innerUri ->
+                    Uri.parse(innerUri).getQueryParameter("oobCode")
+                }
+        }
+
+    }
 
     enum class AuthenticationAction {
         CHANGE_PASSWORD,
@@ -120,6 +107,8 @@ class AuthService private constructor(private val application: PingwinekCooksApp
         REGISTER,
         UNSUBSCRIBE
     }
+
+
 
 //    data class AuthenticationResponse(val action: AuthenticationAction, val code: Int, val msg: String?)
 }

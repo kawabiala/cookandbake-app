@@ -7,16 +7,15 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.firestore.SuspendedCoroutineWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 /**
@@ -67,6 +66,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private val auth = FirebaseAuth.getInstance()
+    //private val firebaseAuth = FirebaseAuthService.getInstance(application as PingwinekCooksApplication)
 
     val result = MutableLiveData<ResultType>()
     val linkMode = MutableLiveData<EmailLinkMode>()
@@ -91,11 +91,26 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             return
         }
 
+        //val actionCode = FirebaseAuthService.extractActionCode(intent.data!!) ?: return
         val actionCode = extractActionCode(intent) ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
+/*
             try {
-                val actionCodeResult = suspendedFunction(auth.checkActionCode(actionCode))
+                emailFromIntent = firebaseAuth.getEmailForResetActionCode(actionCode)
+                if (emailFromIntent != null) {
+                    oobCode = actionCode
+                    linkMode.postValue(EmailLinkMode.RESET)
+                } else {
+                    linkMode.postValue(EmailLinkMode.UNKNOWN)
+                }
+            } catch (exception: Exception) {
+                postError(getString(R.string.unknownException))
+                logError(exception)
+            }
+*/
+            try {
+                val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
                 if (actionCodeResult.operation == 0) {
                     oobCode = actionCode
                     actionCodeResult.info?.let {
@@ -120,7 +135,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.currentUser!!.reload())
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
                 if (auth.currentUser == null) {
                     changeAuthStatus(AuthStatus.SIGNED_OUT)
                 } else if (auth.currentUser!!.isEmailVerified) {
@@ -142,7 +157,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.currentUser!!.delete())
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.delete())
                 result.postValue(ResultType.ACCOUNT_DELETED)
                 changeAuthStatus(AuthStatus.SIGNED_OUT)
                 email.postValue("")
@@ -171,9 +186,9 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
+                SuspendedCoroutineWrapper.suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
                 result.postValue(ResultType.ACCOUNT_CREATED)
-                suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
                 changeAuthStatus(AuthStatus.SIGNED_IN)
             } catch (exception: Exception) {
@@ -200,7 +215,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.confirmPasswordReset(oobCode!!, password))
+                SuspendedCoroutineWrapper.suspendedFunction(auth.confirmPasswordReset(oobCode!!, password))
                 result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
                 changeAuthStatus(AuthStatus.SIGNED_OUT)
             } catch (exception: Exception) {
@@ -240,7 +255,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(
+                SuspendedCoroutineWrapper.suspendedFunction(
                     auth.sendPasswordResetEmail(
                         email,
                         getActionCodeSettings(true)))
@@ -260,7 +275,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(
+                SuspendedCoroutineWrapper.suspendedFunction(
                     auth.currentUser!!.sendEmailVerification(
                         getActionCodeSettings(false)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
@@ -284,10 +299,10 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                suspendedFunction(auth.signInWithEmailAndPassword(email, password))
+                SuspendedCoroutineWrapper.suspendedFunction(auth.signInWithEmailAndPassword(email, password))
                 result.postValue(ResultType.SIGNED_IN)
 
-                suspendedFunction(auth.currentUser!!.reload())
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
 
                 if (auth.currentUser == null) {
                     changeAuthStatus(AuthStatus.SIGNED_OUT)
@@ -393,17 +408,5 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     private fun postError(exception: Exception) {
         errorMessage = PingwinekAuthenticationException(exception).toString()
         result.postValue(ResultType.EXCEPTION)
-    }
-
-    private suspend fun <T> suspendedFunction(task: Task<T>): T {
-        return suspendCoroutine { continuation ->
-            task.addOnCompleteListener { resultingTask ->
-                if (resultingTask.isSuccessful) {
-                    continuation.resume(task.result)
-                } else {
-                    continuation.resumeWithException(task.exception ?: Exception(getString(R.string.unknownException)))
-                }
-            }
-        }
     }
 }
