@@ -20,9 +20,9 @@ import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY_VERBAL
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_UNITY
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
-import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
@@ -178,10 +178,13 @@ class RecipeActivity : BaseActivity(),
                 delete()
                 true
             }
+/*
             addMenuEntry(R.id.OPTION_MENU_DELETE_PDF, resources.getString(R.string.delete_pdf)) {
                 deletePdf()
                 true
             }
+
+ */
             addMenuEntry(
                 R.id.OPTION_MENU_SHARE,
                 resources.getString(R.string.share),
@@ -351,7 +354,8 @@ class RecipePagerAdapter(
     }
 
     override fun getCount(): Int {
-        return 3
+        //return 3
+        return 2
     }
 
     override fun getPageTitle(position: Int): CharSequence {

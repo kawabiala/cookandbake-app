@@ -34,7 +34,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
 
     override suspend fun getAllForRecipeId(recipeId: String) : LinkedList<IngredientFB> {
         var list = LinkedList<IngredientFB>()
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             list = getAll(buildIngredientsCollRef(auth.uid!!, recipeId), recipeId)
         } else {
             Log.i(this::class.java.name, "unauthorized getAll")
@@ -45,7 +45,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
     //TODO Check if needed or remove from interface
     override suspend fun get(id: String) : IngredientFB {
         var ingredientFB: IngredientFB = IngredientFB("", null, null, null, "")
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
 
         } else {
             Log.i(this::class.java.name, "unauthorized get")
@@ -55,7 +55,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
 
     override suspend fun new(item: IngredientFB) : IngredientFB {
         var ingredientFB = item
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             ingredientFB = new(buildIngredientsCollRef(auth.uid!!, item.recipeId), item)
         } else {
             Log.i(this::class.java.name, "unauthorized new")
@@ -65,7 +65,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
 
     override suspend fun update(item: IngredientFB) : IngredientFB {
         var ingredientFB = item
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             ingredientFB = update(buildIngredientDocRef(auth.uid!!, item.recipeId, item.id), item)
         } else {
             Log.i(this::class.java.name, "unauthorized update")
@@ -74,7 +74,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
     }
 
     override suspend fun delete(item: IngredientFB) : Boolean {
-        return if (auth.currentUser != null) {
+        return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             delete(buildIngredientDocRef(auth.uid!!, item.recipeId, item.id))
         } else {
             Log.i(this::class.java.name, "unauthorized delete")

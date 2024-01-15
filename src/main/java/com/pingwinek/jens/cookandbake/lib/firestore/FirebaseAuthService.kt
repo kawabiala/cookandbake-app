@@ -88,10 +88,13 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
 
     companion object : SingletonHolder<FirebaseAuthService, PingwinekCooksApplication>(::FirebaseAuthService) {
 
+        private const val QP_LINK = "link"
+        private const val QP_OOBCODE = "oobCode"
+
         fun extractActionCode(link: Uri): String? {
-            return link.getQueryParameter("link")
+            return link.getQueryParameter(QP_LINK)
                 ?.let { innerUri ->
-                    Uri.parse(innerUri).getQueryParameter("oobCode")
+                    Uri.parse(innerUri).getQueryParameter(QP_OOBCODE)
                 }
         }
 

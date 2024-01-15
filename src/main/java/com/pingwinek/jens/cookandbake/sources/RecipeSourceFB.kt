@@ -25,7 +25,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
 
     override suspend fun getAll(): LinkedList<RecipeFB> {
         var list = LinkedList<RecipeFB>()
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             list = getAll(buildRecipesCollRef(auth.uid!!))
         } else {
             Log.w(this::class.java.name, "unauthorized getAll")
@@ -36,7 +36,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
     // does not work for firestore, because id is not Int
     override suspend fun get(id: String) : RecipeFB {
         var recipeFB: RecipeFB = RecipeFB("","","","",0)
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             recipeFB = get(buildRecipeDocRef(auth.uid!!, id))
         } else {
             Log.w(this::class.java.name, "unauthorized get")
@@ -49,7 +49,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
      */
     override suspend fun new(item: RecipeFB) : RecipeFB {
         var recipeFB: RecipeFB = item
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             recipeFB = add(buildRecipesCollRef(auth.uid!!), item)
         } else {
             Log.w(this::class.java.name, "unauthorized new")
@@ -62,7 +62,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
      */
     override suspend fun update(item: RecipeFB) : RecipeFB {
         var recipeFB: RecipeFB = item
-        if (auth.currentUser != null) {
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             recipeFB = update(buildRecipeDocRef(auth.uid!!, item.id), item)
         } else {
             Log.w(this::class.java.name, "unauthorized update")
@@ -71,7 +71,11 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
     }
 
     override suspend fun delete(item: RecipeFB) : Boolean {
-        auth.currentUser?.run { return delete(buildRecipeDocRef(auth.uid!!, item.id)) } ?: return false
+        return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+            delete(buildRecipeDocRef(auth.uid!!, item.id))
+        } else {
+            false
+        }
     }
 
     private fun buildRecipesCollRef(userID: String) : CollectionReference {

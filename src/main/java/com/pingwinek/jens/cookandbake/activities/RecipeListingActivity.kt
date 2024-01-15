@@ -16,11 +16,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
-import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import java.util.LinkedList
 
 class RecipeListingActivity : BaseActivity() {
@@ -82,6 +82,24 @@ class RecipeListingActivity : BaseActivity() {
                 true
             }
         }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//// Data Migration - used one time for migrating data Jan 2024
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+        AlertDialog.Builder(this).apply {
+            setMessage("Migrate?")
+            setPositiveButton("yes") { _, _ ->
+                recipeListingModel.migrateData()
+            }
+            setNegativeButton("no") { _, _ ->
+
+            }
+        }.show()
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     }
 
     private fun configureOptionMenu() {
