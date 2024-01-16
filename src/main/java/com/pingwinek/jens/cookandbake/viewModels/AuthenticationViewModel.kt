@@ -14,21 +14,11 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.firestore.SuspendedCoroutineWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * TODO check email format, check password security - at registration
  */
 class AuthenticationViewModel(application: Application) : AndroidViewModel(application) {
-
-    private class AuthStateListener(private val continuation: Continuation<Boolean>): FirebaseAuth.AuthStateListener {
-        override fun onAuthStateChanged(auth: FirebaseAuth) {
-            continuation.resume (auth.currentUser != null)
-        }
-
-    }
 
     private class PingwinekAuthenticationException(private val exception: Exception) : Exception(exception) {
 
@@ -321,24 +311,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     fun signOut() {
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                /*
-                auth.signOut() does not provide a task, but only triggers an event, that
-                a listener can receive.
-
-                We temporarily add a listener and remove it immediately after signOut to
-                avoid signOut messages in cases like password reset, account deletion or
-                resuming the activity.
-                 */
-                var authStateListener: AuthStateListener?
-                val signedOut = suspendCoroutine { continuation ->
-                    authStateListener = AuthStateListener(continuation)
-                    auth.addAuthStateListener(authStateListener!!)
-                    auth.signOut()
-                }
-
-                authStateListener?.let { auth.removeAuthStateListener(it) }
-
-                if (signedOut) {
+                auth.signOut()
+                if (auth.currentUser == null) {
                     result.postValue(ResultType.SIGNED_OUT)
                     changeAuthStatus(AuthStatus.SIGNED_OUT)
                     email.postValue("")
