@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.repos
 
+import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
@@ -46,7 +47,12 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
      */
 
     suspend fun getAll(): LinkedList<Recipe> {
-        return LinkedList<Recipe>(recipeSourceFB.getAll())
+        return try{
+            LinkedList<Recipe>(recipeSourceFB.getAll())
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "Error when retrieving recipe list: ${exception.toString()}")
+            LinkedList<Recipe>()
+        }
     }
 
     suspend fun get(id: String): Recipe {

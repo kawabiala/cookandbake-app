@@ -46,7 +46,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     enum class EmailLinkMode {
         RESET,
-        UNKNOWN
+        UNKNOWN,
+        VERIFIED
     }
 
     enum class AuthStatus {
@@ -99,14 +100,27 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 */
             try {
                 val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
-                if (actionCodeResult.operation == 0) {
-                    oobCode = actionCode
-                    actionCodeResult.info?.let {
-                        email.postValue(it.email)
+                when (actionCodeResult.operation) {
+                    0 -> {
+                        oobCode = actionCode
+                        actionCodeResult.info?.let {
+                            email.postValue(it.email)
+                        }
+                        linkMode.postValue(EmailLinkMode.RESET)
                     }
-                    linkMode.postValue(EmailLinkMode.RESET)
-                } else {
+
+                    1 -> {
+                        SuspendedCoroutineWrapper.suspendedFunction(auth.applyActionCode(actionCode))
+                        auth.currentUser?.let { user ->
+                            SuspendedCoroutineWrapper.suspendedFunction(user.getIdToken(true))
+                            SuspendedCoroutineWrapper.suspendedFunction(user.reload())
+                        }
+                        linkMode.postValue(EmailLinkMode.VERIFIED)
+                    }
+
+                    else -> {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
+                    }
                 }
             } catch (exception: Exception) {
                 postError(getString(R.string.unknownException))
@@ -176,7 +190,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             try {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
                 result.postValue(ResultType.ACCOUNT_CREATED)
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(false)))
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(true)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
                 changeAuthStatus(AuthStatus.SIGNED_IN)
             } catch (exception: Exception) {
@@ -267,7 +281,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             try {
                 SuspendedCoroutineWrapper.suspendedFunction(
                     auth.currentUser!!.sendEmailVerification(
-                        getActionCodeSettings(false)))
+                        getActionCodeSettings(true)))
                 result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
             } catch (exception: Exception) {
                 postError(getString(R.string.sendVerificationEmail, exception.localizedMessage))

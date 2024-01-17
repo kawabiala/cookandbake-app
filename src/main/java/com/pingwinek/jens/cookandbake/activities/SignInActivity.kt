@@ -210,8 +210,10 @@ class SignInActivity : BaseActivity() {
         }
 
         authenticationViewModel.linkMode.observe(this) {
-            if (it == AuthenticationViewModel.EmailLinkMode.RESET) {
-                applyViewSettings(resetPasswordView)
+            when (it) {
+                AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
+                AuthenticationViewModel.EmailLinkMode.VERIFIED -> applyViewSettings(verifiedView)
+                else -> {}
             }
         }
 
