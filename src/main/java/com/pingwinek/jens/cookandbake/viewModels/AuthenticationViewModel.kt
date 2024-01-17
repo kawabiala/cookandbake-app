@@ -68,7 +68,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     var errorMessage: String = ""
 
-    private var emailFromIntent: String? = null
     private var oobCode: String? = null
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun checkActionCodeForIntent(intent: Intent) {
-        emailFromIntent = null
         if (intent.data == null) {
             return
         }
@@ -104,7 +102,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 if (actionCodeResult.operation == 0) {
                     oobCode = actionCode
                     actionCodeResult.info?.let {
-                        emailFromIntent = it.email
+                        email.postValue(it.email)
                     }
                     linkMode.postValue(EmailLinkMode.RESET)
                 } else {
@@ -189,10 +187,13 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun resetPassword(password: String) {
+        /*
         if (auth.currentUser != null && auth.currentUser!!.email != emailFromIntent) {
             postError(getString(R.string.resetForWrongEmail))
             return
         }
+
+         */
         if (password.isEmpty()) {
             postError(getString(R.string.passwordMalformatted))
             return
@@ -212,7 +213,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 postError(getString(R.string.resetFailed, exception.localizedMessage))
                 logError(exception)
             } finally {
-                emailFromIntent = null
                 oobCode = null
             }
         }
@@ -335,10 +335,13 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private fun extractActionCode(intent: Intent): String? {
-        return intent.data?.getQueryParameter("link")
-            ?.let { innerUri ->
-                Uri.parse(innerUri).getQueryParameter("oobCode")
-            }
+        if (intent.data == null) return null
+
+        val link = intent.data!!.getQueryParameter("link")?.let {
+            Uri.parse(it)
+        } ?: intent.data!!
+
+        return link.getQueryParameter("oobCode")
     }
 
     /**
