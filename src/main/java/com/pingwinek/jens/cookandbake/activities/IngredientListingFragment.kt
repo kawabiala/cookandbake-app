@@ -133,7 +133,11 @@ class IngredientListingAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ingredient = ingredientList[position]
-        holder.quantityView.text = quantityToString(ingredient.quantity)
+        holder.quantityView.text = if (ingredient.quantityVerbal?.trim().isNullOrEmpty()) {
+            quantityToString(ingredient.quantity)
+        } else {
+            ingredient.quantityVerbal
+        }
         holder.unityView.text = ingredient.unity
         holder.nameView.text = ingredient.name
         holder.buttonView.setOnClickListener {

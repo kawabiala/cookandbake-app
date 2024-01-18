@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake.lib.firestore
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import java.util.LinkedList
 
@@ -10,7 +11,7 @@ abstract class FirestoreDataAccessManager {
 
     companion object {
 
-        suspend fun <T> getAll(collectionReference: CollectionReference, instantiator: (QueryDocumentSnapshot) -> T) : LinkedList<T> {
+        suspend fun <T> getAll(collectionReference: Query, instantiator: (QueryDocumentSnapshot) -> T) : LinkedList<T> {
             val list = LinkedList<T>()
             val qs = SuspendedCoroutineWrapper.suspendedFunction(collectionReference.get())
             qs.forEach { queryDocumentSnapshot ->

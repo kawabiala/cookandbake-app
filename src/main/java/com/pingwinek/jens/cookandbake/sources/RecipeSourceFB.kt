@@ -6,6 +6,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.RecipeFB
@@ -26,7 +27,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
     override suspend fun getAll(): LinkedList<RecipeFB> {
         var list = LinkedList<RecipeFB>()
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-            list = getAll(buildRecipesCollRef(auth.uid!!))
+            list = getAll(buildRecipesCollRef(auth.uid!!).orderBy("title"))
         } else {
             Log.w(this::class.java.name, "unauthorized getAll")
         }
@@ -92,7 +93,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
         }
     }
 
-    private suspend fun getAll(collRef: CollectionReference) : LinkedList<RecipeFB> {
+    private suspend fun getAll(collRef: Query) : LinkedList<RecipeFB> {
         return FirestoreDataAccessManager.getAll(collRef) {
             RecipeFB(it)
         }
