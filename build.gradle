@@ -37,7 +37,8 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "DOMAIN", '"http://10.0.2.2/strato/pingwinek"'
+//            buildConfigField "String", "DOMAIN", '"http://10.0.2.2/strato/pingwinek"'
+            buildConfigField "String", "DOMAIN", '"https://www.pingwinek.de"'
         }
     }
     compileOptions {
