@@ -5,8 +5,9 @@
 <resources>
     <string name="URL_DATAPROTECTION" translatable="false">&basepath;/%1$s/datenschutz</string>
     <string name="URL_IMPRESSUM" translatable="false">&basepath;/%1$s/impressum</string>
-
+<!--
     <string name="URL_VERIFY_REDIRECT" translatable="false">https://pingwinekcooks.firebaseapp.com</string>
+-->
 <!-- old
     <string name="URL_REGISTER" translatable="false">&basepath;/auth/register</string>
     <string name="URL_LOGIN" translatable="false">&basepath;/auth/login</string>

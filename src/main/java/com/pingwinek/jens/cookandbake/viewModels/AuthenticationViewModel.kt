@@ -152,6 +152,16 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun deleteAccount() {
+        /*
+        viewModelScope.launch(Dispatchers.IO) {
+            when (firebaseAuth.deleteAccount()) {
+                FirebaseAuthService.AuthActionResult.DELETE_SUCCEEDED -> {}
+                FirebaseAuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {}
+                FirebaseAuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {}
+                else -> {}
+            }
+        }
+         */
         if (auth.currentUser == null) {
             postError(getString(R.string.noSignedInUser))
             return
@@ -376,7 +386,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 true,
                 null)
             handleCodeInApp = handleInApp
-            url = getApplication<Application>().getString(R.string.URL_VERIFY_REDIRECT)
+            url = "https://www.pingwinek.de"
         }.build()
     }
 

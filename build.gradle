@@ -40,6 +40,7 @@ android {
         }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
     namespace 'com.pingwinek.jens.cookandbake'
 }
@@ -66,6 +67,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore-ktx' //version determined by firebase-bom
 
-    testImplementation 'junit:junit:4.13.2'
+//    testImplementation 'junit:junit:4.13.2'
     //testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
 }
