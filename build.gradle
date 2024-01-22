@@ -4,6 +4,7 @@ plugins {
 
     //Firebase
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -62,10 +63,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
 
     //Firebase
-    implementation platform('com.google.firebase:firebase-bom:32.6.0')
-    implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
+    implementation platform('com.google.firebase:firebase-bom:32.7.1')
+//    implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
     implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-firestore-ktx' //version determined by firebase-bom
+    implementation 'com.google.firebase:firebase-firestore' //version determined by firebase-bom
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
 
 //    testImplementation 'junit:junit:4.13.2'
     //testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"

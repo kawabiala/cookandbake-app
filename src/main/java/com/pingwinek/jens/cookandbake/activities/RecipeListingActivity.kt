@@ -105,6 +105,7 @@ class RecipeListingActivity : BaseActivity() {
     private fun configureOptionMenu() {
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
+                //throw(Exception("Initialize Crashlytics"))
                 refresh()
                 true
             }
