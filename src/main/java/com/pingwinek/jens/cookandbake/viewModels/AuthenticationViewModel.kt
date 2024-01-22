@@ -57,7 +57,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     private val auth = FirebaseAuth.getInstance()
-    //private val firebaseAuth = FirebaseAuthService.getInstance(application as PingwinekCooksApplication)
 
     val result = MutableLiveData<ResultType>()
     val linkMode = MutableLiveData<EmailLinkMode>()
@@ -84,20 +83,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         val actionCode = extractActionCode(intent) ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
-/*
-            try {
-                emailFromIntent = firebaseAuth.getEmailForResetActionCode(actionCode)
-                if (emailFromIntent != null) {
-                    oobCode = actionCode
-                    linkMode.postValue(EmailLinkMode.RESET)
-                } else {
-                    linkMode.postValue(EmailLinkMode.UNKNOWN)
-                }
-            } catch (exception: Exception) {
-                postError(getString(R.string.unknownException))
-                logError(exception)
-            }
-*/
             try {
                 val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
                 when (actionCodeResult.operation) {
@@ -152,16 +137,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun deleteAccount() {
-        /*
-        viewModelScope.launch(Dispatchers.IO) {
-            when (firebaseAuth.deleteAccount()) {
-                FirebaseAuthService.AuthActionResult.DELETE_SUCCEEDED -> {}
-                FirebaseAuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {}
-                FirebaseAuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {}
-                else -> {}
-            }
-        }
-         */
         if (auth.currentUser == null) {
             postError(getString(R.string.noSignedInUser))
             return
