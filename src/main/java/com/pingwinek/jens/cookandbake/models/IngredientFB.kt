@@ -14,7 +14,7 @@ data class IngredientFB(
     override var lastModified: Long = Date().time
 ) : Ingredient() {
 
-    inner class DocumentData(
+    data class DocumentData(
         val quantity: Double?,
         val quantityVerbal: String?,
         val unity: String?,

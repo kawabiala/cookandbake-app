@@ -12,6 +12,10 @@
             android:theme="@style/CookAndBakeAppTheme"
             android:usesCleartextTraffic="true">
 
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
+
         <activity
                 android:name=".activities.RecipeListingActivity"
                 android:launchMode="singleTask"

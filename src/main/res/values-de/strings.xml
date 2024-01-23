@@ -55,6 +55,8 @@
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>
 
+    <string name="acceptCrashlytics">Ja, ich bin einverstanden, dass die App Absturzberichte sendet</string>
+
     <string name="recipeLocal">Rezept</string>
     <string name="recipes">Rezepte</string>
     <string name="recipe_title">Rezepttitel</string>

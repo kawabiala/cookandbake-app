@@ -13,9 +13,9 @@ android {
         applicationId "com.pingwinek.jens.cookandbake"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 18
-        versionName "2.1"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 19
+        versionName "2.2"
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {

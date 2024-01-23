@@ -11,6 +11,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
@@ -30,6 +32,7 @@ class SignInActivity : BaseActivity() {
         val showOnlyLeftHeader: Boolean = false,
         val editEmail: Boolean = true,
         val showPassword: Boolean = true,
+        val showCrashlytics: Boolean = true,
         val showReset: Boolean = false,
         val showPrivacy: Boolean = true,
         val showLeftButton: Boolean = true,
@@ -42,6 +45,8 @@ class SignInActivity : BaseActivity() {
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var resetTextView: TextView
+    private lateinit var acceptCrashlyticsView: CheckBox
+    private lateinit var acceptCrashlyticsTextView: TextView
     private lateinit var checkBox: CheckBox
     private lateinit var acceptanceTextView: TextView
     private lateinit var buttonLeft: Button
@@ -81,6 +86,8 @@ class SignInActivity : BaseActivity() {
         emailEditText = findViewById(R.id.siEmail)
         passwordEditText = findViewById(R.id.siPassword)
         resetTextView = findViewById(R.id.siLostPassword)
+        acceptCrashlyticsView = findViewById(R.id.siCheckCrashlyticsBox)
+        acceptCrashlyticsTextView = findViewById(R.id.siAcceptCrashlytics)
         checkBox = findViewById(R.id.siCheckBox)
         acceptanceTextView = findViewById(R.id.siAcceptance)
         buttonLeft = findViewById(R.id.siCancelButton)
@@ -122,6 +129,7 @@ class SignInActivity : BaseActivity() {
             editEmail = false,
             showOnlyLeftHeader = true,
             showReset = true,
+            showCrashlytics = false,
             showPrivacy = false
         )
 
@@ -134,6 +142,7 @@ class SignInActivity : BaseActivity() {
             showOnlyLeftHeader = true,
             editEmail = false,
             showPassword = false,
+            showCrashlytics = false,
             showPrivacy = false,
             showLogout = true,
             showDelete = true
@@ -281,6 +290,7 @@ class SignInActivity : BaseActivity() {
         adaptEmail(settings.editEmail)
         adaptPassword(settings.showPassword)
         adaptReset(settings.showReset)
+        adaptCrashlytics(settings.showCrashlytics)
         adaptPrivacy(settings.showPrivacy)
         adaptButtonLeft(settings.buttonLeftCaption, settings.showLeftButton, settings.buttonLeftAction)
         adaptButtonRight(settings.buttonRightCaption, settings.buttonRightAction)
@@ -334,6 +344,14 @@ class SignInActivity : BaseActivity() {
         }
     }
 
+    private fun adaptCrashlytics(showCrashlytics: Boolean) {
+        acceptCrashlyticsView.isVisible = showCrashlytics
+        acceptCrashlyticsTextView.isVisible = showCrashlytics
+        acceptCrashlyticsView.setOnClickListener {
+            crashlyticsAction()
+        }
+    }
+
     private fun adaptReset(showReset: Boolean) {
         resetTextView.apply {
             isVisible = showReset
@@ -382,6 +400,10 @@ class SignInActivity : BaseActivity() {
     private val closeAction: () -> Unit = {
         startActivity(Intent(this, RecipeListingActivity::class.java))
         finish()
+    }
+
+    private val crashlyticsAction: () -> Unit = {
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(acceptCrashlyticsView.isChecked)
     }
 
     private val deleteAction: () -> Unit = {

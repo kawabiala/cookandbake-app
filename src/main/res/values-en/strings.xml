@@ -55,6 +55,8 @@
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Privacy statement</string>
 
+    <string name="acceptCrashlytics">Yes, I agree that the app can send crash reports</string>
+
     <string name="recipeLocal">Recipe</string>
     <string name="recipes">Recipes</string>
     <string name="recipe_title">Recipe name</string>

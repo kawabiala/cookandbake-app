@@ -10,7 +10,7 @@ data class RecipeFB(
     override var lastModified: Long // keep for consistency with abstract base class Recipe and the interface Model
 ) : Recipe() {
 
-    inner class DocumentData(
+    data class DocumentData(
         val title: String,
         val description: String?,
         val instruction: String?

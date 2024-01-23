@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
@@ -47,11 +49,19 @@ class RecipeEditActivity : BaseActivity() {
     }
 
     private fun save() {
+        tryCrash()
         setResult(Activity.RESULT_OK, Intent().also {
             it.putExtra(EXTRA_RECIPE_TITLE, findViewById<TextView>(R.id.titleText).text.toString())
             it.putExtra(EXTRA_RECIPE_DESCRIPTION, findViewById<TextView>(R.id.descriptionText).text.toString())
         })
         finish()
+    }
+
+    private fun tryCrash() {
+        val description = findViewById<TextView>(R.id.descriptionText).text.toString()
+        if (description.startsWith("crash")) {
+            Firebase.crashlytics.recordException(Exception(description))
+        }
     }
 
 }
