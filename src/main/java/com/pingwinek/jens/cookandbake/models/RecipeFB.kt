@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.models
 
+import androidx.annotation.Keep
 import com.google.firebase.firestore.DocumentSnapshot
 
 data class RecipeFB(
@@ -10,6 +11,7 @@ data class RecipeFB(
     override var lastModified: Long // keep for consistency with abstract base class Recipe and the interface Model
 ) : Recipe() {
 
+    @Keep
     data class DocumentData(
         val title: String,
         val description: String?,

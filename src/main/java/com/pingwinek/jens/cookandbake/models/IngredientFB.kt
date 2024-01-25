@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.models
 
+import androidx.annotation.Keep
 import com.google.firebase.firestore.DocumentSnapshot
 import java.util.Date
 
@@ -14,6 +15,7 @@ data class IngredientFB(
     override var lastModified: Long = Date().time
 ) : Ingredient() {
 
+    @Keep
     data class DocumentData(
         val quantity: Double?,
         val quantityVerbal: String?,
