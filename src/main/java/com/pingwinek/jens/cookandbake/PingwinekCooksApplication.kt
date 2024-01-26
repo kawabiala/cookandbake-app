@@ -1,12 +1,12 @@
 package com.pingwinek.jens.cookandbake
 
 import android.app.Application
-import android.os.Build
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import java.net.URI
+import java.util.Locale
 
 class PingwinekCooksApplication : Application() {
 
@@ -63,12 +63,14 @@ class PingwinekCooksApplication : Application() {
 
     fun getURL(id: Int): String {
         val domain = BuildConfig.DOMAIN
-        val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            resources.configuration.locales[0]
-        } else {
-            resources.configuration.locale
+        val locale = resources.configuration.locales[0]
+        val language = when (locale.language) {
+            Locale.GERMAN.language -> "de"
+            Locale.ENGLISH.language -> "en"
+            "pl" -> "pl"
+            else -> "en"
         }
-        return "$domain/${getString(id, locale)}"
+        return "$domain/${getString(id, language)}"
     }
 
     fun getHost(): String {
