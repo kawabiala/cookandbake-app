@@ -105,7 +105,6 @@ class RecipeListingActivity : BaseActivity() {
     private fun configureOptionMenu() {
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
-                //throw(Exception("Initialize Crashlytics"))
                 refresh()
                 true
             }
@@ -116,7 +115,6 @@ class RecipeListingActivity : BaseActivity() {
             }
             addMenuEntry(R.id.OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-//                    .putExtra("url", URL_DATAPROTECTION))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
                 true
             }

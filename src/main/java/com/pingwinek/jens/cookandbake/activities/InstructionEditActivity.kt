@@ -8,7 +8,7 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
 
-class InstructionActivity : BaseActivity() {
+class InstructionEditActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

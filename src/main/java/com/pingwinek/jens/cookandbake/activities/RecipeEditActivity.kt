@@ -57,6 +57,10 @@ class RecipeEditActivity : BaseActivity() {
         finish()
     }
 
+    /**
+     * Records and exception, if description starts with "crash". Purpose is testing, if enabling
+     * and disabling of crashlytics in the profile works.
+     */
     private fun tryCrash() {
         val description = findViewById<TextView>(R.id.descriptionText).text.toString()
         if (description.startsWith("crash")) {

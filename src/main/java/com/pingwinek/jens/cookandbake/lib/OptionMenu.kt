@@ -4,6 +4,10 @@ import android.view.Menu
 import android.view.Menu.NONE
 import android.view.MenuItem
 
+/**
+ * Wraps option menu handling with key advantage:
+ * Adding menu entry and expected action in one go
+ */
 class OptionMenu {
 
     inner class OptionMenuItem(val itemName: String, val action: (Int) -> Boolean) {

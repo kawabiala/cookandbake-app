@@ -40,7 +40,7 @@ class InstructionFragment : androidx.fragment.app.Fragment() {
 
         if (this.context is RecipeActivity) {
             instructionView.setOnClickListener {
-                val instructionIntent = Intent(activity, InstructionActivity::class.java).also {
+                val instructionIntent = Intent(activity, InstructionEditActivity::class.java).also {
                     it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
                     it.putExtra(EXTRA_RECIPE_INSTRUCTION, recipeModel.recipeData.value?.instruction)
                 }

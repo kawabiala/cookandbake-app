@@ -216,7 +216,7 @@ class RecipeActivity : BaseActivity(),
     }
 
     override fun onListFragmentSaveIngredient(ingredient: Ingredient?) {
-        val intent = Intent(this, IngredientActivity::class.java)
+        val intent = Intent(this, IngredientEditActivity::class.java)
         recipeModel.recipeData.value?.let { recipe ->
             intent.putExtra(EXTRA_RECIPE_TITLE, recipe.title)
             ingredient?.let {

@@ -15,7 +15,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToDouble
 import com.pingwinek.jens.cookandbake.utils.Utils.quantityToString
 
-class IngredientActivity : BaseActivity() {
+class IngredientEditActivity : BaseActivity() {
 
     private var ingredientId: String? = null
 
@@ -29,9 +29,7 @@ class IngredientActivity : BaseActivity() {
 
         intent?.extras?.let {
             supportActionBar?.title = it.getString(EXTRA_RECIPE_TITLE)
-            it.get(EXTRA_INGREDIENT_ID)?.run {
-                ingredientId = it.getString(EXTRA_INGREDIENT_ID)
-            }
+            ingredientId = it.getString(EXTRA_INGREDIENT_ID)
             ingredientView.text = it.getString(EXTRA_INGREDIENT_NAME)
             findViewById<TextView>(R.id.ingredientQuantity).text =
                 quantityToString(it.getDouble(EXTRA_INGREDIENT_QUANTITY))

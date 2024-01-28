@@ -9,8 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.OptionMenu
 
-/*
-Sets option menu
+/**
+ * Provides consistent layout frame including support action bar.
+ * Simplifies usage of option menu via custom [OptionMenu].
+ * The option menu is best set up inside the onCreate lifecycle function
  */
 abstract class BaseActivity : AppCompatActivity() {
 
