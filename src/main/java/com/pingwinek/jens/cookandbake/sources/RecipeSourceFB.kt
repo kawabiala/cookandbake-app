@@ -36,7 +36,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
 
     // does not work for firestore, because id is not Int
     override suspend fun get(id: String) : RecipeFB {
-        var recipeFB: RecipeFB = RecipeFB("","","","",0)
+        var recipeFB = RecipeFB("","","","",0)
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             recipeFB = get(buildRecipeDocRef(auth.uid!!, id))
         } else {

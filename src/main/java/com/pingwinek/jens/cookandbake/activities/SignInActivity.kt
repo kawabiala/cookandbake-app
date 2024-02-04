@@ -368,7 +368,7 @@ class SignInActivity : BaseActivity() {
         buttonLeft.apply {
             text = caption
             isVisible = showLeftButton
-            setOnClickListener{ action() }
+            setOnClickListener { action() }
         }
     }
 

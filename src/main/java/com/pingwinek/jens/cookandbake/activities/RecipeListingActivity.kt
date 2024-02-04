@@ -125,7 +125,7 @@ class RecipeListingActivity : BaseActivity() {
         openRecipeItem(recipeItem.tag as String)
     }
 
-    fun onNewRecipeClick(button: View) {
+    fun onNewRecipeClick() {
         openRecipeItem(null)
     }
 

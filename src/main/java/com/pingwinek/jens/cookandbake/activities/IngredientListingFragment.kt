@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,8 +38,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
         super.onCreate(savedInstanceState)
 
         recipeModel = activity?.run {
-            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
-                .get(RecipeViewModel::class.java)
+            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[RecipeViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
     }
@@ -107,6 +107,7 @@ class IngredientListingFragment : androidx.fragment.app.Fragment() {
  * [RecyclerView.Adapter] that can display a [Ingredient] and makes a call to the
  * specified [OnListFragmentInteractionListener].
  */
+@SuppressLint("NotifyDataSetChanged")
 class IngredientListingAdapter(
     ingredientListData: LiveData<LinkedList<Ingredient>>,
     private val listener: OnListFragmentInteractionListener?,

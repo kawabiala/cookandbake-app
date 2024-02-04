@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
@@ -22,8 +21,7 @@ class InstructionFragment : androidx.fragment.app.Fragment() {
         super.onCreate(savedInstanceState)
 
         recipeModel = activity?.run {
-            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
-                .get(RecipeViewModel::class.java)
+            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[RecipeViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -34,9 +32,9 @@ class InstructionFragment : androidx.fragment.app.Fragment() {
         val view = inflater.inflate(R.layout.fragment_instruction, container, false)
         val instructionView = view.findViewById<TextView>(R.id.instruction)
 
-        recipeModel.recipeData.observe(viewLifecycleOwner, Observer { recipe ->
+        recipeModel.recipeData.observe(viewLifecycleOwner) { recipe ->
             instructionView.text = recipe?.instruction
-        })
+        }
 
         if (this.context is RecipeActivity) {
             instructionView.setOnClickListener {

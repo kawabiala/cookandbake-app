@@ -20,8 +20,7 @@ class PdfFragment : androidx.fragment.app.Fragment() {
         super.onCreate(savedInstanceState)
 
         recipeModel = activity?.run {
-            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
-                .get(RecipeViewModel::class.java)
+            ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[RecipeViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 

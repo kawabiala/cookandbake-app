@@ -106,7 +106,7 @@
         android:layout_marginStart="@dimen/text_margin"
         android:layout_marginTop="0dp"
         android:layout_marginEnd="@dimen/text_margin"
-        android:text="@string/declareAcceptanceOfDataprotection"
+        android:text="@string/acceptCrashlytics"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/siCheckCrashlyticsBox"
         app:layout_constraintTop_toTopOf="@+id/siCheckCrashlyticsBox" />
@@ -127,7 +127,7 @@
         android:layout_marginStart="@dimen/text_margin"
         android:layout_marginTop="0dp"
         android:layout_marginEnd="@dimen/text_margin"
-        android:text="@string/acceptCrashlytics"
+        android:text="@string/declareAcceptanceOfDataprotection"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/siCheckBox"
         app:layout_constraintTop_toTopOf="@+id/siCheckBox" />

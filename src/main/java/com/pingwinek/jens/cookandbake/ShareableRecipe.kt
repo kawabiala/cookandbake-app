@@ -1,16 +1,16 @@
 package com.pingwinek.jens.cookandbake
 
-import android.content.res.Resources
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
-import java.util.*
+import java.util.LinkedList
 
 class ShareableRecipe(recipe: Recipe, private val ingredients: LinkedList<Ingredient>) {
 
     val title = recipe.title
     val description = recipe.description
     val instruction = recipe.instruction
-    val ingredientsAsText = ingredients.joinToString(System.lineSeparator()) { ingredient ->
+
+    private val ingredientsAsText = ingredients.joinToString(System.lineSeparator()) { ingredient ->
         StringBuilder().apply {
             append("- ")
             ingredient.quantity?.let {

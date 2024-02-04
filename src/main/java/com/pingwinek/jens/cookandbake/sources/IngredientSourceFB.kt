@@ -18,18 +18,8 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
     private val auth: FirebaseAuth = Firebase.auth
     private val basePath: String = "/user"
 
-    //TODO Check if needed or remove from interface
     override suspend fun getAll() : LinkedList<IngredientFB> {
-        var list = LinkedList<IngredientFB>()
-        /*
-        if (auth.currentUser != null) {
-            list = getAll(buildIngredientsCollRef(auth.uid!!))
-        } else {
-
-        }
-
-         */
-        return list
+        throw NotImplementedError("Not supported by Firebase")
     }
 
     override suspend fun getAllForRecipeId(recipeId: String) : LinkedList<IngredientFB> {
@@ -42,15 +32,8 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         return list
     }
 
-    //TODO Check if needed or remove from interface
     override suspend fun get(id: String) : IngredientFB {
-        var ingredientFB: IngredientFB = IngredientFB("", null, null, null, "")
-        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-
-        } else {
-            Log.i(this::class.java.name, "unauthorized get")
-        }
-        return ingredientFB
+        throw NotImplementedError("Not supported by Firebase")
     }
 
     override suspend fun new(item: IngredientFB) : IngredientFB {

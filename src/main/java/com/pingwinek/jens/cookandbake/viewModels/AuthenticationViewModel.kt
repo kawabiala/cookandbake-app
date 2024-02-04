@@ -33,7 +33,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    enum class ResultType() {
+    enum class ResultType {
         ACCOUNT_CREATED,
         VERIFICATION_EMAIL_SENT,
         SIGNED_IN,

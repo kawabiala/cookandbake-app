@@ -43,7 +43,7 @@ interface Source<T: Model> {
     /**
      * Deletes the instance with the given id
      *
-     * @param id of the instance to be deleted
+     * @param item of the instance to be deleted
      * @return true if successful, otherwise false
      */
     suspend fun delete(item: T) : Boolean

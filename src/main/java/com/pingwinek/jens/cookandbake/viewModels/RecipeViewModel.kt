@@ -20,8 +20,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
-    //private val fileRepository = FileRepository.getInstance(application as PingwinekCooksApplication)
-    private val contentResolver = application.contentResolver
 
     private val privateRecipeData = MutableLiveData<Recipe>()
     val recipeData: LiveData<Recipe> = privateRecipeData.map { mutableRecipe ->

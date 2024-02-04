@@ -32,7 +32,7 @@ class DataMigration {
         /*
         NewId added with uid from firebase authentication
          */
-        val users = JSONArray(
+        private val users = JSONArray(
             "[\n" +
                     "{\"id\":\"1\",\"newId\":\"LoOGamVWzuTBciTBAUtA7cx1CNH2\",\"email\":\"jens.reufsteck@gmail.com\",\"password\":\"\",\"confirmed\":\"1\",\"temp_code\":\"b57119de3bc558b2db67f17fca34e2c9\",\"temp_code_valid_until\":\"2019-10-24 20:58:46\",\"last_modified\":\"2019-10-24 20:58:46\"},\n" +
                     "{\"id\":\"8\",\"newId\":\"l4MQt98H2lZtvE6S5197I4FGKDc2\",\"email\":\"google@pingwinek.de\",\"password\":\"\",\"confirmed\":\"1\",\"temp_code\":\"1537d840cf526167e27fb5fccee29718\",\"temp_code_valid_until\":\"2020-02-28 13:06:16\",\"last_modified\":\"2020-02-28 13:06:16\"},\n" +

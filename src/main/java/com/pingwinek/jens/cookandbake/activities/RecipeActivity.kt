@@ -244,6 +244,7 @@ class RecipeActivity : BaseActivity(),
 
     }
 
+    /*
     private fun deletePdf() {
         AlertDialog.Builder(this).apply {
             setMessage(R.string.pdf_delete_confirm)
@@ -256,6 +257,8 @@ class RecipeActivity : BaseActivity(),
         }.show()
 
     }
+
+     */
 
     private fun getShareRecipeIntent(): Intent {
         return Intent.createChooser(
