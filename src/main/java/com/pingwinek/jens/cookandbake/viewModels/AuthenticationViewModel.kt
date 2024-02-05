@@ -2,21 +2,18 @@ package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
-import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.firestore.SuspendedCoroutineWrapper
+import com.pingwinek.jens.cookandbake.lib.firestore.FirebaseAuthService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * TODO check email format, check password security - at registration
+ *
  */
 class AuthenticationViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -76,275 +73,149 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun checkActionCodeForIntent(intent: Intent) {
-        if (intent.data == null) {
-            return
-        }
-
-        //val actionCode = FirebaseAuthService.extractActionCode(intent.data!!) ?: return
-        val actionCode = extractActionCode(intent) ?: return
+        val actionCode = FirebaseAuthService.extractActionCode(intent) ?: return
 
         viewModelScope.launch(Dispatchers.IO) {
-/*
-            try {
-                emailFromIntent = firebaseAuth.getEmailForResetActionCode(actionCode)
-                if (emailFromIntent != null) {
+            val checkActionCodeResult = FirebaseAuthService.getActionCodeResult(actionCode)
+            when (checkActionCodeResult.operation) {
+                FirebaseAuthService.ActionCodeOperation.RESET -> {
                     oobCode = actionCode
+                    email.postValue(checkActionCodeResult.email!!)
                     linkMode.postValue(EmailLinkMode.RESET)
-                } else {
-                    linkMode.postValue(EmailLinkMode.UNKNOWN)
                 }
-            } catch (exception: Exception) {
-                postError(getString(R.string.unknownException))
-                logError(exception)
-            }
-*/
-            try {
-                val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
-                when (actionCodeResult.operation) {
-                    0 -> {
-                        oobCode = actionCode
-                        actionCodeResult.info?.let {
-                            email.postValue(it.email)
-                        }
-                        linkMode.postValue(EmailLinkMode.RESET)
-                    }
 
-                    1 -> {
-                        SuspendedCoroutineWrapper.suspendedFunction(auth.applyActionCode(actionCode))
-                        auth.currentUser?.let { user ->
-                            SuspendedCoroutineWrapper.suspendedFunction(user.getIdToken(true))
-                            SuspendedCoroutineWrapper.suspendedFunction(user.reload())
-                        }
+                FirebaseAuthService.ActionCodeOperation.VERIFY -> {
+                    if (FirebaseAuthService.verify(actionCode) == FirebaseAuthService.AuthActionResult.VERIFICATION_SUCCEEDED) {
                         linkMode.postValue(EmailLinkMode.VERIFIED)
-                    }
-
-                    else -> {
+                    } else {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
                     }
                 }
-            } catch (exception: Exception) {
-                postError(getString(R.string.unknownException))
-                logError(exception)
+
+                else -> {
+                    linkMode.postValue(EmailLinkMode.UNKNOWN)
+                }
             }
         }
     }
 
     fun checkAuthStatus() {
-        if (auth.currentUser == null) {
-            changeAuthStatus(AuthStatus.SIGNED_OUT)
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
-                if (auth.currentUser == null) {
-                    changeAuthStatus(AuthStatus.SIGNED_OUT)
-                } else if (auth.currentUser!!.isEmailVerified) {
-                    changeAuthStatus(AuthStatus.VERIFIED)
-                } else {
-                    changeAuthStatus(AuthStatus.SIGNED_IN)
-                }
-            } catch (exception: Exception) {
-                changeAuthStatus(AuthStatus.SIGNED_OUT)
+            when (FirebaseAuthService.checkAuthStatus()) {
+                FirebaseAuthService.AuthStatus.VERIFIED -> { changeAuthStatus(AuthStatus.VERIFIED) }
+                FirebaseAuthService.AuthStatus.SIGNED_IN -> { changeAuthStatus(AuthStatus.SIGNED_IN) }
+                else -> { changeAuthStatus(AuthStatus.SIGNED_OUT)}
             }
         }
     }
 
     fun deleteAccount() {
-        /*
         viewModelScope.launch(Dispatchers.IO) {
-            when (firebaseAuth.deleteAccount()) {
-                FirebaseAuthService.AuthActionResult.DELETE_SUCCEEDED -> {}
-                FirebaseAuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {}
-                FirebaseAuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {}
-                else -> {}
-            }
-        }
-         */
-        if (auth.currentUser == null) {
-            postError(getString(R.string.noSignedInUser))
-            return
-        }
+            when (FirebaseAuthService.deleteAccount()) {
+                FirebaseAuthService.AuthActionResult.DELETE_SUCCEEDED -> {
+                    result.postValue(ResultType.ACCOUNT_DELETED)
+                    changeAuthStatus(AuthStatus.SIGNED_OUT)
+                    email.postValue("")
+                }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.delete())
-                result.postValue(ResultType.ACCOUNT_DELETED)
-                changeAuthStatus(AuthStatus.SIGNED_OUT)
-                email.postValue("")
-            } catch (exception: Exception) {
-                postError(getString(R.string.deleteFailed, exception.localizedMessage))
-                logError(exception)
+                FirebaseAuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {
+                    postError(getString(R.string.noSignedInUser))
+                }
+
+                else -> {
+                    postError(getString(R.string.deleteFailed))
+                }
             }
         }
     }
 
     fun register(email: String, password: String, dataPolicyChecked: Boolean) {
-        if (email.isEmpty()) {
-            postError(getString(R.string.emailMalformatted))
-            return
-        }
-
-        if (password.isEmpty()) {
-            postError(getString(R.string.passwordMalformatted))
-            return
-        }
-
-        if (!dataPolicyChecked) {
-            postError(getString(R.string.dataProtectionNotChecked))
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.createUserWithEmailAndPassword(email, password))
-                result.postValue(ResultType.ACCOUNT_CREATED)
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings(true)))
-                result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
-                changeAuthStatus(AuthStatus.SIGNED_IN)
-            } catch (exception: Exception) {
-                postError(getString(R.string.registrationFailed, exception.localizedMessage))
-                logError(exception)
+            when (FirebaseAuthService.register(email, password, dataPolicyChecked)) {
+                FirebaseAuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
+                    when (FirebaseAuthService.sendVerificationEmail()) {
+                        FirebaseAuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> { result.postValue(ResultType.VERIFICATION_EMAIL_SENT) }
+                        else -> { postError(getString(R.string.registrationFailed)) }
+                    }
+                }
+                FirebaseAuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> { postError(getString(R.string.emailMalformatted)) }
+                FirebaseAuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> { postError(getString(R.string.passwordMalformatted)) }
+                FirebaseAuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> { postError(getString(R.string.dataProtectionNotChecked)) }
+                else -> { postError(getString(R.string.registrationFailed)) }
             }
         }
     }
 
     fun resetPassword(password: String) {
-        /*
-        if (auth.currentUser != null && auth.currentUser!!.email != emailFromIntent) {
-            postError(getString(R.string.resetForWrongEmail))
-            return
-        }
-
-         */
-        if (password.isEmpty()) {
-            postError(getString(R.string.passwordMalformatted))
-            return
-        }
         if (oobCode.isNullOrEmpty()) {
             postError(getString(R.string.unknownException))
             logError(Exception("action code is null or empty"))
             return
         }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.confirmPasswordReset(oobCode!!, password))
-                result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
-                changeAuthStatus(AuthStatus.SIGNED_OUT)
-            } catch (exception: Exception) {
-                postError(getString(R.string.resetFailed, exception.localizedMessage))
-                logError(exception)
-            } finally {
-                oobCode = null
+            when (FirebaseAuthService.resetPassword(password, oobCode!!)) {
+                FirebaseAuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> {
+                    result.postValue(ResultType.PASSWORD_RESET_CONFIRMED)
+                    changeAuthStatus(AuthStatus.SIGNED_OUT)
+                }
+                FirebaseAuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> { postError(getString(R.string.passwordMalformatted)) }
+                else -> { postError(getString(R.string.resetFailed)) }
             }
         }
     }
 
     fun retrieveEmail() {
-        if (auth.currentUser == null) {
-            email.postValue("")
-        } else {
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    auth.currentUser!!.reload()
-                    auth.currentUser?.let { user ->
-                        email.postValue(user.email)
-                    }
-                } catch (exception: Exception) {
-                    email.postValue("")
-                    postError(getString(R.string.retrieveEmailFailed, exception.localizedMessage))
-                    logError(exception)
-                }
-            }
+        viewModelScope.launch(Dispatchers.IO) {
+            email.postValue(FirebaseAuthService.getEmail())
         }
     }
 
     fun sendPasswordResetEmail(email: String) {
-        if (email.isEmpty()) {
-            postError(getString(R.string.emailMalformatted))
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(
-                    auth.sendPasswordResetEmail(
-                        email,
-                        getActionCodeSettings(true)))
-                result.postValue(ResultType.PASSWORD_RESET_SENT)
-            } catch (exception: Exception) {
-                postError(getString(R.string.sendResetFailed, exception.localizedMessage))
-                logError(exception)
+            when (FirebaseAuthService.sendPasswordResetEmail(email)) {
+                FirebaseAuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> { result.postValue(ResultType.PASSWORD_RESET_SENT) }
+                FirebaseAuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> { postError(getString(R.string.emailMalformatted)) }
+                else -> { postError(getString(R.string.sendResetFailed)) }
             }
         }
     }
 
     fun sendVerificationEmail() {
-        if (auth.currentUser == null) {
-            postError(getString(R.string.noSignedInUser))
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(
-                    auth.currentUser!!.sendEmailVerification(
-                        getActionCodeSettings(true)))
-                result.postValue(ResultType.VERIFICATION_EMAIL_SENT)
-            } catch (exception: Exception) {
-                postError(getString(R.string.sendVerificationEmail, exception.localizedMessage))
-                logError(exception)
+            when (FirebaseAuthService.sendVerificationEmail()) {
+                FirebaseAuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> { result.postValue(ResultType.VERIFICATION_EMAIL_SENT) }
+                FirebaseAuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> { postError(getString(R.string.noSignedInUser)) }
+                else -> { postError(getString(R.string.sendVerificationFailed))}
             }
         }
     }
 
     fun signIn(email: String, password: String) {
-        if (email.isEmpty()) {
-            postError(getString(R.string.emailMalformatted))
-            return
-        }
-
-        if (password.isEmpty()) {
-            postError(getString(R.string.passwordMalformatted))
-            return
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.signInWithEmailAndPassword(email, password))
-                result.postValue(ResultType.SIGNED_IN)
-
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
-
-                if (auth.currentUser == null) {
-                    changeAuthStatus(AuthStatus.SIGNED_OUT)
-                } else if (auth.currentUser!!.isEmailVerified) {
-                    changeAuthStatus(AuthStatus.VERIFIED)
-                } else {
-                    changeAuthStatus(AuthStatus.SIGNED_IN)
+            when (FirebaseAuthService.signIn(email, password)) {
+                FirebaseAuthService.AuthActionResult.SIGNIN_SUCCEEDED -> {
+                    result.postValue(ResultType.SIGNED_IN)
+                    when (FirebaseAuthService.checkAuthStatus()) {
+                        FirebaseAuthService.AuthStatus.VERIFIED -> { changeAuthStatus(AuthStatus.VERIFIED) }
+                        FirebaseAuthService.AuthStatus.SIGNED_IN -> { changeAuthStatus(AuthStatus.SIGNED_IN) }
+                        else -> { changeAuthStatus(AuthStatus.SIGNED_OUT) }
+                    }
                 }
-            } catch (exception: Exception) {
-                postError(getString(R.string.loginFailed, exception.localizedMessage))
-                logError(exception)
+                FirebaseAuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> { postError(getString(R.string.emailMalformatted)) }
+                FirebaseAuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> { postError(getString(R.string.passwordMalformatted)) }
+                else -> { postError(getString(R.string.loginFailed)) }
             }
         }
     }
 
     fun signOut() {
-        try {
-            viewModelScope.launch(Dispatchers.IO) {
-                auth.signOut()
-                if (auth.currentUser == null) {
-                    result.postValue(ResultType.SIGNED_OUT)
-                    changeAuthStatus(AuthStatus.SIGNED_OUT)
-                    email.postValue("")
-                }
+        when (FirebaseAuthService.signOut()) {
+            FirebaseAuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> {
+                result.postValue(ResultType.SIGNED_OUT)
+                changeAuthStatus(AuthStatus.SIGNED_OUT)
+                email.postValue("")
             }
-        } catch (exception: Exception) {
-            postError(getString(R.string.logoutFailed, exception.localizedMessage))
-            logError(exception)
+            else -> { postError(getString(R.string.logoutFailed)) }
         }
     }
 
@@ -358,44 +229,8 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    private fun extractActionCode(intent: Intent): String? {
-        if (intent.data == null) return null
-
-        val link = intent.data!!.getQueryParameter("link")?.let {
-            Uri.parse(it)
-        } ?: intent.data!!
-
-        return link.getQueryParameter("oobCode")
-    }
-
-    /**
-     * Provides the [ActionCodeSettings] for verification and reset password emails. Uses
-     * [BuildConfig.APPLICATION_ID] from the gradle build configuration as package name. The
-     * redirect URL for redirecting to the app after verification is configured in urls.xml.
-     *
-     * @param handleInApp false for verification email and true for reset password email
-     *
-     * The verification email cannot be handled inside the app due to missing verification method
-     * in the Firebase Auth api. The reset password email needs to be handled in the app, where
-     * we can set a new password.
-     */
-    private fun getActionCodeSettings(handleInApp: Boolean): ActionCodeSettings {
-        return ActionCodeSettings.newBuilder().apply {
-            setAndroidPackageName(
-                BuildConfig.APPLICATION_ID,
-                true,
-                null)
-            handleCodeInApp = handleInApp
-            url = "https://www.pingwinek.de"
-        }.build()
-    }
-
     private fun getString(id: Int): String {
         return getApplication<Application>().getString(id)
-    }
-
-    private fun getString(id: Int, placeholder: String?): String {
-        return getApplication<Application>().getString(id, placeholder)
     }
 
     private fun logError(exception: Exception) {

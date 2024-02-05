@@ -5,54 +5,25 @@ import android.net.Uri
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.pingwinek.jens.cookandbake.BuildConfig
-import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.LinkedList
 
-class FirebaseAuthService private constructor(private val application: PingwinekCooksApplication) {
+/**
+ * TODO Add Timeout to suspended functions
+ * TODO Log errors
+ */
+class FirebaseAuthService {
 
     interface AuthenticationListener {
         fun onLogin()
         fun onLogout()
     }
 
-    private val authListeners = LinkedList<AuthenticationListener>()
-
-    fun registerAuthenticationListener(authenticationListener: AuthenticationListener) {
-        authListeners.add(authenticationListener)
-    }
-
-    private fun notifyOnLogin() {
-        authListeners.forEach { listener ->
-            listener.onLogin()
-        }
-    }
-
-    private fun notifyOnLogout() {
-        authListeners.forEach { listener ->
-            listener.onLogout()
-        }
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private val auth = FirebaseAuth.getInstance()
-
-    @Throws(SuspendedCoroutineWrapper.SuspendedCoroutineException::class)
-    suspend fun getEmailForResetActionCode(actionCode: String): String? {
-        val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
-
-        return if (actionCodeResult.operation == 0) {
-            actionCodeResult.info?.email
-        } else {
-            null
-        }
-    }
-
-
-    companion object : SingletonHolder<FirebaseAuthService, PingwinekCooksApplication>(::FirebaseAuthService) {
+    companion object {
 
         private val auth = FirebaseAuth.getInstance()
+        private val authListeners = LinkedList<AuthenticationListener>()
 
         private const val FB_AUTH_DOMAIN = "https://www.pingwinek.de"
         private const val QP_LINK = "link"
@@ -96,6 +67,58 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
             }
         }
 
+        /**
+         * If isSuccess true, then email is guaranteed to be not null
+         */
+        suspend fun getActionCodeResult(actionCode: String): CheckActionCodeResult {
+            return try {
+                val actionCodeResult = SuspendedCoroutineWrapper.suspendedFunction(auth.checkActionCode(actionCode))
+                when (actionCodeResult.operation) {
+                    0 -> {
+                        actionCodeResult.info?.let { info ->
+                            CheckActionCodeResult(true, ActionCodeOperation.RESET, info.email)
+                        } ?: CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+                    }
+                    1 -> {
+                        actionCodeResult.info?.let { info ->
+                            CheckActionCodeResult(true, ActionCodeOperation.VERIFY, info.email)
+                        } ?: CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+                    }
+                    else -> {
+                        CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+                    }
+                }
+            } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+            } catch (exception: Exception) {
+                CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+            }
+        }
+
+        suspend fun getEmail(): String {
+            if (auth.currentUser == null) return ""
+            return try {
+                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
+                auth.currentUser?.email ?: ""
+            } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                ""
+            } catch (exception: Exception) {
+                ""
+            }
+        }
+
+        private fun notifyOnLogin() {
+            authListeners.forEach { listener ->
+                listener.onLogin()
+            }
+        }
+
+        private fun notifyOnLogout() {
+            authListeners.forEach { listener ->
+                listener.onLogout()
+            }
+        }
+
         suspend fun register(email: String, password: String, dataPolicyChecked: Boolean): AuthActionResult {
             when {
                 !isEmail(email) -> return AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
@@ -114,6 +137,10 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
             } catch (exception: Exception) {
                 AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
             }
+        }
+
+        fun registerAuthenticationListener(authenticationListener: AuthenticationListener) {
+            authListeners.add(authenticationListener)
         }
 
         suspend fun resetPassword(password: String, oobCode: String): AuthActionResult {
@@ -189,18 +216,27 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
             }
         }
 
-        suspend fun signOut(): AuthActionResult {
+        fun signOut(): AuthActionResult {
+            auth.signOut()
+            return if (auth.currentUser == null) {
+                AuthActionResult.SIGNOUT_SUCCEEDED
+            } else {
+                AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
+            }
+        }
+
+        suspend fun verify(actionCode: String): AuthActionResult {
             return try {
-                auth.signOut()
-                if (auth.currentUser == null) {
-                    AuthActionResult.SIGNOUT_SUCCEEDED
-                } else {
-                    AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
-                }
+                SuspendedCoroutineWrapper.suspendedFunction(auth.applyActionCode(actionCode))
+                auth.currentUser?.let { user ->
+                    SuspendedCoroutineWrapper.suspendedFunction(user.getIdToken(true))
+                    SuspendedCoroutineWrapper.suspendedFunction(user.reload())
+                    AuthActionResult.VERIFICATION_SUCCEEDED
+                } ?: AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
+                AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
-                AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
+                AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             }
         }
 
@@ -208,7 +244,7 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
         // Private Functions
         ////////////////////////////////////////////////////////////////////////////////////////////
 
-        private fun extractActionCode(intent: Intent): String? {
+        fun extractActionCode(intent: Intent): String? {
             if (intent.data == null) return null
 
             val link = intent.data!!.getQueryParameter(QP_LINK)?.let {
@@ -275,6 +311,18 @@ class FirebaseAuthService private constructor(private val application: Pingwinek
         VERIFIED,
         UNKNOWN
     }
+
+    enum class ActionCodeOperation {
+        RESET,
+        VERIFY,
+        UNKNOWN
+    }
+
+    data class CheckActionCodeResult(
+        val isSuccess: Boolean,
+        val operation: ActionCodeOperation,
+        val email: String?
+    )
 
     class PasswordPolicy {
 
