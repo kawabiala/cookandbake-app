@@ -7,7 +7,6 @@ interface AuthService {
         EXC_DATAPOLICY_NOT_ACCEPTED,
         EXC_DELETE_FAILED_WITHOUT_REASON,
         EXC_EMAIL_EMPTY_OR_MALFORMATTED,
-        EXC_NO_OOBCOD_PROVIDED,
         EXC_NO_SIGNEDIN_USER,
         EXC_PASSWORD_EMPTY,
         EXC_PASSWORD_POLICY_CHECK_NOT_PASSED,
@@ -45,6 +44,10 @@ interface AuthService {
         companion object {
 
             private val minLength = 8
+
+            fun getPasswordPolicy(policyString: String): String {
+                return policyString.format(minLength, 1, 1, 1, 1)
+            }
 
             fun matches(password: String): Boolean {
                 val result = runCatching {

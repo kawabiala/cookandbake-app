@@ -16,13 +16,13 @@
     <string name="errorMessage">Wiadomość o błędzie</string>
 
     <string name="login">Login</string>
-    <string name="loggedIn">Jesteś zalogowane</string>
+    <string name="loggedIn">Jesteś zalogowane.</string>
     <string name="is_logged_in">%1$s (zalogowane)</string>
     <string name="logged_in_as">Zalogowane jako: %1$s</string>
     <string name="is_not_logged_in">%1$s (nie zalogowane)</string>
 
     <string name="logout">Logout</string>
-    <string name="loggedOut">Jesteś wylogowane</string>
+    <string name="loggedOut">Jesteś wylogowane.</string>
     <string name="confirmLogout">Logout obecnege użytkownika?</string>
 
     <string name="setPassword">Wpisać hasło</string>
@@ -44,13 +44,15 @@
     <string name="confirmUnsubscribe">Naprawdę zmazać profil?</string>
     <string name="no_account">Żaden profil zalogowany</string>
     <string name="manage_account">Profil</string>
-    <string name="confirmationSucceeded">Profil jest potwierdzony</string>
+    <string name="confirmationSucceeded">Email jest potwierdzony.</string>
     <string name="confirmationFailed">Potwierdzenie profilu się nie udało</string>
     <string name="declareAcceptanceOfDataprotection">Tak, zgadzam się z zapamiętaniem moich danych i akceptuję <annotation clickableArea="dataprotection">Politykę prywatności</annotation>.</string>
     <string name="sendVerificationEmail">Wysłać link do weryfikacji emailu</string>
 
-    <string name="accountCreated">Konto zostało założone.</string>
-    <string name="accountDeleted">Konto zostało zmazane.</string>
+    <string name="passwordPolicy">Hasło musi zawierać przynajmniej %d znaków, żadnegych białych znaków, min. %d małą oraz %d dużą literkę, min. %d liczbę oray %d specialny znak.</string>
+
+    <string name="accountCreated">Twoje Konto zostało założone.</string>
+    <string name="accountDeleted">Twoje Konto zostało zmazane.</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Polityka prywatności</string>

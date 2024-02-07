@@ -86,7 +86,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
     fun register(email: String, password: String, dataPolicyChecked: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            var result = FirebaseAuthService.register(email, password, dataPolicyChecked)
+            var result = FirebaseAuthService.registerWithEmailAndPassword(email, password, dataPolicyChecked)
             if (result == AuthService.AuthActionResult.REGISTRATION_SUCCEEDED) {
                 result = FirebaseAuthService.sendVerificationEmail()
             }

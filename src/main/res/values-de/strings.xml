@@ -16,7 +16,7 @@
     <string name="errorMessage">Fehlermeldung</string>
 
     <string name="login">Login</string>
-    <string name="loggedIn">Du bist jetzt eingeloggt</string>
+    <string name="loggedIn">Du bist jetzt eingeloggt.</string>
     <string name="is_logged_in">%1$s (angemeldet)</string>
     <string name="logged_in_as">Angemeldet als: %1$s</string>
     <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
@@ -44,13 +44,15 @@
     <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
     <string name="no_account">Kein Profil angemeldet</string>
     <string name="manage_account">Profildaten</string>
-    <string name="confirmationSucceeded">Das Profil ist jetzt bestätigt.</string>
+    <string name="confirmationSucceeded">Deine Email ist jetzt bestätigt.</string>
     <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
     <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
     <string name="sendVerificationEmail">Bestätigungs-Link senden</string>
 
-    <string name="accountCreated">Das Konto wurde angelegt</string>
-    <string name="accountDeleted">Das Konto wurde gelöscht</string>
+    <string name="passwordPolicy">Das Passwort muss mind. %d Zeichen lang sein, darf kein Leerzeichen enthalten und muss min. %d Klein- und %d Großbuchstaben enthalten sowie min. %d Zahl und %d Sonderzeichen.</string>
+
+    <string name="accountCreated">Dein Konto wurde angelegt.</string>
+    <string name="accountDeleted">Dein Konto wurde gelöscht.</string>
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>

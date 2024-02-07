@@ -2,20 +2,21 @@
 <resources>
     <string name="unknownException">Something went wrong</string>
 
-    <string name="noSignedInUser">No user is signed in</string>
-    <string name="deleteFailed">Deleting account failed: %1$s</string>
-    <string name="registrationFailed">Registration failed: $1%s</string>
-    <string name="loginFailed">Login failed: $1%s</string>
-    <string name="logoutFailed">Logout failed: $1%s</string>
-    <string name="resetFailed">Reset password failed: $1%s</string>
+    <string name="noSignedInUser">No user is signed in.</string>
+    <string name="deleteFailed">The account could not be deleted. Please, try again!</string>
+    <string name="registrationFailed">The registration failed. Please, try again!</string>
+    <string name="loginFailed">Login failed. Probably, either email or password were not correct.</string>
+    <string name="logoutFailed">Logout failed. Please, try again!</string>
+    <string name="resetFailed">Reseting the password failed. Maybe, the link was no longer valid.</string>
     <string name="retrieveEmailFailed">Retrieving email failed: $1%s</string>
     <string name="resetForWrongEmail">The reset link is not valid for the signed in user</string>
-    <string name="sendVerificationFailed">Send verification email failed: $1%s</string>
-    <string name="sendResetFailed">Send password reset email failed: $1%s</string>
+    <string name="sendVerificationFailed">Sending of the verification email failed. Please, try again.</string>
+    <string name="sendResetFailed">Sending of the password reset email failed. Please, try again.</string>
+    <string name="verificationFailed">The verification of your email failed. Maybe, the link was no longer valid.</string>
 
-    <string name="emailMalformatted">The email is empty or not correctly formatted</string>
-    <string name="passwordMalformatted">The password is empty or not correctly formatted</string>
+    <string name="emailMalformatted">The email is empty or not correctly formatted.</string>
+    <string name="passwordMalformatted">The password is empty or does not follow the password policy: $1%s</string>
 
-    <string name="dataProtectionNotChecked">Please, agree with the data protection policy</string>
+    <string name="dataProtectionNotChecked">Please, agree with the data protection policy!</string>
 
 </resources>

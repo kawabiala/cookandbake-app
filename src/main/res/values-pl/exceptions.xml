@@ -2,19 +2,20 @@
 <resources>
     <string name="unknownException">Wystąpił nieznany błąd</string>
 
-    <string name="noSignedInUser">Nie ma zalogowanego użytkownika</string>
-    <string name="deleteFailed">Zmazanie profilu się nie udało: %1$s</string>
-    <string name="registrationFailed">Założenie profilu się nie udało: $1%s</string>
-    <string name="loginFailed">Login się nie udało: $1%s</string>
-    <string name="logoutFailed">Logout się nie udało: $1%s</string>
-    <string name="resetFailed">Resetowanie hasła się nie udało: $1%s</string>
+    <string name="noSignedInUser">Nie ma zalogowanego użytkownika.</string>
+    <string name="deleteFailed">Zmazanie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
+    <string name="registrationFailed">Założenie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
+    <string name="loginFailed">Login się nie udało. Prawdopodobnie, albo email albo hasło się nie zgadzało.</string>
+    <string name="logoutFailed">Logout się nie udało. Proszę, spróbuj jeszcze raz!</string>
+    <string name="resetFailed">Resetowanie hasła się nie udało. Może link był już nie aktualny.</string>
     <string name="retrieveEmailFailed">Nie udało się załadować emailu: $1%s</string>
     <string name="resetForWrongEmail">Link do resetowanie hasła nie jest ważny dla zalogowanego użytkownika</string>
-    <string name="sendVerificationFailed">Nie udało się wysłać email do weryfikacji: $1%s</string>
-    <string name="sendResetFailed">Nie udało się wysłać email do resetowania hasła: $1%s</string>
+    <string name="sendVerificationFailed">Nie udało się wysłać email do weryfikacji. Proszę, spróbuj jeszcze raz!</string>
+    <string name="sendResetFailed">Nie udało się wysłać email do resetowania hasła. Proszę, spróbuj jeszcze raz!</string>
+    <string name="verificationFailed">Weryfikacja twojego emailu się nie udało. Może link był już nie aktualny.</string>
 
-    <string name="emailMalformatted">Email jest pusty albo nie w odpowiednim formacie</string>
-    <string name="passwordMalformatted">Hasło jest puste albo nie w odpowiednim formacie</string>
+    <string name="emailMalformatted">Email jest pusty albo nie w odpowiednim formacie.</string>
+    <string name="passwordMalformatted">Hasło jest puste albo nie odpowiada polityce o formacie haseł: $1%s</string>
 
     <string name="dataProtectionNotChecked">Proszę zaakceptować politykę ochrony danych!</string>
 

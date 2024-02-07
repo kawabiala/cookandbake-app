@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.lib.firestore
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.pingwinek.jens.cookandbake.BuildConfig
@@ -9,7 +10,6 @@ import com.pingwinek.jens.cookandbake.lib.AuthService
 import java.util.LinkedList
 
 /**
- * TODO Add Timeout to suspended functions
  * TODO Log errors
  */
 class FirebaseAuthService {
@@ -33,7 +33,9 @@ class FirebaseAuthService {
             }
 
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.currentUser!!.reload())
                 if (auth.currentUser == null) {
                     AuthService.AuthStatus.SIGNED_OUT
                 } else if (auth.currentUser!!.isEmailVerified) {
@@ -42,8 +44,10 @@ class FirebaseAuthService {
                     AuthService.AuthStatus.SIGNED_IN
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthStatus.UNKNOWN
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthStatus.UNKNOWN
             }
         }
@@ -57,8 +61,10 @@ class FirebaseAuthService {
                 SuspendedCoroutineWrapper.suspendedFunction(TIMEOUT, auth.currentUser!!.delete())
                 AuthService.AuthActionResult.DELETE_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
             }
         }
@@ -85,8 +91,10 @@ class FirebaseAuthService {
                     }
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
             }
         }
@@ -94,11 +102,15 @@ class FirebaseAuthService {
         suspend fun getEmail(): String {
             if (auth.currentUser == null) return ""
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.currentUser!!.reload())
                 auth.currentUser?.email ?: ""
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 ""
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 ""
             }
         }
@@ -115,7 +127,7 @@ class FirebaseAuthService {
             }
         }
 
-        suspend fun register(email: String, password: String, dataPolicyChecked: Boolean): AuthService.AuthActionResult {
+        suspend fun registerWithEmailAndPassword(email: String, password: String, dataPolicyChecked: Boolean): AuthService.AuthActionResult {
             when {
                 !isEmail(email) -> return AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
                 !passesPasswordPolicy(password) -> return AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
@@ -129,8 +141,10 @@ class FirebaseAuthService {
                 )
                 AuthService.AuthActionResult.REGISTRATION_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
             }
         }
@@ -144,15 +158,19 @@ class FirebaseAuthService {
                 return AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
             }
             if (oobCode.isEmpty()) {
-                return AuthService.AuthActionResult.EXC_NO_OOBCOD_PROVIDED
+                return AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
             }
 
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.confirmPasswordReset(oobCode, password))
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.confirmPasswordReset(oobCode, password))
                 AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
             }
         }
@@ -164,13 +182,16 @@ class FirebaseAuthService {
 
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
                     auth.sendPasswordResetEmail(
                         email,
                         getActionCodeSettings()))
                 AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
             }
         }
@@ -181,11 +202,15 @@ class FirebaseAuthService {
             }
 
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings()))
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.currentUser!!.sendEmailVerification(getActionCodeSettings()))
                 AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 return AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 return AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
             }
         }
@@ -197,8 +222,12 @@ class FirebaseAuthService {
             }
 
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.signInWithEmailAndPassword(email, password))
-                SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.signInWithEmailAndPassword(email, password))
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.currentUser!!.reload())
 
                 if (auth.currentUser == null) {
                     AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
@@ -206,8 +235,10 @@ class FirebaseAuthService {
                     AuthService.AuthActionResult.SIGNIN_SUCCEEDED
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 return AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 return AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
             }
         }
@@ -223,15 +254,23 @@ class FirebaseAuthService {
 
         suspend fun verify(actionCode: String): AuthService.AuthActionResult {
             return try {
-                SuspendedCoroutineWrapper.suspendedFunction(auth.applyActionCode(actionCode))
+                SuspendedCoroutineWrapper.suspendedFunction(
+                    TIMEOUT,
+                    auth.applyActionCode(actionCode))
                 auth.currentUser?.let { user ->
-                    SuspendedCoroutineWrapper.suspendedFunction(user.getIdToken(true))
-                    SuspendedCoroutineWrapper.suspendedFunction(user.reload())
+                    SuspendedCoroutineWrapper.suspendedFunction(
+                        TIMEOUT,
+                        user.getIdToken(true))
+                    SuspendedCoroutineWrapper.suspendedFunction(
+                        TIMEOUT,
+                        user.reload())
                     AuthService.AuthActionResult.VERIFICATION_SUCCEEDED
                 } ?: AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
+                Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             }
         }
