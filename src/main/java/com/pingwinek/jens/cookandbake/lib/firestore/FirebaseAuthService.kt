@@ -5,6 +5,7 @@ import android.net.Uri
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.pingwinek.jens.cookandbake.BuildConfig
+import com.pingwinek.jens.cookandbake.lib.AuthService
 import java.util.LinkedList
 
 /**
@@ -13,17 +14,12 @@ import java.util.LinkedList
  */
 class FirebaseAuthService {
 
-    interface AuthenticationListener {
-        fun onLogin()
-        fun onLogout()
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    companion object {
+    companion object : AuthService {
 
         private val auth = FirebaseAuth.getInstance()
-        private val authListeners = LinkedList<AuthenticationListener>()
+        private val authListeners = LinkedList<AuthService.AuthenticationListener>()
 
         private const val FB_AUTH_DOMAIN = "https://www.pingwinek.de"
         private const val QP_LINK = "link"
@@ -31,39 +27,39 @@ class FirebaseAuthService {
         private const val HANDLE_IN_APP = true
         private const val TIMEOUT: Long = 10000
 
-        suspend fun checkAuthStatus(): AuthStatus {
+        suspend fun checkAuthStatus(): AuthService.AuthStatus {
             if (auth.currentUser == null) {
-                return AuthStatus.SIGNED_OUT
+                return AuthService.AuthStatus.SIGNED_OUT
             }
 
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
                 if (auth.currentUser == null) {
-                    AuthStatus.SIGNED_OUT
+                    AuthService.AuthStatus.SIGNED_OUT
                 } else if (auth.currentUser!!.isEmailVerified) {
-                    AuthStatus.VERIFIED
+                    AuthService.AuthStatus.VERIFIED
                 } else {
-                    AuthStatus.SIGNED_IN
+                    AuthService.AuthStatus.SIGNED_IN
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthStatus.UNKNOWN
+                AuthService.AuthStatus.UNKNOWN
             } catch (exception: Exception) {
-                AuthStatus.UNKNOWN
+                AuthService.AuthStatus.UNKNOWN
             }
         }
 
-        suspend fun deleteAccount(): AuthActionResult {
+        suspend fun deleteAccount(): AuthService.AuthActionResult {
             if (auth.currentUser == null) {
-                return AuthActionResult.EXC_NO_SIGNEDIN_USER
+                return AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER
             }
 
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(TIMEOUT, auth.currentUser!!.delete())
-                AuthActionResult.DELETE_SUCCEEDED
+                AuthService.AuthActionResult.DELETE_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
-                AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
             }
         }
 
@@ -119,11 +115,11 @@ class FirebaseAuthService {
             }
         }
 
-        suspend fun register(email: String, password: String, dataPolicyChecked: Boolean): AuthActionResult {
+        suspend fun register(email: String, password: String, dataPolicyChecked: Boolean): AuthService.AuthActionResult {
             when {
-                !isEmail(email) -> return AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
-                !passesPasswordPolicy(password) -> return AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
-                !dataPolicyChecked -> return AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED
+                !isEmail(email) -> return AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
+                !passesPasswordPolicy(password) -> return AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
+                !dataPolicyChecked -> return AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED
             }
 
             return try {
@@ -131,39 +127,39 @@ class FirebaseAuthService {
                     TIMEOUT,
                     auth.createUserWithEmailAndPassword(email, password)
                 )
-                AuthActionResult.REGISTRATION_SUCCEEDED
+                AuthService.AuthActionResult.REGISTRATION_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
-                AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
             }
         }
 
-        fun registerAuthenticationListener(authenticationListener: AuthenticationListener) {
+        fun registerAuthenticationListener(authenticationListener: AuthService.AuthenticationListener) {
             authListeners.add(authenticationListener)
         }
 
-        suspend fun resetPassword(password: String, oobCode: String): AuthActionResult {
-            if (!PasswordPolicy.matches(password)) {
-                return AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
+        suspend fun resetPassword(password: String, oobCode: String): AuthService.AuthActionResult {
+            if (!AuthService.PasswordPolicy.matches(password)) {
+                return AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED
             }
             if (oobCode.isEmpty()) {
-                return AuthActionResult.EXC_NO_OOBCOD_PROVIDED
+                return AuthService.AuthActionResult.EXC_NO_OOBCOD_PROVIDED
             }
 
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.confirmPasswordReset(oobCode, password))
-                AuthActionResult.RESET_PASSWORD_SUCCEEDED
+                AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
-                AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON
             }
         }
 
-        suspend fun sendPasswordResetEmail(email: String): AuthActionResult {
+        suspend fun sendPasswordResetEmail(email: String): AuthService.AuthActionResult {
             if (!isEmail(email)) {
-                return AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
+                return AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
             }
 
             return try {
@@ -171,33 +167,33 @@ class FirebaseAuthService {
                     auth.sendPasswordResetEmail(
                         email,
                         getActionCodeSettings()))
-                AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED
+                AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
             } catch (exception: Exception) {
-                AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON
             }
         }
 
-        suspend fun sendVerificationEmail(): AuthActionResult {
+        suspend fun sendVerificationEmail(): AuthService.AuthActionResult {
             if (auth.currentUser == null) {
-                return AuthActionResult.EXC_NO_SIGNEDIN_USER
+                return AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER
             }
 
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.sendEmailVerification(getActionCodeSettings()))
-                AuthActionResult.VERIFICATION_SEND_SUCCEEDED
+                AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                return AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
+                return AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
-                return AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
+                return AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON
             }
         }
 
-        suspend fun signIn(email: String, password: String): AuthActionResult {
+        suspend fun signIn(email: String, password: String): AuthService.AuthActionResult {
             when {
-                !isEmail(email) -> return AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
-                password.isEmpty() -> return AuthActionResult.EXC_PASSWORD_EMPTY
+                !isEmail(email) -> return AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED
+                password.isEmpty() -> return AuthService.AuthActionResult.EXC_PASSWORD_EMPTY
             }
 
             return try {
@@ -205,38 +201,38 @@ class FirebaseAuthService {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.currentUser!!.reload())
 
                 if (auth.currentUser == null) {
-                    AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
+                    AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
                 } else {
-                    AuthActionResult.SIGNIN_SUCCEEDED
+                    AuthService.AuthActionResult.SIGNIN_SUCCEEDED
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                return AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
+                return AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
-                return AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
+                return AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON
             }
         }
 
-        fun signOut(): AuthActionResult {
+        fun signOut(): AuthService.AuthActionResult {
             auth.signOut()
             return if (auth.currentUser == null) {
-                AuthActionResult.SIGNOUT_SUCCEEDED
+                AuthService.AuthActionResult.SIGNOUT_SUCCEEDED
             } else {
-                AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON
             }
         }
 
-        suspend fun verify(actionCode: String): AuthActionResult {
+        suspend fun verify(actionCode: String): AuthService.AuthActionResult {
             return try {
                 SuspendedCoroutineWrapper.suspendedFunction(auth.applyActionCode(actionCode))
                 auth.currentUser?.let { user ->
                     SuspendedCoroutineWrapper.suspendedFunction(user.getIdToken(true))
                     SuspendedCoroutineWrapper.suspendedFunction(user.reload())
-                    AuthActionResult.VERIFICATION_SUCCEEDED
-                } ?: AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
+                    AuthService.AuthActionResult.VERIFICATION_SUCCEEDED
+                } ?: AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
-                AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch ( exception: Exception) {
-                AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
+                AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             }
         }
 
@@ -275,41 +271,8 @@ class FirebaseAuthService {
         }
 
         private fun passesPasswordPolicy(password: String): Boolean {
-            return PasswordPolicy.matches(password)
+            return AuthService.PasswordPolicy.matches(password)
         }
-    }
-
-    enum class AuthActionResult {
-        DELETE_SUCCEEDED,
-        EXC_DATAPOLICY_NOT_ACCEPTED,
-        EXC_DELETE_FAILED_WITHOUT_REASON,
-        EXC_EMAIL_EMPTY_OR_MALFORMATTED,
-        EXC_NO_OOBCOD_PROVIDED,
-        EXC_NO_SIGNEDIN_USER,
-        EXC_PASSWORD_EMPTY,
-        EXC_PASSWORD_POLICY_CHECK_NOT_PASSED,
-        EXC_REGISTRATION_FAILED_WITHOUT_REASON,
-        EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON,
-        EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON,
-        EXC_SIGNIN_FAILED_WITHOUT_REASON,
-        EXC_SIGNOUT_FAILED_WITHOUT_REASON,
-        EXC_USER_ALREADY_EXISTS,
-        EXC_VERIFICATION_FAILED_WITHOUT_REASON,
-        EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON,
-        REGISTRATION_SUCCEEDED,
-        RESET_PASSWORD_SUCCEEDED,
-        RESET_PASSWORD_SEND_SUCCEEDED,
-        SIGNIN_SUCCEEDED,
-        SIGNOUT_SUCCEEDED,
-        VERIFICATION_SUCCEEDED,
-        VERIFICATION_SEND_SUCCEEDED,
-    }
-
-    enum class AuthStatus {
-        SIGNED_OUT,
-        SIGNED_IN,
-        VERIFIED,
-        UNKNOWN
     }
 
     enum class ActionCodeOperation {
@@ -323,26 +286,5 @@ class FirebaseAuthService {
         val operation: ActionCodeOperation,
         val email: String?
     )
-
-    class PasswordPolicy {
-
-        companion object {
-
-            private val minLength = 8
-
-            fun matches(password: String): Boolean {
-                val result = runCatching {
-                    require(password.length >= minLength)
-                    require(password.none() { it.isWhitespace() } )
-                    require(password.any() { it.isUpperCase() } )
-                    require(password.any() { it.isLowerCase() } )
-                    require(password.any() { it.isDigit() } )
-                    require(password.any() { ! it.isLetterOrDigit() } )
-                }
-
-                return result.isSuccess
-            }
-        }
-    }
 
 }
