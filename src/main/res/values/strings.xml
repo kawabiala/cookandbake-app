@@ -50,7 +50,7 @@
     <string name="declareAcceptanceOfDataprotection">Yes, I agree with storing my data and I accept the <annotation clickableArea="dataprotection">privacy statement</annotation>.</string>
     <string name="sendVerificationEmail">Send verification email</string>
 
-    <string name="passwordPolicy">The password must contain at least %d signs, no whitespace, min. %d lower and %d upper letter, min. %d digit and %d special sign.</string>
+    <string name="passwordPolicy">The password must contain at least %d characters, no whitespace, min. %d lower and %d upper letter, min. %d digit and %d special character.</string>
 
     <string name="accountCreated">Your account was created.</string>
     <string name="accountDeleted">Your account was deleted.</string>

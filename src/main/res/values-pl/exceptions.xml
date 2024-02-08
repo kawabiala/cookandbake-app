@@ -15,7 +15,7 @@
     <string name="verificationFailed">Weryfikacja twojego emailu się nie udało. Może link był już nie aktualny.</string>
 
     <string name="emailMalformatted">Email jest pusty albo nie w odpowiednim formacie.</string>
-    <string name="passwordMalformatted">Hasło jest puste albo nie odpowiada polityce o formacie haseł: $1%s</string>
+    <string name="passwordMalformatted">Hasło jest puste albo nie odpowiada polityce o formacie haseł: %s</string>
 
     <string name="dataProtectionNotChecked">Proszę zaakceptować politykę ochrony danych!</string>
 

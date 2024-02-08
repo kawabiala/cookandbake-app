@@ -15,7 +15,7 @@
     <string name="verificationFailed">Deine Email konnte nicht verifiziert werden. Möglicherweise war der Link nicht mehr gültig.</string>
 
     <string name="emailMalformatted">Die Email ist leer oder nicht korrekt formattiert.</string>
-    <string name="passwordMalformatted">Das Passwort ist leer oder folgt nicht der Passwort-Policy: $1%s</string>
+    <string name="passwordMalformatted">Das Passwort ist leer oder folgt nicht der Passwort-Policy: %s</string>
 
     <string name="dataProtectionNotChecked">Bitte stimme der Datenschutzerklärung zu!</string>
 
