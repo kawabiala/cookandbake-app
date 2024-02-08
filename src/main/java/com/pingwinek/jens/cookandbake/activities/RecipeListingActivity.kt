@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -52,6 +53,11 @@ class RecipeListingActivity : BaseActivity() {
         swipeRefreshLayout.setOnRefreshListener {
             refresh()
             swipeRefreshLayout.isRefreshing = false
+        }
+
+        val fab = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        fab.setOnClickListener {
+            openRecipeItem(null)
         }
 
         configureOptionMenu()
@@ -123,10 +129,6 @@ class RecipeListingActivity : BaseActivity() {
 
     fun onRecipeItemClick(recipeItem: View) {
         openRecipeItem(recipeItem.tag as String)
-    }
-
-    fun onNewRecipeClick() {
-        openRecipeItem(null)
     }
 
     private fun refresh() {

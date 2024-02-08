@@ -473,6 +473,11 @@ class SignInActivity : BaseActivity() {
     private fun adaptCrashlytics(showCrashlytics: Boolean) {
         acceptCrashlyticsView.isVisible = showCrashlytics
         acceptCrashlyticsTextView.isVisible = showCrashlytics
+        /* The crashlytics API does not provide any method to find out if collection is enabled
+        * or not. Therefore, we set it to false, whenever this activity is visited. The user can then
+        * enable it. TODO persist status of crashlytics
+         */
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(false)
         acceptCrashlyticsView.setOnClickListener {
             crashlyticsAction()
         }

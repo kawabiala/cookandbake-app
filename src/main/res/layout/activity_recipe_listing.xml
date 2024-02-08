@@ -31,7 +31,6 @@
             android:clickable="true"
             android:contentDescription="@string/add_recipe"
             android:focusable="true"
-            android:onClick="onNewRecipeClick"
             android:src="@drawable/ic_action_add_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
