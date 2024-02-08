@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 
 class SignInActivity : BaseActivity() {
@@ -164,6 +165,129 @@ class SignInActivity : BaseActivity() {
 
         // Observers
 
+        authenticationViewModel.authActionResult.observe(this) {
+            when (authenticationViewModel.authActionResult.value) {
+                AuthService.AuthActionResult.DELETE_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.accountDeleted)) {
+                        asRegistrationView = true
+                        resetView()
+                    }
+                }
+                AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
+                    toast(getString(R.string.accountCreated))
+                }
+                AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.PasswordChanged)) {
+                        asRegistrationView = false
+                        applyViewSettings(signInView) // resetView won't work in this case
+                    }
+                }
+                AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.lostPasswordSentLong))
+                }
+                AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.loggedIn),
+                        closeAction)
+                }
+                AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.loggedOut)) {
+                        asRegistrationView = false
+                        resetView()
+                    }
+                }
+                AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.confirmationSucceeded)) {
+                        closeAction
+                    }
+                }
+                AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> {
+                    authMessage(
+                        getString(R.string.confirmationSent),
+                        closeAction)
+                }
+                AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> {
+                    errorMessage(
+                        getString(R.string.dataProtectionNotChecked)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.deleteFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> {
+                    errorMessage(
+                        getString(R.string.emailMalformatted)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {
+                    errorMessage(
+                        getString(R.string.noSignedInUser)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> {
+                    errorMessage(
+                        getString(
+                            R.string.passwordMalformatted,
+                            AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
+                        )
+                    )
+                }
+                AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> {
+                    errorMessage(
+                        getString(
+                            R.string.passwordMalformatted,
+                            AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
+                        )
+                    )
+                }
+                AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.registrationFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.resetFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.sendResetFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.loginFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.logoutFailed)
+                    )
+                }
+                AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> TODO()
+                AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.verificationFailed)) {
+                        applyViewSettings(unverifiedView)
+                    }
+                }
+                AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> {
+                    errorMessage(
+                        getString(R.string.sendVerificationFailed)
+                    )
+                }
+                null -> TODO()
+            }
+        }
+/*
         authenticationViewModel.result.observe(this) {
             when (authenticationViewModel.result.value) {
                 AuthenticationViewModel.ResultType.ACCOUNT_CREATED -> {
@@ -218,6 +342,8 @@ class SignInActivity : BaseActivity() {
             }
         }
 
+ */
+
         authenticationViewModel.linkMode.observe(this) {
             when (it) {
                 AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
@@ -235,13 +361,13 @@ class SignInActivity : BaseActivity() {
 
         authenticationViewModel.authStatus.observe(this) { authStatus ->
             when (authStatus) {
-                AuthenticationViewModel.AuthStatus.SIGNED_OUT -> {
+                AuthService.AuthStatus.SIGNED_OUT -> {
                     if (currentView != resetPasswordView) resetView()
                 }
-                AuthenticationViewModel.AuthStatus.SIGNED_IN -> {
+                AuthService.AuthStatus.SIGNED_IN -> {
                     if (currentView != resetPasswordView) applyViewSettings(unverifiedView)
                 }
-                AuthenticationViewModel.AuthStatus.VERIFIED -> {
+                AuthService.AuthStatus.VERIFIED -> {
                     if (currentView != resetPasswordView) applyViewSettings(verifiedView)
                 }
                 else -> {}
@@ -457,8 +583,20 @@ class SignInActivity : BaseActivity() {
         }
     }
 
-    private fun alert(title: String?, message: String) {
-        alert(title, message) {}
+    private fun authMessage(message: String) {
+        authMessage(message) {}
+    }
+
+    private fun authMessage(message: String, action: () -> Unit) {
+        alert(getString(R.string.authenticationMessage), message, action)
+    }
+
+    private fun errorMessage(message: String) {
+        errorMessage(message) {}
+    }
+
+    private fun errorMessage(message: String, action: () -> Unit) {
+        alert(getString(R.string.errorMessage), message, action)
     }
 
     private fun toast(message: String) {

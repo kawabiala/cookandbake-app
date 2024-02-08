@@ -2,20 +2,21 @@
 <resources>
     <string name="unknownException">Unbekannter Fehler</string>
 
-    <string name="noSignedInUser">Kein eingeloggter User</string>
-    <string name="deleteFailed">Das Löschen des Account ist fehlgeschlagen: %1$s</string>
-    <string name="registrationFailed">Das Anlegen des Accounts fehlgeschlagen: $1%s</string>
-    <string name="loginFailed">Login ist fehlgeschlagen: $1%s</string>
-    <string name="logoutFailed">Logout ist fehlgeschlagen: $1%s</string>
-    <string name="resetFailed">Das Zurücksetzen des Passworts ist fehlgeschlagen: $1%s</string>
+    <string name="noSignedInUser">Kein eingeloggter User.</string>
+    <string name="deleteFailed">Das Löschen des Account ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="registrationFailed">Das Anlegen des Accounts ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="loginFailed">Das Login ist fehlgeschlagen. Vermutlich waren Email oder Passwort falsch.</string>
+    <string name="logoutFailed">Logout ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="resetFailed">Das Zurücksetzen des Passworts ist fehlgeschlagen. Möglicherweise war der Link nicht mehr gültig.</string>
     <string name="retrieveEmailFailed">Die Email-Adresse konnte nicht geladen werden: $1%s</string>
     <string name="resetForWrongEmail">Der Reset-Link ist nicht gültig für den eingeloggten User</string>
-    <string name="sendVerificationFailed">Das Senden der Verifikations-Email ist fehlgeschlagen: $1%s</string>
-    <string name="sendResetFailed">Das Senden der Passwort-Reset-Email ist fehlgeschlagen: $1%s</string>
+    <string name="sendVerificationFailed">Das Senden der Verifikations-Email ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="sendResetFailed">Das Senden der Passwort-Reset-Email ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="verificationFailed">Deine Email konnte nicht verifiziert werden. Möglicherweise war der Link nicht mehr gültig.</string>
 
-    <string name="emailMalformatted">Die Email ist leer oder nicht korrekt formattiert</string>
-    <string name="passwordMalformatted">Das Passwort ist leer oder nicht korrekt formattiert</string>
+    <string name="emailMalformatted">Die Email ist leer oder nicht korrekt formattiert.</string>
+    <string name="passwordMalformatted">Das Passwort ist leer oder folgt nicht der Passwort-Policy: %s</string>
 
-    <string name="dataProtectionNotChecked">Bitte der Datenschutzerklärung zustimmen!</string>
+    <string name="dataProtectionNotChecked">Bitte stimme der Datenschutzerklärung zu!</string>
 
 </resources>
