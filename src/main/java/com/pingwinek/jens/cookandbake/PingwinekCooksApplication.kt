@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
+import com.pingwinek.jens.cookandbake.sources.UserInfoSourceFB
 import java.util.Locale
 
 class PingwinekCooksApplication : Application() {
@@ -46,6 +47,9 @@ class PingwinekCooksApplication : Application() {
 
         val ingredientSourceFB = IngredientSourceFB.getInstance(FirebaseFirestore.getInstance())
         serviceLocator.registerService(ingredientSourceFB)
+
+        val userInfoSourceFB = UserInfoSourceFB.getInstance(FirebaseFirestore.getInstance())
+        serviceLocator.registerService(userInfoSourceFB)
     }
 
 }
