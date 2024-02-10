@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.UserInfo
@@ -17,9 +16,8 @@ class UserInfoViewModel(application: Application) : AndroidViewModel(application
     private val userInfoRepository = UserInfoRepository.getInstance(application as PingwinekCooksApplication)
 
     private val privateUserInfoData = MutableLiveData<UserInfo>()
-    val userInfoData: LiveData<UserInfo> = privateUserInfoData.map { mutableUserInfo ->
-        mutableUserInfo
-    }
+    val userInfoData: LiveData<UserInfo>
+        get() = privateUserInfoData
 
     var userInfoId: String? = null
 

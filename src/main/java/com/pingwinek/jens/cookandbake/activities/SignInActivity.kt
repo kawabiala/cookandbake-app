@@ -11,11 +11,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
+import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 
 class SignInActivity : BaseActivity() {
 
@@ -62,6 +61,7 @@ class SignInActivity : BaseActivity() {
     private lateinit var verifiedView: ViewSettings
 
     private lateinit var authenticationViewModel: AuthenticationViewModel
+    private lateinit var userInfoViewModel: UserInfoViewModel
 
     private var asRegistrationView: Boolean = true
     private var currentView: ViewSettings = ViewSettings()
@@ -79,6 +79,11 @@ class SignInActivity : BaseActivity() {
             .AndroidViewModelFactory
             .getInstance(application)
             .create(AuthenticationViewModel::class.java)
+
+        userInfoViewModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(UserInfoViewModel::class.java)
 
         // Assign fields to vars
 
@@ -373,6 +378,10 @@ class SignInActivity : BaseActivity() {
                 else -> {}
             }
         }
+
+        userInfoViewModel.userInfoData.observe(this) { userInfo ->
+            acceptCrashlyticsView.isChecked = userInfo.crashlyticsEnabled
+        }
     }
 
     override fun onResume() {
@@ -382,6 +391,8 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.checkAuthStatus()
         authenticationViewModel.retrieveEmail()
         authenticationViewModel.checkActionCodeForIntent(intent)
+
+        userInfoViewModel.loadData()
     }
 
     /**
@@ -473,11 +484,6 @@ class SignInActivity : BaseActivity() {
     private fun adaptCrashlytics(showCrashlytics: Boolean) {
         acceptCrashlyticsView.isVisible = showCrashlytics
         acceptCrashlyticsTextView.isVisible = showCrashlytics
-        /* The crashlytics API does not provide any method to find out if collection is enabled
-        * or not. Therefore, we set it to false, whenever this activity is visited. The user can then
-        * enable it. TODO persist status of crashlytics
-         */
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(false)
         acceptCrashlyticsView.setOnClickListener {
             crashlyticsAction()
         }
@@ -534,7 +540,7 @@ class SignInActivity : BaseActivity() {
     }
 
     private val crashlyticsAction: () -> Unit = {
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(acceptCrashlyticsView.isChecked)
+        userInfoViewModel.saveUserInfo(acceptCrashlyticsView.isChecked)
     }
 
     private val deleteAction: () -> Unit = {
