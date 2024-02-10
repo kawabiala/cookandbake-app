@@ -19,12 +19,12 @@ class UserInfoViewModel(application: Application) : AndroidViewModel(application
     val userInfoData: LiveData<UserInfo>
         get() = privateUserInfoData
 
-    var userInfoId: String? = null
-
     fun loadData() {
-        userInfoId?.let { id ->
-            viewModelScope.launch(Dispatchers.IO) {
-                privateUserInfoData.postValue(userInfoRepository.get(id))
+        viewModelScope.launch(Dispatchers.IO) {
+            userInfoRepository.getAll().also { infos ->
+                if (infos.isNotEmpty()) {
+                    privateUserInfoData.postValue(infos[0])
+                }
             }
         }
     }
@@ -37,7 +37,6 @@ class UserInfoViewModel(application: Application) : AndroidViewModel(application
         } ?: run {
             viewModelScope.launch(Dispatchers.IO) {
                 userInfoRepository.newUserInfo(crashlyticsEnabled).let { userInfo ->
-                    userInfoId = userInfo.id
                     privateUserInfoData.postValue(userInfo)
                 }
             }
