@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.compose.runtime.Composable
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_DESCRIPTION
@@ -46,6 +47,11 @@ class RecipeEditActivity : BaseActivity() {
                 true
             }
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 
     private fun save() {

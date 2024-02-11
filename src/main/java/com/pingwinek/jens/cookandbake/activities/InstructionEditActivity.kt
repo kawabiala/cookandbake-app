@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
+import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
@@ -39,6 +40,11 @@ class InstructionEditActivity : BaseActivity() {
                 true
             }
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 
     private fun save() {

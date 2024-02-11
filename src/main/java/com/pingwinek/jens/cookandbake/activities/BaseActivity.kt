@@ -3,11 +3,13 @@ package com.pingwinek.jens.cookandbake.activities
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.pingwinek.jens.cookandbake.R
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.lib.OptionMenu
+import com.pingwinek.jens.cookandbake.theming.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.theming.PingwinekCooksScaffold
 
 /**
  * Provides consistent layout frame including support action bar.
@@ -25,12 +27,24 @@ abstract class BaseActivity : AppCompatActivity() {
      */
 
     // when the activity is first created
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        super.setContentView(R.layout.activity_base)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setContent {
+            PingwinekCooksAppTheme {
+                PingwinekCooksScaffold("Title") {
+                    ScaffoldContent()
+                }
+            }
+        }
+
+        //super.setContentView(R.layout.activity_base)
+        //setSupportActionBar(findViewById(R.id.toolbar))
     }
+
+    @Composable
+    abstract fun ScaffoldContent()
 
     /*
     /////////////////////////////////////////////
@@ -54,8 +68,11 @@ abstract class BaseActivity : AppCompatActivity() {
      */
 
     protected fun addContentView (viewId: Int) {
+        /*
         val baseLayout = findViewById<View>(R.id.mainContent) as ViewGroup
         val layoutInflater = this.layoutInflater
         layoutInflater.inflate(viewId, baseLayout)
+
+         */
     }
 }

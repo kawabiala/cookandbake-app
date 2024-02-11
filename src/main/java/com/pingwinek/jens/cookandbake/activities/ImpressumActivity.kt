@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
 import android.webkit.WebView
+import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.R
 
 class ImpressumActivity : BaseActivity() {
@@ -24,5 +25,10 @@ class ImpressumActivity : BaseActivity() {
                 true
             }
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 }

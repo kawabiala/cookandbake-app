@@ -9,6 +9,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.runtime.Composable
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
@@ -405,6 +406,11 @@ class SignInActivity : BaseActivity() {
         intent?.let {
             this.intent = it
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

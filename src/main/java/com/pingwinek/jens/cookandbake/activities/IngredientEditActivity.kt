@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
+import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY
@@ -51,6 +52,11 @@ class IngredientEditActivity : BaseActivity() {
                 true
             }
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 
     private fun save() {

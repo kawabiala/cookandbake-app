@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -194,6 +195,11 @@ class RecipeActivity : BaseActivity(),
                 true
             }
         }
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        TODO("Not yet implemented")
     }
 
     override fun onResume() {

@@ -6,14 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -31,7 +30,7 @@ class RecipeListingActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_recipe_listing)
+        //addContentView(R.layout.activity_recipe_listing)
 
         auth = Firebase.auth
 
@@ -41,6 +40,7 @@ class RecipeListingActivity : BaseActivity() {
             .create(RecipeListingViewModel::class.java)
 
         val recipeListData = recipeListingModel.recipeListData
+        /*
         val viewAdapter = RecipeListingAdapter(recipeListData, this)
 
         findViewById<RecyclerView>(R.id.recipeList).apply {
@@ -61,12 +61,14 @@ class RecipeListingActivity : BaseActivity() {
         }
 
         configureOptionMenu()
+
+         */
     }
 
     override fun onResume() {
         super.onResume()
         recipeListingModel.loadData()
-
+/*
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(
                 R.id.OPTION_MENU_LOGIN,
@@ -89,6 +91,8 @@ class RecipeListingActivity : BaseActivity() {
             }
         }
 
+ */
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //// Data Migration - used one time for migrating data Jan 2024
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +110,11 @@ class RecipeListingActivity : BaseActivity() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    }
+
+    @Composable
+    override fun ScaffoldContent() {
+        Text("RecipeListing")
     }
 
     private fun configureOptionMenu() {
