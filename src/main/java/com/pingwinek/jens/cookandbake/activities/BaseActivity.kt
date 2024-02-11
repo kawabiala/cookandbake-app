@@ -9,7 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.lib.OptionMenu
 import com.pingwinek.jens.cookandbake.theming.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.theming.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.theming.PingwinekCooksHamburgerMenu
 
 /**
  * Provides consistent layout frame including support action bar.
@@ -33,10 +33,17 @@ abstract class BaseActivity : AppCompatActivity() {
 
         setContent {
             PingwinekCooksAppTheme {
+                PingwinekCooksHamburgerMenu(title = "Title") {
+                    ScaffoldContent()
+                }
+            }
+/*
                 PingwinekCooksScaffold("Title") {
                     ScaffoldContent()
                 }
             }
+
+ */
         }
 
         //super.setContentView(R.layout.activity_base)

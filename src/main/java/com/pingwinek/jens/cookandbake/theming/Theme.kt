@@ -1,17 +1,31 @@
 package com.pingwinek.jens.cookandbake.theming
+
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 
 
 private val LightColors = lightColorScheme(
@@ -99,11 +113,12 @@ fun PingwinekCooksAppTheme(
 @Composable
 fun PingwinekCooksScaffold(
     title: String,
+    drawerState: DrawerState,
     scaffoldContent: @Composable() () -> Unit
 ) {
     Scaffold(
         topBar = {
-            PingwinekCooksTopAppBar(title)
+            PingwinekCooksTopAppBar(title, drawerState)
         },
     ) { paddingValues ->
         Column(
@@ -117,7 +132,8 @@ fun PingwinekCooksScaffold(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PingwinekCooksTopAppBar(title: String) {
+fun PingwinekCooksTopAppBar(title: String, drawerState: DrawerState) {
+    val scope = rememberCoroutineScope()
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -126,7 +142,50 @@ fun PingwinekCooksTopAppBar(title: String) {
         title = {
             Text(title)
         },
-        navigationIcon = {},
-        actions = {})
+        navigationIcon = {
+            IconButton(onClick = {
+                Log.i("test", "test")
+            }) {
+                Icon(Icons.Filled.Person, null)
+            }
+        },
+        actions = {
+            IconButton(onClick = {
+                Log.i("Person", "clicked")
+            }) {
+                Icon(Icons.Filled.Person, null)
+            }
+            IconButton(onClick = {
+                Log.i("Hamburger", "clicked")
+                scope.launch {
+                    drawerState.apply {
+                        if (isClosed) open() else close()
+                    }
+                }
+            }) {
+                Icon(Icons.Filled.MoreVert, null)
+            }
+        })
+}
+
+@Composable
+fun PingwinekCooksHamburgerMenu(title: String, scaffoldContent: @Composable() () -> Unit) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+        NavigationDrawerItem(
+            label = {
+                    Text("Option 1")
+            },
+            selected = false,
+            onClick = {
+                Log.i("Option 1", "clicked")
+            })
+    }) {
+        PingwinekCooksScaffold(title = title, drawerState) {
+            scaffoldContent()
+        }
+    }
 }
 
