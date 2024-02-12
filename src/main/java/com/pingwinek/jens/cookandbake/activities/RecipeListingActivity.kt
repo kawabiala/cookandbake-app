@@ -2,10 +2,15 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -17,9 +22,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
-import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
+import com.pingwinek.jens.cookandbake.theming.OptionItem
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
@@ -68,6 +73,16 @@ class RecipeListingActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         recipeListingModel.loadData()
+
+        configureTopBar(
+            "Test",
+            true,
+            OptionItem("left", Icons.AutoMirrored.Filled.ArrowBack) { Log.e(this::class.java.name, "ArrowBack clicked") },
+            OptionItem("person", Icons.Filled.Person) { Log.e(this::class.java.name, "Person clicked") },
+            null
+        )
+
+        addOptionItem(OptionItem("HamburgerOption 1", Icons.Filled.Build) { Log.e(this::class.java.name, "Option 1 clicked") })
 /*
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(
@@ -116,7 +131,7 @@ class RecipeListingActivity : BaseActivity() {
     override fun ScaffoldContent() {
         Text("RecipeListing")
     }
-
+/*
     private fun configureOptionMenu() {
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
@@ -135,7 +150,7 @@ class RecipeListingActivity : BaseActivity() {
             }
         }
     }
-
+*/
     fun onRecipeItemClick(recipeItem: View) {
         openRecipeItem(recipeItem.tag as String)
     }

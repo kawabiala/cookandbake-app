@@ -2,29 +2,24 @@ package com.pingwinek.jens.cookandbake.theming
 
 import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.launch
 
 
@@ -110,29 +105,16 @@ fun PingwinekCooksAppTheme(
     )
 }
 
-@Composable
-fun PingwinekCooksScaffold(
-    title: String,
-    drawerState: DrawerState,
-    scaffoldContent: @Composable() () -> Unit
-) {
-    Scaffold(
-        topBar = {
-            PingwinekCooksTopAppBar(title, drawerState)
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            Text("Test")
-            scaffoldContent()
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PingwinekCooksTopAppBar(title: String, drawerState: DrawerState) {
+fun PingwinekCooksTopAppBar(
+    title: String,
+    showHamburger: Boolean,
+    drawerState: DrawerState,
+    optionItem1: OptionItem?,
+    optionItem2: OptionItem?,
+    optionItem3: OptionItem?,
+) {
     val scope = rememberCoroutineScope()
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -143,49 +125,74 @@ fun PingwinekCooksTopAppBar(title: String, drawerState: DrawerState) {
             Text(title)
         },
         navigationIcon = {
-            IconButton(onClick = {
-                Log.i("test", "test")
-            }) {
-                Icon(Icons.Filled.Person, null)
+            optionItem1?.let {
+                IconButton(onClick = {
+                    it.onClick
+                }) {
+                    Icon(it.icon, it.label)
+                }
             }
         },
         actions = {
-            IconButton(onClick = {
-                Log.i("Person", "clicked")
-            }) {
-                Icon(Icons.Filled.Person, null)
+            optionItem2?.let {
+                IconButton(onClick = {
+                    it.onClick
+                }) {
+                    Icon(it.icon, it.label)
+                }
             }
-            IconButton(onClick = {
-                Log.i("Hamburger", "clicked")
-                scope.launch {
-                    drawerState.apply {
-                        if (isClosed) open() else close()
+            if (showHamburger) {
+                IconButton(onClick = {
+                    Log.i("Hamburger", "clicked")
+                    scope.launch {
+                        drawerState.apply {
+                            if (isClosed) open() else close()
+                        }
+                    }
+                }) {
+                    Icon(Icons.Filled.MoreVert, null)
+                }
+            } else {
+                optionItem3?.let {
+                    IconButton(onClick = {
+                        it.onClick
+                    }) {
+                        Icon(it.icon, it.label)
                     }
                 }
-            }) {
-                Icon(Icons.Filled.MoreVert, null)
             }
         })
 }
 
 @Composable
-fun PingwinekCooksHamburgerMenu(title: String, scaffoldContent: @Composable() () -> Unit) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+fun PingwinekCooksHamburgerMenu(
+    drawerState: DrawerState,
+    options: List<OptionItem>,
+    scaffoldContent: @Composable() () -> Unit
+) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-        NavigationDrawerItem(
-            label = {
-                    Text("Option 1")
-            },
-            selected = false,
-            onClick = {
-                Log.i("Option 1", "clicked")
-            })
-    }) {
-        PingwinekCooksScaffold(title = title, drawerState) {
-            scaffoldContent()
+            ModalDrawerSheet {
+                options.forEach {
+                    NavigationDrawerItem(
+                        label = {
+                            Text(it.label)
+                        },
+                        selected = false,
+                        onClick = it.onClick
+                    )
+                }
+            }
         }
+    ) {
+        scaffoldContent()
     }
 }
+
+data class OptionItem(
+    val label: String,
+    val icon: ImageVector,
+    val onClick: () -> Unit
+)
 
