@@ -1,13 +1,15 @@
 package com.pingwinek.jens.cookandbake.theming
 
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -18,9 +20,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import kotlinx.coroutines.launch
 
 
 private val LightColors = lightColorScheme(
@@ -109,12 +114,22 @@ fun PingwinekCooksAppTheme(
 @Composable
 fun PingwinekCooksTopAppBar(
     title: String,
-    showHamburger: Boolean,
+    showDropDown: Boolean,
     drawerState: DrawerState,
+    options: List<OptionItem>,
     optionItem1: OptionItem?,
     optionItem2: OptionItem?,
     optionItem3: OptionItem?,
 ) {
+    val topBarIconButtonColors = IconButtonColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary,
+        disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        disabledContentColor = MaterialTheme.colorScheme.primary
+    )
+    var expanded by remember {
+        mutableStateOf(false)
+    }
     val scope = rememberCoroutineScope()
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -126,42 +141,79 @@ fun PingwinekCooksTopAppBar(
         },
         navigationIcon = {
             optionItem1?.let {
-                IconButton(onClick = {
-                    it.onClick
-                }) {
+                IconButton(
+                    onClick = {
+                        it.onClick
+                    },
+                    colors = topBarIconButtonColors
+                ) {
                     Icon(it.icon, it.label)
                 }
             }
         },
         actions = {
             optionItem2?.let {
-                IconButton(onClick = {
-                    it.onClick
-                }) {
+                IconButton(
+                    onClick = {
+                        it.onClick
+                    },
+                    colors = topBarIconButtonColors
+                ) {
                     Icon(it.icon, it.label)
                 }
             }
-            if (showHamburger) {
-                IconButton(onClick = {
-                    Log.i("Hamburger", "clicked")
-                    scope.launch {
-                        drawerState.apply {
-                            if (isClosed) open() else close()
+            if (showDropDown) {
+                IconButton(
+                    onClick = {
+                              expanded = true
+/*                        scope.launch {
+                            drawerState.apply {
+                                if (isClosed) open() else close()
+                            }
                         }
-                    }
-                }) {
+
+ */
+                    },
+                    colors = topBarIconButtonColors
+                ) {
                     Icon(Icons.Filled.MoreVert, null)
                 }
             } else {
                 optionItem3?.let {
-                    IconButton(onClick = {
-                        it.onClick
-                    }) {
+                    IconButton(
+                        onClick = {
+                            it.onClick
+                        },
+                        colors = topBarIconButtonColors
+                    ) {
                         Icon(it.icon, it.label)
                     }
                 }
             }
         })
+    PingwinekCooksDropDown(expanded = expanded, options = options)
+}
+
+@Composable
+fun PingwinekCooksDropDown(
+    expanded: Boolean,
+    options: List<OptionItem>
+) {
+    var isExpanded = expanded
+    DropdownMenu(
+        expanded = isExpanded,
+        onDismissRequest = { isExpanded = false }
+    ) {
+        options.forEach {
+            DropdownMenuItem(
+                leadingIcon = { Icon(imageVector = it.icon, contentDescription = it.label) },
+                text = {
+                    Text(it.label)
+                },
+                onClick = it.onClick
+            )
+        }
+    }
 }
 
 @Composable
@@ -176,6 +228,7 @@ fun PingwinekCooksHamburgerMenu(
             ModalDrawerSheet {
                 options.forEach {
                     NavigationDrawerItem(
+                        icon = { Icon(imageVector = it.icon, contentDescription = it.label) },
                         label = {
                             Text(it.label)
                         },

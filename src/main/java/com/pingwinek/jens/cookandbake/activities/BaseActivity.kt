@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import com.pingwinek.jens.cookandbake.lib.OptionMenu
 import com.pingwinek.jens.cookandbake.theming.OptionItem
 import com.pingwinek.jens.cookandbake.theming.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.theming.PingwinekCooksHamburgerMenu
 import com.pingwinek.jens.cookandbake.theming.PingwinekCooksTopAppBar
 
 /**
@@ -60,15 +59,17 @@ abstract class BaseActivity : AppCompatActivity() {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         Scaffold(
             topBar = {
-                PingwinekCooksTopAppBar(title, showHamburger, drawerState, optionItem1, optionItem2, optionItem3)
+                PingwinekCooksTopAppBar(title, showHamburger, drawerState, hamburgerOptions, optionItem1, optionItem2, optionItem3)
             },
         ) { paddingValues ->
             Column(
                 modifier = Modifier.padding(paddingValues)
             ) {
+                ScaffoldContent()
+                /*
                 PingwinekCooksHamburgerMenu(drawerState, hamburgerOptions) {
-                    ScaffoldContent()
-                }
+
+                }*/
             }
         }
     }
