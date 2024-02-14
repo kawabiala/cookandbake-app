@@ -17,7 +17,7 @@ class RecipeEditActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_recipe_edit)
+//        addContentView(R.layout.activity_recipe_edit)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -35,7 +35,7 @@ class RecipeEditActivity : BaseActivity() {
         titleView.requestFocus()
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(titleView, InputMethodManager.SHOW_IMPLICIT)
-
+/*
         optionMenu.apply {
             addMenuEntry(
                 R.id.OPTION_MENU_DONE,
@@ -47,6 +47,8 @@ class RecipeEditActivity : BaseActivity() {
                 true
             }
         }
+
+ */
     }
 
     @Composable

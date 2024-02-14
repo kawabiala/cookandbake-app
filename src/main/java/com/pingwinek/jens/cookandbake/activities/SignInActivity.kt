@@ -74,7 +74,7 @@ class SignInActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        addContentView(R.layout.activity_signin)
+//        addContentView(R.layout.activity_signin)
 
         authenticationViewModel = ViewModelProvider
             .AndroidViewModelFactory

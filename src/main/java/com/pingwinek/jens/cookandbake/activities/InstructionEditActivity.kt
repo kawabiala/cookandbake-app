@@ -13,7 +13,7 @@ class InstructionEditActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_instruction)
+//        addContentView(R.layout.activity_instruction)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -28,7 +28,7 @@ class InstructionEditActivity : BaseActivity() {
         }
 
         instructionView.requestFocus()
-
+/*
         optionMenu.apply {
             addMenuEntry(
                 R.id.OPTION_MENU_DONE,
@@ -40,6 +40,8 @@ class InstructionEditActivity : BaseActivity() {
                 true
             }
         }
+
+ */
     }
 
     @Composable

@@ -50,7 +50,7 @@ class RecipeActivity : BaseActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_recipe)
+//        addContentView(R.layout.activity_recipe)
 
         saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
         saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
@@ -173,7 +173,7 @@ class RecipeActivity : BaseActivity(),
                 }
             })
         }
-
+/*
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
                 delete()
@@ -195,6 +195,8 @@ class RecipeActivity : BaseActivity(),
                 true
             }
         }
+
+ */
     }
 
     @Composable

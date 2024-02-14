@@ -9,11 +9,11 @@ class ImpressumActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addContentView(R.layout.activity_impressum)
+//        addContentView(R.layout.activity_impressum)
 
         val url = intent?.extras?.getString("url") ?: ""
         findViewById<WebView>(R.id.impressumWebView).loadUrl(url)
-
+/*
         optionMenu.apply {
             addMenuEntry(
                 R.id.OPTION_MENU_CLOSE,
@@ -25,6 +25,8 @@ class ImpressumActivity : BaseActivity() {
                 true
             }
         }
+
+ */
     }
 
     @Composable

@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +22,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.theming.OptionItem
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
@@ -75,14 +76,33 @@ class RecipeListingActivity : BaseActivity() {
         recipeListingModel.loadData()
 
         configureTopBar(
-            "Test",
-            true,
-            OptionItem("left", Icons.AutoMirrored.Filled.ArrowBack) { Log.e(this::class.java.name, "ArrowBack clicked") },
-            OptionItem("person", Icons.Filled.Person) { Log.e(this::class.java.name, "Person clicked") },
-            null
+            title = "Recipes",
+            showHamburger = true,
+            optionItemLeft = null,
+            optionItemMid = PingwinekCooksComposables.OptionItem(
+                "person",
+                Icons.Filled.Person
+            ) { Log.e(this::class.java.name, "Person clicked") },
+            optionItemRight = null
         )
 
-        addOptionItem(OptionItem("HamburgerOption 1", Icons.Filled.Build) { Log.e(this::class.java.name, "Option 1 clicked") })
+        addDropDownOptionItem(
+            PingwinekCooksComposables.OptionItem(
+                getString(R.string.dataprotection),
+                Icons.Filled.Lock
+            ) {
+                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
+            })
+
+        addDropDownOptionItem(
+            PingwinekCooksComposables.OptionItem(
+                getString(R.string.impressum),
+                Icons.Filled.Info
+            ) {
+                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
+            })
 /*
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(
