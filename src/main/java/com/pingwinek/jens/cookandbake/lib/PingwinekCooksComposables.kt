@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib
 
+import android.view.ViewGroup
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
 
@@ -88,7 +90,7 @@ class PingwinekCooksComposables {
                     optionItemLeft?.let {
                         IconButton(
                             onClick = {
-                                it.onClick
+                                it.onClick()
                             },
                             colors = topBarIconButtonColors
                         ) {
@@ -100,7 +102,7 @@ class PingwinekCooksComposables {
                     optionItemMid?.let {
                         IconButton(
                             onClick = {
-                                it.onClick
+                                it.onClick()
                             },
                             colors = topBarIconButtonColors
                         ) {
@@ -124,7 +126,7 @@ class PingwinekCooksComposables {
                         optionItemRight?.let {
                             IconButton(
                                 onClick = {
-                                    it.onClick
+                                    it.onClick()
                                 },
                                 colors = topBarIconButtonColors
                             ) {
@@ -160,7 +162,7 @@ class PingwinekCooksComposables {
                             Text(it.label)
                         },
                         onClick = {
-                            it.onClick
+                            it.onClick()
                             onSelected()
                         },
                         colors = menuItemColors
@@ -203,5 +205,18 @@ class PingwinekCooksComposables {
             }
         }
 
+        @Composable
+        fun WebView(url: String) {
+            AndroidView(factory = {
+                android.webkit.WebView(it).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                }
+            }, update = {
+                it.loadUrl(url)
+            })
+        }
     }
 }
