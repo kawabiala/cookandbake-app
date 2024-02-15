@@ -69,21 +69,13 @@ class RecipeListingActivity : BaseActivity() {
         configureOptionMenu()
 
          */
-    }
-
-    override fun onResume() {
-        super.onResume()
-        recipeListingModel.loadData()
-
         configureTopBar(
             title = "Recipes",
             showHamburger = true,
-            optionItemLeft = null,
             optionItemMid = PingwinekCooksComposables.OptionItem(
                 "person",
                 Icons.Filled.Person
-            ) { Log.e(this::class.java.name, "Person clicked") },
-            optionItemRight = null
+            ) { Log.e(this::class.java.name, "Person clicked") }
         )
 
         addDropDownOptionItem(
@@ -92,6 +84,7 @@ class RecipeListingActivity : BaseActivity() {
                 Icons.Filled.Lock
             ) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                    .putExtra("title", getString(R.string.dataprotection))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
             })
 
@@ -101,8 +94,15 @@ class RecipeListingActivity : BaseActivity() {
                 Icons.Filled.Info
             ) {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                    .putExtra("title", getString(R.string.impressum))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
             })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        recipeListingModel.loadData()
+
 /*
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(

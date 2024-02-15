@@ -2,6 +2,8 @@ package com.pingwinek.jens.cookandbake.lib
 
 import android.view.ViewGroup
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DrawerState
@@ -27,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
@@ -207,6 +210,7 @@ class PingwinekCooksComposables {
 
         @Composable
         fun WebView(url: String) {
+            val scrollState = rememberScrollState()
             AndroidView(factory = {
                 android.webkit.WebView(it).apply {
                     layoutParams = ViewGroup.LayoutParams(
@@ -216,7 +220,7 @@ class PingwinekCooksComposables {
                 }
             }, update = {
                 it.loadUrl(url)
-            })
+            }, modifier = Modifier.verticalScroll(scrollState))
         }
     }
 }

@@ -59,10 +59,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     fun configureTopBar(
         title: String,
-        showHamburger: Boolean,
-        optionItemLeft: PingwinekCooksComposables.OptionItem?,
-        optionItemMid: PingwinekCooksComposables.OptionItem?,
-        optionItemRight: PingwinekCooksComposables.OptionItem?
+        showHamburger: Boolean = false,
+        optionItemLeft: PingwinekCooksComposables.OptionItem? = null,
+        optionItemMid: PingwinekCooksComposables.OptionItem? = null,
+        optionItemRight: PingwinekCooksComposables.OptionItem? = null
     ) {
         this.title = title
         this.showHamburger = showHamburger
