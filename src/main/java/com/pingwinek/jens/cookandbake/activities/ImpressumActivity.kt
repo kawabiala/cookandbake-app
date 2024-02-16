@@ -23,6 +23,8 @@ class ImpressumActivity : BaseActivity() {
                 "close",
                 Icons.Filled.Close
             ) { finish() })
+
+        navigationBarItemsEnabled.value = false
     }
 
     @Composable

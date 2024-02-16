@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +42,14 @@ class PingwinekCooksComposables {
         val label: String,
         val icon: ImageVector,
         val onClick: () -> Unit
+    )
+
+    data class NavigationBarItem(
+        val icon: ImageVector,
+        val label: String = "",
+        val selected: Boolean = false,
+        val enabled: Boolean = true,
+        val onClick: () -> Unit = {}
     )
 
     companion object {
@@ -175,9 +184,24 @@ class PingwinekCooksComposables {
         }
 
         @Composable
-        fun PingwinekCooksNavigationBar() {
+        fun PingwinekCooksNavigationBar(menuItems: List<NavigationBarItem>) {
+            var selectedItem by remember {
+                mutableIntStateOf(-1)
+            }
             NavigationBar() {
-                NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { /*TODO*/ })
+                menuItems.forEachIndexed { index, item ->
+                    if (selectedItem == -1 && item.selected) selectedItem = index
+                    NavigationBarItem(
+                        icon =  { Icon(item.icon, null) } ,
+                        label = { Text(item.label) },
+                        selected = (selectedItem == index),
+                        enabled = item.enabled,
+                        onClick = {
+                            selectedItem = index
+                            item.onClick()
+                        }
+                    )
+                }
             }
         }
 

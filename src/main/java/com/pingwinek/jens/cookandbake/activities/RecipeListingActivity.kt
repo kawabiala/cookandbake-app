@@ -71,7 +71,7 @@ class RecipeListingActivity : BaseActivity() {
          */
         configureTopBar(
             title = "Recipes",
-            showHamburger = true,
+            showDropDown = true,
             optionItemMid = PingwinekCooksComposables.OptionItem(
                 "person",
                 Icons.Filled.Person
@@ -97,6 +97,11 @@ class RecipeListingActivity : BaseActivity() {
                     .putExtra("title", getString(R.string.impressum))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
             })
+
+        recipeIsSelected.value = true
+        loginOnClick.value = {
+            Log.i(this::class.java.name, "login menu clicked")
+        }
     }
 
     override fun onResume() {
