@@ -6,7 +6,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,11 +14,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuItemColors
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -28,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -82,18 +78,17 @@ class PingwinekCooksComposables {
         ) {
             val topBarIconButtonColors = IconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                disabledContentColor = MaterialTheme.colorScheme.primary
+                disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
             var expanded by remember {
                 mutableStateOf(false)
             }
-            val scope = rememberCoroutineScope()
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 title = {
                     Text(title)
@@ -156,12 +151,12 @@ class PingwinekCooksComposables {
             onSelected: () -> Unit
         ) {
             val menuItemColors = MenuItemColors(
-                textColor = MaterialTheme.colorScheme.secondary,
-                leadingIconColor = MaterialTheme.colorScheme.secondary,
-                trailingIconColor = MaterialTheme.colorScheme.secondary,
-                disabledLeadingIconColor = MaterialTheme.colorScheme.secondary,
-                disabledTextColor = MaterialTheme.colorScheme.secondary,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.secondary
+                textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                leadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                trailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
             DropdownMenu(
                 expanded = expanded,
@@ -188,10 +183,22 @@ class PingwinekCooksComposables {
             var selectedItem by remember {
                 mutableIntStateOf(-1)
             }
-            NavigationBar() {
+            val navigationBarItemColors = NavigationBarItemColors(
+                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                disabledIconColor = MaterialTheme.colorScheme.onPrimary,
+                disabledTextColor = MaterialTheme.colorScheme.onPrimary
+            )
+            NavigationBar(
+                //modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer)
+            ) {
                 menuItems.forEachIndexed { index, item ->
                     if (selectedItem == -1 && item.selected) selectedItem = index
                     NavigationBarItem(
+                        colors = navigationBarItemColors,
                         icon =  { Icon(item.icon, null) } ,
                         label = { Text(item.label) },
                         selected = (selectedItem == index),
@@ -202,33 +209,6 @@ class PingwinekCooksComposables {
                         }
                     )
                 }
-            }
-        }
-
-        @Composable
-        fun PingwinekCooksHamburgerMenu(
-            drawerState: DrawerState,
-            options: List<OptionItem>,
-            scaffoldContent: @Composable() () -> Unit
-        ) {
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                drawerContent = {
-                    ModalDrawerSheet {
-                        options.forEach {
-                            NavigationDrawerItem(
-                                icon = { Icon(imageVector = it.icon, contentDescription = it.label) },
-                                label = {
-                                    Text(it.label)
-                                },
-                                selected = false,
-                                onClick = it.onClick
-                            )
-                        }
-                    }
-                }
-            ) {
-                scaffoldContent()
             }
         }
 
