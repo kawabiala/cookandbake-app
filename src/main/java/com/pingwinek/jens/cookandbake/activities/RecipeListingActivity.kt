@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
@@ -34,6 +33,8 @@ class RecipeListingActivity : BaseActivity() {
     private lateinit var recipeListingModel: RecipeListingViewModel
     private lateinit var auth: FirebaseAuth
 
+    private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //addContentView(R.layout.activity_recipe_listing)
@@ -45,7 +46,8 @@ class RecipeListingActivity : BaseActivity() {
             .getInstance(application)
             .create(RecipeListingViewModel::class.java)
 
-        val recipeListData = recipeListingModel.recipeListData
+        recipeListData = recipeListingModel.recipeListData
+
         /*
         val viewAdapter = RecipeListingAdapter(recipeListData, this)
 
@@ -154,7 +156,6 @@ class RecipeListingActivity : BaseActivity() {
 
     @Composable
     override fun ScaffoldContent() {
-        Text("RecipeListing")
     }
 /*
     private fun configureOptionMenu() {

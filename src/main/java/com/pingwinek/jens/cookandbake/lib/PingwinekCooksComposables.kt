@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.lib
 
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -79,8 +80,8 @@ class PingwinekCooksComposables {
             val topBarIconButtonColors = IconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
             var expanded by remember {
                 mutableStateOf(false)
@@ -151,15 +152,18 @@ class PingwinekCooksComposables {
             onSelected: () -> Unit
         ) {
             val menuItemColors = MenuItemColors(
-                textColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                leadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                trailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                textColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
             DropdownMenu(
                 expanded = expanded,
+                modifier = Modifier.background(
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ),
                 onDismissRequest = { onSelected() }
             ) {
                 options.forEach {
@@ -189,11 +193,11 @@ class PingwinekCooksComposables {
                 selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
                 unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                disabledIconColor = MaterialTheme.colorScheme.onPrimary,
-                disabledTextColor = MaterialTheme.colorScheme.onPrimary
+                disabledIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
             NavigationBar(
-                //modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer)
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 menuItems.forEachIndexed { index, item ->
                     if (selectedItem == -1 && item.selected) selectedItem = index
