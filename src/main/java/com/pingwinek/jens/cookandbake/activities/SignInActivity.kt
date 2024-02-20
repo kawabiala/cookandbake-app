@@ -9,13 +9,19 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
+import java.util.LinkedList
 
 class SignInActivity : BaseActivity() {
 
@@ -87,7 +93,7 @@ class SignInActivity : BaseActivity() {
             .create(UserInfoViewModel::class.java)
 
         // Assign fields to vars
-
+/*
         headerLeftTextView = findViewById(R.id.siHeaderLeft)
         headerRightTextView = findViewById(R.id.siHeaderRight)
         emailEditText = findViewById(R.id.siEmail)
@@ -101,7 +107,7 @@ class SignInActivity : BaseActivity() {
         buttonRight = findViewById(R.id.siLoginButton)
         logoutTextView = findViewById(R.id.siLogout)
         deleteTextView = findViewById(R.id.siDelete)
-
+*/
         // Define view settings
 
         registerView = ViewSettings(
@@ -293,62 +299,6 @@ class SignInActivity : BaseActivity() {
                 null -> TODO()
             }
         }
-/*
-        authenticationViewModel.result.observe(this) {
-            when (authenticationViewModel.result.value) {
-                AuthenticationViewModel.ResultType.ACCOUNT_CREATED -> {
-                    toast(getString(R.string.accountCreated))
-                }
-                AuthenticationViewModel.ResultType.VERIFICATION_EMAIL_SENT -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.confirmationSent),
-                        closeAction)
-                }
-                AuthenticationViewModel.ResultType.SIGNED_IN -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.loggedIn),
-                        closeAction)
-                }
-                AuthenticationViewModel.ResultType.SIGNED_OUT -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.loggedOut)) {
-                        asRegistrationView = false
-                        resetView()
-                    }
-                }
-                AuthenticationViewModel.ResultType.ACCOUNT_DELETED -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.accountDeleted)) {
-                        asRegistrationView = true
-                        resetView()
-                    }
-                }
-                AuthenticationViewModel.ResultType.PASSWORD_RESET_SENT -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.lostPasswordSentLong))
-                }
-                AuthenticationViewModel.ResultType.PASSWORD_RESET_CONFIRMED -> {
-                    alert(
-                        getString(R.string.authenticationMessage),
-                        getString(R.string.PasswordChanged))
-                    asRegistrationView = false
-                    applyViewSettings(signInView) // resetView won't work in this case
-                }
-                AuthenticationViewModel.ResultType.EXCEPTION -> {
-                    alert(
-                        getString(R.string.errorMessage),
-                        authenticationViewModel.errorMessage)
-                }
-                else -> {}
-            }
-        }
-
- */
 
         authenticationViewModel.linkMode.observe(this) {
             when (it) {
@@ -387,6 +337,7 @@ class SignInActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+/* Don't delete - this is needed
         resetView()
 
         authenticationViewModel.checkAuthStatus()
@@ -394,6 +345,8 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.checkActionCodeForIntent(intent)
 
         userInfoViewModel.loadData()
+
+ */
     }
 
     /**
@@ -408,9 +361,46 @@ class SignInActivity : BaseActivity() {
         }
     }
 
+    @Preview
+    @Composable
+    fun Preview() {
+        super.BasePreview()
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ScaffoldContent() {
-        TODO("Not yet implemented")
+        PingwinekCooksComposables.PingwinekCooksTabRow(
+            selectedItem = 0,
+            menuItems = LinkedList<PingwinekCooksComposables.NavigationBarItem>().apply {
+                add(
+                    PingwinekCooksComposables.NavigationBarItem(
+                    Icons.Filled.Person, "Register", true
+                ))
+                add(
+                    PingwinekCooksComposables.NavigationBarItem(
+                        Icons.Filled.Person, "Login", false
+                    ))
+            }
+        )
+        /*
+        TabRow(
+            selectedTabIndex = 0,
+            modifier = Modifier.padding(Dp(0F), Dp(40F))
+        ) {
+            Tab(
+                selected = false,
+                text = { Text("Register") },
+                onClick = {}
+            )
+            Tab(
+                selected = false,
+                text = { Text("Login") },
+                onClick = {}
+            )
+        }
+
+         */
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

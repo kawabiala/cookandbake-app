@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
@@ -17,10 +18,15 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksNavigationBar
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksTopAppBar
+import com.pingwinek.jens.cookandbake.theming.Margins
 
 /**
  */
 abstract class BaseActivity : AppCompatActivity() {
+
+    protected object TopBar {
+        var title = ""
+    }
 
     private var title: String = ""
     private var showDrowDown = false
@@ -61,10 +67,18 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     @Composable
+    fun BasePreview() {
+        PingwinekCooksAppTheme {
+            BaseScaffold()
+        }
+    }
+
+    @Composable
     fun BaseScaffold() {
         Scaffold(
+            contentWindowInsets = WindowInsets(Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM, Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM),
             topBar = {
-                PingwinekCooksTopAppBar(title, showDrowDown, dropDownOptions, optionItemLeft,
+                PingwinekCooksTopAppBar(TopBar.title, showDrowDown, dropDownOptions, optionItemLeft,
                     this.optionItemMid,
                     this.optionItemRight
                 )
@@ -94,13 +108,6 @@ abstract class BaseActivity : AppCompatActivity() {
         this.optionItemLeft = optionItemLeft
         this.optionItemRight = optionItemMid
         this.optionItemRight = optionItemRight
-    }
-
-    fun configureRecipeMenuItem(
-        selected: Boolean,
-        enabled: Boolean = true
-    ) {
-
     }
 
     fun addDropDownOptionItem(optionItem: PingwinekCooksComposables.OptionItem) {

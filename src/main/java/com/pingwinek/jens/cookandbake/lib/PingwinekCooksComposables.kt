@@ -18,6 +18,8 @@ import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -209,6 +211,27 @@ class PingwinekCooksComposables {
                         enabled = item.enabled,
                         onClick = {
                             selectedItem = index
+                            item.onClick()
+                        }
+                    )
+                }
+            }
+        }
+
+        @Composable
+        fun PingwinekCooksTabRow(selectedItem: Int, menuItems: List<NavigationBarItem>) {
+            var selectedTab by remember {
+                mutableIntStateOf(selectedItem)
+            }
+            TabRow(selectedTab) {
+                menuItems.forEachIndexed { index, item ->
+                    Tab(
+                        selected = selectedTab == index,
+                        enabled = item.enabled,
+                        text = { Text(item.label) },
+                        icon = { Icon(item.icon, null) },
+                        onClick = {
+                            selectedTab = index
                             item.onClick()
                         }
                     )

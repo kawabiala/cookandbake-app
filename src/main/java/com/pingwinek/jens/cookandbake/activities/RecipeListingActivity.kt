@@ -11,7 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -80,6 +83,8 @@ class RecipeListingActivity : BaseActivity() {
             ) { Log.e(this::class.java.name, "Person clicked") }
         )
 
+        TopBar.title = "Rezepte"
+
         addDropDownOptionItem(
             PingwinekCooksComposables.OptionItem(
                 getString(R.string.dataprotection),
@@ -102,14 +107,13 @@ class RecipeListingActivity : BaseActivity() {
 
         recipeIsSelected.value = true
         loginOnClick.value = {
-            Log.i(this::class.java.name, "login menu clicked")
+            startActivity(Intent(this, SignInActivity::class.java))
         }
     }
 
     override fun onResume() {
         super.onResume()
         recipeListingModel.loadData()
-
 /*
         if (auth.currentUser != null) {
             optionMenu.addMenuEntry(
@@ -156,6 +160,12 @@ class RecipeListingActivity : BaseActivity() {
 
     @Composable
     override fun ScaffoldContent() {
+        val recipes = recipeListData.observeAsState()
+        recipes.value?.forEach { recipe: Recipe ->
+            key(recipe.id) {
+                Text(recipe.title)
+            }
+        }
     }
 /*
     private fun configureOptionMenu() {
