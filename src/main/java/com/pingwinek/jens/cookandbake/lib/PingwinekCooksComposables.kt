@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
+import java.util.LinkedList
 
 class PingwinekCooksComposables {
 
@@ -52,6 +53,7 @@ class PingwinekCooksComposables {
     )
 
     companion object {
+
         @Composable
         fun PingwinekCooksAppTheme(
             useDarkTheme: Boolean = isSystemInDarkTheme(),
@@ -72,13 +74,17 @@ class PingwinekCooksComposables {
         @OptIn(ExperimentalMaterial3Api::class)
         @Composable
         fun PingwinekCooksTopAppBar(
-            title: String,
-            showDropDown: Boolean,
-            dropDownOptions: List<OptionItem>,
-            optionItemLeft: OptionItem?,
-            optionItemMid: OptionItem?,
-            optionItemRight: OptionItem?,
+            title: String = "",
+            showDropDown: Boolean = false,
+            dropDownOptions: List<OptionItem> = LinkedList<OptionItem>(),
+            optionItemLeft: OptionItem? = null,
+            optionItemMid: OptionItem? = null,
+            optionItemRight: OptionItem? = null,
         ) {
+            val topAppBarColors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
             val topBarIconButtonColors = IconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -89,10 +95,7 @@ class PingwinekCooksComposables {
                 mutableStateOf(false)
             }
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
+                colors = topAppBarColors,
                 title = {
                     Text(title)
                 },
@@ -185,10 +188,15 @@ class PingwinekCooksComposables {
         }
 
         @Composable
-        fun PingwinekCooksNavigationBar(menuItems: List<NavigationBarItem>) {
-            var selectedItem by remember {
-                mutableIntStateOf(-1)
+        fun PingwinekCooksNavigationBar(
+            selectedItem: Int = 0,
+            enabled: Boolean = true,
+            menuItems: List<OptionItem>
+        ) {
+            var selectedMenuItem by remember {
+                mutableIntStateOf(selectedItem)
             }
+            val navigationBarColor = MaterialTheme.colorScheme.secondaryContainer
             val navigationBarItemColors = NavigationBarItemColors(
                 selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -199,18 +207,17 @@ class PingwinekCooksComposables {
                 disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = navigationBarColor
             ) {
                 menuItems.forEachIndexed { index, item ->
-                    if (selectedItem == -1 && item.selected) selectedItem = index
                     NavigationBarItem(
                         colors = navigationBarItemColors,
                         icon =  { Icon(item.icon, null) } ,
                         label = { Text(item.label) },
-                        selected = (selectedItem == index),
-                        enabled = item.enabled,
+                        selected = selectedMenuItem == index,
+                        enabled = enabled,
                         onClick = {
-                            selectedItem = index
+                            selectedMenuItem = index
                             item.onClick()
                         }
                     )
@@ -219,7 +226,11 @@ class PingwinekCooksComposables {
         }
 
         @Composable
-        fun PingwinekCooksTabRow(selectedItem: Int, menuItems: List<NavigationBarItem>) {
+        fun PingwinekCooksTabRow(
+            selectedItem: Int = 0,
+            enabled: Boolean = true,
+            menuItems: List<OptionItem>
+        ) {
             var selectedTab by remember {
                 mutableIntStateOf(selectedItem)
             }
@@ -227,7 +238,7 @@ class PingwinekCooksComposables {
                 menuItems.forEachIndexed { index, item ->
                     Tab(
                         selected = selectedTab == index,
-                        enabled = item.enabled,
+                        enabled = enabled,
                         text = { Text(item.label) },
                         icon = { Icon(item.icon, null) },
                         onClick = {

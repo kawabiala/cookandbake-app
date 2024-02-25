@@ -76,16 +76,14 @@ class RecipeListingActivity : BaseActivity() {
          */
         configureTopBar(
             title = "Recipes",
-            showDropDown = true,
             optionItemMid = PingwinekCooksComposables.OptionItem(
                 "person",
                 Icons.Filled.Person
             ) { Log.e(this::class.java.name, "Person clicked") }
         )
 
-        TopBar.title = "Rezepte"
 
-        addDropDownOptionItem(
+        configureDropDown(
             PingwinekCooksComposables.OptionItem(
                 getString(R.string.dataprotection),
                 Icons.Filled.Lock
@@ -93,9 +91,7 @@ class RecipeListingActivity : BaseActivity() {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
                     .putExtra("title", getString(R.string.dataprotection))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
-            })
-
-        addDropDownOptionItem(
+            },
             PingwinekCooksComposables.OptionItem(
                 getString(R.string.impressum),
                 Icons.Filled.Info
@@ -103,12 +99,16 @@ class RecipeListingActivity : BaseActivity() {
                 startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
                     .putExtra("title", getString(R.string.impressum))
                     .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
-            })
+            }
+        )
 
-        recipeIsSelected.value = true
-        loginOnClick.value = {
-            startActivity(Intent(this, SignInActivity::class.java))
-        }
+        configureNavigationBar(
+            selectedItem = Navigation.RECIPE,
+            enabled = true,
+            onLoginClickAction = {
+                startActivity(Intent(this, SignInActivity::class.java))
+            }
+        )
     }
 
     override fun onResume() {

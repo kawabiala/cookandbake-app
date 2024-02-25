@@ -372,15 +372,15 @@ class SignInActivity : BaseActivity() {
     override fun ScaffoldContent() {
         PingwinekCooksComposables.PingwinekCooksTabRow(
             selectedItem = 0,
-            menuItems = LinkedList<PingwinekCooksComposables.NavigationBarItem>().apply {
+            menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
                 add(
-                    PingwinekCooksComposables.NavigationBarItem(
-                    Icons.Filled.Person, "Register", true
-                ))
+                    PingwinekCooksComposables.OptionItem(
+                        "Register", Icons.Filled.Person
+                    ) { })
                 add(
-                    PingwinekCooksComposables.NavigationBarItem(
-                        Icons.Filled.Person, "Login", false
-                    ))
+                    PingwinekCooksComposables.OptionItem(
+                        "Login", Icons.Filled.Person
+                    ) { })
             }
         )
         /*

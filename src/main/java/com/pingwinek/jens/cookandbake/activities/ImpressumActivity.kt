@@ -24,7 +24,7 @@ class ImpressumActivity : BaseActivity() {
                 Icons.Filled.Close
             ) { finish() })
 
-        navigationBarItemsEnabled.value = false
+        configureNavigationBar(enabled = false)
     }
 
     @Composable
