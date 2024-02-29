@@ -21,6 +21,7 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -214,7 +215,7 @@ class PingwinekCooksComposables {
                         colors = navigationBarItemColors,
                         icon =  { Icon(item.icon, null) } ,
                         label = { Text(item.label) },
-                        selected = selectedMenuItem == index,
+                        selected = selectedMenuItem == index && enabled,
                         enabled = enabled,
                         onClick = {
                             selectedMenuItem = index
@@ -247,6 +248,19 @@ class PingwinekCooksComposables {
                         }
                     )
                 }
+            }
+        }
+
+        @Composable
+        fun EditableText(
+            text: String,
+            editable: Boolean = false,
+            onValueChanged: (text: String) -> Unit = {}
+        ) {
+            if (editable) {
+                TextField(value = text, onValueChange = onValueChanged)
+            } else {
+                Text(text)
             }
         }
 

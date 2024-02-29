@@ -2,19 +2,21 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.TextView
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
@@ -46,7 +48,7 @@ class SignInActivity : BaseActivity() {
         val showLogout: Boolean = false,
         val showDelete: Boolean = false
     )
-
+/*
     private lateinit var headerLeftTextView: TextView
     private lateinit var headerRightTextView: TextView
     private lateinit var emailEditText: EditText
@@ -60,7 +62,7 @@ class SignInActivity : BaseActivity() {
     private lateinit var buttonRight: Button
     private lateinit var logoutTextView: TextView
     private lateinit var deleteTextView: TextView
-
+*/
     private lateinit var registerView: ViewSettings
     private lateinit var signInView: ViewSettings
     private lateinit var resetPasswordView: ViewSettings
@@ -307,14 +309,14 @@ class SignInActivity : BaseActivity() {
                 else -> {}
             }
         }
-
+/*
         authenticationViewModel.email.observe(this) {
             with(emailEditText.text) {
                 clear()
                 append(authenticationViewModel.email.value)
             }
         }
-
+*/
         authenticationViewModel.authStatus.observe(this) { authStatus ->
             when (authStatus) {
                 AuthService.AuthStatus.SIGNED_OUT -> {
@@ -329,15 +331,20 @@ class SignInActivity : BaseActivity() {
                 else -> {}
             }
         }
-
+/*
         userInfoViewModel.userInfoData.observe(this) { userInfo ->
             acceptCrashlyticsView.isChecked = userInfo.crashlyticsEnabled
         }
+
+ */
+        configureTopBar(title = getString(R.string.profile))
+        configureNavigationBar(selectedItem = Navigation.LOGIN)
     }
 
     override fun onResume() {
         super.onResume()
 /* Don't delete - this is needed
+ */
         resetView()
 
         authenticationViewModel.checkAuthStatus()
@@ -346,7 +353,6 @@ class SignInActivity : BaseActivity() {
 
         userInfoViewModel.loadData()
 
- */
     }
 
     /**
@@ -370,37 +376,109 @@ class SignInActivity : BaseActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ScaffoldContent() {
+        Screen { viewSettings, email, toggleRegistrationView ->
+            var temporaryEmail : String by remember { mutableStateOf(email) }
+            val onValueChanged : (text: String) -> Unit = { text -> temporaryEmail = text }
+
+            if (viewSettings.showOnlyLeftHeader) {
+                ProfileHeader()
+            } else {
+                SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
+            }
+
+            Log.i(this::class.java.name, "email: $email, $temporaryEmail")
+
+            PingwinekCooksComposables.EditableText(
+                text = temporaryEmail,
+                editable = viewSettings.editEmail,
+                onValueChanged = onValueChanged
+            )
+        }
+    }
+
+    @Composable
+    private fun Screen(
+        content: @Composable (viewSettings: ViewSettings, email: String, toggleRegistration: () -> Unit) -> Unit
+    ) {
+        var asRegistration: Boolean by remember { mutableStateOf(true) }
+        val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
+        val authStatus = authenticationViewModel.authStatus.observeAsState()
+        val linkMode = authenticationViewModel.linkMode.observeAsState()
+        val email = authenticationViewModel.email.observeAsState()
+
+        val viewSettings = when (authStatus.value) {
+            AuthService.AuthStatus.VERIFIED -> {
+                //verifiedView
+                signInView
+            }
+
+            AuthService.AuthStatus.SIGNED_IN -> {
+                when (linkMode.value) {
+                    AuthenticationViewModel.EmailLinkMode.RESET -> {
+                        resetPasswordView
+                    }
+
+                    AuthenticationViewModel.EmailLinkMode.VERIFIED -> {
+                        verifiedView
+                    }
+
+                    else -> {
+                        unverifiedView
+                    }
+                }
+            }
+
+            AuthService.AuthStatus.SIGNED_OUT -> {
+                if (asRegistration) {
+                    registerView
+                } else {
+                    signInView
+                }
+            }
+
+            else -> {
+                ViewSettings()
+            }
+        }
+
+        Log.i(this::class.java.name, "viewSettings: $viewSettings")
+        Log.i(this::class.java.name, "email: ${email.value}")
+
+        content(viewSettings, email.value ?: "", toggleRegistrationView)
+    }
+
+
+    @Composable
+    fun ProfileHeader() {
+        Row() {
+            Text("Profile")
+        }
+    }
+
+    @Composable
+    fun SignInTabRow(
+        leftCaption: String,
+        rightCaption: String,
+        highlightLeft: Boolean,
+        toggleItem: () -> Unit
+    ) {
         PingwinekCooksComposables.PingwinekCooksTabRow(
-            selectedItem = 0,
+            selectedItem = if (highlightLeft) { 0 } else { 1 },
             menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        "Register", Icons.Filled.Person
-                    ) { })
+                        leftCaption, Icons.Filled.Person
+                    ) {
+                        if (!highlightLeft) toggleItem()
+                    })
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        "Login", Icons.Filled.Person
-                    ) { })
+                        rightCaption, Icons.Filled.Person
+                    ) {
+                        if (highlightLeft) toggleItem()
+                    })
             }
         )
-        /*
-        TabRow(
-            selectedTabIndex = 0,
-            modifier = Modifier.padding(Dp(0F), Dp(40F))
-        ) {
-            Tab(
-                selected = false,
-                text = { Text("Register") },
-                onClick = {}
-            )
-            Tab(
-                selected = false,
-                text = { Text("Login") },
-                onClick = {}
-            )
-        }
-
-         */
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,8 +494,8 @@ class SignInActivity : BaseActivity() {
     }
 
     private fun applyViewSettings(settings: ViewSettings) {
-        currentView = settings
-
+//        currentView = settings
+/*
         adaptHeaderLeft(settings.headerLeftCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
         adaptHeaderRight(settings.headerRightCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
         adaptEmail(settings.editEmail)
@@ -429,8 +507,10 @@ class SignInActivity : BaseActivity() {
         adaptButtonRight(settings.buttonRightCaption, settings.buttonRightAction)
         adaptLogout(settings.showLogout)
         adaptDelete(settings.showDelete)
-    }
 
+ */
+    }
+/*
     private fun adaptHeaderLeft(caption: String, showOnlyLeftHeader: Boolean, highlightLeftHeader: Boolean) {
         headerLeftTextView.apply {
             text = caption
@@ -526,6 +606,8 @@ class SignInActivity : BaseActivity() {
         }
     }
 
+ */
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Auth-Actions
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -536,7 +618,7 @@ class SignInActivity : BaseActivity() {
     }
 
     private val crashlyticsAction: () -> Unit = {
-        userInfoViewModel.saveUserInfo(acceptCrashlyticsView.isChecked)
+//        userInfoViewModel.saveUserInfo(acceptCrashlyticsView.isChecked)
     }
 
     private val deleteAction: () -> Unit = {
@@ -544,16 +626,18 @@ class SignInActivity : BaseActivity() {
     }
 
     private val registerAction: () -> Unit = {
-        val email = emailEditText.text.toString()
+/*        val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
         val dataPolicyChecked = checkBox.isChecked
 
         authenticationViewModel.register(email, password, dataPolicyChecked)
+
+ */
     }
 
     private val resetPasswordAction: () -> Unit = {
-        val password = passwordEditText.text.toString()
-        authenticationViewModel.resetPassword(password)
+//        val password = passwordEditText.text.toString()
+//        authenticationViewModel.resetPassword(password)
     }
 
     private val sendEmailVerificationAction: () -> Unit = {
@@ -561,15 +645,17 @@ class SignInActivity : BaseActivity() {
     }
 
     private val sendResetEmailAction: () -> Unit = {
-        val email = emailEditText.text.toString()
-        authenticationViewModel.sendPasswordResetEmail(email)
+//        val email = emailEditText.text.toString()
+//        authenticationViewModel.sendPasswordResetEmail(email)
     }
 
     private val signInAction: () -> Unit = {
-        val email = emailEditText.text.toString()
+/*        val email = emailEditText.text.toString()
         val password = passwordEditText.text.toString()
 
         authenticationViewModel.signIn(email, password)
+
+ */
     }
 
     private val signOutAction: () -> Unit = {
