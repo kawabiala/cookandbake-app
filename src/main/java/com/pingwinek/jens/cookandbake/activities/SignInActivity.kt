@@ -10,7 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -376,9 +379,13 @@ class SignInActivity : BaseActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ScaffoldContent() {
-        Screen { viewSettings, email, toggleRegistrationView ->
-            var temporaryEmail : String by remember { mutableStateOf(email) }
-            val onValueChanged : (text: String) -> Unit = { text -> temporaryEmail = text }
+        Screen { viewSettings, toggleRegistrationView ->
+            val email = authenticationViewModel.email.observeAsState()
+            var newEmail : String by remember { mutableStateOf("") }
+            val onEmailValueChanged : (text: String) -> Unit = { text -> newEmail = text }
+
+            var password by remember { mutableStateOf("")}
+            val onPasswordValueChanged : (text: String) -> Unit = { text -> password = text }
 
             if (viewSettings.showOnlyLeftHeader) {
                 ProfileHeader()
@@ -386,30 +393,49 @@ class SignInActivity : BaseActivity() {
                 SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
             }
 
-            Log.i(this::class.java.name, "email: $email, $temporaryEmail")
-
             PingwinekCooksComposables.EditableText(
-                text = temporaryEmail,
+                text = if (viewSettings.editEmail) newEmail else email.value ?: "",
                 editable = viewSettings.editEmail,
-                onValueChanged = onValueChanged
+                onValueChanged = onEmailValueChanged
             )
+
+            if (viewSettings.showPassword) {
+                TextField(
+                    value = password,
+                    onValueChange = onPasswordValueChanged
+                )
+            }
         }
     }
 
     @Composable
     private fun Screen(
-        content: @Composable (viewSettings: ViewSettings, email: String, toggleRegistration: () -> Unit) -> Unit
+        content: @Composable (viewSettings: ViewSettings, toggleRegistration: () -> Unit) -> Unit
     ) {
-        var asRegistration: Boolean by remember { mutableStateOf(true) }
-        val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
         val authStatus = authenticationViewModel.authStatus.observeAsState()
         val linkMode = authenticationViewModel.linkMode.observeAsState()
-        val email = authenticationViewModel.email.observeAsState()
+        val authResult = authenticationViewModel.authActionResult.observeAsState()
+
+        val asRegState : State<Boolean?> = remember { derivedStateOf {
+            when (authResult.value) {
+                AuthService.AuthActionResult.DELETE_SUCCEEDED -> true
+                AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> false
+                AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> false
+                else -> null
+            }
+        }}
+
+        var asRegistration: Boolean by remember { mutableStateOf(true) }
+        val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
 
         val viewSettings = when (authStatus.value) {
             AuthService.AuthStatus.VERIFIED -> {
-                //verifiedView
-                signInView
+                if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
+                    resetPasswordView
+                } else {
+                    verifiedView
+                    //signInView
+                }
             }
 
             AuthService.AuthStatus.SIGNED_IN -> {
@@ -442,9 +468,8 @@ class SignInActivity : BaseActivity() {
         }
 
         Log.i(this::class.java.name, "viewSettings: $viewSettings")
-        Log.i(this::class.java.name, "email: ${email.value}")
 
-        content(viewSettings, email.value ?: "", toggleRegistrationView)
+        content(viewSettings, toggleRegistrationView)
     }
 
 

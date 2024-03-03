@@ -253,6 +253,7 @@ class PingwinekCooksComposables {
 
         @Composable
         fun EditableText(
+            label: String? = null,
             text: String,
             editable: Boolean = false,
             onValueChanged: (text: String) -> Unit = {}
