@@ -282,15 +282,22 @@ class PingwinekCooksComposables {
             label : String,
             onCheckedChange : (checked: Boolean) -> Unit = {}
         ) {
+            var checkedLocal by remember { mutableStateOf(checked) }
             Row(
                 Modifier.toggleable(
                     value = checked,
-                    onValueChange = onCheckedChange
+                    onValueChange = {
+                        checkedLocal = it
+                        onCheckedChange(it)
+                    }
                 )
             ) {
                 Checkbox(
                     checked = checked,
-                    onCheckedChange = onCheckedChange
+                    onCheckedChange = {
+                        checkedLocal = it
+                        onCheckedChange(it)
+                    }
                 )
                 Text(text = label)
             }

@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -389,6 +390,9 @@ class SignInActivity : BaseActivity() {
             var isPrivacyApproved by remember { mutableStateOf(false) }
             val onPrivacyApprovedChange : (checked : Boolean) -> Unit = { checked -> isPrivacyApproved = checked }
 
+            val userInfoData = userInfoViewModel.userInfoData.observeAsState()
+            val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
+
             if (viewSettings.showOnlyLeftHeader) {
                 ProfileHeader()
             } else {
@@ -416,6 +420,29 @@ class SignInActivity : BaseActivity() {
                     label = getString(R.string.declareAcceptanceOfDataprotection),
                     checked = isPrivacyApproved,
                     onCheckedChange = onPrivacyApprovedChange)
+            }
+
+            if (viewSettings.showCrashlytics) {
+                PingwinekCooksComposables.LabelledCheckBox(
+                    label = getString(R.string.acceptCrashlytics),
+                    checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                    onCheckedChange = onCrashlyticsChange
+                    )
+            }
+
+            Row() {
+                if (viewSettings.showLeftButton) {
+                    Button(
+                        onClick = viewSettings.buttonLeftAction
+                    ) {
+                        Text(viewSettings.buttonLeftCaption)
+                    }
+                }
+                Button(
+                    onClick = viewSettings.buttonRightAction
+                ) {
+                    Text(viewSettings.buttonRightCaption)
+                }
             }
         }
     }
