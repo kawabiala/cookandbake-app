@@ -3,10 +3,13 @@ package com.pingwinek.jens.cookandbake.lib
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -256,12 +259,40 @@ class PingwinekCooksComposables {
             label: String? = null,
             text: String,
             editable: Boolean = false,
-            onValueChanged: (text: String) -> Unit = {}
+            onValueChange: (text: String) -> Unit = {}
         ) {
             if (editable) {
-                TextField(value = text, onValueChange = onValueChanged)
+                TextField(
+                    value = text,
+                    label = {
+                        if (!label.isNullOrEmpty()) {
+                            Text(label)
+                        }
+                    },
+                    onValueChange = onValueChange,
+                )
             } else {
                 Text(text)
+            }
+        }
+
+        @Composable
+        fun LabelledCheckBox(
+            checked : Boolean = false,
+            label : String,
+            onCheckedChange : (checked: Boolean) -> Unit = {}
+        ) {
+            Row(
+                Modifier.toggleable(
+                    value = checked,
+                    onValueChange = onCheckedChange
+                )
+            ) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+                Text(text = label)
             }
         }
 

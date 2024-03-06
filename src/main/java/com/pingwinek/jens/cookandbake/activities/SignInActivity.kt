@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -385,7 +384,10 @@ class SignInActivity : BaseActivity() {
             val onEmailValueChanged : (text: String) -> Unit = { text -> newEmail = text }
 
             var password by remember { mutableStateOf("")}
-            val onPasswordValueChanged : (text: String) -> Unit = { text -> password = text }
+            val onPasswordValueChange : (text: String) -> Unit = { text -> password = text }
+
+            var isPrivacyApproved by remember { mutableStateOf(false) }
+            val onPrivacyApprovedChange : (checked : Boolean) -> Unit = { checked -> isPrivacyApproved = checked }
 
             if (viewSettings.showOnlyLeftHeader) {
                 ProfileHeader()
@@ -395,15 +397,25 @@ class SignInActivity : BaseActivity() {
 
             PingwinekCooksComposables.EditableText(
                 text = if (viewSettings.editEmail) newEmail else email.value ?: "",
+                label = getString(R.string.email),
                 editable = viewSettings.editEmail,
-                onValueChanged = onEmailValueChanged
+                onValueChange = onEmailValueChanged
             )
 
             if (viewSettings.showPassword) {
-                TextField(
-                    value = password,
-                    onValueChange = onPasswordValueChanged
+                PingwinekCooksComposables.EditableText(
+                    text = password,
+                    label = getString(R.string.password),
+                    editable = true,
+                    onValueChange = onPasswordValueChange
                 )
+            }
+
+            if (viewSettings.showPrivacy) {
+                PingwinekCooksComposables.LabelledCheckBox(
+                    label = getString(R.string.declareAcceptanceOfDataprotection),
+                    checked = isPrivacyApproved,
+                    onCheckedChange = onPrivacyApprovedChange)
             }
         }
     }
@@ -433,8 +445,9 @@ class SignInActivity : BaseActivity() {
                 if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
                     resetPasswordView
                 } else {
-                    verifiedView
+                    //verifiedView
                     //signInView
+                    registerView
                 }
             }
 
