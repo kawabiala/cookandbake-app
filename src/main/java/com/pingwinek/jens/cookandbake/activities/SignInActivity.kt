@@ -341,7 +341,10 @@ class SignInActivity : BaseActivity() {
 
  */
         configureTopBar(title = getString(R.string.profile))
-        configureNavigationBar(selectedItem = Navigation.LOGIN)
+        configureNavigationBar(
+            selectedItem = Navigation.LOGIN,
+            onRecipeClickAction = closeAction
+            )
     }
 
     override fun onResume() {
@@ -393,6 +396,17 @@ class SignInActivity : BaseActivity() {
             val userInfoData = userInfoViewModel.userInfoData.observeAsState()
             val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
 
+            val onButtonRightChange : () -> Unit = {
+                when (viewSettings.buttonRightCaption) {
+                    getString(R.string.login) -> { authenticationViewModel.signIn(newEmail, password) }
+                    getString(R.string.register) -> { authenticationViewModel.register(newEmail, password, isPrivacyApproved) }
+                    getString(R.string.setPassword) -> { TODO() }
+                    getString(R.string.sendVerificationEmail) -> { authenticationViewModel.sendVerificationEmail() }
+                    getString(R.string.close) -> { closeAction() }
+                    else -> {}
+                }
+            }
+
             if (viewSettings.showOnlyLeftHeader) {
                 ProfileHeader()
             } else {
@@ -439,7 +453,7 @@ class SignInActivity : BaseActivity() {
                     }
                 }
                 Button(
-                    onClick = viewSettings.buttonRightAction
+                    onClick = onButtonRightChange
                 ) {
                     Text(viewSettings.buttonRightCaption)
                 }
