@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.lib.AuthService
@@ -30,6 +31,18 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     val authActionResult = MutableLiveData<AuthService.AuthActionResult>()
     val linkMode = MutableLiveData<EmailLinkMode>()
     val email = MutableLiveData<String>()
+
+    private val myNewEmail = MutableLiveData<String>()
+    val newEmail : LiveData<String> = myNewEmail
+    fun onNewEmailChange(email: String) { myNewEmail.postValue(email) }
+
+    private val myPassword = MutableLiveData<String>()
+    val password : LiveData<String> = myPassword
+    fun onPasswordChange(password: String) { myPassword.postValue(password) }
+
+    private val myIsPrivacyApproved = MutableLiveData<Boolean>()
+    val isPrivacyApproved : LiveData<Boolean> = myIsPrivacyApproved
+    fun onIsPrivacyApprovedChange(approved: Boolean) { myIsPrivacyApproved.postValue(approved) }
 
     private var oobCode: String? = null
 
@@ -84,9 +97,14 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun register(email: String, password: String, dataPolicyChecked: Boolean) {
+//    fun register(email: String, password: String, dataPolicyChecked: Boolean) {
+    fun register() {
         viewModelScope.launch(Dispatchers.IO) {
-            var result = FirebaseAuthService.registerWithEmailAndPassword(email, password, dataPolicyChecked)
+            var result = FirebaseAuthService.registerWithEmailAndPassword(
+                newEmail.value ?: "",
+                password.value ?: "",
+                isPrivacyApproved.value ?: false
+            )
             if (result == AuthService.AuthActionResult.REGISTRATION_SUCCEEDED) {
                 result = FirebaseAuthService.sendVerificationEmail()
             }
@@ -94,14 +112,18 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun resetPassword(password: String) {
+//    fun resetPassword(password: String) {
+    fun resetPassword() {
         if (oobCode.isNullOrEmpty()) {
             authActionResult.postValue(AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON)
             logError(Exception("action code is null or empty"))
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
-            val result = FirebaseAuthService.resetPassword(password, oobCode!!)
+            val result = FirebaseAuthService.resetPassword(
+                password.value ?: "",
+                oobCode!!
+            )
             if (result == AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED) {
                 changeAuthStatus(AuthService.AuthStatus.SIGNED_OUT)
             }
@@ -127,9 +149,13 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun signIn(email: String, password: String) {
+//    fun signIn(email: String, password: String) {
+    fun signIn() {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = FirebaseAuthService.signIn(email, password)
+            val result = FirebaseAuthService.signIn(
+                newEmail.value ?: "",
+                password.value ?: ""
+            )
             if (result == AuthService.AuthActionResult.SIGNIN_SUCCEEDED) {
                 changeAuthStatus(FirebaseAuthService.checkAuthStatus())
             } else {

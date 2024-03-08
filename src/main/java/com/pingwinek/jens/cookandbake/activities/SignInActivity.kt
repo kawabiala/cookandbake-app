@@ -71,7 +71,6 @@ class SignInActivity : BaseActivity() {
     private lateinit var userInfoViewModel: UserInfoViewModel
 
     private var asRegistrationView: Boolean = true
-    private var currentView: ViewSettings = ViewSettings()
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Lifecycle Functions
@@ -355,31 +354,21 @@ class SignInActivity : BaseActivity() {
     override fun ScaffoldContent() {
         Screen { viewSettings, toggleRegistrationView ->
             val email = authenticationViewModel.email.observeAsState()
-            var newEmail : String by remember { mutableStateOf("") }
-            val onEmailValueChanged : (text: String) -> Unit = { text -> newEmail = text }
+            val newEmail = authenticationViewModel.newEmail.observeAsState()
+            val password = authenticationViewModel.password.observeAsState()
+            val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
 
-            var password by remember { mutableStateOf("")}
-            val onPasswordValueChange : (text: String) -> Unit = { text -> password = text }
-            val onResetPasswordClicked : () -> Unit = resetPasswordAction
-
-            var isPrivacyApproved by remember { mutableStateOf(false) }
-            val onPrivacyApprovedChange : (checked : Boolean) -> Unit = { checked -> isPrivacyApproved = checked }
+            val onResetPasswordClicked : () -> Unit = sendResetEmailAction
 
             val userInfoData = userInfoViewModel.userInfoData.observeAsState()
             val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
 
             val onButtonRightChange : () -> Unit = {
                 when (viewSettings.buttonRightAction) {
-                    ButtonRightAction.SIGNIN -> { authenticationViewModel.signIn(newEmail, password) }
-                    ButtonRightAction.REGISTER -> { authenticationViewModel.register(newEmail, password, isPrivacyApproved) }
-                    ButtonRightAction.RESETPASSWORD -> {
-                        if (email.value.isNullOrEmpty()) {
-                            authenticationViewModel.signIn(newEmail, password)
-                        } else {
-                            authenticationViewModel.signIn(email.value!!, password)
-                        }
-                    }
-                    ButtonRightAction.SENDVERIFICATION -> { authenticationViewModel.sendVerificationEmail() }
+                    ButtonRightAction.SIGNIN -> { signInAction() }
+                    ButtonRightAction.REGISTER -> { registerAction() }
+                    ButtonRightAction.RESETPASSWORD -> { resetPasswordAction() }
+                    ButtonRightAction.SENDVERIFICATION -> { sendEmailVerificationAction() }
                     ButtonRightAction.CLOSE -> { closeAction() }
                     else -> {}
                 }
@@ -394,19 +383,19 @@ class SignInActivity : BaseActivity() {
             }
 
             PingwinekCooksComposables.EditableText(
-                text = if (viewSettings.editEmail) newEmail else email.value ?: "",
+                text = if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "",
                 label = getString(R.string.email),
                 editable = viewSettings.editEmail,
-                onValueChange = onEmailValueChanged
+                onValueChange = { authenticationViewModel.onNewEmailChange(it) }
             )
 
             if (viewSettings.showPassword) {
                 PingwinekCooksComposables.EditableText(
-                    text = password,
+                    text = password.value ?: "",
                     label = getString(R.string.password),
                     supportingText = if (viewSettings.showReset) getString(R.string.lostPassword) else null,
                     editable = true,
-                    onValueChange = onPasswordValueChange,
+                    onValueChange = { authenticationViewModel.onPasswordChange(it) },
                     onSupportingTextClicked = onResetPasswordClicked
                 )
             } else if (viewSettings.showReset) {
@@ -420,8 +409,9 @@ class SignInActivity : BaseActivity() {
             if (viewSettings.showPrivacy) {
                 PingwinekCooksComposables.LabelledCheckBox(
                     label = getString(R.string.declareAcceptanceOfDataprotection),
-                    checked = isPrivacyApproved,
-                    onCheckedChange = onPrivacyApprovedChange)
+                    checked = isPrivacyApproved.value ?: false,
+                    onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
+                )
             }
 
             if (viewSettings.showCrashlytics) {
@@ -588,18 +578,11 @@ class SignInActivity : BaseActivity() {
     }
 
     private val registerAction: () -> Unit = {
-/*        val email = emailEditText.text.toString()
-        val password = passwordEditText.text.toString()
-        val dataPolicyChecked = checkBox.isChecked
-
-        authenticationViewModel.register(email, password, dataPolicyChecked)
-
- */
+        authenticationViewModel.register()
     }
 
     private val resetPasswordAction: () -> Unit = {
-//        val password = passwordEditText.text.toString()
-//        authenticationViewModel.resetPassword(password)
+        authenticationViewModel.resetPassword()
     }
 
     private val sendEmailVerificationAction: () -> Unit = {
@@ -612,12 +595,7 @@ class SignInActivity : BaseActivity() {
     }
 
     private val signInAction: () -> Unit = {
-/*        val email = emailEditText.text.toString()
-        val password = passwordEditText.text.toString()
-
-        authenticationViewModel.signIn(email, password)
-
- */
+        authenticationViewModel.signIn()
     }
 
     private val signOutAction: () -> Unit = {
