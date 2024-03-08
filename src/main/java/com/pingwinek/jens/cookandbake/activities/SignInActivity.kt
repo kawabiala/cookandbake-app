@@ -5,11 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -19,6 +19,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
@@ -30,6 +31,14 @@ import java.util.LinkedList
 
 class SignInActivity : BaseActivity() {
 
+    private enum class ButtonRightAction {
+        CLOSE,
+        REGISTER,
+        RESETPASSWORD,
+        SENDVERIFICATION,
+        SIGNIN,
+    }
+
     /**
      *
      */
@@ -39,7 +48,7 @@ class SignInActivity : BaseActivity() {
         val buttonLeftCaption: String = "",
         val buttonRightCaption: String = "",
         val buttonLeftAction: () -> Unit = {},
-        val buttonRightAction: () -> Unit = {},
+        val buttonRightAction: ButtonRightAction = ButtonRightAction.CLOSE,
         val highlightLeftHeader: Boolean = true,
         val showOnlyLeftHeader: Boolean = false,
         val editEmail: Boolean = true,
@@ -51,21 +60,7 @@ class SignInActivity : BaseActivity() {
         val showLogout: Boolean = false,
         val showDelete: Boolean = false
     )
-/*
-    private lateinit var headerLeftTextView: TextView
-    private lateinit var headerRightTextView: TextView
-    private lateinit var emailEditText: EditText
-    private lateinit var passwordEditText: EditText
-    private lateinit var resetTextView: TextView
-    private lateinit var acceptCrashlyticsView: CheckBox
-    private lateinit var acceptCrashlyticsTextView: TextView
-    private lateinit var checkBox: CheckBox
-    private lateinit var acceptanceTextView: TextView
-    private lateinit var buttonLeft: Button
-    private lateinit var buttonRight: Button
-    private lateinit var logoutTextView: TextView
-    private lateinit var deleteTextView: TextView
-*/
+
     private lateinit var registerView: ViewSettings
     private lateinit var signInView: ViewSettings
     private lateinit var resetPasswordView: ViewSettings
@@ -85,8 +80,6 @@ class SignInActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        addContentView(R.layout.activity_signin)
-
         authenticationViewModel = ViewModelProvider
             .AndroidViewModelFactory
             .getInstance(application)
@@ -97,22 +90,6 @@ class SignInActivity : BaseActivity() {
             .getInstance(application)
             .create(UserInfoViewModel::class.java)
 
-        // Assign fields to vars
-/*
-        headerLeftTextView = findViewById(R.id.siHeaderLeft)
-        headerRightTextView = findViewById(R.id.siHeaderRight)
-        emailEditText = findViewById(R.id.siEmail)
-        passwordEditText = findViewById(R.id.siPassword)
-        resetTextView = findViewById(R.id.siLostPassword)
-        acceptCrashlyticsView = findViewById(R.id.siCheckCrashlyticsBox)
-        acceptCrashlyticsTextView = findViewById(R.id.siAcceptCrashlytics)
-        checkBox = findViewById(R.id.siCheckBox)
-        acceptanceTextView = findViewById(R.id.siAcceptance)
-        buttonLeft = findViewById(R.id.siCancelButton)
-        buttonRight = findViewById(R.id.siLoginButton)
-        logoutTextView = findViewById(R.id.siLogout)
-        deleteTextView = findViewById(R.id.siDelete)
-*/
         // Define view settings
 
         registerView = ViewSettings(
@@ -121,7 +98,7 @@ class SignInActivity : BaseActivity() {
             buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.register),
             buttonLeftAction = closeAction,
-            buttonRightAction = registerAction
+            buttonRightAction = ButtonRightAction.REGISTER
         )
 
         signInView = ViewSettings(
@@ -130,7 +107,7 @@ class SignInActivity : BaseActivity() {
             buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.login),
             buttonLeftAction = closeAction,
-            buttonRightAction = signInAction,
+            buttonRightAction = ButtonRightAction.SIGNIN,
             highlightLeftHeader = false,
             showReset = true,
             showPrivacy = false,
@@ -143,7 +120,7 @@ class SignInActivity : BaseActivity() {
             buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.setPassword),
             buttonLeftAction = closeAction,
-            buttonRightAction = resetPasswordAction,
+            buttonRightAction = ButtonRightAction.RESETPASSWORD,
             editEmail = false,
             showOnlyLeftHeader = true,
             showReset = true,
@@ -156,7 +133,7 @@ class SignInActivity : BaseActivity() {
             buttonLeftCaption =  getString(R.string.close),
             buttonRightCaption = getString(R.string.sendVerificationEmail),
             buttonLeftAction = closeAction,
-            buttonRightAction = sendEmailVerificationAction,
+            buttonRightAction = ButtonRightAction.SENDVERIFICATION,
             showOnlyLeftHeader = true,
             editEmail = false,
             showPassword = false,
@@ -169,7 +146,7 @@ class SignInActivity : BaseActivity() {
         verifiedView = ViewSettings(
             headerLeftCaption = getString(R.string.profile),
             buttonRightCaption = getString(R.string.close),
-            buttonRightAction = closeAction,
+            buttonRightAction = ButtonRightAction.CLOSE,
             showOnlyLeftHeader = true,
             editEmail = false,
             showPassword = false,
@@ -188,7 +165,7 @@ class SignInActivity : BaseActivity() {
                     authMessage(
                         getString(R.string.accountDeleted)) {
                         asRegistrationView = true
-                        resetView()
+                        //resetView()
                     }
                 }
                 AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
@@ -198,7 +175,7 @@ class SignInActivity : BaseActivity() {
                     authMessage(
                         getString(R.string.PasswordChanged)) {
                         asRegistrationView = false
-                        applyViewSettings(signInView) // resetView won't work in this case
+                        //applyViewSettings(signInView) // resetView won't work in this case
                     }
                 }
                 AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> {
@@ -214,7 +191,7 @@ class SignInActivity : BaseActivity() {
                     authMessage(
                         getString(R.string.loggedOut)) {
                         asRegistrationView = false
-                        resetView()
+                        //resetView()
                     }
                 }
                 AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> {
@@ -293,7 +270,7 @@ class SignInActivity : BaseActivity() {
                 AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> {
                     errorMessage(
                         getString(R.string.verificationFailed)) {
-                        applyViewSettings(unverifiedView)
+                        //applyViewSettings(unverifiedView)
                     }
                 }
                 AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> {
@@ -304,42 +281,40 @@ class SignInActivity : BaseActivity() {
                 null -> TODO()
             }
         }
+        /*
 
-        authenticationViewModel.linkMode.observe(this) {
-            when (it) {
-                AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
-                AuthenticationViewModel.EmailLinkMode.VERIFIED -> applyViewSettings(verifiedView)
-                else -> {}
-            }
-        }
-/*
-        authenticationViewModel.email.observe(this) {
-            with(emailEditText.text) {
-                clear()
-                append(authenticationViewModel.email.value)
-            }
-        }
-*/
-        authenticationViewModel.authStatus.observe(this) { authStatus ->
-            when (authStatus) {
-                AuthService.AuthStatus.SIGNED_OUT -> {
-                    if (currentView != resetPasswordView) resetView()
+                authenticationViewModel.linkMode.observe(this) {
+                    when (it) {
+                        AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
+                        AuthenticationViewModel.EmailLinkMode.VERIFIED -> applyViewSettings(verifiedView)
+                        else -> {}
+                    }
                 }
-                AuthService.AuthStatus.SIGNED_IN -> {
-                    if (currentView != resetPasswordView) applyViewSettings(unverifiedView)
+                authenticationViewModel.email.observe(this) {
+                    with(emailEditText.text) {
+                        clear()
+                        append(authenticationViewModel.email.value)
+                    }
                 }
-                AuthService.AuthStatus.VERIFIED -> {
-                    if (currentView != resetPasswordView) applyViewSettings(verifiedView)
+                authenticationViewModel.authStatus.observe(this) { authStatus ->
+                    when (authStatus) {
+                        AuthService.AuthStatus.SIGNED_OUT -> {
+                            if (currentView != resetPasswordView) resetView()
+                        }
+                        AuthService.AuthStatus.SIGNED_IN -> {
+                            if (currentView != resetPasswordView) applyViewSettings(unverifiedView)
+                        }
+                        AuthService.AuthStatus.VERIFIED -> {
+                            if (currentView != resetPasswordView) applyViewSettings(verifiedView)
+                        }
+                        else -> {}
+                    }
                 }
-                else -> {}
-            }
-        }
-/*
-        userInfoViewModel.userInfoData.observe(this) { userInfo ->
-            acceptCrashlyticsView.isChecked = userInfo.crashlyticsEnabled
-        }
+                userInfoViewModel.userInfoData.observe(this) { userInfo ->
+                    acceptCrashlyticsView.isChecked = userInfo.crashlyticsEnabled
+                }
 
- */
+         */
         configureTopBar(title = getString(R.string.profile))
         configureNavigationBar(
             selectedItem = Navigation.LOGIN,
@@ -349,9 +324,6 @@ class SignInActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-/* Don't delete - this is needed
- */
-        resetView()
 
         authenticationViewModel.checkAuthStatus()
         authenticationViewModel.retrieveEmail()
@@ -379,7 +351,6 @@ class SignInActivity : BaseActivity() {
         super.BasePreview()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ScaffoldContent() {
         Screen { viewSettings, toggleRegistrationView ->
@@ -389,6 +360,7 @@ class SignInActivity : BaseActivity() {
 
             var password by remember { mutableStateOf("")}
             val onPasswordValueChange : (text: String) -> Unit = { text -> password = text }
+            val onResetPasswordClicked : () -> Unit = resetPasswordAction
 
             var isPrivacyApproved by remember { mutableStateOf(false) }
             val onPrivacyApprovedChange : (checked : Boolean) -> Unit = { checked -> isPrivacyApproved = checked }
@@ -397,18 +369,26 @@ class SignInActivity : BaseActivity() {
             val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
 
             val onButtonRightChange : () -> Unit = {
-                when (viewSettings.buttonRightCaption) {
-                    getString(R.string.login) -> { authenticationViewModel.signIn(newEmail, password) }
-                    getString(R.string.register) -> { authenticationViewModel.register(newEmail, password, isPrivacyApproved) }
-                    getString(R.string.setPassword) -> { TODO() }
-                    getString(R.string.sendVerificationEmail) -> { authenticationViewModel.sendVerificationEmail() }
-                    getString(R.string.close) -> { closeAction() }
+                when (viewSettings.buttonRightAction) {
+                    ButtonRightAction.SIGNIN -> { authenticationViewModel.signIn(newEmail, password) }
+                    ButtonRightAction.REGISTER -> { authenticationViewModel.register(newEmail, password, isPrivacyApproved) }
+                    ButtonRightAction.RESETPASSWORD -> {
+                        if (email.value.isNullOrEmpty()) {
+                            authenticationViewModel.signIn(newEmail, password)
+                        } else {
+                            authenticationViewModel.signIn(email.value!!, password)
+                        }
+                    }
+                    ButtonRightAction.SENDVERIFICATION -> { authenticationViewModel.sendVerificationEmail() }
+                    ButtonRightAction.CLOSE -> { closeAction() }
                     else -> {}
                 }
             }
 
             if (viewSettings.showOnlyLeftHeader) {
-                ProfileHeader()
+                ProfileHeader(
+                    text = viewSettings.headerLeftCaption
+                )
             } else {
                 SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
             }
@@ -424,9 +404,17 @@ class SignInActivity : BaseActivity() {
                 PingwinekCooksComposables.EditableText(
                     text = password,
                     label = getString(R.string.password),
+                    supportingText = if (viewSettings.showReset) getString(R.string.lostPassword) else null,
                     editable = true,
-                    onValueChange = onPasswordValueChange
+                    onValueChange = onPasswordValueChange,
+                    onSupportingTextClicked = onResetPasswordClicked
                 )
+            } else if (viewSettings.showReset) {
+                Row(
+                    modifier = Modifier.clickable { onResetPasswordClicked() }
+                ) {
+                    Text(text = getString(R.string.lostPassword))
+                }
             }
 
             if (viewSettings.showPrivacy) {
@@ -458,6 +446,26 @@ class SignInActivity : BaseActivity() {
                     Text(viewSettings.buttonRightCaption)
                 }
             }
+
+            if (viewSettings.showLogout) {
+                Row(
+                    Modifier.clickable(
+                        onClick = signOutAction
+                    )
+                ) {
+                    Text(getString(R.string.logout))
+                }
+            }
+
+            if (viewSettings.showDelete) {
+                Row(
+                    Modifier.clickable(
+                        onClick = deleteAction
+                    )
+                ) {
+                    Text(getString(R.string.delete))
+                }
+            }
         }
     }
 
@@ -486,9 +494,9 @@ class SignInActivity : BaseActivity() {
                 if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
                     resetPasswordView
                 } else {
-                    //verifiedView
+                    verifiedView
                     //signInView
-                    registerView
+                    //registerView
                 }
             }
 
@@ -528,9 +536,11 @@ class SignInActivity : BaseActivity() {
 
 
     @Composable
-    fun ProfileHeader() {
+    fun ProfileHeader(
+        text: String
+    ) {
         Row() {
-            Text("Profile")
+            Text(text = text)
         }
     }
 
@@ -559,133 +569,6 @@ class SignInActivity : BaseActivity() {
             }
         )
     }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Manage View
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private fun resetView() {
-        if (asRegistrationView) {
-            applyViewSettings(registerView)
-        } else {
-            applyViewSettings(signInView)
-        }
-    }
-
-    private fun applyViewSettings(settings: ViewSettings) {
-//        currentView = settings
-/*
-        adaptHeaderLeft(settings.headerLeftCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
-        adaptHeaderRight(settings.headerRightCaption, settings.showOnlyLeftHeader, settings.highlightLeftHeader)
-        adaptEmail(settings.editEmail)
-        adaptPassword(settings.showPassword)
-        adaptReset(settings.showReset)
-        adaptCrashlytics(settings.showCrashlytics)
-        adaptPrivacy(settings.showPrivacy)
-        adaptButtonLeft(settings.buttonLeftCaption, settings.showLeftButton, settings.buttonLeftAction)
-        adaptButtonRight(settings.buttonRightCaption, settings.buttonRightAction)
-        adaptLogout(settings.showLogout)
-        adaptDelete(settings.showDelete)
-
- */
-    }
-/*
-    private fun adaptHeaderLeft(caption: String, showOnlyLeftHeader: Boolean, highlightLeftHeader: Boolean) {
-        headerLeftTextView.apply {
-            text = caption
-            background = if (showOnlyLeftHeader) {
-                null
-            } else if (highlightLeftHeader) {
-                ColorDrawable(resources.getColor(R.color.colorPrimary, null))
-            } else {
-                ColorDrawable(resources.getColor(R.color.colorDisabled, null))
-            }
-            setOnClickListener {
-                asRegistrationView = true
-                resetView()
-            }
-        }
-    }
-
-    private fun adaptHeaderRight(caption: String, showOnlyLeftHeader: Boolean, highlightLeftHeader: Boolean) {
-        headerRightTextView.apply {
-            text = caption
-            if (showOnlyLeftHeader) {
-                isVisible = false
-            } else if (highlightLeftHeader) {
-                isVisible = true
-                background = ColorDrawable(resources.getColor(R.color.colorDisabled, null))
-            } else {
-                isVisible = true
-                background = ColorDrawable(resources.getColor(R.color.colorPrimary, null))
-            }
-            setOnClickListener {
-                asRegistrationView = false
-                resetView()
-            }
-        }
-    }
-
-    private fun adaptEmail(editEmail: Boolean) {
-        emailEditText.isEnabled = editEmail
-    }
-
-    private fun adaptPassword(showPassword: Boolean) {
-        passwordEditText.apply {
-            isVisible = showPassword
-        }
-    }
-
-    private fun adaptCrashlytics(showCrashlytics: Boolean) {
-        acceptCrashlyticsView.isVisible = showCrashlytics
-        acceptCrashlyticsTextView.isVisible = showCrashlytics
-        acceptCrashlyticsView.setOnClickListener {
-            crashlyticsAction()
-        }
-    }
-
-    private fun adaptReset(showReset: Boolean) {
-        resetTextView.apply {
-            isVisible = showReset
-            setOnClickListener { sendResetEmailAction() }
-        }
-    }
-
-    private fun adaptPrivacy(showPrivacy: Boolean) {
-        checkBox.isVisible = showPrivacy
-        acceptanceTextView.isVisible = showPrivacy
-    }
-
-    private fun adaptButtonLeft(caption: String, showLeftButton: Boolean, action: () -> Unit) {
-        buttonLeft.apply {
-            text = caption
-            isVisible = showLeftButton
-            setOnClickListener { action() }
-        }
-    }
-
-    private fun adaptButtonRight(caption: String, action: () -> Unit) {
-        buttonRight.apply {
-            text = caption
-            setOnClickListener { action() }
-        }
-    }
-
-    private fun adaptLogout(showLogout: Boolean) {
-        logoutTextView.apply {
-            isVisible = showLogout
-            setOnClickListener { signOutAction() }
-        }
-    }
-
-    private fun adaptDelete(showDelete: Boolean) {
-        deleteTextView.apply {
-            isVisible = showDelete
-            setOnClickListener { deleteAction() }
-        }
-    }
-
- */
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Auth-Actions

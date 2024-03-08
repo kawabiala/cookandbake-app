@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.lib
 
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
@@ -258,8 +259,10 @@ class PingwinekCooksComposables {
         fun EditableText(
             label: String? = null,
             text: String,
+            supportingText: String? = null,
             editable: Boolean = false,
-            onValueChange: (text: String) -> Unit = {}
+            onValueChange: (text: String) -> Unit = {},
+            onSupportingTextClicked: () -> Unit = {}
         ) {
             if (editable) {
                 TextField(
@@ -267,6 +270,14 @@ class PingwinekCooksComposables {
                     label = {
                         if (!label.isNullOrEmpty()) {
                             Text(label)
+                        }
+                    },
+                    supportingText = {
+                        if (!supportingText.isNullOrEmpty()) {
+                            Text(
+                                text = supportingText,
+                                modifier = Modifier.clickable { onSupportingTextClicked() },
+                            )
                         }
                     },
                     onValueChange = onValueChange,
