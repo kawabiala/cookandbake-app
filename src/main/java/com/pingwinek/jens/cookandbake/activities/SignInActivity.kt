@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -20,7 +21,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
@@ -358,7 +363,9 @@ class SignInActivity : BaseActivity() {
             val password = authenticationViewModel.password.observeAsState()
             val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
 
-            val onResetPasswordClicked : () -> Unit = sendResetEmailAction
+            val onResetPasswordClicked : () -> Unit = {
+                sendResetEmailAction(if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "")
+            }
 
             val userInfoData = userInfoViewModel.userInfoData.observeAsState()
             val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
@@ -374,12 +381,16 @@ class SignInActivity : BaseActivity() {
                 }
             }
 
-            if (viewSettings.showOnlyLeftHeader) {
-                ProfileHeader(
-                    text = viewSettings.headerLeftCaption
-                )
-            } else {
-                SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
+            Row(
+                modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
+            ) {
+                if (viewSettings.showOnlyLeftHeader) {
+                    ProfileHeader(
+                        text = viewSettings.headerLeftCaption
+                    )
+                } else {
+                    SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
+                }
             }
 
             PingwinekCooksComposables.EditableText(
@@ -530,7 +541,11 @@ class SignInActivity : BaseActivity() {
         text: String
     ) {
         Row() {
-            Text(text = text)
+            Text(
+                text = text,
+                fontSize = TextUnit(5F, TextUnitType.Em),
+                fontWeight = FontWeight.Bold
+                )
         }
     }
 
@@ -589,7 +604,8 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.sendVerificationEmail()
     }
 
-    private val sendResetEmailAction: () -> Unit = {
+    private val sendResetEmailAction: (email: String) -> Unit = { email ->
+        authenticationViewModel.sendPasswordResetEmail(email)
 //        val email = emailEditText.text.toString()
 //        authenticationViewModel.sendPasswordResetEmail(email)
     }

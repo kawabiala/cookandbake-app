@@ -32,19 +32,23 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     val linkMode = MutableLiveData<EmailLinkMode>()
     val email = MutableLiveData<String>()
 
+    private var oobCode: String? = null
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Values for UI components
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     private val myNewEmail = MutableLiveData<String>()
     val newEmail : LiveData<String> = myNewEmail
-    fun onNewEmailChange(email: String) { myNewEmail.postValue(email) }
+    fun onNewEmailChange(email: String) { myNewEmail.value = email }
 
     private val myPassword = MutableLiveData<String>()
     val password : LiveData<String> = myPassword
-    fun onPasswordChange(password: String) { myPassword.postValue(password) }
+    fun onPasswordChange(password: String) { myPassword.value = password }
 
     private val myIsPrivacyApproved = MutableLiveData<Boolean>()
     val isPrivacyApproved : LiveData<Boolean> = myIsPrivacyApproved
-    fun onIsPrivacyApprovedChange(approved: Boolean) { myIsPrivacyApproved.postValue(approved) }
-
-    private var oobCode: String? = null
+    fun onIsPrivacyApprovedChange(approved: Boolean) { myIsPrivacyApproved.value = approved }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Authentication Functions
