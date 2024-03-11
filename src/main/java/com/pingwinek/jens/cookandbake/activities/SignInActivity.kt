@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -394,7 +396,11 @@ class SignInActivity : BaseActivity() {
             }
 
             PingwinekCooksComposables.EditableText(
-                text = if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "",
+                text = if (viewSettings.editEmail) {
+                    newEmail.value ?: ""
+                } else {
+                    getString(R.string.logged_in_as, email.value ?: "")
+                },
                 label = getString(R.string.email),
                 editable = viewSettings.editEmail,
                 onValueChange = { authenticationViewModel.onNewEmailChange(it) }
@@ -433,7 +439,10 @@ class SignInActivity : BaseActivity() {
                     )
             }
 
-            Row() {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
                 if (viewSettings.showLeftButton) {
                     Button(
                         onClick = viewSettings.buttonLeftAction
