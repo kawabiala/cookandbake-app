@@ -7,12 +7,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -29,6 +36,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
@@ -322,6 +330,55 @@ class SignInActivity : BaseActivity() {
 
          */
         configureTopBar(title = getString(R.string.profile))
+
+        val optionItems = mutableListOf(
+            PingwinekCooksComposables.OptionItem(
+                getString(R.string.dataprotection),
+                Icons.Filled.Lock
+            ) {
+                startActivity(
+                    Intent(this@SignInActivity, ImpressumActivity::class.java)
+                        .putExtra("title", getString(R.string.dataprotection))
+                        .putExtra(
+                            "url",
+                            (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)
+                        )
+                )
+            },
+            PingwinekCooksComposables.OptionItem(
+                getString(R.string.impressum),
+                Icons.Filled.Info
+            ) {
+                startActivity(
+                    Intent(this@SignInActivity, ImpressumActivity::class.java)
+                        .putExtra("title", getString(R.string.impressum))
+                        .putExtra(
+                            "url",
+                            (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)
+                        )
+                )
+            }
+        )
+/*
+        if (authenticationViewModel.authStatus.value != AuthService.AuthStatus.SIGNED_OUT) {
+            optionItems.apply {
+                add(
+                    PingwinekCooksComposables.OptionItem(
+                        getString(R.string.logout),
+                        Icons.Filled.Person
+                    ) { authenticationViewModel.signOut() }
+                )
+                add(
+                    PingwinekCooksComposables.OptionItem(
+                        getString(R.string.delete),
+                        Icons.Filled.Person
+                    ) { authenticationViewModel.deleteAccount() }
+                )
+            }
+        }
+*/
+        configureDropDown(*optionItems.toTypedArray())
+
         configureNavigationBar(
             selectedItem = Navigation.LOGIN,
             onRecipeClickAction = closeAction
@@ -429,6 +486,56 @@ class SignInActivity : BaseActivity() {
                     checked = isPrivacyApproved.value ?: false,
                     onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
                 )
+            }
+
+            if (viewSettings.showCrashlytics) {
+                var isOpen by remember { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier.clickable { isOpen = !isOpen }
+                ) {
+                    Row() {
+                        if (isOpen) {
+                            Icon(
+                                Icons.Filled.ArrowDropDown,
+                                ""
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.ArrowDropUp,
+                                ""
+                            )
+                        }
+                        Text(text = "Account Settings")
+                    }
+                }
+                if (isOpen) {
+                    Column() {
+                        PingwinekCooksComposables.LabelledCheckBox(
+                            label = getString(R.string.acceptCrashlytics),
+                            checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                            onCheckedChange = onCrashlyticsChange
+                        )
+                        Row(
+                            modifier = Modifier.clickable { onResetPasswordClicked() }
+                        ) {
+                            Text(text = getString(R.string.lostPassword))
+                        }
+                        Row(
+                            Modifier.clickable(
+                                onClick = signOutAction
+                            )
+                        ) {
+                            Text(getString(R.string.logout))
+                        }
+                        Row(
+                            Modifier.clickable(
+                                onClick = deleteAction
+                            )
+                        ) {
+                            Text(getString(R.string.delete))
+                        }
+                    }
+                }
             }
 
             if (viewSettings.showCrashlytics) {
