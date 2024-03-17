@@ -4,16 +4,24 @@ import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -22,6 +30,7 @@ import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -35,7 +44,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
@@ -311,6 +322,87 @@ class PingwinekCooksComposables {
                     }
                 )
                 Text(text = label)
+            }
+        }
+
+        @Composable
+        fun LabelledSwitch(
+            checked : Boolean = false,
+            label : String,
+            onCheckedChange : (checked: Boolean) -> Unit = {}
+        ) {
+            var checkedLocal by remember { mutableStateOf(checked) }
+            Row(
+                modifier = Modifier
+                    .toggleable(
+                        value = checkedLocal,
+                        onValueChange = {
+                            checkedLocal = it
+                            onCheckedChange(it)
+                        }
+                    )
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier.weight(0.6F),
+                    text = label)
+                Spacer(
+                    modifier = Modifier.weight(0.1F)
+                )
+                Switch(
+                    checked = checkedLocal,
+                    onCheckedChange = {
+                        checkedLocal = it
+                        onCheckedChange(it)
+                    })
+            }
+        }
+
+        @Composable
+        fun Expandable(
+            headerText: String,
+            lineThickness: Dp = Dp(1F),
+            lineColor: Color = MaterialTheme.colorScheme.tertiary,
+            boxColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+            padding: Dp = Dp(0F),
+            content: @Composable () -> Unit
+        ) {
+            var isOpen by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isOpen = !isOpen },
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = headerText)
+                if (isOpen) {
+                    Icon(
+                        Icons.Filled.ArrowDropUp,
+                        ""
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        ""
+                    )
+                }
+            }
+
+            HorizontalDivider(
+                thickness = lineThickness,
+                color = lineColor
+            )
+
+            if (isOpen) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = boxColor)
+                        .padding(padding)
+                ) {
+                    content()
+                }
             }
         }
 

@@ -7,19 +7,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -32,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -472,12 +470,6 @@ class SignInActivity : BaseActivity() {
                     onValueChange = { authenticationViewModel.onPasswordChange(it) },
                     onSupportingTextClicked = onResetPasswordClicked
                 )
-            } else if (viewSettings.showReset) {
-                Row(
-                    modifier = Modifier.clickable { onResetPasswordClicked() }
-                ) {
-                    Text(text = getString(R.string.lostPassword))
-                }
             }
 
             if (viewSettings.showPrivacy) {
@@ -486,64 +478,6 @@ class SignInActivity : BaseActivity() {
                     checked = isPrivacyApproved.value ?: false,
                     onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
                 )
-            }
-
-            if (viewSettings.showCrashlytics) {
-                var isOpen by remember { mutableStateOf(false) }
-                Box(
-                    modifier = Modifier.clickable { isOpen = !isOpen }
-                ) {
-                    Row() {
-                        if (isOpen) {
-                            Icon(
-                                Icons.Filled.ArrowDropDown,
-                                ""
-                            )
-                        } else {
-                            Icon(
-                                Icons.Filled.ArrowDropUp,
-                                ""
-                            )
-                        }
-                        Text(text = "Account Settings")
-                    }
-                }
-                if (isOpen) {
-                    Column() {
-                        PingwinekCooksComposables.LabelledCheckBox(
-                            label = getString(R.string.acceptCrashlytics),
-                            checked = userInfoData.value?.crashlyticsEnabled ?: false,
-                            onCheckedChange = onCrashlyticsChange
-                        )
-                        Row(
-                            modifier = Modifier.clickable { onResetPasswordClicked() }
-                        ) {
-                            Text(text = getString(R.string.lostPassword))
-                        }
-                        Row(
-                            Modifier.clickable(
-                                onClick = signOutAction
-                            )
-                        ) {
-                            Text(getString(R.string.logout))
-                        }
-                        Row(
-                            Modifier.clickable(
-                                onClick = deleteAction
-                            )
-                        ) {
-                            Text(getString(R.string.delete))
-                        }
-                    }
-                }
-            }
-
-            if (viewSettings.showCrashlytics) {
-                PingwinekCooksComposables.LabelledCheckBox(
-                    label = getString(R.string.acceptCrashlytics),
-                    checked = userInfoData.value?.crashlyticsEnabled ?: false,
-                    onCheckedChange = onCrashlyticsChange
-                    )
             }
 
             Row(
@@ -564,23 +498,46 @@ class SignInActivity : BaseActivity() {
                 }
             }
 
-            if (viewSettings.showLogout) {
-                Row(
-                    Modifier.clickable(
-                        onClick = signOutAction
-                    )
+            if (viewSettings.showCrashlytics) {
+                PingwinekCooksComposables.Expandable(
+                    headerText = "Account Settings",
+                    lineColor = MaterialTheme.colorScheme.primary,
+                    boxColor = MaterialTheme.colorScheme.secondaryContainer,
+                    padding = Dp(10F)
                 ) {
-                    Text(getString(R.string.logout))
-                }
-            }
+                    PingwinekCooksComposables.LabelledSwitch(
+                        label = getString(R.string.acceptCrashlytics),
+                        checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                        onCheckedChange = onCrashlyticsChange
+                    )
 
-            if (viewSettings.showDelete) {
-                Row(
-                    Modifier.clickable(
-                        onClick = deleteAction
-                    )
-                ) {
-                    Text(getString(R.string.delete))
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier.clickable { onResetPasswordClicked() }
+                    ) {
+                        Text(text = getString(R.string.lostPassword))
+                    }
+
+                    HorizontalDivider()
+
+                    Row(
+                        Modifier.clickable(
+                            onClick = signOutAction
+                        )
+                    ) {
+                        Text(getString(R.string.logout))
+                    }
+
+                    HorizontalDivider()
+
+                    Row(
+                        Modifier.clickable(
+                            onClick = deleteAction
+                        )
+                    ) {
+                        Text(getString(R.string.delete))
+                    }
                 }
             }
         }
