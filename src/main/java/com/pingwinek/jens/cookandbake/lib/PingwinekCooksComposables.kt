@@ -25,17 +25,22 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,14 +63,6 @@ class PingwinekCooksComposables {
         val label: String,
         val icon: ImageVector,
         val onClick: () -> Unit
-    )
-
-    data class NavigationBarItem(
-        val icon: ImageVector,
-        val label: String = "",
-        val selected: Boolean = false,
-        val enabled: Boolean = true,
-        val onClick: () -> Unit = {}
     )
 
     companion object {
@@ -96,22 +93,16 @@ class PingwinekCooksComposables {
             optionItemLeft: OptionItem? = null,
             optionItemMid: OptionItem? = null,
             optionItemRight: OptionItem? = null,
+            dropDownItemColors: MenuItemColors = MenuDefaults.itemColors(),
+            dropDownMenuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+            topBarColors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
+            topBarIconButtonColors: IconButtonColors = IconButtonDefaults.filledIconButtonColors()
         ) {
-            val topAppBarColors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            val topBarIconButtonColors = IconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
             var expanded by remember {
                 mutableStateOf(false)
             }
             TopAppBar(
-                colors = topAppBarColors,
+                colors = topBarColors,
                 title = {
                     Text(title)
                 },
@@ -148,6 +139,8 @@ class PingwinekCooksComposables {
                             Icon(Icons.Filled.MoreVert, null)
                             PingwinekCooksDropDown(
                                 expanded = expanded,
+                                menuItemColors = dropDownItemColors,
+                                menuColor = dropDownMenuColor,
                                 options = dropDownOptions
                             ) { expanded = false }
                         }
@@ -169,21 +162,15 @@ class PingwinekCooksComposables {
         @Composable
         fun PingwinekCooksDropDown(
             expanded: Boolean,
+            menuItemColors: MenuItemColors = MenuDefaults.itemColors(),
+            menuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
             options: List<OptionItem>,
             onSelected: () -> Unit
         ) {
-            val menuItemColors = MenuItemColors(
-                textColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
             DropdownMenu(
                 expanded = expanded,
                 modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.secondaryContainer
+                    color = menuColor
                 ),
                 onDismissRequest = { onSelected() }
             ) {
@@ -207,21 +194,13 @@ class PingwinekCooksComposables {
         fun PingwinekCooksNavigationBar(
             selectedItem: Int = 0,
             enabled: Boolean = true,
+            navigationBarColor: Color = NavigationBarDefaults.containerColor,
+            navigationBarItemColors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
             menuItems: List<OptionItem>
         ) {
             var selectedMenuItem by remember {
                 mutableIntStateOf(selectedItem)
             }
-            val navigationBarColor = MaterialTheme.colorScheme.secondaryContainer
-            val navigationBarItemColors = NavigationBarItemColors(
-                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                disabledIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
             NavigationBar(
                 containerColor = navigationBarColor
             ) {
@@ -391,14 +370,14 @@ class PingwinekCooksComposables {
 
             HorizontalDivider(
                 thickness = lineThickness,
-                color = lineColor
+                //color = lineColor
             )
 
             if (isOpen) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = boxColor)
+                        //.background(color = boxColor)
                         .padding(padding)
                 ) {
                     content()
