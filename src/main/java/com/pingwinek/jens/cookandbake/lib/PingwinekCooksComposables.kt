@@ -21,7 +21,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -51,7 +50,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
@@ -308,6 +311,7 @@ class PingwinekCooksComposables {
         fun LabelledSwitch(
             checked : Boolean = false,
             label : String,
+            labelTextSize: TextUnit = TextUnit(6F, TextUnitType.Em),
             onCheckedChange : (checked: Boolean) -> Unit = {}
         ) {
             var checkedLocal by remember { mutableStateOf(checked) }
@@ -325,7 +329,9 @@ class PingwinekCooksComposables {
             ) {
                 Text(
                     modifier = Modifier.weight(0.6F),
-                    text = label)
+                    text = label,
+                    fontSize = labelTextSize
+                )
                 Spacer(
                     modifier = Modifier.weight(0.1F)
                 )
@@ -341,46 +347,52 @@ class PingwinekCooksComposables {
         @Composable
         fun Expandable(
             headerText: String,
-            lineThickness: Dp = Dp(1F),
-            lineColor: Color = MaterialTheme.colorScheme.tertiary,
-            boxColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+            headerTextSize: TextUnit = TextUnit(6F, TextUnitType.Em),
+            headerTextColor: Color = MaterialTheme.colorScheme.onSurface,
+            contentTextSize: TextUnit = TextUnit(5F, TextUnitType.Em),
+            boxColor: Color = MaterialTheme.colorScheme.surfaceContainer,
             padding: Dp = Dp(0F),
-            content: @Composable () -> Unit
+            content: @Composable (TextUnit) -> Unit
         ) {
             var isOpen by remember { mutableStateOf(false) }
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isOpen = !isOpen },
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .background(color = boxColor)
+                    .padding(padding)
             ) {
-                Text(text = headerText)
-                if (isOpen) {
-                    Icon(
-                        Icons.Filled.ArrowDropUp,
-                        ""
-                    )
-                } else {
-                    Icon(
-                        Icons.Filled.ArrowDropDown,
-                        ""
-                    )
-                }
-            }
-
-            HorizontalDivider(
-                thickness = lineThickness,
-                //color = lineColor
-            )
-
-            if (isOpen) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        //.background(color = boxColor)
-                        .padding(padding)
+                        .clickable { isOpen = !isOpen },
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    content()
+                    Text(
+                        text = headerText,
+                        fontSize = headerTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = headerTextColor,
+                    )
+                    if (isOpen) {
+                        Icon(
+                            Icons.Filled.ArrowDropUp,
+                            ""
+                        )
+                    } else {
+                        Icon(
+                            Icons.Filled.ArrowDropDown,
+                            ""
+                        )
+                    }
+                }
+
+                if (isOpen) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp)
+                    ) {
+                        content(contentTextSize)
+                    }
                 }
             }
         }

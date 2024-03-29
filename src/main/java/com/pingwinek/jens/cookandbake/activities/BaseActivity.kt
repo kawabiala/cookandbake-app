@@ -46,12 +46,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private var selectedNavigationBarItem: Int = 0
     private var navigationBarEnabled = true
-    /*
-        private val recipeIcon = Icons.Outlined.RestaurantMenu
-        private var loginIcon = Icons.Outlined.Person
-        private lateinit var recipeLabel: String
-        private lateinit var loginLabel: String
-    */    private var navigationBarItems = listOf<PingwinekCooksComposables.OptionItem>()
+    private var navigationBarItems = listOf<PingwinekCooksComposables.OptionItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +67,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun BaseScaffold() {
+    private fun BaseScaffold() {
+
         val topAppBarColors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -80,18 +76,31 @@ abstract class BaseActivity : AppCompatActivity() {
         val topBarIconButtonColors = IconButtonColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface
         )
+
+        val dropDownMenuColor = MaterialTheme.colorScheme.surfaceContainerLow
         val dropDownItemColors = MenuItemColors(
-            textColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+            textColor = MaterialTheme.colorScheme.onSurface,
+            leadingIconColor = MaterialTheme.colorScheme.onSurface,
+            trailingIconColor = MaterialTheme.colorScheme.onSurface,
+            disabledLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface
         )
-        val dropDownMenuColor = MaterialTheme.colorScheme.surfaceContainer
+
+        val navigationBarColor = MaterialTheme.colorScheme.surfaceContainer
+        val navigationBarItemColors = NavigationBarItemColors(
+            selectedIconColor = MaterialTheme.colorScheme.onSurface,
+            selectedTextColor = MaterialTheme.colorScheme.onSurface,
+            selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+
         Scaffold(
             contentWindowInsets = WindowInsets(Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM, Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM),
             topBar = {
@@ -109,16 +118,6 @@ abstract class BaseActivity : AppCompatActivity() {
                 )
             },
             bottomBar = {
-                val navigationBarColor = MaterialTheme.colorScheme.surfaceContainer
-                val navigationBarItemColors = NavigationBarItemColors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    disabledIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
                 PingwinekCooksNavigationBar(
                     selectedItem = selectedNavigationBarItem,
                     enabled = navigationBarEnabled,

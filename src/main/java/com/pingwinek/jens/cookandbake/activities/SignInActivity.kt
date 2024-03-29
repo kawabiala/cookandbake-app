@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -481,11 +482,19 @@ class SignInActivity : BaseActivity() {
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp, bottom = 20.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 if (viewSettings.showLeftButton) {
                     Button(
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                        ),
                         onClick = viewSettings.buttonLeftAction
                     ) {
                         Text(viewSettings.buttonLeftCaption)
@@ -501,42 +510,67 @@ class SignInActivity : BaseActivity() {
             if (viewSettings.showCrashlytics) {
                 PingwinekCooksComposables.Expandable(
                     headerText = "Account Settings",
-                    lineColor = MaterialTheme.colorScheme.primary,
-                    boxColor = MaterialTheme.colorScheme.secondaryContainer,
-                    padding = Dp(10F)
-                ) {
+                    headerTextSize = TextUnit(5F, TextUnitType.Em),
+                    headerTextColor = MaterialTheme.colorScheme.onSurface,
+                    contentTextSize = TextUnit(5F, TextUnitType.Em),
+                    boxColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    padding = Dp(20F)
+                ) { contentTextSize ->
                     PingwinekCooksComposables.LabelledSwitch(
                         label = getString(R.string.acceptCrashlytics),
+                        labelTextSize = contentTextSize,
                         checked = userInfoData.value?.crashlyticsEnabled ?: false,
                         onCheckedChange = onCrashlyticsChange
                     )
 
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 5.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
 
                     Row(
                         modifier = Modifier.clickable { onResetPasswordClicked() }
                     ) {
-                        Text(text = getString(R.string.lostPassword))
+                        Text(
+                            text = getString(R.string.lostPassword),
+                            fontSize = contentTextSize
+                        )
                     }
 
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 5.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
+
 
                     Row(
                         Modifier.clickable(
                             onClick = signOutAction
                         )
                     ) {
-                        Text(getString(R.string.logout))
+                        Text(
+                            text = getString(R.string.logout),
+                            fontSize = contentTextSize
+                        )
                     }
 
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 5.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
 
                     Row(
                         Modifier.clickable(
                             onClick = deleteAction
                         )
                     ) {
-                        Text(getString(R.string.delete))
+                        Text(
+                            text = getString(R.string.delete),
+                            fontSize = contentTextSize
+                        )
                     }
                 }
             }
@@ -616,8 +650,9 @@ class SignInActivity : BaseActivity() {
         Row() {
             Text(
                 text = text,
-                fontSize = TextUnit(5F, TextUnitType.Em),
-                fontWeight = FontWeight.Bold
+                fontSize = TextUnit(8F, TextUnitType.Em),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
                 )
         }
     }
