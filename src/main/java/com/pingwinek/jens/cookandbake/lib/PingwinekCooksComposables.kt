@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,14 +52,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
+import com.pingwinek.jens.cookandbake.theming.Typography
 import java.util.LinkedList
 
 class PingwinekCooksComposables {
@@ -83,6 +86,7 @@ class PingwinekCooksComposables {
 
             MaterialTheme(
                 colorScheme = colors,
+                typography = Typography,
                 content = content
             )
         }
@@ -281,6 +285,33 @@ class PingwinekCooksComposables {
         }
 
         @Composable
+        fun PasswordField(
+            password: String,
+            label: String? = null,
+            onValueChange: (String) -> Unit
+        ) {
+            var passwordHidden: Boolean by remember { mutableStateOf(true) }
+            TextField(
+                value = password,
+                textStyle = MaterialTheme.typography.bodyMedium,
+                label = {
+                                 if (!label.isNullOrEmpty()) {
+                                     Text(text = label)
+                                    }
+                                 },
+                onValueChange = onValueChange,
+                visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+                trailingIcon = {
+                    IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                        val icon = if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description = if (passwordHidden) "show password" else "hide password"
+                        Icon(imageVector = icon, contentDescription = description)
+                    }
+                }
+            )
+        }
+
+        @Composable
         fun LabelledCheckBox(
             checked : Boolean = false,
             label : String,
@@ -311,7 +342,7 @@ class PingwinekCooksComposables {
         fun LabelledSwitch(
             checked : Boolean = false,
             label : String,
-            labelTextSize: TextUnit = TextUnit(6F, TextUnitType.Em),
+            labelTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
             onCheckedChange : (checked: Boolean) -> Unit = {}
         ) {
             var checkedLocal by remember { mutableStateOf(checked) }
@@ -330,7 +361,7 @@ class PingwinekCooksComposables {
                 Text(
                     modifier = Modifier.weight(0.6F),
                     text = label,
-                    fontSize = labelTextSize
+                    style = labelTextStyle,
                 )
                 Spacer(
                     modifier = Modifier.weight(0.1F)
@@ -347,12 +378,12 @@ class PingwinekCooksComposables {
         @Composable
         fun Expandable(
             headerText: String,
-            headerTextSize: TextUnit = TextUnit(6F, TextUnitType.Em),
+            headerTextStyle: TextStyle = MaterialTheme.typography.headlineMedium,
             headerTextColor: Color = MaterialTheme.colorScheme.onSurface,
-            contentTextSize: TextUnit = TextUnit(5F, TextUnitType.Em),
+            contentTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
             boxColor: Color = MaterialTheme.colorScheme.surfaceContainer,
             padding: Dp = Dp(0F),
-            content: @Composable (TextUnit) -> Unit
+            content: @Composable (TextStyle) -> Unit
         ) {
             var isOpen by remember { mutableStateOf(false) }
             Column(
@@ -368,8 +399,7 @@ class PingwinekCooksComposables {
                 ) {
                     Text(
                         text = headerText,
-                        fontSize = headerTextSize,
-                        fontWeight = FontWeight.Bold,
+                        style = headerTextStyle,
                         color = headerTextColor,
                     )
                     if (isOpen) {
@@ -391,7 +421,7 @@ class PingwinekCooksComposables {
                             .fillMaxWidth()
                             .padding(top = 20.dp)
                     ) {
-                        content(contentTextSize)
+                        content(contentTextStyle)
                     }
                 }
             }

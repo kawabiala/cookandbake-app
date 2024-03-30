@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.theming
 
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 
@@ -72,4 +73,13 @@ val DarkColors = darkColorScheme(
     surfaceTint = md_theme_dark_surfaceTint,
     outlineVariant = md_theme_dark_outlineVariant,
     scrim = md_theme_dark_scrim,
+)
+
+val Typography = Typography(
+    titleMedium = md_theme_titleMedium,
+    headlineLarge = md_theme_headlineLarge,
+    headlineMedium = md_theme_headlineMedium,
+    headlineSmall = md_theme_headlineSmall,
+    labelMedium = md_theme_labelMedium,
+    bodyMedium = md_theme_bodyMedium
 )
