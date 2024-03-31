@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake.theming
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.compositionLocalOf
 
 
 val LightColors = lightColorScheme(
@@ -83,3 +84,5 @@ val Typography = Typography(
     labelMedium = md_theme_labelMedium,
     bodyMedium = md_theme_bodyMedium
 )
+
+val LocalSpacing = compositionLocalOf { Spacing() }

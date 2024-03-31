@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -159,7 +160,7 @@ class RecipeListingActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         val recipes = recipeListData.observeAsState()
         recipes.value?.forEach { recipe: Recipe ->
             key(recipe.id) {

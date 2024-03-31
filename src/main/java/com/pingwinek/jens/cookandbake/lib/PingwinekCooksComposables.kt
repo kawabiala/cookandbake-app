@@ -60,8 +60,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
+import com.pingwinek.jens.cookandbake.theming.Spacing
 import com.pingwinek.jens.cookandbake.theming.Typography
 import java.util.LinkedList
+
+val MaterialTheme.spacing: Spacing
+    get() = Spacing()
 
 class PingwinekCooksComposables {
 
@@ -440,6 +444,21 @@ class PingwinekCooksComposables {
             }, update = {
                 it.loadUrl(url)
             }, modifier = Modifier.verticalScroll(scrollState))
+        }
+
+        @Composable
+        fun SpacerSmall() {
+            Spacer(modifier = Modifier.padding(MaterialTheme.spacing.spacerSmall))
+        }
+
+        @Composable
+        fun SpacerMedium() {
+            Spacer(modifier = Modifier.padding(MaterialTheme.spacing.spacerMedium))
+        }
+
+        @Composable
+        fun SpacerLarge() {
+            Spacer(modifier = Modifier.padding(MaterialTheme.spacing.spacerLarge))
         }
     }
 }

@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
@@ -57,7 +58,7 @@ class IngredientEditActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         TODO("Not yet implemented")
     }
 

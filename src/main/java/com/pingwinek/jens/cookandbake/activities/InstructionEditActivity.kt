@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
@@ -45,7 +46,7 @@ class InstructionEditActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         TODO("Not yet implemented")
     }
 

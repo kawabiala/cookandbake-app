@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
@@ -52,7 +53,7 @@ class RecipeEditActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         TODO("Not yet implemented")
     }
 

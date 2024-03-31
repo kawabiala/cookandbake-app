@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
@@ -200,7 +201,7 @@ class RecipeActivity : BaseActivity(),
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         TODO("Not yet implemented")
     }
 

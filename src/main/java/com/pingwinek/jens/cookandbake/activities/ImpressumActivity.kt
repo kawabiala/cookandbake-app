@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -28,7 +29,7 @@ class ImpressumActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         PingwinekCooksComposables.WebView(url)
     }
 }

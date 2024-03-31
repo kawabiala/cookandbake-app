@@ -1,8 +1,12 @@
 package com.pingwinek.jens.cookandbake.theming
 
-object Margins {
-    const val MARGIN_LEFT_RIGHT = 40
-    const val MARGIN_TOP_BOTTOM = 0
-    const val TEXT_MARGIN = 40
-    const val TEXT_PADOING = 20
-}
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+data class Spacing (
+    val standardPadding: Dp = 10.dp,
+    val mainWindowPadding: Dp = 40.dp,
+    val spacerSmall: Dp = 10.dp,
+    val spacerMedium: Dp = 20.dp,
+    val spacerLarge: Dp = 30.dp
+)

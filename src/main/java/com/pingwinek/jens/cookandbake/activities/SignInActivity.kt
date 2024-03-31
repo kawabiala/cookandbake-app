@@ -7,9 +7,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -36,6 +40,9 @@ import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.LabelledCheckBox
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerMedium
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerSmall
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 import java.util.LinkedList
@@ -416,7 +423,7 @@ class SignInActivity : BaseActivity() {
     }
 
     @Composable
-    override fun ScaffoldContent() {
+    override fun ScaffoldContent(paddingValues: PaddingValues) {
         Screen { viewSettings, toggleRegistrationView ->
             val email = authenticationViewModel.email.observeAsState()
             val newEmail = authenticationViewModel.newEmail.observeAsState()
@@ -441,86 +448,103 @@ class SignInActivity : BaseActivity() {
                 }
             }
 
-            Row(
-                modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
-            ) {
-                if (viewSettings.showOnlyLeftHeader) {
-                    ProfileHeader(
-                        text = viewSettings.headerLeftCaption
-                    )
-                } else {
-                    SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
-                }
-            }
+            val scrollState = rememberScrollState()
 
-            PingwinekCooksComposables.EditableText(
-                text = if (viewSettings.editEmail) {
-                    newEmail.value ?: ""
-                } else {
-                    getString(R.string.logged_in_as, email.value ?: "")
-                },
-                label = getString(R.string.email),
-                editable = viewSettings.editEmail,
-                onValueChange = { authenticationViewModel.onNewEmailChange(it) }
-            )
-
-            if (viewSettings.showPassword) {
-                PingwinekCooksComposables.PasswordField(
-                    password = password.value ?: "",
-                    label = getString(R.string.password),
-                    onValueChange = { authenticationViewModel.onPasswordChange(it) },
-                )
-            }
-
-            if (viewSettings.showPrivacy) {
-                PingwinekCooksComposables.LabelledCheckBox(
-                    label = getString(R.string.declareAcceptanceOfDataprotection),
-                    checked = isPrivacyApproved.value ?: false,
-                    onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
-                )
-            }
-
-            if (viewSettings.showCrashlytics) {
-                PingwinekCooksComposables.LabelledCheckBox(
-                    label = getString(R.string.acceptCrashlytics),
-                    checked = userInfoData.value?.crashlyticsEnabled ?: false,
-                    onCheckedChange = onCrashlyticsChange
-                )
-
-            }
-
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp, bottom = 20.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .padding(paddingValues)
+                    .verticalScroll(scrollState)
             ) {
-                if (viewSettings.showLeftButton) {
-                    Button(
-                        colors = ButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                        ),
-                        onClick = viewSettings.buttonLeftAction
-                    ) {
-                        Text(viewSettings.buttonLeftCaption)
+                SpacerMedium()
+
+                Row(
+                    //modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
+                ) {
+                    if (viewSettings.showOnlyLeftHeader) {
+                        ProfileHeader(
+                            text = viewSettings.headerLeftCaption
+                        )
+                    } else {
+                        SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
                     }
                 }
-                Button(
-                    onClick = onButtonRightChange
-                ) {
-                    Text(viewSettings.buttonRightCaption)
-                }
-            }
 
-            if (viewSettings.showAccountSettings) {
-                AccountSettingsBox(
-                    crashlyticsEnabled = userInfoData.value?.crashlyticsEnabled ?: false,
-                    onCrashlyticsChange = onCrashlyticsChange,
-                    onResetPasswordClicked = onResetPasswordClicked
+                SpacerMedium()
+
+                PingwinekCooksComposables.EditableText(
+                    text = if (viewSettings.editEmail) {
+                        newEmail.value ?: ""
+                    } else {
+                        getString(R.string.logged_in_as, email.value ?: "")
+                    },
+                    label = getString(R.string.email),
+                    editable = viewSettings.editEmail,
+                    onValueChange = { authenticationViewModel.onNewEmailChange(it) }
                 )
+
+                if (viewSettings.showPassword) {
+                    PingwinekCooksComposables.PasswordField(
+                        password = password.value ?: "",
+                        label = getString(R.string.password),
+                        onValueChange = { authenticationViewModel.onPasswordChange(it) },
+                    )
+                }
+
+                if (viewSettings.showPrivacy) {
+                    SpacerMedium()
+                    LabelledCheckBox(
+                        label = getString(R.string.declareAcceptanceOfDataprotection),
+                        checked = isPrivacyApproved.value ?: false,
+                        onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
+                    )
+                }
+
+                if (viewSettings.showCrashlytics) {
+                    SpacerSmall()
+                    LabelledCheckBox(
+                        label = getString(R.string.acceptCrashlytics),
+                        checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                        onCheckedChange = onCrashlyticsChange
+                    )
+
+                }
+
+                SpacerMedium()
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    //    .padding(top = 30.dp, bottom = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    if (viewSettings.showLeftButton) {
+                        Button(
+                            colors = ButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                            ),
+                            onClick = viewSettings.buttonLeftAction
+                        ) {
+                            Text(viewSettings.buttonLeftCaption)
+                        }
+                    }
+                    Button(
+                        onClick = onButtonRightChange
+                    ) {
+                        Text(viewSettings.buttonRightCaption)
+                    }
+                }
+
+                if (viewSettings.showAccountSettings) {
+                    SpacerMedium()
+                    AccountSettingsBox(
+                        crashlyticsEnabled = userInfoData.value?.crashlyticsEnabled ?: false,
+                        onCrashlyticsChange = onCrashlyticsChange,
+                        onResetPasswordClicked = onResetPasswordClicked
+                    )
+                }
             }
         }
     }

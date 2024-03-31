@@ -3,9 +3,8 @@ package com.pingwinek.jens.cookandbake.activities
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RestaurantMenu
@@ -17,14 +16,13 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksNavigationBar
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksTopAppBar
-import com.pingwinek.jens.cookandbake.theming.Margins
+import com.pingwinek.jens.cookandbake.lib.spacing
 import java.util.LinkedList
 
 /**
@@ -102,7 +100,12 @@ abstract class BaseActivity : AppCompatActivity() {
         )
 
         Scaffold(
-            contentWindowInsets = WindowInsets(Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM, Margins.MARGIN_LEFT_RIGHT, Margins.MARGIN_TOP_BOTTOM),
+            contentWindowInsets = WindowInsets(
+                MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+            ),
             topBar = {
                 PingwinekCooksTopAppBar(
                     title = title,
@@ -127,16 +130,17 @@ abstract class BaseActivity : AppCompatActivity() {
                 )
             }
         ) { paddingValues ->
-            Column(
-                modifier = Modifier.padding(paddingValues)
+            ScaffoldContent(paddingValues)
+/*            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
             ) {
-                ScaffoldContent()
-            }
+            }*/
         }
     }
 
     @Composable
-    protected abstract fun ScaffoldContent()
+    protected abstract fun ScaffoldContent(paddingValues: PaddingValues)
 
     protected fun configureTopBar(
         title: String,
