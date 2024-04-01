@@ -131,11 +131,6 @@ abstract class BaseActivity : AppCompatActivity() {
             }
         ) { paddingValues ->
             ScaffoldContent(paddingValues)
-/*            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-            ) {
-            }*/
         }
     }
 

@@ -3,7 +3,6 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -97,16 +95,6 @@ class SignInActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        authenticationViewModel = ViewModelProvider
-            .AndroidViewModelFactory
-            .getInstance(application)
-            .create(AuthenticationViewModel::class.java)
-
-        userInfoViewModel = ViewModelProvider
-            .AndroidViewModelFactory
-            .getInstance(application)
-            .create(UserInfoViewModel::class.java)
 
         // Define view settings
 
@@ -180,6 +168,16 @@ class SignInActivity : BaseActivity() {
         )
 
         // Observers
+
+        authenticationViewModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(AuthenticationViewModel::class.java)
+
+        userInfoViewModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(UserInfoViewModel::class.java)
 
         authenticationViewModel.authActionResult.observe(this) {
             when (authenticationViewModel.authActionResult.value) {
@@ -303,40 +301,7 @@ class SignInActivity : BaseActivity() {
                 null -> TODO()
             }
         }
-        /*
 
-                authenticationViewModel.linkMode.observe(this) {
-                    when (it) {
-                        AuthenticationViewModel.EmailLinkMode.RESET -> applyViewSettings(resetPasswordView)
-                        AuthenticationViewModel.EmailLinkMode.VERIFIED -> applyViewSettings(verifiedView)
-                        else -> {}
-                    }
-                }
-                authenticationViewModel.email.observe(this) {
-                    with(emailEditText.text) {
-                        clear()
-                        append(authenticationViewModel.email.value)
-                    }
-                }
-                authenticationViewModel.authStatus.observe(this) { authStatus ->
-                    when (authStatus) {
-                        AuthService.AuthStatus.SIGNED_OUT -> {
-                            if (currentView != resetPasswordView) resetView()
-                        }
-                        AuthService.AuthStatus.SIGNED_IN -> {
-                            if (currentView != resetPasswordView) applyViewSettings(unverifiedView)
-                        }
-                        AuthService.AuthStatus.VERIFIED -> {
-                            if (currentView != resetPasswordView) applyViewSettings(verifiedView)
-                        }
-                        else -> {}
-                    }
-                }
-                userInfoViewModel.userInfoData.observe(this) { userInfo ->
-                    acceptCrashlyticsView.isChecked = userInfo.crashlyticsEnabled
-                }
-
-         */
         configureTopBar(title = getString(R.string.profile))
 
         val optionItems = mutableListOf(
@@ -367,24 +332,7 @@ class SignInActivity : BaseActivity() {
                 )
             }
         )
-/*
-        if (authenticationViewModel.authStatus.value != AuthService.AuthStatus.SIGNED_OUT) {
-            optionItems.apply {
-                add(
-                    PingwinekCooksComposables.OptionItem(
-                        getString(R.string.logout),
-                        Icons.Filled.Person
-                    ) { authenticationViewModel.signOut() }
-                )
-                add(
-                    PingwinekCooksComposables.OptionItem(
-                        getString(R.string.delete),
-                        Icons.Filled.Person
-                    ) { authenticationViewModel.deleteAccount() }
-                )
-            }
-        }
-*/
+
         configureDropDown(*optionItems.toTypedArray())
 
         configureNavigationBar(
@@ -424,139 +372,17 @@ class SignInActivity : BaseActivity() {
 
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
-        Screen { viewSettings, toggleRegistrationView ->
-            val email = authenticationViewModel.email.observeAsState()
-            val newEmail = authenticationViewModel.newEmail.observeAsState()
-            val password = authenticationViewModel.password.observeAsState()
-            val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
 
-            val onResetPasswordClicked : () -> Unit = {
-                sendResetEmailAction(if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "")
-            }
-
-            val userInfoData = userInfoViewModel.userInfoData.observeAsState()
-            val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
-
-            val onButtonRightChange : () -> Unit = {
-                when (viewSettings.buttonRightAction) {
-                    ButtonRightAction.SIGNIN -> { signInAction() }
-                    ButtonRightAction.REGISTER -> { registerAction() }
-                    ButtonRightAction.RESETPASSWORD -> { resetPasswordAction() }
-                    ButtonRightAction.SENDVERIFICATION -> { sendEmailVerificationAction() }
-                    ButtonRightAction.CLOSE -> { closeAction() }
-                    else -> {}
-                }
-            }
-
-            val scrollState = rememberScrollState()
-
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .verticalScroll(scrollState)
-            ) {
-                SpacerMedium()
-
-                Row(
-                    //modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
-                ) {
-                    if (viewSettings.showOnlyLeftHeader) {
-                        ProfileHeader(
-                            text = viewSettings.headerLeftCaption
-                        )
-                    } else {
-                        SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
-                    }
-                }
-
-                SpacerMedium()
-
-                PingwinekCooksComposables.EditableText(
-                    text = if (viewSettings.editEmail) {
-                        newEmail.value ?: ""
-                    } else {
-                        getString(R.string.logged_in_as, email.value ?: "")
-                    },
-                    label = getString(R.string.email),
-                    editable = viewSettings.editEmail,
-                    onValueChange = { authenticationViewModel.onNewEmailChange(it) }
-                )
-
-                if (viewSettings.showPassword) {
-                    PingwinekCooksComposables.PasswordField(
-                        password = password.value ?: "",
-                        label = getString(R.string.password),
-                        onValueChange = { authenticationViewModel.onPasswordChange(it) },
-                    )
-                }
-
-                if (viewSettings.showPrivacy) {
-                    SpacerMedium()
-                    LabelledCheckBox(
-                        label = getString(R.string.declareAcceptanceOfDataprotection),
-                        checked = isPrivacyApproved.value ?: false,
-                        onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
-                    )
-                }
-
-                if (viewSettings.showCrashlytics) {
-                    SpacerSmall()
-                    LabelledCheckBox(
-                        label = getString(R.string.acceptCrashlytics),
-                        checked = userInfoData.value?.crashlyticsEnabled ?: false,
-                        onCheckedChange = onCrashlyticsChange
-                    )
-
-                }
-
-                SpacerMedium()
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    //    .padding(top = 30.dp, bottom = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    if (viewSettings.showLeftButton) {
-                        Button(
-                            colors = ButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
-                                disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            ),
-                            onClick = viewSettings.buttonLeftAction
-                        ) {
-                            Text(viewSettings.buttonLeftCaption)
-                        }
-                    }
-                    Button(
-                        onClick = onButtonRightChange
-                    ) {
-                        Text(viewSettings.buttonRightCaption)
-                    }
-                }
-
-                if (viewSettings.showAccountSettings) {
-                    SpacerMedium()
-                    AccountSettingsBox(
-                        crashlyticsEnabled = userInfoData.value?.crashlyticsEnabled ?: false,
-                        onCrashlyticsChange = onCrashlyticsChange,
-                        onResetPasswordClicked = onResetPasswordClicked
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun Screen(
-        content: @Composable (viewSettings: ViewSettings, toggleRegistration: () -> Unit) -> Unit
-    ) {
         val authStatus = authenticationViewModel.authStatus.observeAsState()
         val linkMode = authenticationViewModel.linkMode.observeAsState()
         val authResult = authenticationViewModel.authActionResult.observeAsState()
+        val email = authenticationViewModel.email.observeAsState()
+        val newEmail = authenticationViewModel.newEmail.observeAsState()
+        val password = authenticationViewModel.password.observeAsState()
+        val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
 
+        val userInfoData = userInfoViewModel.userInfoData.observeAsState()
+/*
         val asRegState : State<Boolean?> = remember { derivedStateOf {
             when (authResult.value) {
                 AuthService.AuthActionResult.DELETE_SUCCEEDED -> true
@@ -565,55 +391,128 @@ class SignInActivity : BaseActivity() {
                 else -> null
             }
         }}
+*/
+//        var asRegistration: Boolean by remember { mutableStateOf(true) }
+        var asRegistration: Boolean by remember { mutableStateOf(authResult.value == AuthService.AuthActionResult.DELETE_SUCCEEDED) }
 
-        var asRegistration: Boolean by remember { mutableStateOf(true) }
+        val viewSettings = determineViewSetting(authStatus, linkMode, asRegistration)
+
         val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
 
-        val viewSettings = when (authStatus.value) {
-            AuthService.AuthStatus.VERIFIED -> {
-                if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
-                    resetPasswordView
-                } else {
-                    verifiedView
-                    //signInView
-                    //registerView
-                }
-            }
+        val onResetPasswordClicked : () -> Unit = {
+            sendResetEmailAction(if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "")
+        }
 
-            AuthService.AuthStatus.SIGNED_IN -> {
-                when (linkMode.value) {
-                    AuthenticationViewModel.EmailLinkMode.RESET -> {
-                        resetPasswordView
-                    }
+        val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
 
-                    AuthenticationViewModel.EmailLinkMode.VERIFIED -> {
-                        verifiedView
-                    }
-
-                    else -> {
-                        unverifiedView
-                    }
-                }
-            }
-
-            AuthService.AuthStatus.SIGNED_OUT -> {
-                if (asRegistration) {
-                    registerView
-                } else {
-                    signInView
-                }
-            }
-
-            else -> {
-                ViewSettings()
+        val onButtonRightChange : () -> Unit = {
+            when (viewSettings.buttonRightAction) {
+                ButtonRightAction.SIGNIN -> { signInAction() }
+                ButtonRightAction.REGISTER -> { registerAction() }
+                ButtonRightAction.RESETPASSWORD -> { resetPasswordAction() }
+                ButtonRightAction.SENDVERIFICATION -> { sendEmailVerificationAction() }
+                ButtonRightAction.CLOSE -> { closeAction() }
             }
         }
 
-        Log.i(this::class.java.name, "viewSettings: $viewSettings")
+        val scrollState = rememberScrollState()
 
-        content(viewSettings, toggleRegistrationView)
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .verticalScroll(scrollState)
+        ) {
+
+            SpacerMedium()
+
+            Row {
+                if (viewSettings.showOnlyLeftHeader) {
+                    ProfileHeader(
+                        text = viewSettings.headerLeftCaption
+                    )
+                } else {
+                    SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
+                }
+            }
+
+            SpacerMedium()
+
+            PingwinekCooksComposables.EditableText(
+                text = if (viewSettings.editEmail) {
+                    newEmail.value ?: ""
+                } else {
+                    getString(R.string.logged_in_as, email.value ?: "")
+                },
+                label = getString(R.string.email),
+                editable = viewSettings.editEmail,
+                onValueChange = { authenticationViewModel.onNewEmailChange(it) }
+            )
+
+            if (viewSettings.showPassword) {
+                PingwinekCooksComposables.PasswordField(
+                    password = password.value ?: "",
+                    label = getString(R.string.password),
+                    onValueChange = { authenticationViewModel.onPasswordChange(it) },
+                )
+            }
+
+            if (viewSettings.showPrivacy) {
+                SpacerMedium()
+                LabelledCheckBox(
+                    label = getString(R.string.declareAcceptanceOfDataprotection),
+                    checked = isPrivacyApproved.value ?: false,
+                    onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
+                )
+            }
+
+            if (viewSettings.showCrashlytics) {
+                SpacerSmall()
+                LabelledCheckBox(
+                    label = getString(R.string.acceptCrashlytics),
+                    checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                    onCheckedChange = onCrashlyticsChange
+                )
+
+            }
+
+            SpacerMedium()
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                //    .padding(top = 30.dp, bottom = 20.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                if (viewSettings.showLeftButton) {
+                    Button(
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                        ),
+                        onClick = viewSettings.buttonLeftAction
+                    ) {
+                        Text(viewSettings.buttonLeftCaption)
+                    }
+                }
+                Button(
+                    onClick = onButtonRightChange
+                ) {
+                    Text(viewSettings.buttonRightCaption)
+                }
+            }
+
+            if (viewSettings.showAccountSettings) {
+                SpacerMedium()
+                AccountSettingsBox(
+                    crashlyticsEnabled = userInfoData.value?.crashlyticsEnabled ?: false,
+                    onCrashlyticsChange = onCrashlyticsChange,
+                    onResetPasswordClicked = onResetPasswordClicked
+                )
+            }
+        }
     }
-
 
     @Composable
     fun ProfileHeader(
@@ -723,6 +622,52 @@ class SignInActivity : BaseActivity() {
                     text = getString(R.string.delete),
                     style = contentTextStyle,
                 )
+            }
+        }
+    }
+
+    private fun determineViewSetting(
+        authStatus: State<AuthService.AuthStatus?>,
+        linkMode: State<AuthenticationViewModel.EmailLinkMode?>,
+        asRegistration: Boolean
+        ) : ViewSettings {
+        return when (authStatus.value) {
+            AuthService.AuthStatus.VERIFIED -> {
+                if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
+                    resetPasswordView
+                } else {
+                    verifiedView
+                    //signInView
+                    //registerView
+                }
+            }
+
+            AuthService.AuthStatus.SIGNED_IN -> {
+                when (linkMode.value) {
+                    AuthenticationViewModel.EmailLinkMode.RESET -> {
+                        resetPasswordView
+                    }
+
+                    AuthenticationViewModel.EmailLinkMode.VERIFIED -> {
+                        verifiedView
+                    }
+
+                    else -> {
+                        unverifiedView
+                    }
+                }
+            }
+
+            AuthService.AuthStatus.SIGNED_OUT -> {
+                if (asRegistration) {
+                    registerView
+                } else {
+                    signInView
+                }
+            }
+
+            else -> {
+                ViewSettings()
             }
         }
     }
