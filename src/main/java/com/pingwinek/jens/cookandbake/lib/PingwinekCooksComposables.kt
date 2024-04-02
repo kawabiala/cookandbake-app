@@ -237,18 +237,14 @@ class PingwinekCooksComposables {
             enabled: Boolean = true,
             menuItems: List<OptionItem>
         ) {
-            var selectedTab by remember {
-                mutableIntStateOf(selectedItem)
-            }
-            TabRow(selectedTab) {
+            TabRow(selectedItem) {
                 menuItems.forEachIndexed { index, item ->
                     Tab(
-                        selected = selectedTab == index,
+                        selected = selectedItem == index,
                         enabled = enabled,
                         text = { Text(item.label) },
                         icon = { Icon(item.icon, null) },
                         onClick = {
-                            selectedTab = index
                             item.onClick()
                         }
                     )

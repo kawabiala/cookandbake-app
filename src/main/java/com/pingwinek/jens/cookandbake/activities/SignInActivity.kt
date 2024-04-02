@@ -1,9 +1,9 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,7 +49,7 @@ import java.util.LinkedList
 class SignInActivity : BaseActivity() {
 
     private enum class ButtonRightAction {
-        CLOSE,
+        NOTHING,
         REGISTER,
         RESETPASSWORD,
         SENDVERIFICATION,
@@ -59,21 +60,20 @@ class SignInActivity : BaseActivity() {
      *
      */
     private data class ViewSettings(
-        val headerLeftCaption: String = "",
-        val headerRightCaption: String = "",
-        val buttonLeftCaption: String = "",
+        val caption: String? = null,
+        val showTabRow: Boolean = true,
+        val selectLeftTab: Boolean = true,
+//        val buttonLeftCaption: String = "",
         val buttonRightCaption: String = "",
-        val buttonLeftAction: () -> Unit = {},
-        val buttonRightAction: ButtonRightAction = ButtonRightAction.CLOSE,
-        val highlightLeftHeader: Boolean = true,
-        val showOnlyLeftHeader: Boolean = false,
+//        val buttonLeftAction: () -> Unit = {},
+        val buttonRightAction: ButtonRightAction = ButtonRightAction.NOTHING,
         val editEmail: Boolean = true,
         val showPassword: Boolean = true,
         val showCrashlytics: Boolean = true,
         val showAccountSettings: Boolean = false,
         val showReset: Boolean = false,
         val showPrivacy: Boolean = true,
-        val showLeftButton: Boolean = true,
+        val showRightButton: Boolean = true,
         val showLogout: Boolean = false,
         val showDelete: Boolean = false
     )
@@ -99,22 +99,18 @@ class SignInActivity : BaseActivity() {
         // Define view settings
 
         registerView = ViewSettings(
-            headerLeftCaption = getString(R.string.register),
-            headerRightCaption = getString(R.string.login),
-            buttonLeftCaption = getString(R.string.close),
+//            buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.register),
-            buttonLeftAction = closeAction,
+//            buttonLeftAction = closeAction,
             buttonRightAction = ButtonRightAction.REGISTER
         )
 
         signInView = ViewSettings(
-            headerLeftCaption = getString(R.string.register),
-            headerRightCaption = getString(R.string.login),
-            buttonLeftCaption = getString(R.string.close),
+            selectLeftTab = false,
+//            buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.login),
-            buttonLeftAction = closeAction,
+//            buttonLeftAction = closeAction,
             buttonRightAction = ButtonRightAction.SIGNIN,
-            highlightLeftHeader = false,
             showCrashlytics = false,
             showReset = true,
             showPrivacy = false,
@@ -123,25 +119,25 @@ class SignInActivity : BaseActivity() {
         )
 
         resetPasswordView = ViewSettings(
-            headerLeftCaption = getString(R.string.setPassword),
-            buttonLeftCaption = getString(R.string.close),
+            caption = getString(R.string.setPassword),
+            showTabRow = false,
+//            buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.setPassword),
-            buttonLeftAction = closeAction,
+//            buttonLeftAction = closeAction,
             buttonRightAction = ButtonRightAction.RESETPASSWORD,
             editEmail = false,
-            showOnlyLeftHeader = true,
             showReset = true,
             showCrashlytics = false,
             showPrivacy = false
         )
 
         unverifiedView = ViewSettings(
-            headerLeftCaption = getString(R.string.registrationIncomplete),
-            buttonLeftCaption =  getString(R.string.close),
+            caption = getString(R.string.registrationIncomplete),
+            showTabRow = false,
+//            buttonLeftCaption =  getString(R.string.close),
             buttonRightCaption = getString(R.string.sendVerificationEmail),
-            buttonLeftAction = closeAction,
+//            buttonLeftAction = closeAction,
             buttonRightAction = ButtonRightAction.SENDVERIFICATION,
-            showOnlyLeftHeader = true,
             editEmail = false,
             showPassword = false,
             showCrashlytics = false,
@@ -152,17 +148,15 @@ class SignInActivity : BaseActivity() {
         )
 
         verifiedView = ViewSettings(
-            headerLeftCaption = getString(R.string.profile),
-            buttonRightCaption = getString(R.string.close),
-            buttonRightAction = ButtonRightAction.CLOSE,
-            showOnlyLeftHeader = true,
+            caption = getString(R.string.profile),
+            showTabRow = false,
             editEmail = false,
             showPassword = false,
             showAccountSettings = true,
             showCrashlytics = false,
             showReset = true,
             showPrivacy = false,
-            showLeftButton = false,
+            showRightButton = false,
             showLogout = true,
             showDelete = true
         )
@@ -382,17 +376,7 @@ class SignInActivity : BaseActivity() {
         val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
 
         val userInfoData = userInfoViewModel.userInfoData.observeAsState()
-/*
-        val asRegState : State<Boolean?> = remember { derivedStateOf {
-            when (authResult.value) {
-                AuthService.AuthActionResult.DELETE_SUCCEEDED -> true
-                AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> false
-                AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> false
-                else -> null
-            }
-        }}
-*/
-//        var asRegistration: Boolean by remember { mutableStateOf(true) }
+
         var asRegistration: Boolean by remember { mutableStateOf(authResult.value == AuthService.AuthActionResult.DELETE_SUCCEEDED) }
 
         val viewSettings = determineViewSetting(authStatus, linkMode, asRegistration)
@@ -411,7 +395,7 @@ class SignInActivity : BaseActivity() {
                 ButtonRightAction.REGISTER -> { registerAction() }
                 ButtonRightAction.RESETPASSWORD -> { resetPasswordAction() }
                 ButtonRightAction.SENDVERIFICATION -> { sendEmailVerificationAction() }
-                ButtonRightAction.CLOSE -> { closeAction() }
+                ButtonRightAction.NOTHING -> {}
             }
         }
 
@@ -426,12 +410,14 @@ class SignInActivity : BaseActivity() {
             SpacerMedium()
 
             Row {
-                if (viewSettings.showOnlyLeftHeader) {
+                if (!viewSettings.caption.isNullOrEmpty()) {
                     ProfileHeader(
-                        text = viewSettings.headerLeftCaption
+                        text = viewSettings.caption
                     )
-                } else {
-                    SignInTabRow(viewSettings.headerLeftCaption, viewSettings.headerRightCaption, viewSettings.highlightLeftHeader, toggleRegistrationView)
+                }
+
+                if (viewSettings.showTabRow)  {
+                    SignInTabRow(viewSettings.selectLeftTab, toggleRegistrationView)
                 }
             }
 
@@ -480,26 +466,32 @@ class SignInActivity : BaseActivity() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                //    .padding(top = 30.dp, bottom = 20.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (viewSettings.showLeftButton) {
-                    Button(
-                        colors = ButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                        ),
-                        onClick = viewSettings.buttonLeftAction
-                    ) {
-                        Text(viewSettings.buttonLeftCaption)
-                    }
+                val buttonLeftColors = if (viewSettings.showRightButton) {
+                    ButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSecondary,
+                        disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                    )
+                } else {
+                    ButtonDefaults.buttonColors()
                 }
+
                 Button(
-                    onClick = onButtonRightChange
+                    colors = buttonLeftColors,
+                    onClick = closeAction
                 ) {
-                    Text(viewSettings.buttonRightCaption)
+                    Text(getString(R.string.close))
+                }
+
+                if (viewSettings.showRightButton) {
+                    Button(
+                        onClick = onButtonRightChange
+                    ) {
+                        Text(viewSettings.buttonRightCaption)
+                    }
                 }
             }
 
@@ -529,8 +521,6 @@ class SignInActivity : BaseActivity() {
 
     @Composable
     fun SignInTabRow(
-        leftCaption: String,
-        rightCaption: String,
         highlightLeft: Boolean,
         toggleItem: () -> Unit
     ) {
@@ -539,16 +529,12 @@ class SignInActivity : BaseActivity() {
             menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        leftCaption, Icons.Filled.Person
-                    ) {
-                        if (!highlightLeft) toggleItem()
-                    })
+                        getString(R.string.register), Icons.Filled.Person, toggleItem
+                    ))
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        rightCaption, Icons.Filled.Person
-                    ) {
-                        if (highlightLeft) toggleItem()
-                    })
+                        getString(R.string.login), Icons.Filled.Person, toggleItem
+                    ))
             }
         )
     }
