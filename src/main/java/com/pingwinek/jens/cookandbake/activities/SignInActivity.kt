@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.clickable
@@ -17,9 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -173,7 +176,7 @@ class SignInActivity : BaseActivity() {
             .getInstance(application)
             .create(UserInfoViewModel::class.java)
 
-        authenticationViewModel.authActionResult.observe(this) {
+/*        authenticationViewModel.authActionResult.observe(this) {
             when (authenticationViewModel.authActionResult.value) {
                 AuthService.AuthActionResult.DELETE_SUCCEEDED -> {
                     authMessage(
@@ -294,7 +297,7 @@ class SignInActivity : BaseActivity() {
                 }
                 null -> TODO()
             }
-        }
+        }*/
 
         configureTopBar(title = getString(R.string.profile))
 
@@ -364,6 +367,7 @@ class SignInActivity : BaseActivity() {
         super.BasePreview()
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
 
@@ -380,6 +384,12 @@ class SignInActivity : BaseActivity() {
         var asRegistration: Boolean by remember { mutableStateOf(authResult.value == AuthService.AuthActionResult.DELETE_SUCCEEDED) }
 
         val viewSettings = determineViewSetting(authStatus, linkMode, asRegistration)
+
+        var message: String? by remember(authResult.value) {
+            mutableStateOf(
+                if (authResult.value != null) authResult.value.toString() else null
+            )
+        }
 
         val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
 
@@ -399,6 +409,10 @@ class SignInActivity : BaseActivity() {
             }
         }
 
+        val onDialogDismissed : () -> Unit = {
+            message = null
+        }
+
         val scrollState = rememberScrollState()
 
         Column(
@@ -408,6 +422,13 @@ class SignInActivity : BaseActivity() {
         ) {
 
             SpacerMedium()
+
+            if (!message.isNullOrEmpty()) {
+                Log.i(this::class.java.name, "message: $message ${message.isNullOrEmpty()}")
+                BasicAlertDialog(onDismissRequest = onDialogDismissed) {
+                    Text(message.toString())
+                }
+            }
 
             Row {
                 if (!viewSettings.caption.isNullOrEmpty()) {
