@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
@@ -45,6 +47,7 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.LabelledCheckBox
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerMedium
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerSmall
+import com.pingwinek.jens.cookandbake.lib.spacing
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 import java.util.LinkedList
@@ -371,30 +374,32 @@ class SignInActivity : BaseActivity() {
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
 
-        val authStatus = authenticationViewModel.authStatus.observeAsState()
-        val linkMode = authenticationViewModel.linkMode.observeAsState()
-        val authResult = authenticationViewModel.authActionResult.observeAsState()
-        val email = authenticationViewModel.email.observeAsState()
-        val newEmail = authenticationViewModel.newEmail.observeAsState()
-        val password = authenticationViewModel.password.observeAsState()
-        val isPrivacyApproved = authenticationViewModel.isPrivacyApproved.observeAsState()
+        val authStatus by authenticationViewModel.authStatus.observeAsState()
+        val linkMode by authenticationViewModel.linkMode.observeAsState()
+        val authResult by authenticationViewModel.authActionResult.observeAsState()
+        val email by authenticationViewModel.email.observeAsState()
+        val newEmail by authenticationViewModel.newEmail.observeAsState()
+        val password by authenticationViewModel.password.observeAsState()
+        val isPrivacyApproved by authenticationViewModel.isPrivacyApproved.observeAsState()
 
-        val userInfoData = userInfoViewModel.userInfoData.observeAsState()
+        val userInfoData by userInfoViewModel.userInfoData.observeAsState()
 
-        var asRegistration: Boolean by remember { mutableStateOf(authResult.value == AuthService.AuthActionResult.DELETE_SUCCEEDED) }
+        var asRegistration: Boolean by remember { mutableStateOf(authResult == AuthService.AuthActionResult.DELETE_SUCCEEDED) }
 
-        val viewSettings = determineViewSetting(authStatus, linkMode, asRegistration)
+        val viewSettings by remember(authStatus, linkMode, asRegistration) {
+            derivedStateOf {
+                determineViewSetting(authStatus, linkMode, asRegistration)
+            }
+        }
 
-        var message: String? by remember(authResult.value) {
-            mutableStateOf(
-                if (authResult.value != null) authResult.value.toString() else null
-            )
+        var message: String? by remember(authResult) {
+            mutableStateOf(getMessage(authResult))
         }
 
         val toggleRegistrationView : () -> Unit = { asRegistration = !asRegistration }
 
         val onResetPasswordClicked : () -> Unit = {
-            sendResetEmailAction(if (viewSettings.editEmail) newEmail.value ?: "" else email.value ?: "")
+            sendResetEmailAction(if (viewSettings.editEmail) newEmail ?: "" else email ?: "")
         }
 
         val onCrashlyticsChange : (checked : Boolean) -> Unit = { checked -> userInfoViewModel.saveUserInfo(checked) }
@@ -425,7 +430,13 @@ class SignInActivity : BaseActivity() {
 
             if (!message.isNullOrEmpty()) {
                 Log.i(this::class.java.name, "message: $message ${message.isNullOrEmpty()}")
-                BasicAlertDialog(onDismissRequest = onDialogDismissed) {
+                BasicAlertDialog(
+                    onDismissRequest = onDialogDismissed,
+                    properties = DialogProperties(dismissOnBackPress = true),
+                    modifier = Modifier
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .padding(all = MaterialTheme.spacing.standardPadding)
+                ) {
                     Text(message.toString())
                 }
             }
@@ -433,7 +444,7 @@ class SignInActivity : BaseActivity() {
             Row {
                 if (!viewSettings.caption.isNullOrEmpty()) {
                     ProfileHeader(
-                        text = viewSettings.caption
+                        text = viewSettings.caption!!
                     )
                 }
 
@@ -446,9 +457,9 @@ class SignInActivity : BaseActivity() {
 
             PingwinekCooksComposables.EditableText(
                 text = if (viewSettings.editEmail) {
-                    newEmail.value ?: ""
+                    newEmail ?: ""
                 } else {
-                    getString(R.string.logged_in_as, email.value ?: "")
+                    getString(R.string.logged_in_as, email ?: "")
                 },
                 label = getString(R.string.email),
                 editable = viewSettings.editEmail,
@@ -457,7 +468,7 @@ class SignInActivity : BaseActivity() {
 
             if (viewSettings.showPassword) {
                 PingwinekCooksComposables.PasswordField(
-                    password = password.value ?: "",
+                    password = password ?: "",
                     label = getString(R.string.password),
                     onValueChange = { authenticationViewModel.onPasswordChange(it) },
                 )
@@ -467,7 +478,7 @@ class SignInActivity : BaseActivity() {
                 SpacerMedium()
                 LabelledCheckBox(
                     label = getString(R.string.declareAcceptanceOfDataprotection),
-                    checked = isPrivacyApproved.value ?: false,
+                    checked = isPrivacyApproved ?: false,
                     onCheckedChange = { authenticationViewModel.onIsPrivacyApprovedChange(it) }
                 )
             }
@@ -476,7 +487,7 @@ class SignInActivity : BaseActivity() {
                 SpacerSmall()
                 LabelledCheckBox(
                     label = getString(R.string.acceptCrashlytics),
-                    checked = userInfoData.value?.crashlyticsEnabled ?: false,
+                    checked = userInfoData?.crashlyticsEnabled ?: false,
                     onCheckedChange = onCrashlyticsChange
                 )
 
@@ -519,7 +530,7 @@ class SignInActivity : BaseActivity() {
             if (viewSettings.showAccountSettings) {
                 SpacerMedium()
                 AccountSettingsBox(
-                    crashlyticsEnabled = userInfoData.value?.crashlyticsEnabled ?: false,
+                    crashlyticsEnabled = userInfoData?.crashlyticsEnabled ?: false,
                     onCrashlyticsChange = onCrashlyticsChange,
                     onResetPasswordClicked = onResetPasswordClicked
                 )
@@ -634,13 +645,13 @@ class SignInActivity : BaseActivity() {
     }
 
     private fun determineViewSetting(
-        authStatus: State<AuthService.AuthStatus?>,
-        linkMode: State<AuthenticationViewModel.EmailLinkMode?>,
+        authStatus: AuthService.AuthStatus?,
+        linkMode: AuthenticationViewModel.EmailLinkMode?,
         asRegistration: Boolean
         ) : ViewSettings {
-        return when (authStatus.value) {
+        return when (authStatus) {
             AuthService.AuthStatus.VERIFIED -> {
-                if (linkMode.value == AuthenticationViewModel.EmailLinkMode.RESET) {
+                if (linkMode == AuthenticationViewModel.EmailLinkMode.RESET) {
                     resetPasswordView
                 } else {
                     verifiedView
@@ -650,7 +661,7 @@ class SignInActivity : BaseActivity() {
             }
 
             AuthService.AuthStatus.SIGNED_IN -> {
-                when (linkMode.value) {
+                when (linkMode) {
                     AuthenticationViewModel.EmailLinkMode.RESET -> {
                         resetPasswordView
                     }
@@ -676,6 +687,82 @@ class SignInActivity : BaseActivity() {
             else -> {
                 ViewSettings()
             }
+        }
+    }
+
+    private fun getMessage(authResult: AuthService.AuthActionResult?) : String? {
+        return when (authResult) {
+            AuthService.AuthActionResult.DELETE_SUCCEEDED -> {
+                getString(R.string.accountDeleted)
+            }
+            AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
+                getString(R.string.accountCreated)
+            }
+            AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> {
+                getString(R.string.PasswordChanged)
+            }
+            AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> {
+                getString(R.string.lostPasswordSentLong)
+            }
+            AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> {
+                getString(R.string.loggedIn)
+            }
+            AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> {
+                getString(R.string.loggedOut)
+            }
+            AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> {
+                getString(R.string.confirmationSucceeded)
+            }
+            AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> {
+                getString(R.string.confirmationSent)
+            }
+            AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> {
+                getString(R.string.dataProtectionNotChecked)
+            }
+            AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {
+                getString(R.string.deleteFailed)
+            }
+            AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> {
+                getString(R.string.emailMalformatted)
+            }
+            AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {
+                getString(R.string.noSignedInUser)
+            }
+            AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> {
+                getString(
+                    R.string.passwordMalformatted,
+                    AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
+                )
+            }
+            AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> {
+                getString(
+                    R.string.passwordMalformatted,
+                    AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
+                )
+            }
+            AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON -> {
+                getString(R.string.registrationFailed)
+            }
+            AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON -> {
+                getString(R.string.resetFailed)
+            }
+            AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> {
+                getString(R.string.sendResetFailed)
+            }
+            AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> {
+                getString(R.string.loginFailed)
+            }
+            AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> {
+                getString(R.string.logoutFailed)
+            }
+            AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> TODO()
+            AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> {
+                getString(R.string.verificationFailed)
+            }
+            AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> {
+                getString(R.string.sendVerificationFailed)
+            }
+            else -> null
         }
     }
 
