@@ -41,7 +41,6 @@ class RecipeListingActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //addContentView(R.layout.activity_recipe_listing)
 
         auth = Firebase.auth
 

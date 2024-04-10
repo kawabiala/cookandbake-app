@@ -3,8 +3,6 @@ package com.pingwinek.jens.cookandbake.activities
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -179,128 +177,10 @@ class SignInActivity : BaseActivity() {
             .getInstance(application)
             .create(UserInfoViewModel::class.java)
 
-/*        authenticationViewModel.authActionResult.observe(this) {
-            when (authenticationViewModel.authActionResult.value) {
-                AuthService.AuthActionResult.DELETE_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.accountDeleted)) {
-                        asRegistrationView = true
-                        //resetView()
-                    }
-                }
-                AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
-                    toast(getString(R.string.accountCreated))
-                }
-                AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.PasswordChanged)) {
-                        asRegistrationView = false
-                        //applyViewSettings(signInView) // resetView won't work in this case
-                    }
-                }
-                AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.lostPasswordSentLong))
-                }
-                AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.loggedIn),
-                        closeAction)
-                }
-                AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.loggedOut)) {
-                        asRegistrationView = false
-                        //resetView()
-                    }
-                }
-                AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.confirmationSucceeded)) {
-                        closeAction
-                    }
-                }
-                AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> {
-                    authMessage(
-                        getString(R.string.confirmationSent),
-                        closeAction)
-                }
-                AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> {
-                    errorMessage(
-                        getString(R.string.dataProtectionNotChecked)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.deleteFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> {
-                    errorMessage(
-                        getString(R.string.emailMalformatted)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {
-                    errorMessage(
-                        getString(R.string.noSignedInUser)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> {
-                    errorMessage(
-                        getString(
-                            R.string.passwordMalformatted,
-                            AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
-                        )
-                    )
-                }
-                AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> {
-                    errorMessage(
-                        getString(
-                            R.string.passwordMalformatted,
-                            AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
-                        )
-                    )
-                }
-                AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.registrationFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.resetFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.sendResetFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.loginFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.logoutFailed)
-                    )
-                }
-                AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> TODO()
-                AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.verificationFailed)) {
-                        //applyViewSettings(unverifiedView)
-                    }
-                }
-                AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> {
-                    errorMessage(
-                        getString(R.string.sendVerificationFailed)
-                    )
-                }
-                null -> TODO()
-            }
-        }*/
+        authenticationViewModel.authStatus.observe(this) {
+            authenticationViewModel.retrieveEmail()
+            userInfoViewModel.loadData()
+        }
 
         configureTopBar(title = getString(R.string.profile))
 
@@ -374,6 +254,8 @@ class SignInActivity : BaseActivity() {
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
 
+        Log.i(this::class.java.name, "recompose scaffold")
+
         val authStatus by authenticationViewModel.authStatus.observeAsState()
         val linkMode by authenticationViewModel.linkMode.observeAsState()
         val authResult by authenticationViewModel.authActionResult.observeAsState()
@@ -392,7 +274,7 @@ class SignInActivity : BaseActivity() {
             }
         }
 
-        var message: String? by remember(authResult) {
+        val message: String? by remember(authResult) {
             mutableStateOf(getMessage(authResult))
         }
 
@@ -415,7 +297,7 @@ class SignInActivity : BaseActivity() {
         }
 
         val onDialogDismissed : () -> Unit = {
-            message = null
+            authenticationViewModel.invalidateResult()
         }
 
         val scrollState = rememberScrollState()
@@ -459,6 +341,7 @@ class SignInActivity : BaseActivity() {
                 text = if (viewSettings.editEmail) {
                     newEmail ?: ""
                 } else {
+                    Log.i(this::class.java.name, "email: ${authenticationViewModel.email.value}")
                     getString(R.string.logged_in_as, email ?: "")
                 },
                 label = getString(R.string.email),
@@ -690,32 +573,17 @@ class SignInActivity : BaseActivity() {
         }
     }
 
+
     private fun getMessage(authResult: AuthService.AuthActionResult?) : String? {
         return when (authResult) {
-            AuthService.AuthActionResult.DELETE_SUCCEEDED -> {
-                getString(R.string.accountDeleted)
-            }
-            AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> {
-                getString(R.string.accountCreated)
-            }
-            AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> {
-                getString(R.string.PasswordChanged)
-            }
-            AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> {
-                getString(R.string.lostPasswordSentLong)
-            }
-            AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> {
-                getString(R.string.loggedIn)
-            }
-            AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> {
-                getString(R.string.loggedOut)
-            }
-            AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> {
-                getString(R.string.confirmationSucceeded)
-            }
-            AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> {
-                getString(R.string.confirmationSent)
-            }
+            AuthService.AuthActionResult.DELETE_SUCCEEDED -> getString(R.string.accountDeleted)
+            AuthService.AuthActionResult.REGISTRATION_SUCCEEDED -> getString(R.string.accountCreated)
+            AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> getString(R.string.PasswordChanged)
+            AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> getString(R.string.lostPasswordSentLong)
+            AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> getString(R.string.loggedIn)
+            AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> getString(R.string.loggedOut)
+            AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> getString(R.string.confirmationSucceeded)
+            AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> getString(R.string.confirmationSent)
             AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> {
                 getString(R.string.dataProtectionNotChecked)
             }
@@ -775,10 +643,6 @@ class SignInActivity : BaseActivity() {
         finish()
     }
 
-    private val crashlyticsAction: () -> Unit = {
-//        userInfoViewModel.saveUserInfo(acceptCrashlyticsView.isChecked)
-    }
-
     private val deleteAction: () -> Unit = {
         authenticationViewModel.deleteAccount()
     }
@@ -797,8 +661,6 @@ class SignInActivity : BaseActivity() {
 
     private val sendResetEmailAction: (email: String) -> Unit = { email ->
         authenticationViewModel.sendPasswordResetEmail(email)
-//        val email = emailEditText.text.toString()
-//        authenticationViewModel.sendPasswordResetEmail(email)
     }
 
     private val signInAction: () -> Unit = {
@@ -809,37 +671,4 @@ class SignInActivity : BaseActivity() {
         authenticationViewModel.signOut()
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Other functions
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private fun alert(title: String?, message: String, action: (() -> Unit)?) {
-        AlertDialog.Builder(this).apply {
-            setMessage(message)
-            title?.let { setTitle(it) }
-            setPositiveButton(getString(R.string.ok)) { _, _ ->
-                action?.let { it() }
-            }.create().show()
-        }
-    }
-
-    private fun authMessage(message: String) {
-        authMessage(message) {}
-    }
-
-    private fun authMessage(message: String, action: () -> Unit) {
-        alert(getString(R.string.authenticationMessage), message, action)
-    }
-
-    private fun errorMessage(message: String) {
-        errorMessage(message) {}
-    }
-
-    private fun errorMessage(message: String, action: () -> Unit) {
-        alert(getString(R.string.errorMessage), message, action)
-    }
-
-    private fun toast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    }
 }

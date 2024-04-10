@@ -101,6 +101,10 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun invalidateResult() {
+        authActionResult.postValue(AuthService.AuthActionResult.NOTHING)
+    }
+
 //    fun register(email: String, password: String, dataPolicyChecked: Boolean) {
     fun register() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -153,7 +157,6 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-//    fun signIn(email: String, password: String) {
     fun signIn() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = FirebaseAuthService.signIn(
