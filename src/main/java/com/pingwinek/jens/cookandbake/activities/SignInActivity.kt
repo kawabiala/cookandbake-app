@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -254,8 +253,6 @@ class SignInActivity : BaseActivity() {
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
 
-        Log.i(this::class.java.name, "recompose scaffold")
-
         val authStatus by authenticationViewModel.authStatus.observeAsState()
         val linkMode by authenticationViewModel.linkMode.observeAsState()
         val authResult by authenticationViewModel.authActionResult.observeAsState()
@@ -311,7 +308,6 @@ class SignInActivity : BaseActivity() {
             SpacerMedium()
 
             if (!message.isNullOrEmpty()) {
-                Log.i(this::class.java.name, "message: $message ${message.isNullOrEmpty()}")
                 BasicAlertDialog(
                     onDismissRequest = onDialogDismissed,
                     properties = DialogProperties(dismissOnBackPress = true),
@@ -341,7 +337,6 @@ class SignInActivity : BaseActivity() {
                 text = if (viewSettings.editEmail) {
                     newEmail ?: ""
                 } else {
-                    Log.i(this::class.java.name, "email: ${authenticationViewModel.email.value}")
                     getString(R.string.logged_in_as, email ?: "")
                 },
                 label = getString(R.string.email),

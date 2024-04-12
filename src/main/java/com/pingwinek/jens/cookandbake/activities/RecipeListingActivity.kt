@@ -7,7 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -16,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -161,9 +166,17 @@ class RecipeListingActivity : BaseActivity() {
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
         val recipes = recipeListData.observeAsState()
-        recipes.value?.forEach { recipe: Recipe ->
-            key(recipe.id) {
-                Text(recipe.title)
+        val scrollState = rememberScrollState()
+
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .verticalScroll(scrollState)
+        ) {
+            recipes.value?.forEach { recipe: Recipe ->
+                key(recipe.id) {
+                    Text(recipe.title)
+                }
             }
         }
     }

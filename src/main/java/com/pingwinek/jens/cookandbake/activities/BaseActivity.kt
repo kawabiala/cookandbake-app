@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +17,13 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.MutableLiveData
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
@@ -42,9 +49,12 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private var dropDownOptions = mutableListOf<PingwinekCooksComposables.OptionItem>()
 
-    private var selectedNavigationBarItem: Int = 0
+    private var selectedNavigationBarItem = 0
+    private var selectedNavigationBarItemAsLiveData = MutableLiveData(selectedNavigationBarItem)
     private var navigationBarEnabled = true
     private var navigationBarItems = listOf<PingwinekCooksComposables.OptionItem>()
+
+    private val isPaused = MutableLiveData(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +64,18 @@ abstract class BaseActivity : AppCompatActivity() {
                 BaseScaffold()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isPaused.value = false
+//        Log.i(this::class.java.name, "resume: $selectedNavigationBarItem")
+        selectedNavigationBarItemAsLiveData.value = selectedNavigationBarItem
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isPaused.value = true
     }
 
     @Composable
@@ -66,6 +88,18 @@ abstract class BaseActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BaseScaffold() {
+
+        val selectedNaviItem by selectedNavigationBarItemAsLiveData.observeAsState()
+
+        var selectedNavigationItem: Int by remember(selectedNaviItem) {
+            mutableIntStateOf(selectedNaviItem ?: selectedNavigationBarItem)
+        }
+        val onSelectedNavigationItemChange : (Int) -> Unit = { item ->
+            Log.i(this::class.java.name, "selectedItem change: $item")
+            selectedNavigationItem = item
+        }
+
+        Log.i(this::class.java.name, "render BaseScaffold: $selectedNavigationItem")
 
         val topAppBarColors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -122,11 +156,12 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             bottomBar = {
                 PingwinekCooksNavigationBar(
-                    selectedItem = selectedNavigationBarItem,
+                    selectedItem = selectedNavigationItem,
                     enabled = navigationBarEnabled,
                     navigationBarColor = navigationBarColor,
                     navigationBarItemColors = navigationBarItemColors,
-                    navigationBarItems
+                    menuItems = navigationBarItems,
+                    onSelectedItemChange = onSelectedNavigationItemChange
                 )
             }
         ) { paddingValues ->

@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib
 
+import android.util.Log
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +46,6 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -207,11 +207,13 @@ class PingwinekCooksComposables {
             enabled: Boolean = true,
             navigationBarColor: Color = NavigationBarDefaults.containerColor,
             navigationBarItemColors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
-            menuItems: List<OptionItem>
+            menuItems: List<OptionItem>,
+            onSelectedItemChange: (Int) -> Unit
         ) {
-            var selectedMenuItem by remember {
+/*            var selectedMenuItem by remember(selectedItem) {
                 mutableIntStateOf(selectedItem)
-            }
+            }*/
+            Log.i(this::class.java.name, "NaviBar: $selectedItem")
             NavigationBar(
                 containerColor = navigationBarColor
             ) {
@@ -220,10 +222,10 @@ class PingwinekCooksComposables {
                         colors = navigationBarItemColors,
                         icon =  { Icon(item.icon, null) } ,
                         label = { Text(item.label) },
-                        selected = selectedMenuItem == index && enabled,
+                        selected = selectedItem == index && enabled,
                         enabled = enabled,
                         onClick = {
-                            selectedMenuItem = index
+                            onSelectedItemChange(index)
                             item.onClick()
                         }
                     )
