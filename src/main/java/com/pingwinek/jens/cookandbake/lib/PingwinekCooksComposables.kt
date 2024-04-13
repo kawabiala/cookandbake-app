@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.lib
 
-import android.util.Log
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -210,10 +209,6 @@ class PingwinekCooksComposables {
             menuItems: List<OptionItem>,
             onSelectedItemChange: (Int) -> Unit
         ) {
-/*            var selectedMenuItem by remember(selectedItem) {
-                mutableIntStateOf(selectedItem)
-            }*/
-            Log.i(this::class.java.name, "NaviBar: $selectedItem")
             NavigationBar(
                 containerColor = navigationBarColor
             ) {

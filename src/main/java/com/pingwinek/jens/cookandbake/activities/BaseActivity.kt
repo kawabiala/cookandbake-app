@@ -19,9 +19,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.MutableLiveData
 import com.pingwinek.jens.cookandbake.R
@@ -54,8 +51,6 @@ abstract class BaseActivity : AppCompatActivity() {
     private var navigationBarEnabled = true
     private var navigationBarItems = listOf<PingwinekCooksComposables.OptionItem>()
 
-    private val isPaused = MutableLiveData(true)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,14 +63,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        isPaused.value = false
-//        Log.i(this::class.java.name, "resume: $selectedNavigationBarItem")
         selectedNavigationBarItemAsLiveData.value = selectedNavigationBarItem
-    }
-
-    override fun onPause() {
-        super.onPause()
-        isPaused.value = true
     }
 
     @Composable
@@ -91,15 +79,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
         val selectedNaviItem by selectedNavigationBarItemAsLiveData.observeAsState()
 
-        var selectedNavigationItem: Int by remember(selectedNaviItem) {
-            mutableIntStateOf(selectedNaviItem ?: selectedNavigationBarItem)
-        }
         val onSelectedNavigationItemChange : (Int) -> Unit = { item ->
             Log.i(this::class.java.name, "selectedItem change: $item")
-            selectedNavigationItem = item
+            selectedNavigationBarItemAsLiveData.value = item
         }
-
-        Log.i(this::class.java.name, "render BaseScaffold: $selectedNavigationItem")
 
         val topAppBarColors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -156,7 +139,7 @@ abstract class BaseActivity : AppCompatActivity() {
             },
             bottomBar = {
                 PingwinekCooksNavigationBar(
-                    selectedItem = selectedNavigationItem,
+                    selectedItem = selectedNaviItem ?: 0,
                     enabled = navigationBarEnabled,
                     navigationBarColor = navigationBarColor,
                     navigationBarItemColors = navigationBarItemColors,
