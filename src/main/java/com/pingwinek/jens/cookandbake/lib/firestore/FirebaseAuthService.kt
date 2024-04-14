@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import java.util.LinkedList
@@ -13,6 +14,18 @@ import java.util.LinkedList
  * TODO Log errors
  */
 class FirebaseAuthService {
+    enum class ActionCodeOperation {
+        RESET,
+        VERIFY,
+        UNKNOWN,
+        CODE_INVALID
+    }
+
+    data class CheckActionCodeResult(
+        val isSuccess: Boolean,
+        val operation: ActionCodeOperation,
+        val email: String?
+    )
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +105,11 @@ class FirebaseAuthService {
                 }
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
                 Log.e(this::class.java.name, exception.toString())
-                CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+                if (exception.getUnderlyingException() is FirebaseAuthActionCodeException) {
+                    CheckActionCodeResult(false, ActionCodeOperation.CODE_INVALID, null)
+                } else {
+                    CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
+                }
             } catch (exception: Exception) {
                 Log.e(this::class.java.name, exception.toString())
                 CheckActionCodeResult(false, ActionCodeOperation.UNKNOWN, null)
@@ -313,17 +330,5 @@ class FirebaseAuthService {
             return AuthService.PasswordPolicy.matches(password)
         }
     }
-
-    enum class ActionCodeOperation {
-        RESET,
-        VERIFY,
-        UNKNOWN
-    }
-
-    data class CheckActionCodeResult(
-        val isSuccess: Boolean,
-        val operation: ActionCodeOperation,
-        val email: String?
-    )
 
 }

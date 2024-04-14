@@ -345,6 +345,10 @@ class SignInActivity : BaseActivity() {
             )
 
             if (viewSettings.showPassword) {
+                if (!viewSettings.editEmail) {
+                    SpacerSmall()
+                }
+
                 PingwinekCooksComposables.PasswordField(
                     password = password ?: "",
                     label = getString(R.string.password),
@@ -576,55 +580,30 @@ class SignInActivity : BaseActivity() {
             AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED -> getString(R.string.PasswordChanged)
             AuthService.AuthActionResult.RESET_PASSWORD_SEND_SUCCEEDED -> getString(R.string.lostPasswordSentLong)
             AuthService.AuthActionResult.SIGNIN_SUCCEEDED -> getString(R.string.loggedIn)
-            AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> getString(R.string.loggedOut)
+//            AuthService.AuthActionResult.SIGNOUT_SUCCEEDED -> getString(R.string.loggedOut)
             AuthService.AuthActionResult.VERIFICATION_SUCCEEDED -> getString(R.string.confirmationSucceeded)
             AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> getString(R.string.confirmationSent)
-            AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> {
-                getString(R.string.dataProtectionNotChecked)
-            }
-            AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> {
-                getString(R.string.deleteFailed)
-            }
-            AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> {
-                getString(R.string.emailMalformatted)
-            }
-            AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> {
-                getString(R.string.noSignedInUser)
-            }
-            AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> {
-                getString(
+            AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> getString(R.string.dataProtectionNotChecked)
+            AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> getString(R.string.deleteFailed)
+            AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> getString(R.string.emailMalformatted)
+            AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> getString(R.string.noSignedInUser)
+            AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> getString(
                     R.string.passwordMalformatted,
                     AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
                 )
-            }
-            AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> {
-                getString(
+            AuthService.AuthActionResult.EXC_PASSWORD_POLICY_CHECK_NOT_PASSED -> getString(
                     R.string.passwordMalformatted,
                     AuthService.PasswordPolicy.getPasswordPolicy(getString(R.string.passwordPolicy))
                 )
-            }
-            AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON -> {
-                getString(R.string.registrationFailed)
-            }
-            AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON -> {
-                getString(R.string.resetFailed)
-            }
-            AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> {
-                getString(R.string.sendResetFailed)
-            }
-            AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> {
-                getString(R.string.loginFailed)
-            }
-            AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> {
-                getString(R.string.logoutFailed)
-            }
+            AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON -> getString(R.string.registrationFailed)
+            AuthService.AuthActionResult.EXC_RESET_OR_VERIFY_CODE_INVALID -> getString(R.string.resetOrVerifyCodeMalformed)
+            AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON -> getString(R.string.resetFailed)
+            AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> getString(R.string.sendResetFailed)
+            AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> getString(R.string.loginFailed)
+            AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> getString(R.string.logoutFailed)
             AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> TODO()
-            AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> {
-                getString(R.string.verificationFailed)
-            }
-            AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> {
-                getString(R.string.sendVerificationFailed)
-            }
+            AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> getString(R.string.verificationFailed)
+            AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> getString(R.string.sendVerificationFailed)
             else -> null
         }
     }

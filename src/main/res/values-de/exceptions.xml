@@ -14,6 +14,7 @@
     <string name="sendResetFailed">Das Senden der Passwort-Reset-Email ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
     <string name="verificationFailed">Deine Email konnte nicht verifiziert werden. Möglicherweise war der Link nicht mehr gültig.</string>
 
+    <string name="resetOrVerifyCodeMalformed">Der in der Email angegebene Code is ungültig oder abgelaufen.</string>
     <string name="emailMalformatted">Die Email ist leer oder nicht korrekt formattiert.</string>
     <string name="passwordMalformatted">Das Passwort ist leer oder folgt nicht der Passwort-Policy: %s</string>
 

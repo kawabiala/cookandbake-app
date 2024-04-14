@@ -35,7 +35,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     enum class Navigation(val label: Int, val icon: ImageVector) {
         RECIPE(R.string.recipes, Icons.Outlined.RestaurantMenu),
-        LOGIN(R.string.login, Icons.Outlined.Person)
+        LOGIN(R.string.profile, Icons.Outlined.Person)
     }
 
     private var title = ""

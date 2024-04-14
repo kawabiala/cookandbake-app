@@ -9,9 +9,13 @@ import kotlin.coroutines.suspendCoroutine
 
 class SuspendedCoroutineWrapper {
 
-    class SuspendedCoroutineException(exception: Exception?) : Exception(exception) {
+    class SuspendedCoroutineException(val exception: Exception) : Exception(exception) {
 
         constructor(message: String): this(Exception(message))
+
+        fun getUnderlyingException(): Exception {
+            return exception
+        }
     }
 
     companion object {

@@ -77,6 +77,10 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                     }
                 }
 
+                FirebaseAuthService.ActionCodeOperation.CODE_INVALID -> {
+                    authActionResult.postValue(AuthService.AuthActionResult.EXC_RESET_OR_VERIFY_CODE_INVALID)
+                }
+
                 else -> {
                     linkMode.postValue(EmailLinkMode.UNKNOWN)
                 }
@@ -134,6 +138,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
             )
             if (result == AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED) {
                 changeAuthStatus(AuthService.AuthStatus.SIGNED_OUT)
+                linkMode.postValue(EmailLinkMode.UNKNOWN)
             }
             authActionResult.postValue(result)
         }
