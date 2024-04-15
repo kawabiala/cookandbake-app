@@ -585,6 +585,7 @@ class SignInActivity : BaseActivity() {
             AuthService.AuthActionResult.VERIFICATION_SEND_SUCCEEDED -> getString(R.string.confirmationSent)
             AuthService.AuthActionResult.EXC_DATAPOLICY_NOT_ACCEPTED -> getString(R.string.dataProtectionNotChecked)
             AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON -> getString(R.string.deleteFailed)
+            AuthService.AuthActionResult.EXC_DELETE_FAILED_RECENT_LOGIN_REQUIRED -> getString(R.string.login_again)
             AuthService.AuthActionResult.EXC_EMAIL_EMPTY_OR_MALFORMATTED -> getString(R.string.emailMalformatted)
             AuthService.AuthActionResult.EXC_NO_SIGNEDIN_USER -> getString(R.string.noSignedInUser)
             AuthService.AuthActionResult.EXC_PASSWORD_EMPTY -> getString(

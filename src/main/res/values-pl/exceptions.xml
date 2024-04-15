@@ -4,6 +4,7 @@
 
     <string name="noSignedInUser">Nie ma zalogowanego użytkownika.</string>
     <string name="deleteFailed">Zmazanie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
+    <string name="login_again">Ta czynność wymaga ponownego zalogowania się.</string>
     <string name="registrationFailed">Założenie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
     <string name="loginFailed">Login się nie udało. Prawdopodobnie, albo email albo hasło się nie zgadzało.</string>
     <string name="logoutFailed">Logout się nie udało. Proszę, spróbuj jeszcze raz!</string>

@@ -4,6 +4,7 @@
 
     <string name="noSignedInUser">Kein eingeloggter User.</string>
     <string name="deleteFailed">Das Löschen des Account ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="login_again">Diese Aktion erfordert, dass Du Dich erneut anmeldest.</string>
     <string name="registrationFailed">Das Anlegen des Accounts ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
     <string name="loginFailed">Das Login ist fehlgeschlagen. Vermutlich waren Email oder Passwort falsch.</string>
     <string name="logoutFailed">Logout ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>

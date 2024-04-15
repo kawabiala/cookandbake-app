@@ -97,6 +97,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
     fun deleteAccount() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = FirebaseAuthService.deleteAccount()
+            Log.i(this::class.java.name, "result: $result")
             if (result == AuthService.AuthActionResult.DELETE_SUCCEEDED) {
                 changeAuthStatus(AuthService.AuthStatus.SIGNED_OUT)
                 email.postValue("")
@@ -118,6 +119,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 isPrivacyApproved.value ?: false
             )
             if (result == AuthService.AuthActionResult.REGISTRATION_SUCCEEDED) {
+                changeAuthStatus(AuthService.AuthStatus.SIGNED_IN)
                 result = FirebaseAuthService.sendVerificationEmail()
             }
             authActionResult.postValue(result)

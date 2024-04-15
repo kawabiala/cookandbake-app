@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import java.util.LinkedList
@@ -75,7 +76,11 @@ class FirebaseAuthService {
                 AuthService.AuthActionResult.DELETE_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
                 Log.e(this::class.java.name, exception.toString())
-                AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
+                if (exception.getUnderlyingException() is FirebaseAuthRecentLoginRequiredException) {
+                    AuthService.AuthActionResult.EXC_DELETE_FAILED_RECENT_LOGIN_REQUIRED
+                } else {
+                    AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON
+                }
             } catch (exception: Exception) {
                 Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_DELETE_FAILED_WITHOUT_REASON

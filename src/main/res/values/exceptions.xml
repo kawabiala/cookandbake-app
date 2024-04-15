@@ -4,6 +4,7 @@
 
     <string name="noSignedInUser">No user is signed in.</string>
     <string name="deleteFailed">The account could not be deleted. Please, try again!</string>
+    <string name="login_again">This action requires, that you login again.</string>
     <string name="registrationFailed">The registration failed. Please, try again!</string>
     <string name="loginFailed">Login failed. Probably, either email or password were not correct.</string>
     <string name="logoutFailed">Logout failed. Please, try again!</string>
