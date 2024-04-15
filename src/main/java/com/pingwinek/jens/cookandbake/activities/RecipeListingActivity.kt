@@ -7,20 +7,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -114,6 +120,12 @@ class RecipeListingActivity : BaseActivity() {
                 startActivity(Intent(this, SignInActivity::class.java))
             }
         )
+
+        configureFloatingActionButton(
+            icon = Icons.Filled.Add,
+            label = "Add",
+            onClick = { openRecipeItem(null) }
+        )
     }
 
     override fun onResume() {
@@ -173,13 +185,38 @@ class RecipeListingActivity : BaseActivity() {
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
         ) {
-            recipes.value?.forEach { recipe: Recipe ->
+            recipes.value?.forEachIndexed { index, recipe ->
+                if (index > 0) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 5.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
+                }
                 key(recipe.id) {
-                    Text(recipe.title)
+                    Recipe(recipe = recipe) { recipeId ->
+                        openRecipeItem(recipeId)
+                    }
                 }
             }
         }
     }
+
+    @Composable
+    private fun Recipe(
+        recipe: Recipe,
+        onClick: (String) -> Unit
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onClick(recipe.id) }
+        ) {
+            Text(recipe.title)
+            Text(recipe.description ?: "")
+        }
+    }
+
 /*
     private fun configureOptionMenu() {
         optionMenu.apply {

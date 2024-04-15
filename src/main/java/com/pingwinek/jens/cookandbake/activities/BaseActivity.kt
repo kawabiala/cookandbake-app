@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RestaurantMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuItemColors
@@ -51,6 +53,8 @@ abstract class BaseActivity : AppCompatActivity() {
     private var navigationBarEnabled = true
     private var navigationBarItems = listOf<PingwinekCooksComposables.OptionItem>()
 
+    private var FloatingActionButtonAsLiveData: MutableLiveData<@Composable () -> Unit> = MutableLiveData{}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -83,6 +87,8 @@ abstract class BaseActivity : AppCompatActivity() {
             Log.i(this::class.java.name, "selectedItem change: $item")
             selectedNavigationBarItemAsLiveData.value = item
         }
+
+        val FloatingActionButton by FloatingActionButtonAsLiveData.observeAsState()
 
         val topAppBarColors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -146,7 +152,8 @@ abstract class BaseActivity : AppCompatActivity() {
                     menuItems = navigationBarItems,
                     onSelectedItemChange = onSelectedNavigationItemChange
                 )
-            }
+            },
+            floatingActionButton = { FloatingActionButton?.let { it() } }
         ) { paddingValues ->
             ScaffoldContent(paddingValues)
         }
@@ -200,4 +207,15 @@ abstract class BaseActivity : AppCompatActivity() {
         dropDownOptions = optionItems
     }
 
+    protected fun configureFloatingActionButton(
+        icon: ImageVector,
+        label: String,
+        onClick: () -> Unit = {}
+    )  {
+        FloatingActionButtonAsLiveData.value = {
+            FloatingActionButton(onClick = onClick) {
+                Icon(icon, label)
+            }
+        }
+    }
 }

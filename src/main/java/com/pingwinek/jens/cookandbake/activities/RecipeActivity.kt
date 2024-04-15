@@ -2,19 +2,17 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
@@ -71,6 +69,7 @@ class RecipeActivity : BaseActivity(),
             }
         }
 
+/*
         // the fab needs to sit in the Activity, does not work in the Fragment
         val fab = findViewById<FloatingActionButton>(R.id.recipeFab)
         fab.hide()
@@ -79,7 +78,7 @@ class RecipeActivity : BaseActivity(),
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                 Log.i(this::class.java.name, "not yet implemented for Android 11+")
 
-/*
+
                 val query = contentResolver.query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     arrayOf(
@@ -102,7 +101,6 @@ class RecipeActivity : BaseActivity(),
                     }
                 }
 
- */
             } else {
                 val pdfIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     //flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -112,13 +110,14 @@ class RecipeActivity : BaseActivity(),
                 savePdfLauncher.launch(pdfIntent)
             }
         }
+*/
 
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 
         recipeModel.recipeData.observe(this) { recipe: Recipe? ->
-            titleView.text = recipe?.title
-            descriptionView.text = recipe?.description
+//            titleView.text = recipe?.title
+//            descriptionView.text = recipe?.description
             /*
             if (!recipeModel.hasRecipeImage()) {
                 fab.setImageResource(R.drawable.ic_action_add_white)
@@ -130,16 +129,18 @@ class RecipeActivity : BaseActivity(),
         }
 
         val onEditRecipeClickListener = { _: View ->
+            /*
             val editIntent = Intent(this, RecipeEditActivity::class.java)
             with(editIntent) {
                 putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
                 putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
             }
             saveRecipeLauncher.launch(editIntent)
+            */
         }
 
-        titleView.setOnClickListener(onEditRecipeClickListener)
-        descriptionView.setOnClickListener(onEditRecipeClickListener)
+//        titleView.setOnClickListener(onEditRecipeClickListener)
+//        descriptionView.setOnClickListener(onEditRecipeClickListener)
 
         val pagerAdapter = RecipePagerAdapter(
             supportFragmentManager,
@@ -149,7 +150,8 @@ class RecipeActivity : BaseActivity(),
 
         val tabLayout = findViewById<TabLayout>(R.id.recipe_tablayout)
         findViewById<ViewPager>(R.id.recipeTabs).apply {
-            adapter = pagerAdapter
+           /*
+           adapter = pagerAdapter
             tabLayout.setupWithViewPager(this)
             addOnPageChangeListener(object: ViewPager.OnPageChangeListener{
 
@@ -162,17 +164,20 @@ class RecipeActivity : BaseActivity(),
                 }
 
                 override fun onPageSelected(position: Int) {
+                    /*
                     when (position) {
                         0 -> fab.hide()
                         1 -> fab.hide()
                         2 -> fab.show()
                     }
+                    */
                 }
 
                 override fun onPageScrollStateChanged(state: Int) {
                     // do nothing
                 }
             })
+            */
         }
 /*
         optionMenu.apply {
@@ -202,7 +207,7 @@ class RecipeActivity : BaseActivity(),
 
     @Composable
     override fun ScaffoldContent(paddingValues: PaddingValues) {
-        TODO("Not yet implemented")
+        Text("Recipe")
     }
 
     override fun onResume() {
