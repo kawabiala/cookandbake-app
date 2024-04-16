@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +25,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -35,6 +38,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -92,6 +96,110 @@ class PingwinekCooksComposables {
                 typography = Typography,
                 content = content
             )
+        }
+
+        @OptIn(ExperimentalMaterial3Api::class)
+        @Composable
+        fun PingwinekCooksScaffold(
+            title: String,
+            showDropDown: Boolean = false,
+            dropDownOptions: List<OptionItem> = LinkedList(),
+            optionItemLeft: OptionItem? = null,
+            optionItemMid: OptionItem? = null,
+            optionItemRight: OptionItem? = null,
+            selectedNavigationBarItem: Int = 0,
+            navigationBarEnabled: Boolean = false,
+            navigationBarItems: List<OptionItem> = LinkedList(),
+            onSelectedNavigationItemChange: (Int) -> Unit = {},
+            showFab: Boolean = false,
+            fabIcon: ImageVector? = null,
+            fabIconLabel: String = "",
+            onFabClicked: () -> Unit = {},
+            scaffoldContent: @Composable (PaddingValues) -> Unit = {}
+        ) {
+/*
+            val selectedNaviItem by selectedNavigationBarItemAsLiveData.observeAsState()
+
+            val onSelectedNavigationItemChange : (Int) -> Unit = { item ->
+                Log.i(this::class.java.name, "selectedItem change: $item")
+                selectedNavigationBarItemAsLiveData.value = item
+            }
+
+            val FloatingActionButton by FloatingActionButtonAsLiveData.observeAsState()
+*/
+            val topAppBarColors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                titleContentColor = MaterialTheme.colorScheme.onSurface
+            )
+            val topBarIconButtonColors = IconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                disabledContentColor = MaterialTheme.colorScheme.onSurface
+            )
+
+            val dropDownMenuColor = MaterialTheme.colorScheme.surfaceContainerLow
+            val dropDownItemColors = MenuItemColors(
+                textColor = MaterialTheme.colorScheme.onSurface,
+                leadingIconColor = MaterialTheme.colorScheme.onSurface,
+                trailingIconColor = MaterialTheme.colorScheme.onSurface,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurface
+            )
+
+            val navigationBarColor = MaterialTheme.colorScheme.surfaceContainer
+            val navigationBarItemColors = NavigationBarItemColors(
+                selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                selectedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                disabledIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+
+            Scaffold(
+                contentWindowInsets = WindowInsets(
+                    MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                    MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                    MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                    MaterialTheme.spacing.mainWindowPadding.value.toInt(),
+                ),
+                topBar = {
+                    PingwinekCooksTopAppBar(
+                        title = title,
+                        showDropDown = showDropDown,
+                        dropDownOptions = dropDownOptions,
+                        optionItemLeft = optionItemLeft,
+                        optionItemMid = optionItemMid,
+                        optionItemRight = optionItemRight,
+                        dropDownItemColors = dropDownItemColors,
+                        dropDownMenuColor = dropDownMenuColor,
+                        topBarColors = topAppBarColors,
+                        topBarIconButtonColors = topBarIconButtonColors,
+                    )
+                },
+                bottomBar = {
+                    PingwinekCooksNavigationBar(
+                        selectedItem = selectedNavigationBarItem,
+                        enabled = navigationBarEnabled,
+                        navigationBarColor = navigationBarColor,
+                        navigationBarItemColors = navigationBarItemColors,
+                        menuItems = navigationBarItems,
+                        onSelectedItemChange = onSelectedNavigationItemChange
+                    )
+                },
+                floatingActionButton = {
+                    if (showFab && fabIcon != null) {
+                        FloatingActionButton(onClick = onFabClicked) {
+                            Icon(imageVector = fabIcon, contentDescription = fabIconLabel)
+                        }
+                    }
+                }
+            ) { paddingValues ->
+                scaffoldContent(paddingValues)
+            }
         }
 
         @OptIn(ExperimentalMaterial3Api::class)

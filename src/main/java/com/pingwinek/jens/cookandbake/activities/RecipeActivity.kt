@@ -4,16 +4,15 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModelProvider
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_QUANTITY
@@ -24,12 +23,12 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
-class RecipeActivity : BaseActivity(),
-    IngredientListingFragment.OnListFragmentInteractionListener {
+class RecipeActivity: AppCompatActivity() {
 
     private class ActivityResultCallback(val onActivityResultHandler: (Intent) -> Unit) : androidx.activity.result.ActivityResultCallback<ActivityResult> {
         override fun onActivityResult(result: ActivityResult) {
@@ -49,14 +48,20 @@ class RecipeActivity : BaseActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        addContentView(R.layout.activity_recipe)
 
+        setContent {
+            PingwinekCooksAppTheme {
+                PingwinekCooksScaffold(title = "") { paddingValues ->
+                    ScaffoldContent(paddingValues = paddingValues)
+                }
+            }
+        }
         saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
         saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
         savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
         saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         recipeModel = ViewModelProvider(
             this,
@@ -110,11 +115,11 @@ class RecipeActivity : BaseActivity(),
                 savePdfLauncher.launch(pdfIntent)
             }
         }
-*/
+
 
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
-
+*/
         recipeModel.recipeData.observe(this) { recipe: Recipe? ->
 //            titleView.text = recipe?.title
 //            descriptionView.text = recipe?.description
@@ -138,7 +143,7 @@ class RecipeActivity : BaseActivity(),
             saveRecipeLauncher.launch(editIntent)
             */
         }
-
+/*
 //        titleView.setOnClickListener(onEditRecipeClickListener)
 //        descriptionView.setOnClickListener(onEditRecipeClickListener)
 
@@ -179,19 +184,18 @@ class RecipeActivity : BaseActivity(),
             })
             */
         }
-/*
+
         optionMenu.apply {
             addMenuEntry(R.id.OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
                 delete()
                 true
             }
-/*
+
             addMenuEntry(R.id.OPTION_MENU_DELETE_PDF, resources.getString(R.string.delete_pdf)) {
                 deletePdf()
                 true
             }
 
- */
             addMenuEntry(
                 R.id.OPTION_MENU_SHARE,
                 resources.getString(R.string.share),
@@ -205,16 +209,16 @@ class RecipeActivity : BaseActivity(),
  */
     }
 
-    @Composable
-    override fun ScaffoldContent(paddingValues: PaddingValues) {
-        Text("Recipe")
-    }
-
     override fun onResume() {
         super.onResume()
         recipeModel.loadData()
     }
 
+    @Composable
+    private fun ScaffoldContent(paddingValues: PaddingValues) {
+        Text("Recipe")
+    }
+/*
     override fun onListFragmentDeleteIngredient(ingredient: Ingredient) {
         AlertDialog.Builder(this).apply {
             setMessage("Zutat ${ingredient.name} wirklich löschen?")
@@ -243,7 +247,7 @@ class RecipeActivity : BaseActivity(),
             saveIngredientLauncher.launch(intent)
         }
     }
-
+*/
     private fun delete() {
         AlertDialog.Builder(this).apply {
             setMessage(R.string.recipe_delete_confirm)
@@ -354,7 +358,7 @@ class RecipeActivity : BaseActivity(),
     }
 
 }
-
+/*
 class RecipePagerAdapter(
     fragmentManager: androidx.fragment.app.FragmentManager,
     private val ingredientTitle: String,
@@ -383,3 +387,4 @@ class RecipePagerAdapter(
         }
     }
 }
+*/
