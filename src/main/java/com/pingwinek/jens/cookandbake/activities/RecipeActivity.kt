@@ -55,7 +55,8 @@ class RecipeActivity: AppCompatActivity() {
     }
 
     private lateinit var recipeModel: RecipeViewModel
-    private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
+
+//    private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
     private lateinit var saveIngredientLauncher: ActivityResultLauncher<Intent>
     private lateinit var savePdfLauncher: ActivityResultLauncher<Intent>
     lateinit var saveInstructionLauncher: ActivityResultLauncher<Intent>
@@ -77,54 +78,70 @@ class RecipeActivity: AppCompatActivity() {
         setContent {
             PingwinekCooksAppTheme {
 
-                var showOptionDropDown by remember { mutableStateOf(true) }
-                val setOptionDropDownVisibilty: (Boolean) -> Unit = { visible ->
-                    showOptionDropDown = visible
+                val recipeData = recipeModel.recipeData.observeAsState()
+
+                var recipeTitle by remember(recipeData.value?.title) {
+                    mutableStateOf(recipeData.value?.title ?: "")
+                }
+                var recipeDescription by remember(recipeData.value?.description) {
+                    mutableStateOf(recipeData.value?.description ?: "")
                 }
 
                 var editRecipe by remember { mutableStateOf(recipeModel.recipeId == null) }
 
+                val optionEdit = PingwinekCooksComposables.OptionItem(
+                    label = getString(R.string.edit_recipe),
+                    icon = Icons.Filled.Edit,
+                    onClick = {
+                        editRecipe = true
+                    }
+                )
+
+                val optionDelete = PingwinekCooksComposables.OptionItem(
+                    label = getString(R.string.delete_recipe),
+                    icon = Icons.Filled.Delete,
+                    onClick = {}
+                )
+
+                val optionSave = PingwinekCooksComposables.OptionItem(
+                    label = getString(R.string.ok),
+                    icon = Icons.Filled.Check,
+                    onClick = {
+                        editRecipe = false
+                        recipeModel.saveRecipe(recipeTitle, recipeDescription)
+                    }
+                )
+
+                val optionBack = PingwinekCooksComposables.OptionItem(
+                    label = "back",
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    onClick = { finish() }
+                )
+
+
                 PingwinekCooksScaffold(
-                    title = getString(R.string.recipeLocal),
-                    showDropDown = showOptionDropDown,
+                    title = "",
+                    showDropDown = !editRecipe,
                     dropDownOptions = listOf(
-                        PingwinekCooksComposables.OptionItem(
-                            label = "edit Recipe",
-                            icon = Icons.Filled.Edit,
-                            onClick = {
-                                editRecipe = true
-                            }
-                        ),
-                        PingwinekCooksComposables.OptionItem(
-                            label = "delete Recipe",
-                            icon = Icons.Filled.Delete,
-                            onClick = {}
-                        )
+                        optionEdit,
+                        optionDelete
                     ),
-                    optionItemLeft = PingwinekCooksComposables.OptionItem(
-                        label = "back",
-                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
-                        onClick = {}
-                    ),
-                    optionItemRight = PingwinekCooksComposables.OptionItem(
-                        label = getString(R.string.ok),
-                        icon = Icons.Filled.Check,
-                        onClick = {
-                            editRecipe = false
-                        }
-                    )
+                    optionItemLeft = if (editRecipe) null else optionBack,
+                    optionItemRight = optionSave
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
-                        setOptionDropDownVisibilty = setOptionDropDownVisibilty,
-                        recipeViewModel = recipeModel,
-                        editRecipe = editRecipe
+                        recipeTitle = recipeTitle,
+                        recipeDescription = recipeDescription,
+                        editRecipe = editRecipe,
+                        onRecipeTitleChange = { title -> recipeTitle = title },
+                        onRecipeDescriptionChange = { description -> recipeDescription = description }
                         )
                 }
             }
         }
 
-        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
+//        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
         saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
         savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
         saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
@@ -274,23 +291,29 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun ScaffoldContent(
         paddingValues: PaddingValues,
-        setOptionDropDownVisibilty: (Boolean) -> Unit,
-        recipeViewModel: RecipeViewModel,
-        editRecipe: Boolean
+        recipeTitle: String = "",
+        recipeDescription: String = "",
+        editRecipe: Boolean,
+        onRecipeTitleChange: (String) -> Unit,
+        onRecipeDescriptionChange: (String) -> Unit,
     ) {
-        val recipeData = recipeViewModel.recipeData.observeAsState()
 
         Column(
             modifier = Modifier
                 .padding(paddingValues)
         ) {
+
+            PingwinekCooksComposables.SpacerSmall()
+
             EditableText(
-                text = recipeData.value?.title ?: "",
-                editable = editRecipe
+                text = recipeTitle,
+                editable = editRecipe,
+                onValueChange = onRecipeTitleChange
             )
             EditableText(
-                text = recipeData.value?.description ?: "",
-                editable = editRecipe
+                text = recipeDescription,
+                editable = editRecipe,
+                onValueChange = onRecipeDescriptionChange
             )
         }
     }

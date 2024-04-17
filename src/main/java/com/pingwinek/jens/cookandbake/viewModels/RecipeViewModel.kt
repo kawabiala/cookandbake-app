@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.ShareableRecipe
@@ -22,16 +21,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
 
     private val privateRecipeData = MutableLiveData<Recipe>()
-    val recipeData: LiveData<Recipe> = privateRecipeData.map { mutableRecipe ->
-        mutableRecipe
-    }
-
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
-    val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData.map { mutableList ->
-        LinkedList(mutableList)
-    }
+
+    val recipeData: LiveData<Recipe> = privateRecipeData
+    val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
+
     var recipeId: String? = null
 
     //TODO update recipeData and ingredientListData

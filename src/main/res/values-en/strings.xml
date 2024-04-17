@@ -65,6 +65,8 @@
     <string name="recipe_description">Short description</string>
     <string name="recipe_delete_confirm">Really delete recipe?</string>
     <string name="add_recipe">Add recipe</string>
+    <string name="edit_recipe">Edit recipe</string>
+    <string name="delete_recipe">Delete recipe</string>
 
     <string name="ingredientRemote">Ingredient</string>
     <string name="ingredients">Ingredients</string>

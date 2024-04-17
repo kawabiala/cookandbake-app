@@ -65,6 +65,8 @@
     <string name="recipe_description">Krótkie opisanie przepisu</string>
     <string name="recipe_delete_confirm">Naprawdę zmazać przepis?</string>
     <string name="add_recipe">Dodawać przepis</string>
+    <string name="edit_recipe">Edytować przepis</string>
+    <string name="delete_recipe">Zmazać przepis</string>
 
     <string name="ingredientRemote">Składnik</string>
     <string name="ingredients">Składniki</string>
