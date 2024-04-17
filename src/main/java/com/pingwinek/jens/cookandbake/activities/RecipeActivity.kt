@@ -9,9 +9,21 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
@@ -23,6 +35,8 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.EditableText
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Recipe
@@ -49,20 +63,6 @@ class RecipeActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            PingwinekCooksAppTheme {
-                PingwinekCooksScaffold(title = "") { paddingValues ->
-                    ScaffoldContent(paddingValues = paddingValues)
-                }
-            }
-        }
-        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
-        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
-        savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
-        saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
-
-//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         recipeModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
@@ -73,6 +73,63 @@ class RecipeActivity: AppCompatActivity() {
                 recipeModel.recipeId = id
             }
         }
+
+        setContent {
+            PingwinekCooksAppTheme {
+
+                var showOptionDropDown by remember { mutableStateOf(true) }
+                val setOptionDropDownVisibilty: (Boolean) -> Unit = { visible ->
+                    showOptionDropDown = visible
+                }
+
+                var editRecipe by remember { mutableStateOf(recipeModel.recipeId == null) }
+
+                PingwinekCooksScaffold(
+                    title = getString(R.string.recipeLocal),
+                    showDropDown = showOptionDropDown,
+                    dropDownOptions = listOf(
+                        PingwinekCooksComposables.OptionItem(
+                            label = "edit Recipe",
+                            icon = Icons.Filled.Edit,
+                            onClick = {
+                                editRecipe = true
+                            }
+                        ),
+                        PingwinekCooksComposables.OptionItem(
+                            label = "delete Recipe",
+                            icon = Icons.Filled.Delete,
+                            onClick = {}
+                        )
+                    ),
+                    optionItemLeft = PingwinekCooksComposables.OptionItem(
+                        label = "back",
+                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                        onClick = {}
+                    ),
+                    optionItemRight = PingwinekCooksComposables.OptionItem(
+                        label = getString(R.string.ok),
+                        icon = Icons.Filled.Check,
+                        onClick = {
+                            editRecipe = false
+                        }
+                    )
+                ) { paddingValues ->
+                    ScaffoldContent(
+                        paddingValues = paddingValues,
+                        setOptionDropDownVisibilty = setOptionDropDownVisibilty,
+                        recipeViewModel = recipeModel,
+                        editRecipe = editRecipe
+                        )
+                }
+            }
+        }
+
+        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
+        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
+        savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
+        saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
+
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
 /*
         // the fab needs to sit in the Activity, does not work in the Fragment
@@ -215,8 +272,27 @@ class RecipeActivity: AppCompatActivity() {
     }
 
     @Composable
-    private fun ScaffoldContent(paddingValues: PaddingValues) {
-        Text("Recipe")
+    private fun ScaffoldContent(
+        paddingValues: PaddingValues,
+        setOptionDropDownVisibilty: (Boolean) -> Unit,
+        recipeViewModel: RecipeViewModel,
+        editRecipe: Boolean
+    ) {
+        val recipeData = recipeViewModel.recipeData.observeAsState()
+
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            EditableText(
+                text = recipeData.value?.title ?: "",
+                editable = editRecipe
+            )
+            EditableText(
+                text = recipeData.value?.description ?: "",
+                editable = editRecipe
+            )
+        }
     }
 /*
     override fun onListFragmentDeleteIngredient(ingredient: Ingredient) {
