@@ -2,11 +2,9 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,15 +21,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -39,11 +41,13 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
-class RecipeListingActivity : BaseActivity() {
+class RecipeListingActivity : AppCompatActivity() {
 
     private lateinit var recipeListingModel: RecipeListingViewModel
     private lateinit var auth: FirebaseAuth
@@ -62,104 +66,100 @@ class RecipeListingActivity : BaseActivity() {
 
         recipeListData = recipeListingModel.recipeListData
 
-        /*
-        val viewAdapter = RecipeListingAdapter(recipeListData, this)
-
-        findViewById<RecyclerView>(R.id.recipeList).apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@RecipeListingActivity)
-            adapter = viewAdapter
+        val optionItemImpressum = PingwinekCooksComposables.OptionItem(
+            getString(R.string.impressum),
+            Icons.Filled.Info
+        ) {
+            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                .putExtra("title", getString(R.string.impressum))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
         }
 
-        val swipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.recipeListSwipeRefreshLayout)
-        swipeRefreshLayout.setOnRefreshListener {
-            refresh()
-            swipeRefreshLayout.isRefreshing = false
+        val optionItemPrivacy = PingwinekCooksComposables.OptionItem(
+            getString(R.string.dataprotection),
+            Icons.Filled.Lock
+        ) {
+            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                .putExtra("title", getString(R.string.dataprotection))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
         }
 
-        val fab = findViewById<FloatingActionButton>(R.id.floatingActionButton)
-        fab.setOnClickListener {
-            openRecipeItem(null)
+        val optionItemRecipe = PingwinekCooksComposables.OptionItem(
+            label = getString(PingwinekCooksComposables.Navigation.RECIPE.label),
+            icon = PingwinekCooksComposables.Navigation.RECIPE.icon
+        ) {}
+
+        val optionItemProfileLoggedOut = PingwinekCooksComposables.OptionItem(
+            label = getString(PingwinekCooksComposables.Navigation.LOGIN.label),
+            icon = PingwinekCooksComposables.Navigation.LOGIN.icon
+        ) {
+            startActivity(Intent(this, SignInActivity::class.java))
         }
 
-        configureOptionMenu()
+        val optionItemProfileLoggedIn = PingwinekCooksComposables.OptionItem(
+            label = getString(PingwinekCooksComposables.Navigation.LOGIN.label),
+            icon = Icons.Filled.Person
+        ) {
+            startActivity(Intent(this, SignInActivity::class.java))
+        }
 
-         */
-        configureTopBar(
-            title = "Recipes",
-            optionItemMid = PingwinekCooksComposables.OptionItem(
-                "person",
-                Icons.Filled.Person
-            ) { Log.e(this::class.java.name, "Person clicked") }
-        )
+        setContent {
+            PingwinekCooksAppTheme {
 
+                var selectedNavigationBarItem by remember {
+                    mutableIntStateOf(PingwinekCooksComposables.Navigation.RECIPE.ordinal)
+                }
 
-        configureDropDown(
-            PingwinekCooksComposables.OptionItem(
-                getString(R.string.dataprotection),
-                Icons.Filled.Lock
-            ) {
-                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("title", getString(R.string.dataprotection))
-                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
-            },
-            PingwinekCooksComposables.OptionItem(
-                getString(R.string.impressum),
-                Icons.Filled.Info
-            ) {
-                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("title", getString(R.string.impressum))
-                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
+                var loggedIn by remember {
+                    mutableStateOf(false)
+                }
+
+                LifecycleResumeEffect(LocalLifecycleOwner.current) {
+                    loggedIn = auth.currentUser != null && auth.currentUser!!.isEmailVerified
+                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.RECIPE.ordinal
+                    recipeListingModel.loadData()
+
+                    onPauseOrDispose {
+                        loggedIn = false
+                    }
+                }
+
+                PingwinekCooksScaffold(
+                    title = "PingwinekCooks",
+                    showDropDown = true,
+                    dropDownOptions = listOf(
+                        optionItemPrivacy,
+                        optionItemImpressum
+                    ),
+                    selectedNavigationBarItem = selectedNavigationBarItem,
+                    navigationBarEnabled = true,
+                    navigationBarItems = listOf(
+                        optionItemRecipe,
+                        if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
+                    ),
+                    onSelectedNavigationItemChange = { itemId -> selectedNavigationBarItem = itemId },
+                    showFab = loggedIn,
+                    fabIcon = Icons.Filled.Add,
+                    fabIconLabel = getString(R.string.add_recipe),
+                    onFabClicked = { openRecipeItem(null) }
+                ) { paddingValues ->
+                    ScaffoldContent(
+                        paddingValues = paddingValues,
+                        loggedIn = loggedIn
+                    )
+                }
             }
-        )
-
-        configureNavigationBar(
-            selectedItem = Navigation.RECIPE,
-            enabled = true,
-            onLoginClickAction = {
-                startActivity(Intent(this, SignInActivity::class.java))
-            }
-        )
-
-        configureFloatingActionButton(
-            icon = Icons.Filled.Add,
-            label = "Add",
-            onClick = { openRecipeItem(null) }
-        )
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
-        recipeListingModel.loadData()
-/*
-        if (auth.currentUser != null) {
-            optionMenu.addMenuEntry(
-                R.id.OPTION_MENU_LOGIN,
-                resources.getString(R.string.logged_in_as, auth.currentUser!!.email),
-                R.drawable.ic_login_person_black,
-                true
-            ) {
-                startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
-                true
-            }
-        } else {
-            optionMenu.addMenuEntry(
-                R.id.OPTION_MENU_LOGIN,
-                resources.getString(R.string.login),
-                R.drawable.ic_login_person_outline_black,
-                true
-            ) {
-                startActivity(Intent(this@RecipeListingActivity, SignInActivity::class.java))
-                true
-            }
-        }
-
- */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //// Data Migration - used one time for migrating data Jan 2024
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
+    override fun onResume() {
+        super.onResume()
+
         AlertDialog.Builder(this).apply {
             setMessage("Migrate?")
             setPositiveButton("yes") { _, _ ->
@@ -169,14 +169,15 @@ class RecipeListingActivity : BaseActivity() {
 
             }
         }.show()
+    }
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-    }
-
     @Composable
-    override fun ScaffoldContent(paddingValues: PaddingValues) {
+    fun ScaffoldContent(
+        paddingValues: PaddingValues,
+        loggedIn: Boolean
+    ) {
         val recipes = recipeListData.observeAsState()
         val scrollState = rememberScrollState()
 
@@ -185,19 +186,25 @@ class RecipeListingActivity : BaseActivity() {
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
         ) {
-            recipes.value?.forEachIndexed { index, recipe ->
-                if (index > 0) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .padding(top = 5.dp, bottom = 5.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
-                    )
-                }
-                key(recipe.id) {
-                    Recipe(recipe = recipe) { recipeId ->
-                        openRecipeItem(recipeId)
+            PingwinekCooksComposables.SpacerSmall()
+
+            if (loggedIn) {
+                recipes.value?.forEachIndexed { index, recipe ->
+                    if (index > 0) {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .padding(top = 5.dp, bottom = 5.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
+                    }
+                    key(recipe.id) {
+                        Recipe(recipe = recipe) { recipeId ->
+                            openRecipeItem(recipeId)
+                        }
                     }
                 }
+            } else {
+                Text(getString(R.string.no_account))
             }
         }
     }
@@ -217,32 +224,9 @@ class RecipeListingActivity : BaseActivity() {
         }
     }
 
-/*
-    private fun configureOptionMenu() {
-        optionMenu.apply {
-            addMenuEntry(R.id.OPTION_MENU_REFRESH, resources.getString(R.string.refresh)) {
-                refresh()
-                true
-            }
-            addMenuEntry(R.id.OPTION_MENU_IMPRESSUM, resources.getString(R.string.impressum)) {
-                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
-                true
-            }
-            addMenuEntry(R.id.OPTION_MENU_DATAPROTECTION, resources.getString(R.string.dataprotection)) {
-                startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                    .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
-                true
-            }
-        }
-    }
-*/
+    // TODO remove function together with view
     fun onRecipeItemClick(recipeItem: View) {
         openRecipeItem(recipeItem.tag as String)
-    }
-
-    private fun refresh() {
-        recipeListingModel.loadData()
     }
 
     private fun openRecipeItem(itemId: String?) {
@@ -254,42 +238,4 @@ class RecipeListingActivity : BaseActivity() {
         }
         startActivity(intent)
     }
-}
-
-class RecipeListingAdapter(recipeListData: LiveData<LinkedList<Recipe>>, owner: LifecycleOwner) :
-    RecyclerView.Adapter<RecipeListingViewHolder>() {
-
-    private var recipeList: LinkedList<Recipe>
-    init {
-        recipeList = recipeListData.value ?: LinkedList()
-        recipeListData.observe(owner) {
-            recipeList = it
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeListingViewHolder {
-
-        val constraintLayout = LayoutInflater.from(parent.context)
-            .inflate(R.layout.recyclerview_recipe_list_item, parent, false) as ConstraintLayout
-
-        constraintLayout.minHeight = 40
-
-        return RecipeListingViewHolder(constraintLayout)
-    }
-
-    override fun getItemCount(): Int {
-        return recipeList.size
-    }
-
-    override fun onBindViewHolder(viewHolder: RecipeListingViewHolder, position: Int) {
-        viewHolder.recipeTitle.text = recipeList[position].title
-        viewHolder.recipeDescription.text = recipeList[position].description
-        viewHolder.recipeListItem.tag = recipeList[position].id
-    }
-}
-
-class RecipeListingViewHolder(val recipeListItem: ConstraintLayout) : RecyclerView.ViewHolder(recipeListItem) {
-    val recipeTitle = recipeListItem.getViewById(R.id.itemTitle) as TextView
-    val recipeDescription = recipeListItem.getViewById(R.id.itemDescription) as TextView
 }

@@ -91,32 +91,28 @@ class RecipeActivity: AppCompatActivity() {
 
                 val optionEdit = PingwinekCooksComposables.OptionItem(
                     label = getString(R.string.edit_recipe),
-                    icon = Icons.Filled.Edit,
-                    onClick = {
-                        editRecipe = true
-                    }
-                )
+                    icon = Icons.Filled.Edit
+                ) {
+                    editRecipe = true
+                }
 
                 val optionDelete = PingwinekCooksComposables.OptionItem(
                     label = getString(R.string.delete_recipe),
-                    icon = Icons.Filled.Delete,
-                    onClick = {}
-                )
+                    icon = Icons.Filled.Delete
+                ) {}
 
                 val optionSave = PingwinekCooksComposables.OptionItem(
                     label = getString(R.string.ok),
-                    icon = Icons.Filled.Check,
-                    onClick = {
-                        editRecipe = false
-                        recipeModel.saveRecipe(recipeTitle, recipeDescription)
-                    }
-                )
+                    icon = Icons.Filled.Check
+                ) {
+                    editRecipe = false
+                    recipeModel.saveRecipe(recipeTitle, recipeDescription)
+                }
 
                 val optionBack = PingwinekCooksComposables.OptionItem(
                     label = "back",
-                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
-                    onClick = { finish() }
-                )
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack
+                ) { finish() }
 
 
                 PingwinekCooksScaffold(

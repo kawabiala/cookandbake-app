@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.RestaurantMenu
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
 import com.pingwinek.jens.cookandbake.theming.Spacing
@@ -74,9 +77,14 @@ class PingwinekCooksComposables {
 
     data class OptionItem(
         val label: String,
-        val icon: ImageVector,
-        val onClick: () -> Unit
+        var icon: ImageVector,
+        var onClick: () -> Unit
     )
+
+    enum class Navigation(val label: Int, val icon: ImageVector) {
+        RECIPE(R.string.recipes, Icons.Outlined.RestaurantMenu),
+        LOGIN(R.string.profile, Icons.Outlined.Person)
+    }
 
     companion object {
 
@@ -117,16 +125,6 @@ class PingwinekCooksComposables {
             onFabClicked: () -> Unit = {},
             scaffoldContent: @Composable (PaddingValues) -> Unit = {}
         ) {
-/*
-            val selectedNaviItem by selectedNavigationBarItemAsLiveData.observeAsState()
-
-            val onSelectedNavigationItemChange : (Int) -> Unit = { item ->
-                Log.i(this::class.java.name, "selectedItem change: $item")
-                selectedNavigationBarItemAsLiveData.value = item
-            }
-
-            val FloatingActionButton by FloatingActionButtonAsLiveData.observeAsState()
-*/
             val topAppBarColors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 titleContentColor = MaterialTheme.colorScheme.onSurface
