@@ -185,7 +185,7 @@ class SignInActivity : BaseActivity() {
 
         val optionItems = mutableListOf(
             PingwinekCooksComposables.OptionItem(
-                getString(R.string.dataprotection),
+                R.string.dataprotection,
                 Icons.Filled.Lock
             ) {
                 startActivity(
@@ -198,7 +198,7 @@ class SignInActivity : BaseActivity() {
                 )
             },
             PingwinekCooksComposables.OptionItem(
-                getString(R.string.impressum),
+                R.string.impressum,
                 Icons.Filled.Info
             ) {
                 startActivity(
@@ -443,11 +443,11 @@ class SignInActivity : BaseActivity() {
             menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        getString(R.string.register), Icons.Filled.Person, toggleItem
+                        R.string.register, Icons.Filled.Person, toggleItem
                     ))
                 add(
                     PingwinekCooksComposables.OptionItem(
-                        getString(R.string.login), Icons.Filled.Person, toggleItem
+                        R.string.login, Icons.Filled.Person, toggleItem
                     ))
             }
         )

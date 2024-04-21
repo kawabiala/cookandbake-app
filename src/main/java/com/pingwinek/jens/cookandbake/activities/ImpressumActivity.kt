@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 
 class ImpressumActivity : BaseActivity() {
@@ -21,7 +22,7 @@ class ImpressumActivity : BaseActivity() {
         configureTopBar(
             title = title,
             optionItemRight = PingwinekCooksComposables.OptionItem(
-                "close",
+                R.string.close,
                 Icons.Filled.Close
             ) { finish() })
 

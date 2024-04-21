@@ -60,6 +60,7 @@
     <string name="acceptCrashlytics">Tak, zgadzam się, żeby applikacja wysłała raporty o awariach</string>
 
     <string name="recipeLocal">Przepis</string>
+    <string name="back">Z powrotem</string>
     <string name="recipes">Przepisy</string>
     <string name="recipe_title">Tytuł przepisu</string>
     <string name="recipe_description">Krótkie opisanie przepisu</string>

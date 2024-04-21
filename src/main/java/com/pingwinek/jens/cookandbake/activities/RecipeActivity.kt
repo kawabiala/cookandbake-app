@@ -13,13 +13,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +44,7 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.EditableText
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
@@ -61,6 +67,24 @@ class RecipeActivity: AppCompatActivity() {
     private lateinit var savePdfLauncher: ActivityResultLauncher<Intent>
     lateinit var saveInstructionLauncher: ActivityResultLauncher<Intent>
 
+    private val optionIngredients = PingwinekCooksComposables.OptionItem(
+        R.string.ingredients,
+        Icons.AutoMirrored.Filled.ReceiptLong,
+        {}
+    )
+
+    private val optionInstruction = PingwinekCooksComposables.OptionItem(
+        R.string.instruction,
+        Icons.Filled.Receipt,
+        {}
+    )
+
+    private val optionPdf = PingwinekCooksComposables.OptionItem(
+        R.string.pdf,
+        Icons.Filled.FilePresent,
+        {}
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -79,6 +103,7 @@ class RecipeActivity: AppCompatActivity() {
             PingwinekCooksAppTheme {
 
                 val recipeData = recipeModel.recipeData.observeAsState()
+                val ingredientData = recipeModel.ingredientListData.observeAsState()
 
                 var recipeTitle by remember(recipeData.value?.title) {
                     mutableStateOf(recipeData.value?.title ?: "")
@@ -90,19 +115,19 @@ class RecipeActivity: AppCompatActivity() {
                 var editRecipe by remember { mutableStateOf(recipeModel.recipeId == null) }
 
                 val optionEdit = PingwinekCooksComposables.OptionItem(
-                    label = getString(R.string.edit_recipe),
+                    labelResourceId = R.string.edit_recipe,
                     icon = Icons.Filled.Edit
                 ) {
                     editRecipe = true
                 }
 
                 val optionDelete = PingwinekCooksComposables.OptionItem(
-                    label = getString(R.string.delete_recipe),
+                    labelResourceId = R.string.delete_recipe,
                     icon = Icons.Filled.Delete
                 ) {}
 
                 val optionSave = PingwinekCooksComposables.OptionItem(
-                    label = getString(R.string.ok),
+                    labelResourceId = R.string.ok,
                     icon = Icons.Filled.Check
                 ) {
                     editRecipe = false
@@ -110,7 +135,7 @@ class RecipeActivity: AppCompatActivity() {
                 }
 
                 val optionBack = PingwinekCooksComposables.OptionItem(
-                    label = "back",
+                    labelResourceId = R.string.back,
                     icon = Icons.AutoMirrored.Outlined.ArrowBack
                 ) { finish() }
 
@@ -129,6 +154,8 @@ class RecipeActivity: AppCompatActivity() {
                         paddingValues = paddingValues,
                         recipeTitle = recipeTitle,
                         recipeDescription = recipeDescription,
+                        ingredients = ingredientData.value ?: listOf(),
+                        instruction = recipeData.value?.instruction ?: "",
                         editRecipe = editRecipe,
                         onRecipeTitleChange = { title -> recipeTitle = title },
                         onRecipeDescriptionChange = { description -> recipeDescription = description }
@@ -287,8 +314,10 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun ScaffoldContent(
         paddingValues: PaddingValues,
-        recipeTitle: String = "",
-        recipeDescription: String = "",
+        recipeTitle: String,
+        recipeDescription: String,
+        ingredients: List<Ingredient>,
+        instruction: String,
         editRecipe: Boolean,
         onRecipeTitleChange: (String) -> Unit,
         onRecipeDescriptionChange: (String) -> Unit,
@@ -311,8 +340,54 @@ class RecipeActivity: AppCompatActivity() {
                 editable = editRecipe,
                 onValueChange = onRecipeDescriptionChange
             )
+
+            PingwinekCooksComposables.SpacerMedium()
+
+            RecipeTabRow(
+                ingredients = ingredients,
+                instruction = instruction
+            )
         }
     }
+
+    @Composable
+    private fun RecipeTabRow(
+        ingredients: List<Ingredient>,
+        instruction: String
+    ) {
+
+        var selectedItem by remember {
+            mutableIntStateOf(0)
+        }
+
+        PingwinekCooksComposables.PingwinekCooksTabRow(
+            selectedItem = selectedItem,
+            menuItems = listOf(
+                optionIngredients.apply {
+                    onClick = { selectedItem = 0 }
+                },
+                optionInstruction.apply {
+                    onClick = { selectedItem = 1 }
+                },
+                optionPdf.apply {
+                    onClick = { selectedItem = 2 }
+                }
+            )
+        )
+
+        when (selectedItem) {
+            0 -> {
+                ingredients.forEach { ingredient ->
+                    Text(text = ingredient.name)
+                }
+            }
+            1 -> {
+                Text(text = instruction)
+            }
+            2 -> {}
+        }
+    }
+
 /*
     override fun onListFragmentDeleteIngredient(ingredient: Ingredient) {
         AlertDialog.Builder(this).apply {

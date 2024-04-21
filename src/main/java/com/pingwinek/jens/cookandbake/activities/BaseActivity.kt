@@ -190,7 +190,7 @@ abstract class BaseActivity : AppCompatActivity() {
                 onLoginClickAction
             }
             navBarItems.add(PingwinekCooksComposables.OptionItem(
-                getString(navigationEntry.label),
+                navigationEntry.label,
                 navigationEntry.icon,
                 onClickAction)
             )

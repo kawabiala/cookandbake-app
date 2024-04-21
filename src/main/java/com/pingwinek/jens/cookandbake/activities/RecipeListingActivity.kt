@@ -67,7 +67,7 @@ class RecipeListingActivity : AppCompatActivity() {
         recipeListData = recipeListingModel.recipeListData
 
         val optionItemImpressum = PingwinekCooksComposables.OptionItem(
-            getString(R.string.impressum),
+            R.string.impressum,
             Icons.Filled.Info
         ) {
             startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
@@ -76,7 +76,7 @@ class RecipeListingActivity : AppCompatActivity() {
         }
 
         val optionItemPrivacy = PingwinekCooksComposables.OptionItem(
-            getString(R.string.dataprotection),
+            R.string.dataprotection,
             Icons.Filled.Lock
         ) {
             startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
@@ -85,19 +85,19 @@ class RecipeListingActivity : AppCompatActivity() {
         }
 
         val optionItemRecipe = PingwinekCooksComposables.OptionItem(
-            label = getString(PingwinekCooksComposables.Navigation.RECIPE.label),
+            labelResourceId = PingwinekCooksComposables.Navigation.RECIPE.label,
             icon = PingwinekCooksComposables.Navigation.RECIPE.icon
         ) {}
 
         val optionItemProfileLoggedOut = PingwinekCooksComposables.OptionItem(
-            label = getString(PingwinekCooksComposables.Navigation.LOGIN.label),
+            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
             icon = PingwinekCooksComposables.Navigation.LOGIN.icon
         ) {
             startActivity(Intent(this, SignInActivity::class.java))
         }
 
         val optionItemProfileLoggedIn = PingwinekCooksComposables.OptionItem(
-            label = getString(PingwinekCooksComposables.Navigation.LOGIN.label),
+            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
             icon = Icons.Filled.Person
         ) {
             startActivity(Intent(this, SignInActivity::class.java))

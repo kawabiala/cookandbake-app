@@ -57,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -76,7 +77,7 @@ val MaterialTheme.spacing: Spacing
 class PingwinekCooksComposables {
 
     data class OptionItem(
-        val label: String,
+        val labelResourceId: Int,
         var icon: ImageVector,
         var onClick: () -> Unit
     )
@@ -230,7 +231,7 @@ class PingwinekCooksComposables {
                             },
                             colors = topBarIconButtonColors
                         ) {
-                            Icon(it.icon, it.label)
+                            Icon(it.icon, stringResource(id = it.labelResourceId))
                         }
                     }
                 },
@@ -242,7 +243,7 @@ class PingwinekCooksComposables {
                             },
                             colors = topBarIconButtonColors
                         ) {
-                            Icon(it.icon, it.label)
+                            Icon(it.icon, stringResource(id = it.labelResourceId))
                         }
                     }
                     if (showDropDown) {
@@ -268,7 +269,7 @@ class PingwinekCooksComposables {
                                 },
                                 colors = topBarIconButtonColors
                             ) {
-                                Icon(it.icon, it.label)
+                                Icon(it.icon, stringResource(id = it.labelResourceId))
                             }
                         }
                     }
@@ -292,9 +293,9 @@ class PingwinekCooksComposables {
             ) {
                 options.forEach {
                     DropdownMenuItem(
-                        leadingIcon = { Icon(imageVector = it.icon, contentDescription = it.label) },
+                        leadingIcon = { Icon(imageVector = it.icon, contentDescription = stringResource(id = it.labelResourceId)) },
                         text = {
-                            Text(it.label)
+                            Text(stringResource(id = it.labelResourceId))
                         },
                         onClick = {
                             it.onClick()
@@ -322,7 +323,7 @@ class PingwinekCooksComposables {
                     NavigationBarItem(
                         colors = navigationBarItemColors,
                         icon =  { Icon(item.icon, null) } ,
-                        label = { Text(item.label) },
+                        label = { Text(stringResource(id = item.labelResourceId)) },
                         selected = selectedItem == index && enabled,
                         enabled = enabled,
                         onClick = {
@@ -345,7 +346,7 @@ class PingwinekCooksComposables {
                     Tab(
                         selected = selectedItem == index,
                         enabled = enabled,
-                        text = { Text(item.label) },
+                        text = { Text(stringResource(id = item.labelResourceId)) },
                         icon = { Icon(item.icon, null) },
                         onClick = {
                             item.onClick()
