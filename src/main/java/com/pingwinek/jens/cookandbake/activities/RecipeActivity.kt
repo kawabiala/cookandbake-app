@@ -9,8 +9,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
@@ -20,6 +22,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +45,6 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_TITLE
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.EditableText
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Ingredient
@@ -58,6 +61,13 @@ class RecipeActivity: AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private enum class Mode {
+        SHOW_RECIPE,
+        EDIT_RECIPE,
+        EDIT_INGREDIENT,
+        EDIT_INSTRUCTION
     }
 
     private lateinit var recipeModel: RecipeViewModel
@@ -101,6 +111,8 @@ class RecipeActivity: AppCompatActivity() {
 
         setContent {
             PingwinekCooksAppTheme {
+
+                val mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
 
                 val recipeData = recipeModel.recipeData.observeAsState()
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
@@ -152,6 +164,7 @@ class RecipeActivity: AppCompatActivity() {
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
+                        mode = mode,
                         recipeTitle = recipeTitle,
                         recipeDescription = recipeDescription,
                         ingredients = ingredientData.value ?: listOf(),
@@ -314,6 +327,7 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun ScaffoldContent(
         paddingValues: PaddingValues,
+        mode: Mode,
         recipeTitle: String,
         recipeDescription: String,
         ingredients: List<Ingredient>,
@@ -322,24 +336,56 @@ class RecipeActivity: AppCompatActivity() {
         onRecipeTitleChange: (String) -> Unit,
         onRecipeDescriptionChange: (String) -> Unit,
     ) {
+            when (mode) {
+                Mode.SHOW_RECIPE -> {
+                    ShowRecipe(
+                        paddingValues = paddingValues,
+                        recipeTitle = recipeTitle,
+                        recipeDescription = recipeDescription,
+                        ingredients = ingredients,
+                        instruction = instruction
+                    )
+                }
+                Mode.EDIT_RECIPE -> {}
+                Mode.EDIT_INGREDIENT -> {}
+                Mode.EDIT_INSTRUCTION -> {}
+            }
+    }
+
+    @Composable
+    private fun ShowRecipe(
+        paddingValues: PaddingValues,
+        recipeTitle: String,
+        recipeDescription: String,
+        ingredients: List<Ingredient>,
+        instruction: String,
+    ) {
+        var showButtons by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
                 .padding(paddingValues)
         ) {
-
             PingwinekCooksComposables.SpacerSmall()
 
-            EditableText(
-                text = recipeTitle,
-                editable = editRecipe,
-                onValueChange = onRecipeTitleChange
-            )
-            EditableText(
-                text = recipeDescription,
-                editable = editRecipe,
-                onValueChange = onRecipeDescriptionChange
-            )
+            Row(
+                modifier = Modifier
+                    .clickable { showButtons = !showButtons }
+            ) {
+                Column {
+                    Text(text = recipeTitle)
+                    Text(text = recipeDescription)
+                }
+
+                if (showButtons) {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                    }
+                }
+            }
 
             PingwinekCooksComposables.SpacerMedium()
 
