@@ -10,9 +10,11 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -112,7 +115,7 @@ class RecipeActivity: AppCompatActivity() {
         setContent {
             PingwinekCooksAppTheme {
 
-                val mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
+                var mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
 
                 val recipeData = recipeModel.recipeData.observeAsState()
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
@@ -171,7 +174,10 @@ class RecipeActivity: AppCompatActivity() {
                         instruction = recipeData.value?.instruction ?: "",
                         editRecipe = editRecipe,
                         onRecipeTitleChange = { title -> recipeTitle = title },
-                        onRecipeDescriptionChange = { description -> recipeDescription = description }
+                        onRecipeDescriptionChange = { description -> recipeDescription = description },
+                        onModeChange = { changedMode ->
+                            mode = changedMode
+                        }
                         )
                 }
             }
@@ -335,6 +341,7 @@ class RecipeActivity: AppCompatActivity() {
         editRecipe: Boolean,
         onRecipeTitleChange: (String) -> Unit,
         onRecipeDescriptionChange: (String) -> Unit,
+        onModeChange: (Mode) -> Unit
     ) {
             when (mode) {
                 Mode.SHOW_RECIPE -> {
@@ -343,10 +350,21 @@ class RecipeActivity: AppCompatActivity() {
                         recipeTitle = recipeTitle,
                         recipeDescription = recipeDescription,
                         ingredients = ingredients,
-                        instruction = instruction
+                        instruction = instruction,
+                        onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) }
                     )
                 }
-                Mode.EDIT_RECIPE -> {}
+                Mode.EDIT_RECIPE -> {
+                    EditRecipe(
+                        paddingValues = paddingValues,
+                        recipeTitle = recipeTitle,
+                        recipeDescription = recipeDescription,
+                        onRecipeTitleChange = onRecipeTitleChange,
+                        onRecipeDescriptionChange = onRecipeDescriptionChange,
+                        onCancel = { onModeChange(Mode.SHOW_RECIPE) },
+                        onSave = {}
+                    )
+                }
                 Mode.EDIT_INGREDIENT -> {}
                 Mode.EDIT_INSTRUCTION -> {}
             }
@@ -359,6 +377,7 @@ class RecipeActivity: AppCompatActivity() {
         recipeDescription: String,
         ingredients: List<Ingredient>,
         instruction: String,
+        onEditRecipe: () -> Unit
     ) {
         var showButtons by remember { mutableStateOf(false) }
 
@@ -370,15 +389,20 @@ class RecipeActivity: AppCompatActivity() {
 
             Row(
                 modifier = Modifier
-                    .clickable { showButtons = !showButtons }
+                    .fillMaxWidth()
+                    .clickable { showButtons = !showButtons },
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .weight(80f)
+                ) {
                     Text(text = recipeTitle)
                     Text(text = recipeDescription)
                 }
 
                 if (showButtons) {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onEditRecipe) {
                         Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
                     }
                     IconButton(onClick = {}) {
@@ -393,6 +417,44 @@ class RecipeActivity: AppCompatActivity() {
                 ingredients = ingredients,
                 instruction = instruction
             )
+        }
+    }
+
+    @Composable
+    private fun EditRecipe(
+        paddingValues: PaddingValues,
+        recipeTitle: String,
+        recipeDescription: String,
+        onRecipeTitleChange: (String) -> Unit,
+        onRecipeDescriptionChange: (String) -> Unit,
+        onCancel: () -> Unit,
+        onSave: () -> Unit
+    ) {
+        EditPane (
+            paddingValues = paddingValues,
+            onCancel = onCancel,
+            onSave = onSave
+        ) {
+            Column {
+                TextField(
+                    value = recipeTitle,
+                    label = {
+                        Text(getString(R.string.recipe_title))
+                    },
+                    onValueChange = { changedString ->
+                        onRecipeTitleChange(changedString)
+                    }
+                )
+                TextField(
+                    value = recipeDescription,
+                    label = {
+                        Text(getString(R.string.recipe_description))
+                    },
+                    onValueChange = { changedString ->
+                        onRecipeDescriptionChange(changedString)
+                    }
+                )
+            }
         }
     }
 
@@ -431,6 +493,34 @@ class RecipeActivity: AppCompatActivity() {
                 Text(text = instruction)
             }
             2 -> {}
+        }
+    }
+
+    @Composable
+    private fun EditPane(
+        paddingValues: PaddingValues,
+        onCancel: () -> Unit,
+        onSave: () -> Unit,
+        content: @Composable () -> Unit
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            PingwinekCooksComposables.SpacerSmall()
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(getString(R.string.close))
+                Text(getString(R.string.save))
+            }
+
+            PingwinekCooksComposables.SpacerMedium()
+
+            content()
         }
     }
 
