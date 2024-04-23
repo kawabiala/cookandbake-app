@@ -3,7 +3,6 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
@@ -51,7 +49,6 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeActivity: AppCompatActivity() {
@@ -120,65 +117,26 @@ class RecipeActivity: AppCompatActivity() {
                 val recipeData = recipeModel.recipeData.observeAsState()
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
 
-                var recipeTitle by remember(recipeData.value?.title) {
-                    mutableStateOf(recipeData.value?.title ?: "")
-                }
-                var recipeDescription by remember(recipeData.value?.description) {
-                    mutableStateOf(recipeData.value?.description ?: "")
-                }
-
-                var editRecipe by remember { mutableStateOf(recipeModel.recipeId == null) }
-
-                val optionEdit = PingwinekCooksComposables.OptionItem(
-                    labelResourceId = R.string.edit_recipe,
-                    icon = Icons.Filled.Edit
-                ) {
-                    editRecipe = true
-                }
-
-                val optionDelete = PingwinekCooksComposables.OptionItem(
-                    labelResourceId = R.string.delete_recipe,
-                    icon = Icons.Filled.Delete
-                ) {}
-
-                val optionSave = PingwinekCooksComposables.OptionItem(
-                    labelResourceId = R.string.ok,
-                    icon = Icons.Filled.Check
-                ) {
-                    editRecipe = false
-                    recipeModel.saveRecipe(recipeTitle, recipeDescription)
-                }
-
                 val optionBack = PingwinekCooksComposables.OptionItem(
                     labelResourceId = R.string.back,
                     icon = Icons.AutoMirrored.Outlined.ArrowBack
                 ) { finish() }
 
-
                 PingwinekCooksScaffold(
                     title = "",
-                    showDropDown = !editRecipe,
-                    dropDownOptions = listOf(
-                        optionEdit,
-                        optionDelete
-                    ),
-                    optionItemLeft = if (editRecipe) null else optionBack,
-                    optionItemRight = optionSave
+                    optionItemLeft = if (mode == Mode.SHOW_RECIPE) optionBack else null,
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
                         mode = mode,
-                        recipeTitle = recipeTitle,
-                        recipeDescription = recipeDescription,
+                        recipeTitle = recipeData.value?.title ?: "",
+                        recipeDescription = recipeData.value?.description ?: "",
                         ingredients = ingredientData.value ?: listOf(),
                         instruction = recipeData.value?.instruction ?: "",
-                        editRecipe = editRecipe,
-                        onRecipeTitleChange = { title -> recipeTitle = title },
-                        onRecipeDescriptionChange = { description -> recipeDescription = description },
                         onModeChange = { changedMode ->
                             mode = changedMode
                         }
-                        )
+                    )
                 }
             }
         }
@@ -187,8 +145,6 @@ class RecipeActivity: AppCompatActivity() {
         saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
         savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
         saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
-
-//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
 /*
         // the fab needs to sit in the Activity, does not work in the Fragment
@@ -236,93 +192,6 @@ class RecipeActivity: AppCompatActivity() {
         val titleView = findViewById<TextView>(R.id.recipeName)
         val descriptionView = findViewById<TextView>(R.id.recipeDescription)
 */
-        recipeModel.recipeData.observe(this) { recipe: Recipe? ->
-//            titleView.text = recipe?.title
-//            descriptionView.text = recipe?.description
-            /*
-            if (!recipeModel.hasRecipeImage()) {
-                fab.setImageResource(R.drawable.ic_action_add_white)
-            } else {
-                fab.setImageResource(R.drawable.ic_action_create_white)
-            }
-
-             */
-        }
-
-        val onEditRecipeClickListener = { _: View ->
-            /*
-            val editIntent = Intent(this, RecipeEditActivity::class.java)
-            with(editIntent) {
-                putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
-                putExtra(EXTRA_RECIPE_DESCRIPTION, recipeModel.recipeData.value?.description)
-            }
-            saveRecipeLauncher.launch(editIntent)
-            */
-        }
-/*
-//        titleView.setOnClickListener(onEditRecipeClickListener)
-//        descriptionView.setOnClickListener(onEditRecipeClickListener)
-
-        val pagerAdapter = RecipePagerAdapter(
-            supportFragmentManager,
-            resources.getString(R.string.ingredients),
-            resources.getString(R.string.instruction),
-            resources.getString(R.string.pdf))
-
-        val tabLayout = findViewById<TabLayout>(R.id.recipe_tablayout)
-        findViewById<ViewPager>(R.id.recipeTabs).apply {
-           /*
-           adapter = pagerAdapter
-            tabLayout.setupWithViewPager(this)
-            addOnPageChangeListener(object: ViewPager.OnPageChangeListener{
-
-                override fun onPageScrolled(
-                    position: Int,
-                    positionOffset: Float,
-                    positionOffsetPixels: Int
-                ) {
-                    //do nothing
-                }
-
-                override fun onPageSelected(position: Int) {
-                    /*
-                    when (position) {
-                        0 -> fab.hide()
-                        1 -> fab.hide()
-                        2 -> fab.show()
-                    }
-                    */
-                }
-
-                override fun onPageScrollStateChanged(state: Int) {
-                    // do nothing
-                }
-            })
-            */
-        }
-
-        optionMenu.apply {
-            addMenuEntry(R.id.OPTION_MENU_DELETE, resources.getString(R.string.delete)) {
-                delete()
-                true
-            }
-
-            addMenuEntry(R.id.OPTION_MENU_DELETE_PDF, resources.getString(R.string.delete_pdf)) {
-                deletePdf()
-                true
-            }
-
-            addMenuEntry(
-                R.id.OPTION_MENU_SHARE,
-                resources.getString(R.string.share),
-                R.drawable.ic_action_share_black,
-                true) {
-                startActivity(getShareRecipeIntent())
-                true
-            }
-        }
-
- */
     }
 
     override fun onResume() {
@@ -338,17 +207,24 @@ class RecipeActivity: AppCompatActivity() {
         recipeDescription: String,
         ingredients: List<Ingredient>,
         instruction: String,
-        editRecipe: Boolean,
-        onRecipeTitleChange: (String) -> Unit,
-        onRecipeDescriptionChange: (String) -> Unit,
         onModeChange: (Mode) -> Unit
     ) {
-            when (mode) {
+        var recipeTitleTemp by remember(recipeTitle) {
+            mutableStateOf(recipeTitle)
+        }
+        var recipeDescriptionTemp by remember(recipeDescription) {
+            mutableStateOf(recipeDescription)
+        }
+        var instructionTemp by remember(instruction) {
+            mutableStateOf(instruction)
+        }
+
+        when (mode) {
                 Mode.SHOW_RECIPE -> {
                     ShowRecipe(
                         paddingValues = paddingValues,
-                        recipeTitle = recipeTitle,
-                        recipeDescription = recipeDescription,
+                        recipeTitle = recipeTitleTemp,
+                        recipeDescription = recipeDescriptionTemp,
                         ingredients = ingredients,
                         instruction = instruction,
                         onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) }
@@ -357,12 +233,17 @@ class RecipeActivity: AppCompatActivity() {
                 Mode.EDIT_RECIPE -> {
                     EditRecipe(
                         paddingValues = paddingValues,
-                        recipeTitle = recipeTitle,
-                        recipeDescription = recipeDescription,
-                        onRecipeTitleChange = onRecipeTitleChange,
-                        onRecipeDescriptionChange = onRecipeDescriptionChange,
-                        onCancel = { onModeChange(Mode.SHOW_RECIPE) },
-                        onSave = {}
+                        recipeTitle = recipeTitleTemp,
+                        recipeDescription = recipeDescriptionTemp,
+                        onRecipeTitleChange = { title -> recipeTitleTemp = title},
+                        onRecipeDescriptionChange = { description -> recipeDescriptionTemp = description},
+                        onCancel = {
+                            onModeChange(Mode.SHOW_RECIPE)
+                                   },
+                        onSave = {
+                            recipeModel.saveRecipe(recipeTitleTemp, recipeDescriptionTemp)
+                            onModeChange(Mode.SHOW_RECIPE)
+                        }
                     )
                 }
                 Mode.EDIT_INGREDIENT -> {}
@@ -389,13 +270,13 @@ class RecipeActivity: AppCompatActivity() {
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showButtons = !showButtons },
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
                     modifier = Modifier
                         .weight(80f)
+                        .clickable { showButtons = !showButtons },
                 ) {
                     Text(text = recipeTitle)
                     Text(text = recipeDescription)
@@ -485,8 +366,30 @@ class RecipeActivity: AppCompatActivity() {
 
         when (selectedItem) {
             0 -> {
+                PingwinekCooksComposables.SpacerSmall()
+
                 ingredients.forEach { ingredient ->
-                    Text(text = ingredient.name)
+                    Row() {
+                        var showButtons by remember {
+                            mutableStateOf(false)
+                        }
+
+                        Text(
+                            modifier = Modifier
+                                .weight(80f)
+                                .clickable { showButtons = !showButtons },
+                            text = ingredient.name
+                        )
+
+                        if (showButtons) {
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
+                            }
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                            }
+                        }
+                    }
                 }
             }
             1 -> {
@@ -514,8 +417,16 @@ class RecipeActivity: AppCompatActivity() {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(getString(R.string.close))
-                Text(getString(R.string.save))
+                Text(
+                    modifier = Modifier
+                        .clickable { onCancel() },
+                    text = getString(R.string.close)
+                )
+                Text(
+                    modifier = Modifier
+                        .clickable { onSave() },
+                    text = getString(R.string.save)
+                )
             }
 
             PingwinekCooksComposables.SpacerMedium()
