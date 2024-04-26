@@ -8,11 +8,15 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,16 +28,23 @@ import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_NAME
@@ -48,6 +59,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.lib.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
@@ -262,15 +274,17 @@ class RecipeActivity: AppCompatActivity() {
     ) {
         var showButtons by remember { mutableStateOf(false) }
 
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-        ) {
+        Column {
             PingwinekCooksComposables.SpacerSmall()
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
@@ -295,6 +309,7 @@ class RecipeActivity: AppCompatActivity() {
             PingwinekCooksComposables.SpacerMedium()
 
             RecipeTabRow(
+                paddingValues = paddingValues,
                 ingredients = ingredients,
                 instruction = instruction
             )
@@ -341,6 +356,7 @@ class RecipeActivity: AppCompatActivity() {
 
     @Composable
     private fun RecipeTabRow(
+        paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
         instruction: String
     ) {
@@ -349,53 +365,93 @@ class RecipeActivity: AppCompatActivity() {
             mutableIntStateOf(0)
         }
 
-        PingwinekCooksComposables.PingwinekCooksTabRow(
-            selectedItem = selectedItem,
-            menuItems = listOf(
-                optionIngredients.apply {
-                    onClick = { selectedItem = 0 }
-                },
-                optionInstruction.apply {
-                    onClick = { selectedItem = 1 }
-                },
-                optionPdf.apply {
-                    onClick = { selectedItem = 2 }
-                }
-            )
-        )
-
-        when (selectedItem) {
-            0 -> {
-                PingwinekCooksComposables.SpacerSmall()
-
-                ingredients.forEach { ingredient ->
-                    Row() {
-                        var showButtons by remember {
-                            mutableStateOf(false)
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(color = MaterialTheme.colorScheme.surface)
+        ) {
+            Surface(
+                color = Color.Transparent,
+                modifier = Modifier
+                    .padding(
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    )
+            ) {
+                PingwinekCooksComposables.PingwinekCooksTabRow(
+                    selectedItem = selectedItem,
+                    containerColor = Color.Transparent,
+                    menuItems = listOf(
+                        optionIngredients.apply {
+                            onClick = { selectedItem = 0 }
+                        },
+                        optionInstruction.apply {
+                            onClick = { selectedItem = 1 }
+                        },
+                        optionPdf.apply {
+                            onClick = { selectedItem = 2 }
                         }
+                    )
+                )
+            }
 
-                        Text(
-                            modifier = Modifier
-                                .weight(80f)
-                                .clickable { showButtons = !showButtons },
-                            text = ingredient.name
-                        )
+            when (selectedItem) {
+                0 -> {
+                    var showButtons by remember {
+                        mutableIntStateOf(-1)
+                    }
 
-                        if (showButtons) {
-                            IconButton(onClick = {}) {
-                                Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
-                            }
-                            IconButton(onClick = {}) {
-                                Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                    PingwinekCooksComposables.SpacerSmall()
+
+                    ingredients.forEachIndexed { index, ingredient ->
+                        key(index) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.background,
+                                shape = ShapeDefaults.ExtraSmall,
+                                modifier = Modifier
+                                    .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(
+                                            start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+//                                        top = MaterialTheme.spacing.spacerSmall,
+//                                        bottom = MaterialTheme.spacing.spacerSmall
+                                        )
+                                ) {
+/*                                    var showButtons by remember {
+                                        mutableStateOf(false)
+                                    }*/
+
+                                    Text(
+                                        modifier = Modifier
+                                            .weight(80f)
+                                            .clickable {
+                                               showButtons = if (showButtons == index) -1 else index
+                                                       },
+                                        text = ingredient.name
+                                    )
+
+                                    if (showButtons == index) {
+                                        IconButton(onClick = {}) {
+                                            Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
+                                        }
+                                        IconButton(onClick = {}) {
+                                            Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                1 -> {
+                    Text(text = instruction)
+                }
+                2 -> {}
             }
-            1 -> {
-                Text(text = instruction)
-            }
-            2 -> {}
         }
     }
 

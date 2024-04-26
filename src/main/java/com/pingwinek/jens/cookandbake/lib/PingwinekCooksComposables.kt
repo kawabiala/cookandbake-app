@@ -339,9 +339,15 @@ class PingwinekCooksComposables {
         fun PingwinekCooksTabRow(
             selectedItem: Int = 0,
             enabled: Boolean = true,
+            containerColor: Color = MaterialTheme.colorScheme.surface,
+            contentColor: Color = MaterialTheme.colorScheme.primary,
             menuItems: List<OptionItem>
         ) {
-            TabRow(selectedItem) {
+            TabRow(
+                selectedTabIndex = selectedItem,
+                containerColor = containerColor,
+                contentColor = contentColor
+            ) {
                 menuItems.forEachIndexed { index, item ->
                     Tab(
                         selected = selectedItem == index,
