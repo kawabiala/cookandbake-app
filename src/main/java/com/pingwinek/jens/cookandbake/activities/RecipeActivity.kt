@@ -239,7 +239,9 @@ class RecipeActivity: AppCompatActivity() {
                         recipeDescription = recipeDescriptionTemp,
                         ingredients = ingredients,
                         instruction = instruction,
-                        onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) }
+                        onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) },
+                        onEditIngredient = { onModeChange(Mode.EDIT_INGREDIENT) },
+                        onEditInstruction = { onModeChange(Mode.EDIT_INSTRUCTION) }
                     )
                 }
                 Mode.EDIT_RECIPE -> {
@@ -270,7 +272,9 @@ class RecipeActivity: AppCompatActivity() {
         recipeDescription: String,
         ingredients: List<Ingredient>,
         instruction: String,
-        onEditRecipe: () -> Unit
+        onEditRecipe: () -> Unit,
+        onEditIngredient: (ingredientId: String) -> Unit,
+        onEditInstruction: () -> Unit
     ) {
         var showButtons by remember { mutableStateOf(false) }
 
@@ -311,7 +315,9 @@ class RecipeActivity: AppCompatActivity() {
             RecipeTabRow(
                 paddingValues = paddingValues,
                 ingredients = ingredients,
-                instruction = instruction
+                instruction = instruction,
+                onEditIngredient = onEditIngredient,
+                onEditInstruction = onEditInstruction
             )
         }
     }
@@ -358,7 +364,9 @@ class RecipeActivity: AppCompatActivity() {
     private fun RecipeTabRow(
         paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
-        instruction: String
+        instruction: String,
+        onEditIngredient: (ingredientId: String) -> Unit,
+        onEditInstruction: () -> Unit
     ) {
 
         var selectedItem by remember {
@@ -368,15 +376,15 @@ class RecipeActivity: AppCompatActivity() {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(color = MaterialTheme.colorScheme.surface)
+                .background(color = MaterialTheme.colorScheme.tertiaryContainer)
         ) {
             Surface(
                 color = Color.Transparent,
-                modifier = Modifier
+                /*modifier = Modifier
                     .padding(
                         start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                         end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                    )
+                    )*/
             ) {
                 PingwinekCooksComposables.PingwinekCooksTabRow(
                     selectedItem = selectedItem,
@@ -406,8 +414,10 @@ class RecipeActivity: AppCompatActivity() {
                     ingredients.forEachIndexed { index, ingredient ->
                         key(index) {
                             Surface(
-                                color = MaterialTheme.colorScheme.background,
-                                shape = ShapeDefaults.ExtraSmall,
+                                color =
+                                if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                                shape = ShapeDefaults.Small,
                                 modifier = Modifier
                                     .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
                             ) {
@@ -417,14 +427,8 @@ class RecipeActivity: AppCompatActivity() {
                                         .padding(
                                             start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                                             end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-//                                        top = MaterialTheme.spacing.spacerSmall,
-//                                        bottom = MaterialTheme.spacing.spacerSmall
                                         )
                                 ) {
-/*                                    var showButtons by remember {
-                                        mutableStateOf(false)
-                                    }*/
-
                                     Text(
                                         modifier = Modifier
                                             .weight(80f)
@@ -435,7 +439,9 @@ class RecipeActivity: AppCompatActivity() {
                                     )
 
                                     if (showButtons == index) {
-                                        IconButton(onClick = {}) {
+                                        IconButton(onClick = {
+                                            onEditIngredient(ingredient.id)
+                                        }) {
                                             Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
                                         }
                                         IconButton(onClick = {}) {
