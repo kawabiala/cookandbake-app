@@ -163,6 +163,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                         ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name)
                     }
                 }
+                loadIngredients()
             }
         }
     }

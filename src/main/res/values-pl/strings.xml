@@ -71,12 +71,16 @@
 
     <string name="ingredientRemote">Składnik</string>
     <string name="ingredients">Składniki</string>
-    <string name="instruction">Instrukcja</string>
+    <string name="ingredientName">Nazwa składniku</string>
     <string name="quantity">Ilość</string>
     <string name="quantity_number">Ilość (liczba)</string>
     <string name="quantity_verbal">Ilość (słownie, n.p. 1 – 2)</string>
     <string name="ingredient_quantity_unequal_verbal">Do słownege określenia ilości trzeba także określić ilość jako liczbę.</string>
     <string name="unity">Jedność</string>
+    <string name="edit_ingredient">Edytować składnik</string>
+    <string name="delete_ingredient">Zmazać składnik</string>
+
+    <string name="instruction">Instrukcja</string>
     <string name="write_instruction">Teraz instrukcję skompletować</string>
     <string name="plus_new_ingredient">+ nowy składnik</string>
 

@@ -71,12 +71,16 @@
 
     <string name="ingredientRemote">Zutat</string>
     <string name="ingredients">Zutaten</string>
-    <string name="instruction">Anleitung</string>
+    <string name="ingredientName">Bezeichnung der Zutat</string>
     <string name="quantity">Menge</string>
     <string name="quantity_number">Menge (Zahl)</string>
     <string name="quantity_verbal">Menge (verbal, z.b. 1 bis 2)</string>
     <string name="ingredient_quantity_unequal_verbal">Zur verbalen Menge muss auch eine Menge als Zahl angegeben werden.</string>
     <string name="unity">Einheit</string>
+    <string name="edit_ingredient">Zutat bearbeiten</string>
+    <string name="delete_ingredient">Zutat löschen</string>
+
+    <string name="instruction">Anleitung</string>
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
     <string name="plus_new_ingredient">+ Neue Zutat</string>
 

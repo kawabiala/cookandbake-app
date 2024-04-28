@@ -72,12 +72,16 @@
 
     <string name="ingredientRemote">Ingredient</string>
     <string name="ingredients">Ingredients</string>
-    <string name="instruction">Instruction</string>
+    <string name="ingredientName">Ingredient Name</string>
     <string name="quantity">Quantity</string>
     <string name="quantity_number">Quantity (number)</string>
     <string name="quantity_verbal">Quantity (verbal, e.g. 1–2)</string>
     <string name="ingredient_quantity_unequal_verbal">If you define a verbal quantity, please also fill in the quantity as number.</string>
     <string name="unity">Unity</string>
+    <string name="edit_ingredient">Edit ingredient</string>
+    <string name="delete_ingredient">Delete ingredient</string>
+
+    <string name="instruction">Instruction</string>
     <string name="write_instruction">Add instruction</string>
     <string name="plus_new_ingredient">+ new ingredient</string>
 

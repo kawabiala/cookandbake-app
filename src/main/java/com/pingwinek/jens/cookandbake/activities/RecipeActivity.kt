@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -230,6 +231,29 @@ class RecipeActivity: AppCompatActivity() {
         var instructionTemp by remember(instruction) {
             mutableStateOf(instruction)
         }
+        var ingredientId: String? by remember {
+            mutableStateOf(null)
+        }
+        var ingredientName by remember(ingredientId) {
+            mutableStateOf(ingredients.find { ingredient ->
+                ingredient.id == ingredientId
+            }?.name)
+        }
+        var ingredientQuantity by remember(ingredientId) {
+            mutableStateOf(ingredients.find { ingredient ->
+                ingredient.id == ingredientId
+            }?.quantity)
+        }
+        var ingredientQuantityVerbal by remember(ingredientId) {
+            mutableStateOf(ingredients.find { ingredient ->
+                ingredient.id == ingredientId
+            }?.quantityVerbal)
+        }
+        var ingredientUnity by remember(ingredientId) {
+            mutableStateOf(ingredients.find { ingredient ->
+                ingredient.id == ingredientId
+            }?.unity)
+        }
 
         when (mode) {
                 Mode.SHOW_RECIPE -> {
@@ -240,7 +264,10 @@ class RecipeActivity: AppCompatActivity() {
                         ingredients = ingredients,
                         instruction = instruction,
                         onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) },
-                        onEditIngredient = { onModeChange(Mode.EDIT_INGREDIENT) },
+                        onEditIngredient = { changedIngredientId ->
+                            ingredientId = changedIngredientId
+                            onModeChange(Mode.EDIT_INGREDIENT)
+                       },
                         onEditInstruction = { onModeChange(Mode.EDIT_INSTRUCTION) }
                     )
                 }
@@ -260,7 +287,35 @@ class RecipeActivity: AppCompatActivity() {
                         }
                     )
                 }
-                Mode.EDIT_INGREDIENT -> {}
+                Mode.EDIT_INGREDIENT -> {
+                    EditIngredient(
+                        paddingValues = paddingValues,
+                        ingredientName = ingredientName,
+                        ingredientQuantity = ingredientQuantity,
+                        ingredientQuantityVerbal = ingredientQuantityVerbal,
+                        ingredientUnity = ingredientUnity,
+                        onIngredientNameChange = { name -> ingredientName = name},
+                        onIngredientQuantityChange = { quantity -> ingredientQuantity = quantity},
+                        onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbal = quantityVerbal},
+                        onIngredientUnityChange = { unity -> ingredientUnity = unity},
+                        onCancel = {
+                            ingredientId = null
+                            onModeChange(Mode.SHOW_RECIPE)
+                                   },
+                        onSave = {
+                            if (!ingredientName.isNullOrEmpty()) {
+                                recipeModel.saveIngredient(
+                                    ingredientId,
+                                    ingredientName!!,
+                                    ingredientQuantity,
+                                    ingredientQuantityVerbal,
+                                    ingredientUnity
+                                )
+                            }
+                            onModeChange(Mode.SHOW_RECIPE)
+                        }
+                    )
+                }
                 Mode.EDIT_INSTRUCTION -> {}
             }
     }
@@ -361,6 +416,75 @@ class RecipeActivity: AppCompatActivity() {
     }
 
     @Composable
+    private fun EditIngredient(
+        paddingValues: PaddingValues,
+        ingredientName: String?,
+        ingredientQuantity: Double?,
+        ingredientQuantityVerbal: String?,
+        ingredientUnity: String?,
+        onIngredientNameChange: (String) -> Unit,
+        onIngredientQuantityChange: (Double?) -> Unit,
+        onIngredientQuantityVerbalChange: (String) -> Unit,
+        onIngredientUnityChange: (String) -> Unit,
+        onCancel: () -> Unit,
+        onSave: () -> Unit
+    ) {
+        EditPane(
+            paddingValues = paddingValues,
+            onCancel = onCancel,
+            onSave = onSave
+        ) {
+            Column {
+                TextField(
+                    value = ingredientName ?: "",
+                    label = {
+                        Text(getString(R.string.ingredientName))
+                    },
+                    onValueChange = { changedString ->
+                        onIngredientNameChange(changedString)
+                    }
+                )
+                TextField(
+                    value = ingredientQuantity?.toString() ?: "",
+                    label = {
+                        Text(getString(R.string.quantity_number))
+                    },
+                    onValueChange = { changedString ->
+                        if (changedString.isNotEmpty()) {
+                            try {
+                                val quantity = changedString.toDouble()
+                                onIngredientQuantityChange(quantity)
+                            } catch (exception: NumberFormatException) {
+                                Log.e(this::class.java.name, exception.toString())
+                            }
+                        } else {
+                            onIngredientQuantityChange(null)
+                        }
+                    }
+                )
+                TextField(
+                    value = ingredientQuantityVerbal ?: "",
+                    label = {
+                        Text(getString(R.string.quantity_verbal))
+                    },
+                    onValueChange = { changedString ->
+                        onIngredientQuantityVerbalChange(changedString)
+                    }
+                )
+                TextField(
+                    value = ingredientUnity ?: "",
+                    label = {
+                        Text(getString(R.string.unity))
+                    },
+                    onValueChange = { changedString ->
+                        onIngredientUnityChange(changedString)
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
     private fun RecipeTabRow(
         paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
@@ -433,8 +557,9 @@ class RecipeActivity: AppCompatActivity() {
                                         modifier = Modifier
                                             .weight(80f)
                                             .clickable {
-                                               showButtons = if (showButtons == index) -1 else index
-                                                       },
+                                                showButtons =
+                                                    if (showButtons == index) -1 else index
+                                            },
                                         text = ingredient.name
                                     )
 
@@ -442,10 +567,10 @@ class RecipeActivity: AppCompatActivity() {
                                         IconButton(onClick = {
                                             onEditIngredient(ingredient.id)
                                         }) {
-                                            Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
+                                            Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
                                         }
                                         IconButton(onClick = {}) {
-                                            Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                                            Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
                                         }
                                     }
                                 }
