@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_INGREDIENT_ID
@@ -429,10 +431,12 @@ class RecipeActivity: AppCompatActivity() {
         onCancel: () -> Unit,
         onSave: () -> Unit
     ) {
+        val isQuantityAsNumberMissing = (ingredientQuantity == null && !ingredientQuantityVerbal.isNullOrEmpty())
+
         EditPane(
             paddingValues = paddingValues,
             onCancel = onCancel,
-            onSave = onSave
+            onSave = { if (!isQuantityAsNumberMissing) onSave() }
         ) {
             Column {
                 TextField(
@@ -449,6 +453,13 @@ class RecipeActivity: AppCompatActivity() {
                     label = {
                         Text(getString(R.string.quantity_number))
                     },
+                    isError = isQuantityAsNumberMissing,
+                    supportingText = {
+                        if (isQuantityAsNumberMissing) {
+                            Text(getString(R.string.ingredient_quantity_unequal_verbal))
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { changedString ->
                         if (changedString.isNotEmpty()) {
                             try {
