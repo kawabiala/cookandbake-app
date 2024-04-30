@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
@@ -105,6 +106,7 @@ class RecipeActivity: AppCompatActivity() {
     )
 
     private enum class FabMode { NONE, ADD_INGREDIENT }
+    private enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +126,15 @@ class RecipeActivity: AppCompatActivity() {
             PingwinekCooksAppTheme {
 
                 var mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
-                var fabMode by remember { mutableStateOf(FabMode.ADD_INGREDIENT) }
+                var tabMode by remember { mutableStateOf(TabMode.INGREDIENTS) }
+                val fabMode by remember(mode, tabMode) { derivedStateOf {
+                        if (mode == Mode.SHOW_RECIPE && tabMode == TabMode.INGREDIENTS) {
+                            FabMode.ADD_INGREDIENT
+                        } else {
+                            FabMode.NONE
+                        }
+                    } 
+                }
 
                 val recipeData = recipeModel.recipeData.observeAsState()
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
@@ -142,6 +152,10 @@ class RecipeActivity: AppCompatActivity() {
                         mode = Mode.EDIT_INGREDIENT
                     }
                 )
+                
+                val onTabModeChange: (TabMode) -> Unit = { newTabMode ->
+                    tabMode = newTabMode
+                }
 
                 PingwinekCooksScaffold(
                     title = "",
@@ -152,23 +166,22 @@ class RecipeActivity: AppCompatActivity() {
                     onFabClicked = {
                         if (fabMode == FabMode.ADD_INGREDIENT) {
                             mode = Mode.EDIT_INGREDIENT
-                            fabMode = FabMode.NONE
                         }
                     }
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
                         mode = mode,
+                        tabMode = tabMode,
                         recipeTitle = recipeData.value?.title ?: "",
                         recipeDescription = recipeData.value?.description ?: "",
                         ingredients = ingredientData.value ?: listOf(),
                         instruction = recipeData.value?.instruction ?: "",
                         onModeChange = { changedMode ->
                             mode = changedMode
-                            if (changedMode != Mode.SHOW_RECIPE) fabMode = FabMode.NONE
                         },
-                        onFabModeChange = { changedFabMode ->
-                            fabMode = changedFabMode
+                        onTabModeChange = { changedTabMode ->
+                            tabMode = changedTabMode
                         }
                     )
                 }
@@ -237,12 +250,13 @@ class RecipeActivity: AppCompatActivity() {
     private fun ScaffoldContent(
         paddingValues: PaddingValues,
         mode: Mode,
+        tabMode: TabMode,
         recipeTitle: String,
         recipeDescription: String,
         ingredients: List<Ingredient>,
         instruction: String,
         onModeChange: (Mode) -> Unit,
-        onFabModeChange: (FabMode) -> Unit
+        onTabModeChange: (TabMode) -> Unit
     ) {
         var recipeTitleTemp by remember(recipeTitle) {
             mutableStateOf(recipeTitle)
@@ -291,7 +305,7 @@ class RecipeActivity: AppCompatActivity() {
                             onModeChange(Mode.EDIT_INGREDIENT)
                        },
                         onEditInstruction = { onModeChange(Mode.EDIT_INSTRUCTION) },
-                        onFabModeChange = onFabModeChange
+                        onTabModeChange = onTabModeChange
                     )
                 }
                 Mode.EDIT_RECIPE -> {
@@ -353,7 +367,7 @@ class RecipeActivity: AppCompatActivity() {
         onEditRecipe: () -> Unit,
         onEditIngredient: (ingredientId: String) -> Unit,
         onEditInstruction: () -> Unit,
-        onFabModeChange: (FabMode) -> Unit
+        onTabModeChange: (TabMode) -> Unit
     ) {
         var showButtons by remember { mutableStateOf(false) }
 
@@ -397,7 +411,7 @@ class RecipeActivity: AppCompatActivity() {
                 instruction = instruction,
                 onEditIngredient = onEditIngredient,
                 onEditInstruction = onEditInstruction,
-                onFabModeChange = onFabModeChange
+                onTabModeChange = onTabModeChange
             )
         }
     }
@@ -525,17 +539,16 @@ class RecipeActivity: AppCompatActivity() {
         instruction: String,
         onEditIngredient: (ingredientId: String) -> Unit,
         onEditInstruction: () -> Unit,
-        onFabModeChange: (FabMode) -> Unit
+        onTabModeChange: (TabMode) -> Unit
     ) {
 
         var selectedTab by remember {
-            mutableIntStateOf(0)
+            mutableStateOf(TabMode.INGREDIENTS)
         }
 
-        val onSelectedTabChange: (tab: Int) -> Unit = { newSelectedTab ->
+        val onSelectedTabChange: (tab: TabMode) -> Unit = { newSelectedTab ->
             selectedTab = newSelectedTab
-            val newFabMode = if (newSelectedTab == 0) FabMode.ADD_INGREDIENT else FabMode.NONE
-            onFabModeChange(newFabMode)
+            onTabModeChange(newSelectedTab)
         }
 
         Column(
@@ -552,24 +565,24 @@ class RecipeActivity: AppCompatActivity() {
                     )*/
             ) {
                 PingwinekCooksComposables.PingwinekCooksTabRow(
-                    selectedItem = selectedTab,
+                    selectedItem = selectedTab.ordinal,
                     containerColor = Color.Transparent,
                     menuItems = listOf(
                         optionIngredients.apply {
-                            onClick = { onSelectedTabChange(0) }
+                            onClick = { onSelectedTabChange(TabMode.INGREDIENTS) }
                         },
                         optionInstruction.apply {
-                            onClick = { onSelectedTabChange(1) }
+                            onClick = { onSelectedTabChange(TabMode.INSTRUCTION) }
                         },
                         optionPdf.apply {
-                            onClick = { onSelectedTabChange(2) }
+                            onClick = { onSelectedTabChange(TabMode.PDF) }
                         }
                     )
                 )
             }
 
             when (selectedTab) {
-                0 -> {
+                TabMode.INGREDIENTS -> {
                     var showButtons by remember {
                         mutableIntStateOf(-1)
                     }
@@ -619,10 +632,10 @@ class RecipeActivity: AppCompatActivity() {
                         }
                     }
                 }
-                1 -> {
+                TabMode.INSTRUCTION -> {
                     Text(text = instruction)
                 }
-                2 -> {}
+                TabMode.PDF -> {}
             }
         }
     }
