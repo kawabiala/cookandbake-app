@@ -80,6 +80,9 @@ class RecipeActivity: AppCompatActivity() {
         EDIT_INSTRUCTION
     }
 
+    private enum class FabMode { NONE, ADD_INGREDIENT }
+    private enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
+
     private lateinit var recipeModel: RecipeViewModel
 
 //    private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
@@ -104,9 +107,6 @@ class RecipeActivity: AppCompatActivity() {
         Icons.Filled.FilePresent,
         {}
     )
-
-    private enum class FabMode { NONE, ADD_INGREDIENT }
-    private enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -353,7 +353,22 @@ class RecipeActivity: AppCompatActivity() {
                         }
                     )
                 }
-                Mode.EDIT_INSTRUCTION -> {}
+                Mode.EDIT_INSTRUCTION -> {
+                    EditInstruction(
+                        paddingValues = paddingValues,
+                        instruction = instruction,
+                        onInstructionChange = { changedInstruction -> instructionTemp = changedInstruction },
+                        onCancel = { onModeChange(Mode.SHOW_RECIPE) },
+                        onSave = {
+                            recipeModel.saveRecipe(
+                                recipeTitleTemp,
+                                recipeDescriptionTemp,
+                                instructionTemp
+                            )
+                            onModeChange(Mode.SHOW_RECIPE)
+                        }
+                    )
+                }
             }
     }
 
@@ -533,6 +548,28 @@ class RecipeActivity: AppCompatActivity() {
     }
 
     @Composable
+    private fun EditInstruction(
+        paddingValues: PaddingValues,
+        instruction: String,
+        onInstructionChange: (String) -> Unit,
+        onCancel: () -> Unit,
+        onSave: () -> Unit
+    ) {
+        EditPane(
+            paddingValues = paddingValues,
+            onCancel = onCancel,
+            onSave = onSave
+        ) {
+            TextField(
+                value = instruction,
+                onValueChange = { changedString ->
+                    onInstructionChange(changedString)
+                }
+            )
+        }
+    }
+
+    @Composable
     private fun RecipeTabRow(
         paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
@@ -633,7 +670,21 @@ class RecipeActivity: AppCompatActivity() {
                     }
                 }
                 TabMode.INSTRUCTION -> {
-                    Text(text = instruction)
+                    var showButtons by remember { mutableStateOf(false) }
+
+                    Row() {
+                        Text(
+                            modifier = Modifier
+                                .clickable { showButtons = !showButtons },
+                            text = instruction
+                        )
+
+                        if (showButtons) {
+                            IconButton(onClick = onEditInstruction) {
+                                Icon(Icons.Filled.Edit, getString(R.string.write_instruction))
+                            }
+                        }
+                    }
                 }
                 TabMode.PDF -> {}
             }
