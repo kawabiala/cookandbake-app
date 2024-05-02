@@ -295,6 +295,7 @@ class RecipeActivity: AppCompatActivity() {
                 Mode.SHOW_RECIPE -> {
                     ShowRecipe(
                         paddingValues = paddingValues,
+                        tabMode = tabMode,
                         recipeTitle = recipeTitleTemp,
                         recipeDescription = recipeDescriptionTemp,
                         ingredients = ingredients,
@@ -356,7 +357,7 @@ class RecipeActivity: AppCompatActivity() {
                 Mode.EDIT_INSTRUCTION -> {
                     EditInstruction(
                         paddingValues = paddingValues,
-                        instruction = instruction,
+                        instruction = instructionTemp,
                         onInstructionChange = { changedInstruction -> instructionTemp = changedInstruction },
                         onCancel = { onModeChange(Mode.SHOW_RECIPE) },
                         onSave = {
@@ -375,6 +376,7 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun ShowRecipe(
         paddingValues: PaddingValues,
+        tabMode: TabMode,
         recipeTitle: String,
         recipeDescription: String,
         ingredients: List<Ingredient>,
@@ -422,6 +424,7 @@ class RecipeActivity: AppCompatActivity() {
 
             RecipeTabRow(
                 paddingValues = paddingValues,
+                tabMode = tabMode,
                 ingredients = ingredients,
                 instruction = instruction,
                 onEditIngredient = onEditIngredient,
@@ -572,6 +575,7 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun RecipeTabRow(
         paddingValues: PaddingValues,
+        tabMode: TabMode,
         ingredients: List<Ingredient>,
         instruction: String,
         onEditIngredient: (ingredientId: String) -> Unit,
@@ -579,12 +583,7 @@ class RecipeActivity: AppCompatActivity() {
         onTabModeChange: (TabMode) -> Unit
     ) {
 
-        var selectedTab by remember {
-            mutableStateOf(TabMode.INGREDIENTS)
-        }
-
         val onSelectedTabChange: (tab: TabMode) -> Unit = { newSelectedTab ->
-            selectedTab = newSelectedTab
             onTabModeChange(newSelectedTab)
         }
 
@@ -602,7 +601,7 @@ class RecipeActivity: AppCompatActivity() {
                     )*/
             ) {
                 PingwinekCooksComposables.PingwinekCooksTabRow(
-                    selectedItem = selectedTab.ordinal,
+                    selectedItem = tabMode.ordinal,
                     containerColor = Color.Transparent,
                     menuItems = listOf(
                         optionIngredients.apply {
@@ -618,7 +617,7 @@ class RecipeActivity: AppCompatActivity() {
                 )
             }
 
-            when (selectedTab) {
+            when (tabMode) {
                 TabMode.INGREDIENTS -> {
                     var showButtons by remember {
                         mutableIntStateOf(-1)
@@ -670,9 +669,18 @@ class RecipeActivity: AppCompatActivity() {
                     }
                 }
                 TabMode.INSTRUCTION -> {
-                    var showButtons by remember { mutableStateOf(false) }
+                    var showButtons by remember(instruction) { mutableStateOf(instruction.isBlank()) }
 
-                    Row() {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                                top = MaterialTheme.spacing.spacerSmall
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
                             modifier = Modifier
                                 .clickable { showButtons = !showButtons },
