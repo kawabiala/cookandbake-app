@@ -41,6 +41,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -81,6 +82,8 @@ class PingwinekCooksComposables {
         var icon: ImageVector,
         var onClick: () -> Unit
     )
+
+    data class PingwinekCooksTabItem(val tabNameId: Int, val tabIcon: ImageVector, val content: @Composable () -> Unit)
 
     enum class Navigation(val label: Int, val icon: ImageVector) {
         RECIPE(R.string.recipes, Icons.Outlined.RestaurantMenu),
@@ -336,6 +339,42 @@ class PingwinekCooksComposables {
         }
 
         @Composable
+        fun PingwinekCooksTabElement(
+            modifier: Modifier,
+            selectedItem: Int,
+            onSelectedItemChange: (Int) -> Unit,
+            tabItems: List<PingwinekCooksTabItem>
+        ) {
+            Column(
+                modifier = modifier
+            ) {
+                Surface(
+                    color = Color.Transparent,
+                ) {
+                    PingwinekCooksTabRow(
+                        selectedItem = selectedItem,
+                        containerColor = Color.Transparent,
+                        menuItems = mutableListOf<OptionItem>().apply{
+                            tabItems.forEachIndexed { index, tabItem ->
+                                add(OptionItem(
+                                    tabItem.tabNameId,
+                                    tabItem.tabIcon,
+                                    {onSelectedItemChange(index)}
+                                ))
+                            }
+                        }
+                    )
+                }
+
+                if (0 <= selectedItem && selectedItem < tabItems.size) {
+                    tabItems[selectedItem].content()
+                } else {
+                    throw IndexOutOfBoundsException()
+                }
+            }
+        }
+
+        @Composable
         fun PingwinekCooksTabRow(
             selectedItem: Int = 0,
             enabled: Boolean = true,
@@ -359,6 +398,42 @@ class PingwinekCooksComposables {
                         }
                     )
                 }
+            }
+        }
+
+        @Composable
+        fun EditPane(
+            paddingValues: PaddingValues,
+            onCancel: () -> Unit,
+            onSave: () -> Unit,
+            content: @Composable () -> Unit
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+            ) {
+                PingwinekCooksComposables.SpacerSmall()
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .clickable { onCancel() },
+                        text = stringResource(R.string.close)
+                    )
+                    Text(
+                        modifier = Modifier
+                            .clickable { onSave() },
+                        text = stringResource(R.string.save)
+                    )
+                }
+
+                PingwinekCooksComposables.SpacerMedium()
+
+                content()
             }
         }
 

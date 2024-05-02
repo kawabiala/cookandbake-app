@@ -422,15 +422,133 @@ class RecipeActivity: AppCompatActivity() {
 
             PingwinekCooksComposables.SpacerMedium()
 
-            RecipeTabRow(
-                paddingValues = paddingValues,
-                tabMode = tabMode,
-                ingredients = ingredients,
-                instruction = instruction,
-                onEditIngredient = onEditIngredient,
-                onEditInstruction = onEditInstruction,
-                onTabModeChange = onTabModeChange
+            PingwinekCooksComposables.PingwinekCooksTabElement(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(color = MaterialTheme.colorScheme.tertiaryContainer),
+                selectedItem = tabMode.ordinal,
+                onSelectedItemChange = { item -> onTabModeChange(TabMode.entries[item]) },
+                tabItems = mutableListOf<PingwinekCooksComposables.PingwinekCooksTabItem>().apply {
+                    add(PingwinekCooksComposables.PingwinekCooksTabItem(
+                        tabNameId = R.string.ingredients,
+                        tabIcon = Icons.AutoMirrored.Filled.ReceiptLong,
+                        content = {
+                            ShowIngredients(
+                                paddingValues = paddingValues,
+                                ingredients = ingredients,
+                                onEditIngredient = onEditIngredient
+                            )
+                        }
+                    ))
+                    add(PingwinekCooksComposables.PingwinekCooksTabItem(
+                        tabNameId = R.string.instruction,
+                        tabIcon = Icons.Filled.Receipt,
+                        content = {
+                            ShowInstruction(
+                                paddingValues = paddingValues,
+                                instruction = instruction,
+                                onEditInstruction = onEditInstruction
+                            )
+                        }
+                    ))
+                    add(PingwinekCooksComposables.PingwinekCooksTabItem(
+                        tabNameId = R.string.pdf,
+                        tabIcon = Icons.Filled.FilePresent,
+                        content = {
+                        }
+                    ))
+                }
             )
+        }
+    }
+
+    @Composable
+    private fun ShowIngredients(
+        paddingValues: PaddingValues,
+        ingredients: List<Ingredient>,
+        onEditIngredient: (String) -> Unit
+    ) {
+        var showButtons by remember {
+            mutableIntStateOf(-1)
+        }
+
+        Column {
+            PingwinekCooksComposables.SpacerSmall()
+
+            ingredients.forEachIndexed { index, ingredient ->
+                key(index) {
+                    Surface(
+                        color =
+                        if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onBackground,
+                        shape = ShapeDefaults.Small,
+                        modifier = Modifier
+                            .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(
+                                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                                )
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .weight(80f)
+                                    .clickable {
+                                        showButtons =
+                                            if (showButtons == index) -1 else index
+                                    },
+                                text = ingredient.name
+                            )
+
+                            if (showButtons == index) {
+                                IconButton(onClick = {
+                                    onEditIngredient(ingredient.id)
+                                }) {
+                                    Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
+                                }
+                                IconButton(onClick = {}) {
+                                    Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ShowInstruction(
+        paddingValues: PaddingValues,
+        instruction: String,
+        onEditInstruction: () -> Unit
+    ) {
+        var showButtons by remember(instruction) { mutableStateOf(instruction.isBlank()) }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    top = MaterialTheme.spacing.spacerSmall
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier
+                    .clickable { showButtons = !showButtons },
+                text = instruction
+            )
+
+            if (showButtons) {
+                IconButton(onClick = onEditInstruction) {
+                    Icon(Icons.Filled.Edit, getString(R.string.write_instruction))
+                }
+            }
         }
     }
 
@@ -444,7 +562,7 @@ class RecipeActivity: AppCompatActivity() {
         onCancel: () -> Unit,
         onSave: () -> Unit
     ) {
-        EditPane (
+        PingwinekCooksComposables.EditPane (
             paddingValues = paddingValues,
             onCancel = onCancel,
             onSave = onSave
@@ -488,7 +606,7 @@ class RecipeActivity: AppCompatActivity() {
     ) {
         val isQuantityAsNumberMissing = (ingredientQuantity == null && !ingredientQuantityVerbal.isNullOrEmpty())
 
-        EditPane(
+        PingwinekCooksComposables.EditPane(
             paddingValues = paddingValues,
             onCancel = onCancel,
             onSave = { if (!isQuantityAsNumberMissing) onSave() }
@@ -558,7 +676,7 @@ class RecipeActivity: AppCompatActivity() {
         onCancel: () -> Unit,
         onSave: () -> Unit
     ) {
-        EditPane(
+        PingwinekCooksComposables.EditPane(
             paddingValues = paddingValues,
             onCancel = onCancel,
             onSave = onSave
@@ -569,169 +687,6 @@ class RecipeActivity: AppCompatActivity() {
                     onInstructionChange(changedString)
                 }
             )
-        }
-    }
-
-    @Composable
-    private fun RecipeTabRow(
-        paddingValues: PaddingValues,
-        tabMode: TabMode,
-        ingredients: List<Ingredient>,
-        instruction: String,
-        onEditIngredient: (ingredientId: String) -> Unit,
-        onEditInstruction: () -> Unit,
-        onTabModeChange: (TabMode) -> Unit
-    ) {
-
-        val onSelectedTabChange: (tab: TabMode) -> Unit = { newSelectedTab ->
-            onTabModeChange(newSelectedTab)
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(color = MaterialTheme.colorScheme.tertiaryContainer)
-        ) {
-            Surface(
-                color = Color.Transparent,
-                /*modifier = Modifier
-                    .padding(
-                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                    )*/
-            ) {
-                PingwinekCooksComposables.PingwinekCooksTabRow(
-                    selectedItem = tabMode.ordinal,
-                    containerColor = Color.Transparent,
-                    menuItems = listOf(
-                        optionIngredients.apply {
-                            onClick = { onSelectedTabChange(TabMode.INGREDIENTS) }
-                        },
-                        optionInstruction.apply {
-                            onClick = { onSelectedTabChange(TabMode.INSTRUCTION) }
-                        },
-                        optionPdf.apply {
-                            onClick = { onSelectedTabChange(TabMode.PDF) }
-                        }
-                    )
-                )
-            }
-
-            when (tabMode) {
-                TabMode.INGREDIENTS -> {
-                    var showButtons by remember {
-                        mutableIntStateOf(-1)
-                    }
-
-                    PingwinekCooksComposables.SpacerSmall()
-
-                    ingredients.forEachIndexed { index, ingredient ->
-                        key(index) {
-                            Surface(
-                                color =
-                                if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.onBackground,
-                                shape = ShapeDefaults.Small,
-                                modifier = Modifier
-                                    .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .padding(
-                                            start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-                                        )
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            .weight(80f)
-                                            .clickable {
-                                                showButtons =
-                                                    if (showButtons == index) -1 else index
-                                            },
-                                        text = ingredient.name
-                                    )
-
-                                    if (showButtons == index) {
-                                        IconButton(onClick = {
-                                            onEditIngredient(ingredient.id)
-                                        }) {
-                                            Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
-                                        }
-                                        IconButton(onClick = {}) {
-                                            Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                TabMode.INSTRUCTION -> {
-                    var showButtons by remember(instruction) { mutableStateOf(instruction.isBlank()) }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-                                top = MaterialTheme.spacing.spacerSmall
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .clickable { showButtons = !showButtons },
-                            text = instruction
-                        )
-
-                        if (showButtons) {
-                            IconButton(onClick = onEditInstruction) {
-                                Icon(Icons.Filled.Edit, getString(R.string.write_instruction))
-                            }
-                        }
-                    }
-                }
-                TabMode.PDF -> {}
-            }
-        }
-    }
-
-    @Composable
-    private fun EditPane(
-        paddingValues: PaddingValues,
-        onCancel: () -> Unit,
-        onSave: () -> Unit,
-        content: @Composable () -> Unit
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-        ) {
-            PingwinekCooksComposables.SpacerSmall()
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    modifier = Modifier
-                        .clickable { onCancel() },
-                    text = getString(R.string.close)
-                )
-                Text(
-                    modifier = Modifier
-                        .clickable { onSave() },
-                    text = getString(R.string.save)
-                )
-            }
-
-            PingwinekCooksComposables.SpacerMedium()
-
-            content()
         }
     }
 
