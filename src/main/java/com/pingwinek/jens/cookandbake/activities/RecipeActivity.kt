@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,6 +83,8 @@ class RecipeActivity: AppCompatActivity() {
 
     private enum class FabMode { NONE, ADD_INGREDIENT }
     private enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
+
+    private enum class Delete { NONE, RECIPE, INGREDIENT }
 
     private lateinit var recipeModel: RecipeViewModel
 
@@ -144,7 +147,7 @@ class RecipeActivity: AppCompatActivity() {
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
                     onClick = { finish() }
                 )
-
+/*
                 val optionAddIngredient = PingwinekCooksComposables.OptionItem(
                     labelResourceId = R.string.plus_new_ingredient,
                     icon = Icons.Filled.Add,
@@ -156,7 +159,7 @@ class RecipeActivity: AppCompatActivity() {
                 val onTabModeChange: (TabMode) -> Unit = { newTabMode ->
                     tabMode = newTabMode
                 }
-
+*/
                 PingwinekCooksScaffold(
                     title = "",
                     optionItemLeft = if (mode == Mode.SHOW_RECIPE) optionBack else null,
@@ -182,7 +185,7 @@ class RecipeActivity: AppCompatActivity() {
                         },
                         onTabModeChange = { changedTabMode ->
                             tabMode = changedTabMode
-                        }
+                        },
                     )
                 }
             }
@@ -256,7 +259,7 @@ class RecipeActivity: AppCompatActivity() {
         ingredients: List<Ingredient>,
         instruction: String,
         onModeChange: (Mode) -> Unit,
-        onTabModeChange: (TabMode) -> Unit
+        onTabModeChange: (TabMode) -> Unit,
     ) {
         var recipeTitleTemp by remember(recipeTitle) {
             mutableStateOf(recipeTitle)
@@ -290,6 +293,50 @@ class RecipeActivity: AppCompatActivity() {
                 ingredient.id == ingredientId
             }?.unity)
         }
+        var delete by remember {
+            mutableStateOf(Delete.NONE)
+        }
+
+        if (delete != Delete.NONE) {
+            AlertDialog(
+                text = { val msg = when (delete) {
+                    Delete.RECIPE -> getString(R.string.delete_recipe)
+                    Delete.INGREDIENT -> getString(R.string.delete_ingredient)
+                    Delete.NONE -> ""
+                }
+                       Text(msg)
+               },
+                onDismissRequest = { delete = Delete.NONE },
+                dismissButton = {
+                    Text(
+                        modifier = Modifier
+                            .clickable { delete = Delete.NONE },
+                        text = getString(R.string.close)
+                    )
+                },
+                confirmButton = {
+                    Text(
+                        modifier = Modifier
+                            .clickable {
+                                when (delete) {
+                                    Delete.NONE -> {}
+                                    Delete.RECIPE -> {
+                                        recipeModel.deleteRecipe()
+                                        finish()
+                                    }
+                                    Delete.INGREDIENT -> {
+                                        ingredients.find { ingredient -> ingredient.id == ingredientId }
+                                            ?.let { recipeModel.deleteIngredient(it) }
+                                        ingredientId = null
+                                        delete = Delete.NONE
+                                    }
+                                }
+                            },
+                        text = getString(R.string.delete)
+                    )
+                }
+            )
+        }
 
         when (mode) {
                 Mode.SHOW_RECIPE -> {
@@ -301,10 +348,15 @@ class RecipeActivity: AppCompatActivity() {
                         ingredients = ingredients,
                         instruction = instruction,
                         onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) },
+                        onDeleteRecipe = { delete = Delete.RECIPE },
                         onEditIngredient = { changedIngredientId ->
                             ingredientId = changedIngredientId
                             onModeChange(Mode.EDIT_INGREDIENT)
                        },
+                        onDeleteIngredient = { changedIngredientId ->
+                            ingredientId = changedIngredientId
+                            delete = Delete.INGREDIENT
+                        },
                         onEditInstruction = { onModeChange(Mode.EDIT_INSTRUCTION) },
                         onTabModeChange = onTabModeChange
                     )
@@ -382,7 +434,9 @@ class RecipeActivity: AppCompatActivity() {
         ingredients: List<Ingredient>,
         instruction: String,
         onEditRecipe: () -> Unit,
+        onDeleteRecipe: () -> Unit,
         onEditIngredient: (ingredientId: String) -> Unit,
+        onDeleteIngredient: (ingredientId: String) -> Unit,
         onEditInstruction: () -> Unit,
         onTabModeChange: (TabMode) -> Unit
     ) {
@@ -414,7 +468,7 @@ class RecipeActivity: AppCompatActivity() {
                     IconButton(onClick = onEditRecipe) {
                         Icon(Icons.Filled.Edit, getString(R.string.edit_recipe))
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onDeleteRecipe) {
                         Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
                     }
                 }
@@ -436,7 +490,8 @@ class RecipeActivity: AppCompatActivity() {
                             ShowIngredients(
                                 paddingValues = paddingValues,
                                 ingredients = ingredients,
-                                onEditIngredient = onEditIngredient
+                                onEditIngredient = onEditIngredient,
+                                onDeleteIngredient = onDeleteIngredient
                             )
                         }
                     ))
@@ -466,7 +521,8 @@ class RecipeActivity: AppCompatActivity() {
     private fun ShowIngredients(
         paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
-        onEditIngredient: (String) -> Unit
+        onEditIngredient: (String) -> Unit,
+        onDeleteIngredient: (String) -> Unit
     ) {
         var showButtons by remember {
             mutableIntStateOf(-1)
@@ -509,7 +565,9 @@ class RecipeActivity: AppCompatActivity() {
                                 }) {
                                     Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
                                 }
-                                IconButton(onClick = {}) {
+                                IconButton(onClick = {
+                                    onDeleteIngredient(ingredient.id)
+                                }) {
                                     Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
                                 }
                             }
