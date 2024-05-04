@@ -42,7 +42,7 @@ class InstructionFragment : androidx.fragment.app.Fragment() {
                     it.putExtra(EXTRA_RECIPE_TITLE, recipeModel.recipeData.value?.title)
                     it.putExtra(EXTRA_RECIPE_INSTRUCTION, recipeModel.recipeData.value?.instruction)
                 }
-                (this.context as RecipeActivity).saveInstructionLauncher.launch(instructionIntent)
+//                (this.context as RecipeActivity).saveInstructionLauncher.launch(instructionIntent)
             }
         } else {
             Log.w(this::class.java.name, "context is not RecipeActivity")

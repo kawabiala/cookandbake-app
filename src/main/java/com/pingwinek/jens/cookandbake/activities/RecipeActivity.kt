@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,7 +53,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
-import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_INSTRUCTION
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
@@ -91,7 +90,7 @@ class RecipeActivity: AppCompatActivity() {
 //    private lateinit var saveRecipeLauncher: ActivityResultLauncher<Intent>
 //    private lateinit var saveIngredientLauncher: ActivityResultLauncher<Intent>
     private lateinit var savePdfLauncher: ActivityResultLauncher<Intent>
-    lateinit var saveInstructionLauncher: ActivityResultLauncher<Intent>
+//    lateinit var saveInstructionLauncher: ActivityResultLauncher<Intent>
 
     private val optionIngredients = PingwinekCooksComposables.OptionItem(
         R.string.ingredients,
@@ -147,22 +146,17 @@ class RecipeActivity: AppCompatActivity() {
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
                     onClick = { finish() }
                 )
-/*
-                val optionAddIngredient = PingwinekCooksComposables.OptionItem(
-                    labelResourceId = R.string.plus_new_ingredient,
-                    icon = Icons.Filled.Add,
-                    onClick = {
-                        mode = Mode.EDIT_INGREDIENT
-                    }
+
+                val optionShare = PingwinekCooksComposables.OptionItem(
+                    labelResourceId = R.string.share,
+                    icon = Icons.Filled.Share,
+                    onClick = { }
                 )
-                
-                val onTabModeChange: (TabMode) -> Unit = { newTabMode ->
-                    tabMode = newTabMode
-                }
-*/
+
                 PingwinekCooksScaffold(
                     title = "",
                     optionItemLeft = if (mode == Mode.SHOW_RECIPE) optionBack else null,
+                    optionItemMid = if (mode == Mode.SHOW_RECIPE) optionShare else null,
                     showFab = (fabMode != FabMode.NONE),
                     fabIconLabel = if (fabMode == FabMode.ADD_INGREDIENT) getString(R.string.plus_new_ingredient) else "",
                     fabIcon = Icons.Filled.Add,
@@ -194,7 +188,7 @@ class RecipeActivity: AppCompatActivity() {
 //        saveRecipeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveRecipe))
 //        saveIngredientLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveIngredient))
         savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::savePdf))
-        saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
+//        saveInstructionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult(), ActivityResultCallback(::saveInstruction))
 
 /*
         // the fab needs to sit in the Activity, does not work in the Fragment
@@ -270,6 +264,7 @@ class RecipeActivity: AppCompatActivity() {
         var instructionTemp by remember(instruction) {
             mutableStateOf(instruction)
         }
+
         var ingredientId: String? by remember {
             mutableStateOf(null)
         }
@@ -293,136 +288,163 @@ class RecipeActivity: AppCompatActivity() {
                 ingredient.id == ingredientId
             }?.unity)
         }
-        var delete by remember {
+
+        var deleteDialogMode by remember {
             mutableStateOf(Delete.NONE)
         }
 
-        if (delete != Delete.NONE) {
-            AlertDialog(
-                text = { val msg = when (delete) {
-                    Delete.RECIPE -> getString(R.string.delete_recipe)
-                    Delete.INGREDIENT -> getString(R.string.delete_ingredient)
-                    Delete.NONE -> ""
+        val resetIngredient: () -> Unit = {
+            ingredientId = null
+        }
+
+        val resetDelete: () -> Unit = {
+            deleteDialogMode = Delete.NONE
+        }
+
+        val saveRecipe: () -> Unit = {
+            recipeModel.saveRecipe(recipeTitleTemp, recipeDescriptionTemp, instructionTemp)
+        }
+
+        val saveIngredient: () -> Unit = {
+            if (!ingredientName.isNullOrEmpty()) {
+                recipeModel.saveIngredient(
+                    ingredientId,
+                    ingredientName!!,
+                    ingredientQuantity,
+                    ingredientQuantityVerbal,
+                    ingredientUnity
+                )
+            }
+        }
+
+        val deleteRecipe: () -> Unit = {
+            recipeModel.deleteRecipe()
+        }
+
+        val deleteIngredient: () -> Unit = {
+            ingredients.find { ingredient -> ingredient.id == ingredientId }
+                ?.let { recipeModel.deleteIngredient(it) }
+        }
+
+        val onCloseDeleteDialog: () -> Unit = {
+            resetIngredient()
+            resetDelete()
+        }
+
+        val onCloseEdit: () -> Unit = {
+            resetIngredient()
+            onModeChange(Mode.SHOW_RECIPE)
+        }
+
+        val onDelete: (delete: Delete) -> Unit = { selectedDelete ->
+            when (selectedDelete) {
+                Delete.NONE -> {}
+                Delete.RECIPE -> {
+                    deleteRecipe()
+                    finish()
                 }
-                       Text(msg)
-               },
-                onDismissRequest = { delete = Delete.NONE },
-                dismissButton = {
-                    Text(
-                        modifier = Modifier
-                            .clickable { delete = Delete.NONE },
-                        text = getString(R.string.close)
-                    )
-                },
-                confirmButton = {
-                    Text(
-                        modifier = Modifier
-                            .clickable {
-                                when (delete) {
-                                    Delete.NONE -> {}
-                                    Delete.RECIPE -> {
-                                        recipeModel.deleteRecipe()
-                                        finish()
-                                    }
-                                    Delete.INGREDIENT -> {
-                                        ingredients.find { ingredient -> ingredient.id == ingredientId }
-                                            ?.let { recipeModel.deleteIngredient(it) }
-                                        ingredientId = null
-                                        delete = Delete.NONE
-                                    }
-                                }
-                            },
-                        text = getString(R.string.delete)
-                    )
+                Delete.INGREDIENT -> {
+                    deleteIngredient()
+                    resetIngredient()
+                    resetDelete()
                 }
+            }
+        }
+
+        val onDeleteIngredient: (ingredientId: String) -> Unit = { id ->
+            ingredientId = id
+            deleteDialogMode = Delete.INGREDIENT
+        }
+
+        val onDeleteRecipe: () -> Unit = {
+            deleteDialogMode = Delete.RECIPE
+        }
+
+        val onEditIngredient: (ingredientId: String) -> Unit = { id ->
+            ingredientId = id
+            onModeChange(Mode.EDIT_INGREDIENT)
+        }
+
+        val onEditInstruction: () -> Unit = {
+            onModeChange(Mode.EDIT_INSTRUCTION)
+        }
+
+        val onEditRecipe: () -> Unit = {
+            onModeChange(Mode.EDIT_RECIPE)
+        }
+
+        val onSaveIngredient: () -> Unit = {
+            saveIngredient()
+            resetIngredient()
+            onModeChange(Mode.SHOW_RECIPE)
+        }
+
+        val onSaveRecipe: () -> Unit = {
+            saveRecipe()
+            onModeChange(Mode.SHOW_RECIPE)
+        }
+
+        if (deleteDialogMode != Delete.NONE) {
+            DeleteDialog(
+                dialogMode = deleteDialogMode,
+                onClose = onCloseDeleteDialog,
+                onDelete = onDelete
             )
         }
 
         when (mode) {
-                Mode.SHOW_RECIPE -> {
-                    ShowRecipe(
-                        paddingValues = paddingValues,
-                        tabMode = tabMode,
-                        recipeTitle = recipeTitleTemp,
-                        recipeDescription = recipeDescriptionTemp,
-                        ingredients = ingredients,
-                        instruction = instruction,
-                        onEditRecipe = { onModeChange(Mode.EDIT_RECIPE) },
-                        onDeleteRecipe = { delete = Delete.RECIPE },
-                        onEditIngredient = { changedIngredientId ->
-                            ingredientId = changedIngredientId
-                            onModeChange(Mode.EDIT_INGREDIENT)
-                       },
-                        onDeleteIngredient = { changedIngredientId ->
-                            ingredientId = changedIngredientId
-                            delete = Delete.INGREDIENT
-                        },
-                        onEditInstruction = { onModeChange(Mode.EDIT_INSTRUCTION) },
-                        onTabModeChange = onTabModeChange
-                    )
-                }
-                Mode.EDIT_RECIPE -> {
-                    EditRecipe(
-                        paddingValues = paddingValues,
-                        recipeTitle = recipeTitleTemp,
-                        recipeDescription = recipeDescriptionTemp,
-                        onRecipeTitleChange = { title -> recipeTitleTemp = title},
-                        onRecipeDescriptionChange = { description -> recipeDescriptionTemp = description},
-                        onCancel = {
-                            onModeChange(Mode.SHOW_RECIPE)
-                                   },
-                        onSave = {
-                            recipeModel.saveRecipe(recipeTitleTemp, recipeDescriptionTemp)
-                            onModeChange(Mode.SHOW_RECIPE)
-                        }
-                    )
-                }
-                Mode.EDIT_INGREDIENT -> {
-                    EditIngredient(
-                        paddingValues = paddingValues,
-                        ingredientName = ingredientName,
-                        ingredientQuantity = ingredientQuantity,
-                        ingredientQuantityVerbal = ingredientQuantityVerbal,
-                        ingredientUnity = ingredientUnity,
-                        onIngredientNameChange = { name -> ingredientName = name},
-                        onIngredientQuantityChange = { quantity -> ingredientQuantity = quantity},
-                        onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbal = quantityVerbal},
-                        onIngredientUnityChange = { unity -> ingredientUnity = unity},
-                        onCancel = {
-                            ingredientId = null
-                            onModeChange(Mode.SHOW_RECIPE)
-                                   },
-                        onSave = {
-                            if (!ingredientName.isNullOrEmpty()) {
-                                recipeModel.saveIngredient(
-                                    ingredientId,
-                                    ingredientName!!,
-                                    ingredientQuantity,
-                                    ingredientQuantityVerbal,
-                                    ingredientUnity
-                                )
-                            }
-                            onModeChange(Mode.SHOW_RECIPE)
-                        }
-                    )
-                }
-                Mode.EDIT_INSTRUCTION -> {
-                    EditInstruction(
-                        paddingValues = paddingValues,
-                        instruction = instructionTemp,
-                        onInstructionChange = { changedInstruction -> instructionTemp = changedInstruction },
-                        onCancel = { onModeChange(Mode.SHOW_RECIPE) },
-                        onSave = {
-                            recipeModel.saveRecipe(
-                                recipeTitleTemp,
-                                recipeDescriptionTemp,
-                                instructionTemp
-                            )
-                            onModeChange(Mode.SHOW_RECIPE)
-                        }
-                    )
-                }
+            Mode.SHOW_RECIPE -> {
+                ShowRecipe(
+                    paddingValues = paddingValues,
+                    tabMode = tabMode,
+                    recipeTitle = recipeTitleTemp,
+                    recipeDescription = recipeDescriptionTemp,
+                    ingredients = ingredients,
+                    instruction = instruction,
+                    onEditRecipe = onEditRecipe,
+                    onDeleteRecipe = onDeleteRecipe,
+                    onEditIngredient = onEditIngredient,
+                    onDeleteIngredient = onDeleteIngredient,
+                    onEditInstruction = onEditInstruction,
+                    onTabModeChange = onTabModeChange
+                )
             }
+            Mode.EDIT_RECIPE -> {
+                EditRecipe(
+                    paddingValues = paddingValues,
+                    recipeTitle = recipeTitleTemp,
+                    recipeDescription = recipeDescriptionTemp,
+                    onRecipeTitleChange = { title -> recipeTitleTemp = title},
+                    onRecipeDescriptionChange = { description -> recipeDescriptionTemp = description},
+                    onCancel = onCloseEdit,
+                    onSave = onSaveRecipe
+                )
+            }
+            Mode.EDIT_INGREDIENT -> {
+                EditIngredient(
+                    paddingValues = paddingValues,
+                    ingredientName = ingredientName,
+                    ingredientQuantity = ingredientQuantity,
+                    ingredientQuantityVerbal = ingredientQuantityVerbal,
+                    ingredientUnity = ingredientUnity,
+                    onIngredientNameChange = { name -> ingredientName = name},
+                    onIngredientQuantityChange = { quantity -> ingredientQuantity = quantity},
+                    onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbal = quantityVerbal},
+                    onIngredientUnityChange = { unity -> ingredientUnity = unity},
+                    onCancel = onCloseEdit,
+                    onSave = onSaveIngredient
+                )
+            }
+            Mode.EDIT_INSTRUCTION -> {
+                EditInstruction(
+                    paddingValues = paddingValues,
+                    instruction = instructionTemp,
+                    onInstructionChange = { changedInstruction -> instructionTemp = changedInstruction },
+                    onCancel = onCloseEdit,
+                    onSave = onSaveRecipe
+                )
+            }
+        }
     }
 
     @Composable
@@ -440,7 +462,7 @@ class RecipeActivity: AppCompatActivity() {
         onEditInstruction: () -> Unit,
         onTabModeChange: (TabMode) -> Unit
     ) {
-        var showButtons by remember { mutableStateOf(false) }
+        var showButtons by remember { mutableStateOf(recipeTitle.isEmpty()) }
 
         Column {
             PingwinekCooksComposables.SpacerSmall()
@@ -542,6 +564,7 @@ class RecipeActivity: AppCompatActivity() {
                             .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
                     ) {
                         Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .padding(
@@ -549,15 +572,22 @@ class RecipeActivity: AppCompatActivity() {
                                     end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                                 )
                         ) {
-                            Text(
+                            Row(
                                 modifier = Modifier
                                     .weight(80f)
                                     .clickable {
                                         showButtons =
                                             if (showButtons == index) -1 else index
                                     },
-                                text = ingredient.name
-                            )
+                            ) {
+                                val quantity = if (ingredient.quantityVerbal.isNullOrEmpty()) {
+                                    "${ingredient.quantity} ${ingredient.unity}"
+                                } else {
+                                    ingredient.quantityVerbal
+                                }
+                                Text(text = "$quantity ")
+                                Text(text = ingredient.name)
+                            }
 
                             if (showButtons == index) {
                                 IconButton(onClick = {
@@ -748,18 +778,37 @@ class RecipeActivity: AppCompatActivity() {
         }
     }
 
-    private fun delete() {
-        AlertDialog.Builder(this).apply {
-            setMessage(R.string.recipe_delete_confirm)
-            setPositiveButton(R.string.yes) { _, _ ->
-                recipeModel.deleteRecipe()
-                finish()
+    @Composable
+    private fun DeleteDialog(
+        dialogMode: Delete,
+        onClose: () -> Unit,
+        onDelete: (delete: Delete) -> Unit
+    ) {
+        AlertDialog(
+            text = {
+                val msg = when (dialogMode) {
+                    Delete.RECIPE -> getString(R.string.delete_recipe)
+                    Delete.INGREDIENT -> getString(R.string.delete_ingredient)
+                    Delete.NONE -> ""
+                }
+                Text(msg)
+            },
+            onDismissRequest = onClose,
+            dismissButton = {
+                Text(
+                    modifier = Modifier
+                        .clickable { onClose() },
+                    text = getString(R.string.close)
+                )
+            },
+            confirmButton = {
+                Text(
+                    modifier = Modifier
+                        .clickable { onDelete(dialogMode) },
+                    text = getString(R.string.delete)
+                )
             }
-            setNegativeButton(R.string.no) { _, _ ->
-                // Do nothing
-            }
-        }.show()
-
+        )
     }
 
     private fun getShareRecipeIntent(): Intent {
@@ -783,20 +832,6 @@ class RecipeActivity: AppCompatActivity() {
             },
             null
         )
-    }
-
-    private fun saveInstruction(data: Intent) {
-        data.extras?.let {
-            it.getString(EXTRA_RECIPE_INSTRUCTION)?.let { instruction ->
-                recipeModel.recipeData.value?.title?.let { title ->
-                    recipeModel.saveRecipe(
-                        title,
-                        recipeModel.recipeData.value?.description ?: "",
-                        instruction
-                    )
-                }
-            }
-        }
     }
 
     private fun savePdf(data: Intent) {
