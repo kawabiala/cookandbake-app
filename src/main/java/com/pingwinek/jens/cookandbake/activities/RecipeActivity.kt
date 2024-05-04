@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -50,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
@@ -59,6 +59,7 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.Pi
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.lib.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.utils.Utils
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 class RecipeActivity: AppCompatActivity() {
@@ -575,30 +576,46 @@ class RecipeActivity: AppCompatActivity() {
                             Row(
                                 modifier = Modifier
                                     .weight(80f)
+                                    .fillMaxWidth()
                                     .clickable {
                                         showButtons =
                                             if (showButtons == index) -1 else index
                                     },
                             ) {
                                 val quantity = if (ingredient.quantityVerbal.isNullOrEmpty()) {
-                                    "${ingredient.quantity} ${ingredient.unity}"
+                                    val quantityAsString = Utils.quantityToString(ingredient.quantity)
+                                    if (quantityAsString.isEmpty()) "" else "$quantityAsString ${ingredient.unity}"
                                 } else {
                                     ingredient.quantityVerbal
                                 }
-                                Text(text = "$quantity ")
-                                Text(text = ingredient.name)
+                                Text(
+                                    modifier = Modifier
+                                        .weight(40f),
+                                    textAlign = TextAlign.Right,
+                                    text = "$quantity "
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .weight(60f),
+                                    text = ingredient.name
+                                )
                             }
 
-                            if (showButtons == index) {
-                                IconButton(onClick = {
-                                    onEditIngredient(ingredient.id)
-                                }) {
-                                    Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
-                                }
-                                IconButton(onClick = {
-                                    onDeleteIngredient(ingredient.id)
-                                }) {
-                                    Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
+                            Row(
+                                modifier = Modifier
+                                    .weight(20f)
+                            ) {
+                                if (showButtons == index) {
+                                    IconButton(onClick = {
+                                        onEditIngredient(ingredient.id)
+                                    }) {
+                                        Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
+                                    }
+                                    IconButton(onClick = {
+                                        onDeleteIngredient(ingredient.id)
+                                    }) {
+                                        Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
+                                    }
                                 }
                             }
                         }
@@ -710,7 +727,7 @@ class RecipeActivity: AppCompatActivity() {
                     }
                 )
                 TextField(
-                    value = ingredientQuantity?.toString() ?: "",
+                    value = Utils.quantityToString(ingredientQuantity),
                     label = {
                         Text(getString(R.string.quantity_number))
                     },
@@ -722,16 +739,7 @@ class RecipeActivity: AppCompatActivity() {
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { changedString ->
-                        if (changedString.isNotEmpty()) {
-                            try {
-                                val quantity = changedString.toDouble()
-                                onIngredientQuantityChange(quantity)
-                            } catch (exception: NumberFormatException) {
-                                Log.e(this::class.java.name, exception.toString())
-                            }
-                        } else {
-                            onIngredientQuantityChange(null)
-                        }
+                        onIngredientQuantityChange(Utils.quantityToDouble(changedString))
                     }
                 )
                 TextField(
