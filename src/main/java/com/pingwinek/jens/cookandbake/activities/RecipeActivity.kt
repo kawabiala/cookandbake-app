@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -266,27 +268,27 @@ class RecipeActivity: AppCompatActivity() {
             mutableStateOf(instruction)
         }
 
-        var ingredientId: String? by remember {
+        var ingredientIdTemp: String? by remember {
             mutableStateOf(null)
         }
-        var ingredientName by remember(ingredientId) {
+        var ingredientNameTemp by remember(ingredientIdTemp) {
             mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientId
+                ingredient.id == ingredientIdTemp
             }?.name)
         }
-        var ingredientQuantity by remember(ingredientId) {
+        var ingredientQuantityTemp by remember(ingredientIdTemp) {
             mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientId
+                ingredient.id == ingredientIdTemp
             }?.quantity)
         }
-        var ingredientQuantityVerbal by remember(ingredientId) {
+        var ingredientQuantityVerbalTemp by remember(ingredientIdTemp) {
             mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientId
+                ingredient.id == ingredientIdTemp
             }?.quantityVerbal)
         }
-        var ingredientUnity by remember(ingredientId) {
+        var ingredientUnityTemp by remember(ingredientIdTemp) {
             mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientId
+                ingredient.id == ingredientIdTemp
             }?.unity)
         }
 
@@ -295,7 +297,12 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val resetIngredient: () -> Unit = {
-            ingredientId = null
+            ingredientIdTemp = null
+            // when adding new ingredients, id is always null and other temp-values are not reset automatically
+            ingredientNameTemp = null
+            ingredientQuantityTemp = null
+            ingredientQuantityVerbalTemp = null
+            ingredientUnityTemp = null
         }
 
         val resetDelete: () -> Unit = {
@@ -307,13 +314,13 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val saveIngredient: () -> Unit = {
-            if (!ingredientName.isNullOrEmpty()) {
+            if (!ingredientNameTemp.isNullOrEmpty()) {
                 recipeModel.saveIngredient(
-                    ingredientId,
-                    ingredientName!!,
-                    ingredientQuantity,
-                    ingredientQuantityVerbal,
-                    ingredientUnity
+                    ingredientIdTemp,
+                    ingredientNameTemp!!,
+                    ingredientQuantityTemp,
+                    ingredientQuantityVerbalTemp,
+                    ingredientUnityTemp
                 )
             }
         }
@@ -323,7 +330,7 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val deleteIngredient: () -> Unit = {
-            ingredients.find { ingredient -> ingredient.id == ingredientId }
+            ingredients.find { ingredient -> ingredient.id == ingredientIdTemp }
                 ?.let { recipeModel.deleteIngredient(it) }
         }
 
@@ -353,7 +360,7 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val onDeleteIngredient: (ingredientId: String) -> Unit = { id ->
-            ingredientId = id
+            ingredientIdTemp = id
             deleteDialogMode = Delete.INGREDIENT
         }
 
@@ -362,7 +369,7 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val onEditIngredient: (ingredientId: String) -> Unit = { id ->
-            ingredientId = id
+            ingredientIdTemp = id
             onModeChange(Mode.EDIT_INGREDIENT)
         }
 
@@ -424,14 +431,14 @@ class RecipeActivity: AppCompatActivity() {
             Mode.EDIT_INGREDIENT -> {
                 EditIngredient(
                     paddingValues = paddingValues,
-                    ingredientName = ingredientName,
-                    ingredientQuantity = ingredientQuantity,
-                    ingredientQuantityVerbal = ingredientQuantityVerbal,
-                    ingredientUnity = ingredientUnity,
-                    onIngredientNameChange = { name -> ingredientName = name},
-                    onIngredientQuantityChange = { quantity -> ingredientQuantity = quantity},
-                    onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbal = quantityVerbal},
-                    onIngredientUnityChange = { unity -> ingredientUnity = unity},
+                    ingredientName = ingredientNameTemp,
+                    ingredientQuantity = ingredientQuantityTemp,
+                    ingredientQuantityVerbal = ingredientQuantityVerbalTemp,
+                    ingredientUnity = ingredientUnityTemp,
+                    onIngredientNameChange = { name -> ingredientNameTemp = name},
+                    onIngredientQuantityChange = { quantity -> ingredientQuantityTemp = quantity},
+                    onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbalTemp = quantityVerbal},
+                    onIngredientUnityChange = { unity -> ingredientUnityTemp = unity},
                     onCancel = onCloseEdit,
                     onSave = onSaveIngredient
                 )
@@ -551,14 +558,26 @@ class RecipeActivity: AppCompatActivity() {
             mutableIntStateOf(-1)
         }
 
+        var maxTextElementsSize by remember {
+            mutableIntStateOf(10)
+        }
+
+        var maxLeftTextElementsSize by remember {
+            mutableIntStateOf(4)
+        }
+
+        val leftTextElementWidth: Float by remember(maxTextElementsSize, maxLeftTextElementsSize) {
+            derivedStateOf { maxLeftTextElementsSize.toFloat() / maxTextElementsSize.toFloat() * 100 }
+        }
+
         Column {
             PingwinekCooksComposables.SpacerSmall()
 
             ingredients.forEachIndexed { index, ingredient ->
                 key(index) {
                     Surface(
-                        color =
-                        if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        //if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onBackground,
                         shape = ShapeDefaults.Small,
                         modifier = Modifier
@@ -577,29 +596,54 @@ class RecipeActivity: AppCompatActivity() {
                                 modifier = Modifier
                                     .weight(80f)
                                     .fillMaxWidth()
+                                    .onGloballyPositioned { coordinates ->
+                                        if (coordinates.size.width > maxTextElementsSize) {
+                                            maxTextElementsSize = coordinates.size.width
+                                        }
+                                    }
                                     .clickable {
                                         showButtons =
                                             if (showButtons == index) -1 else index
                                     },
+                                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
                             ) {
-                                val quantity = if (ingredient.quantityVerbal.isNullOrEmpty()) {
-                                    val quantityAsString = Utils.quantityToString(ingredient.quantity)
-                                    if (quantityAsString.isEmpty()) "" else "$quantityAsString ${ingredient.unity}"
+                                val quantity = if (!ingredient.quantityVerbal.isNullOrEmpty()) {
+                                    ingredient.quantityVerbal!!
                                 } else {
-                                    ingredient.quantityVerbal
+                                    val quantityAsString = Utils.quantityToString(ingredient.quantity)
+                                    if (quantityAsString.isEmpty()) {
+                                        ""
+                                    } else if (ingredient.unity.isNullOrEmpty()) {
+                                        quantityAsString
+                                    } else {
+                                        "$quantityAsString ${ingredient.unity}"
+                                    }
+                                }
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(leftTextElementWidth),
+                                    color = Color.Transparent
+                                ) {
+                                    Text(
+                                        modifier = Modifier
+                                            //.weight(leftTextElementWidth)
+                                            .onGloballyPositioned { coordinates ->
+                                                Log.i(this::class.java.name, "left: ${coordinates.size.width}")
+                                                if (coordinates.size.width > maxLeftTextElementsSize) {
+                                                    maxLeftTextElementsSize = coordinates.size.width
+                                                }
+                                            },
+                                        textAlign = TextAlign.Right,
+                                        text = quantity
+                                    )
                                 }
                                 Text(
                                     modifier = Modifier
-                                        .weight(40f),
-                                    textAlign = TextAlign.Right,
-                                    text = "$quantity "
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .weight(60f),
+                                        .weight(100f - leftTextElementWidth),
                                     text = ingredient.name
                                 )
                             }
+
 
                             Row(
                                 modifier = Modifier
