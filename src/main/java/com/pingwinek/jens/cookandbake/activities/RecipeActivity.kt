@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -49,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -470,7 +468,7 @@ class RecipeActivity: AppCompatActivity() {
         onEditInstruction: () -> Unit,
         onTabModeChange: (TabMode) -> Unit
     ) {
-        var showButtons by remember { mutableStateOf(recipeTitle.isEmpty()) }
+        var showButtons by remember(recipeTitle) { mutableStateOf(recipeTitle.isEmpty()) }
 
         Column {
             PingwinekCooksComposables.SpacerSmall()
@@ -558,112 +556,26 @@ class RecipeActivity: AppCompatActivity() {
             mutableIntStateOf(-1)
         }
 
-        var maxTextElementsSize by remember {
-            mutableIntStateOf(10)
-        }
-
-        var maxLeftTextElementsSize by remember {
-            mutableIntStateOf(4)
-        }
-
-        val leftTextElementWidth: Float by remember(maxTextElementsSize, maxLeftTextElementsSize) {
-            derivedStateOf { maxLeftTextElementsSize.toFloat() / maxTextElementsSize.toFloat() * 100 }
-        }
+        val leftTextElementWidth = 30f
 
         Column {
             PingwinekCooksComposables.SpacerSmall()
 
             ingredients.forEachIndexed { index, ingredient ->
                 key(index) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        //if (showButtons == index) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                    IngredientPane(
+                        paddingValues = paddingValues,
+                        paneColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onBackground,
-                        shape = ShapeDefaults.Small,
-                        modifier = Modifier
-                            .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(
-                                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
-                                )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .weight(80f)
-                                    .fillMaxWidth()
-                                    .onGloballyPositioned { coordinates ->
-                                        if (coordinates.size.width > maxTextElementsSize) {
-                                            maxTextElementsSize = coordinates.size.width
-                                        }
-                                    }
-                                    .clickable {
-                                        showButtons =
-                                            if (showButtons == index) -1 else index
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
-                            ) {
-                                val quantity = if (!ingredient.quantityVerbal.isNullOrEmpty()) {
-                                    ingredient.quantityVerbal!!
-                                } else {
-                                    val quantityAsString = Utils.quantityToString(ingredient.quantity)
-                                    if (quantityAsString.isEmpty()) {
-                                        ""
-                                    } else if (ingredient.unity.isNullOrEmpty()) {
-                                        quantityAsString
-                                    } else {
-                                        "$quantityAsString ${ingredient.unity}"
-                                    }
-                                }
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(leftTextElementWidth),
-                                    color = Color.Transparent
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            //.weight(leftTextElementWidth)
-                                            .onGloballyPositioned { coordinates ->
-                                                Log.i(this::class.java.name, "left: ${coordinates.size.width}")
-                                                if (coordinates.size.width > maxLeftTextElementsSize) {
-                                                    maxLeftTextElementsSize = coordinates.size.width
-                                                }
-                                            },
-                                        textAlign = TextAlign.Right,
-                                        text = quantity
-                                    )
-                                }
-                                Text(
-                                    modifier = Modifier
-                                        .weight(100f - leftTextElementWidth),
-                                    text = ingredient.name
-                                )
-                            }
-
-
-                            Row(
-                                modifier = Modifier
-                                    .weight(20f)
-                            ) {
-                                if (showButtons == index) {
-                                    IconButton(onClick = {
-                                        onEditIngredient(ingredient.id)
-                                    }) {
-                                        Icon(Icons.Filled.Edit, getString(R.string.edit_ingredient))
-                                    }
-                                    IconButton(onClick = {
-                                        onDeleteIngredient(ingredient.id)
-                                    }) {
-                                        Icon(Icons.Filled.Delete, getString(R.string.delete_ingredient))
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        leftTextElementWidth = leftTextElementWidth,
+                        showButtons = (showButtons == index),
+                        onChangeShowButtons = {
+                              showButtons = if (showButtons == index) -1 else index
+                                              },
+                        onEditIngredient = onEditIngredient,
+                        onDeleteIngredient = onDeleteIngredient,
+                        ingredient = ingredient
+                    )
                 }
             }
         }
@@ -827,6 +739,104 @@ class RecipeActivity: AppCompatActivity() {
                     onInstructionChange(changedString)
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun IngredientPane(
+        paddingValues: PaddingValues,
+        paneColor: Color,
+        contentColor: Color,
+        leftTextElementWidth: Float,
+        showButtons: Boolean,
+        onChangeShowButtons: () -> Unit,
+        onEditIngredient: (String) -> Unit,
+        onDeleteIngredient: (String) -> Unit,
+        ingredient: Ingredient
+    ){
+        Surface(
+            color = paneColor,
+            contentColor = contentColor,
+            shape = ShapeDefaults.Small,
+            modifier = Modifier
+                .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(
+                        start = paddingValues.calculateStartPadding(
+                            LayoutDirection.Ltr
+                        ),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .weight(80f)
+                        .fillMaxWidth()
+                        .clickable { onChangeShowButtons() },
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val quantity =
+                        if (!ingredient.quantityVerbal.isNullOrEmpty()) {
+                            ingredient.quantityVerbal!!
+                        } else {
+                            val quantityAsString =
+                                Utils.quantityToString(ingredient.quantity)
+                            if (quantityAsString.isEmpty()) {
+                                ""
+                            } else if (ingredient.unity.isNullOrEmpty()) {
+                                quantityAsString
+                            } else {
+                                "$quantityAsString ${ingredient.unity}"
+                            }
+                        }
+                    Surface(
+                        modifier = Modifier
+                            .weight(leftTextElementWidth),
+                        color = Color.Transparent
+                    ) {
+                        Text(
+//                            modifier = Modifier
+                                //.weight(leftTextElementWidth)
+                            textAlign = TextAlign.Right,
+                            text = quantity
+                        )
+                    }
+                    Text(
+                        modifier = Modifier
+                            .weight(100f - leftTextElementWidth),
+                        text = ingredient.name
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .weight(20f)
+                ) {
+                    if (showButtons) {
+                        IconButton(onClick = {
+                            onEditIngredient(ingredient.id)
+                        }) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                getString(R.string.edit_ingredient)
+                            )
+                        }
+                        IconButton(onClick = {
+                            onDeleteIngredient(ingredient.id)
+                        }) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                getString(R.string.delete_ingredient)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
