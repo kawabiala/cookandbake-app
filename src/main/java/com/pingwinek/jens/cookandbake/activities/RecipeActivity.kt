@@ -9,6 +9,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -26,6 +30,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
@@ -41,6 +46,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
@@ -61,6 +68,7 @@ import com.pingwinek.jens.cookandbake.lib.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.utils.Utils
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
+import kotlin.math.roundToInt
 
 class RecipeActivity: AppCompatActivity() {
 
@@ -557,6 +565,7 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val leftTextElementWidth = 30f
+        var offset by remember { mutableFloatStateOf(0f) }
 
         Column {
             PingwinekCooksComposables.SpacerSmall()
@@ -565,6 +574,7 @@ class RecipeActivity: AppCompatActivity() {
                 key(index) {
                     IngredientPane(
                         paddingValues = paddingValues,
+                        offset = if (index == showButtons) offset else 0f,
                         paneColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onBackground,
                         leftTextElementWidth = leftTextElementWidth,
@@ -574,6 +584,9 @@ class RecipeActivity: AppCompatActivity() {
                                               },
                         onEditIngredient = onEditIngredient,
                         onDeleteIngredient = onDeleteIngredient,
+                        onDrag = { newOffset ->
+                            offset = newOffset
+                         },
                         ingredient = ingredient
                     )
                 }
@@ -745,6 +758,7 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun IngredientPane(
         paddingValues: PaddingValues,
+        offset: Float,
         paneColor: Color,
         contentColor: Color,
         leftTextElementWidth: Float,
@@ -752,6 +766,7 @@ class RecipeActivity: AppCompatActivity() {
         onChangeShowButtons: () -> Unit,
         onEditIngredient: (String) -> Unit,
         onDeleteIngredient: (String) -> Unit,
+        onDrag: (Float) -> Unit,
         ingredient: Ingredient
     ){
         Surface(
@@ -760,6 +775,7 @@ class RecipeActivity: AppCompatActivity() {
             shape = ShapeDefaults.Small,
             modifier = Modifier
                 .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
+                .offset { IntOffset(0, offset.roundToInt()) }
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -815,9 +831,12 @@ class RecipeActivity: AppCompatActivity() {
 
                 Row(
                     modifier = Modifier
-                        .weight(20f)
+                        .weight(40f)
                 ) {
                     if (showButtons) {
+                        val draggableState = rememberDraggableState { delta ->
+                            onDrag(offset + delta)
+                        }
                         IconButton(onClick = {
                             onEditIngredient(ingredient.id)
                         }) {
@@ -832,6 +851,22 @@ class RecipeActivity: AppCompatActivity() {
                             Icon(
                                 Icons.Filled.Delete,
                                 getString(R.string.delete_ingredient)
+                            )
+                        }
+                        IconButton(
+                            modifier = Modifier
+                                .draggable(
+                                    state = draggableState,
+                                    orientation = Orientation.Vertical,
+                                    onDragStopped = { _ ->
+                                        onDrag(0f)
+                                    }
+                                ),
+                            onClick = {}
+                        ) {
+                            Icon(
+                                Icons.Filled.Menu,
+                                "DragAndDrop"
                             )
                         }
                     }
