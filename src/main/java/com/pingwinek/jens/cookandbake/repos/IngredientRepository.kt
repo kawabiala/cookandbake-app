@@ -24,7 +24,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         quantity: Double?,
         quantityVerbal: String?,
         unity: String?,
-        name: String
+        name: String,
+        sort: Int
     ) : Ingredient {
         return ingredientSourceFB.new(
             IngredientFB(
@@ -32,7 +33,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
                 quantity,
                 quantityVerbal,
                 unity,
-                name)
+                name,
+                sort)
         )
     }
 
@@ -41,7 +43,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         quantity: Double?,
         quantityVerbal: String?,
         unity: String?,
-        name: String
+        name: String,
+        sort: Int
     ): Ingredient {
         return ingredientSourceFB.update(
             IngredientFB(
@@ -50,7 +53,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
                 quantity,
                 quantityVerbal,
                 unity,
-                name
+                name,
+                sort
             )
         )
     }

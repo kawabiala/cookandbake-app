@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,8 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.ViewModelProvider
@@ -278,24 +280,20 @@ class RecipeActivity: AppCompatActivity() {
             mutableStateOf(null)
         }
         var ingredientNameTemp by remember(ingredientIdTemp) {
-            mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientIdTemp
-            }?.name)
+            mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.name)
         }
         var ingredientQuantityTemp by remember(ingredientIdTemp) {
-            mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientIdTemp
-            }?.quantity)
+            mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.quantity)
         }
         var ingredientQuantityVerbalTemp by remember(ingredientIdTemp) {
-            mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientIdTemp
-            }?.quantityVerbal)
+            mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.quantityVerbal)
         }
         var ingredientUnityTemp by remember(ingredientIdTemp) {
-            mutableStateOf(ingredients.find { ingredient ->
-                ingredient.id == ingredientIdTemp
-            }?.unity)
+            mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.unity)
+        }
+
+        var ingredientSortTemp by remember(ingredientIdTemp) {
+            mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: 0)
         }
 
         var deleteDialogMode by remember {
@@ -309,6 +307,7 @@ class RecipeActivity: AppCompatActivity() {
             ingredientQuantityTemp = null
             ingredientQuantityVerbalTemp = null
             ingredientUnityTemp = null
+            ingredientSortTemp = 0
         }
 
         val resetDelete: () -> Unit = {
@@ -326,7 +325,8 @@ class RecipeActivity: AppCompatActivity() {
                     ingredientNameTemp!!,
                     ingredientQuantityTemp,
                     ingredientQuantityVerbalTemp,
-                    ingredientUnityTemp
+                    ingredientUnityTemp,
+                    ingredientSortTemp
                 )
             }
         }
@@ -560,33 +560,44 @@ class RecipeActivity: AppCompatActivity() {
         onEditIngredient: (String) -> Unit,
         onDeleteIngredient: (String) -> Unit
     ) {
-        var showButtons by remember {
+        var paneWithButtons by remember {
             mutableIntStateOf(-1)
         }
 
         val leftTextElementWidth = 30f
+        val height = MaterialTheme.spacing.standardIcon
+        val paddingBelow = MaterialTheme.spacing.extraSmallPadding
+        val switchPositionOffset = height + paddingBelow
+
         var offset by remember { mutableFloatStateOf(0f) }
+        var posDelta by remember { mutableIntStateOf(0) }
+
+        val onDrag: (Float) -> Unit = { newOffset ->
+            offset = newOffset
+        }
 
         Column {
             PingwinekCooksComposables.SpacerSmall()
 
-            ingredients.forEachIndexed { index, ingredient ->
+            ingredients.sortedBy { ingredient ->
+                ingredient.sort
+            }.forEachIndexed { index, ingredient ->
                 key(index) {
                     IngredientPane(
                         paddingValues = paddingValues,
-                        offset = if (index == showButtons) offset else 0f,
+                        height = height,
+                        paddingBelow = paddingBelow,
+                        offset = if (index == paneWithButtons) offset else 0f,
                         paneColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onBackground,
                         leftTextElementWidth = leftTextElementWidth,
-                        showButtons = (showButtons == index),
+                        showButtons = (paneWithButtons == index),
                         onChangeShowButtons = {
-                              showButtons = if (showButtons == index) -1 else index
+                              paneWithButtons = if (paneWithButtons == index) -1 else index
                                               },
                         onEditIngredient = onEditIngredient,
                         onDeleteIngredient = onDeleteIngredient,
-                        onDrag = { newOffset ->
-                            offset = newOffset
-                         },
+                        onDrag = onDrag,
                         ingredient = ingredient
                     )
                 }
@@ -758,6 +769,8 @@ class RecipeActivity: AppCompatActivity() {
     @Composable
     private fun IngredientPane(
         paddingValues: PaddingValues,
+        height: Dp,
+        paddingBelow: Dp,
         offset: Float,
         paneColor: Color,
         contentColor: Color,
@@ -774,7 +787,8 @@ class RecipeActivity: AppCompatActivity() {
             contentColor = contentColor,
             shape = ShapeDefaults.Small,
             modifier = Modifier
-                .padding(bottom = MaterialTheme.spacing.extraSmallPadding)
+                .padding(bottom = paddingBelow)
+                .height(height)
                 .offset { IntOffset(0, offset.roundToInt()) }
         ) {
             Row(
@@ -788,13 +802,11 @@ class RecipeActivity: AppCompatActivity() {
                         end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
                     )
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .weight(80f)
                         .fillMaxWidth()
                         .clickable { onChangeShowButtons() },
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall),
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     val quantity =
                         if (!ingredient.quantityVerbal.isNullOrEmpty()) {
@@ -810,22 +822,19 @@ class RecipeActivity: AppCompatActivity() {
                                 "$quantityAsString ${ingredient.unity}"
                             }
                         }
-                    Surface(
-                        modifier = Modifier
-                            .weight(leftTextElementWidth),
-                        color = Color.Transparent
-                    ) {
-                        Text(
-//                            modifier = Modifier
-                                //.weight(leftTextElementWidth)
-                            textAlign = TextAlign.Right,
-                            text = quantity
-                        )
-                    }
                     Text(
                         modifier = Modifier
-                            .weight(100f - leftTextElementWidth),
+                            .height(height/2),
+                        fontWeight = FontWeight.Bold,
                         text = ingredient.name
+                    )
+                    Text(
+                        modifier = Modifier
+                            .height(height / 2)
+                            .padding(
+                                start = MaterialTheme.spacing.spacerSmall
+                            ),
+                        text = quantity
                     )
                 }
 
@@ -906,6 +915,12 @@ class RecipeActivity: AppCompatActivity() {
                 )
             }
         )
+    }
+
+    private fun findIngredient(ingredients: List<Ingredient>, ingredientId: String?): Ingredient? {
+        return ingredients.find { ingredient ->
+            ingredient.id == ingredientId
+        }
     }
 
     private fun getShareRecipeIntent(): Intent {

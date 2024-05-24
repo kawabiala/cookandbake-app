@@ -8,5 +8,6 @@ abstract class Ingredient: Model {
     abstract val quantityVerbal: String?
     abstract val unity: String?
     abstract val name: String
-    abstract fun getUpdated(ingredient: Ingredient) : Ingredient
+    abstract val sort: Int
+//    abstract fun getUpdated(ingredient: Ingredient) : Ingredient
 }

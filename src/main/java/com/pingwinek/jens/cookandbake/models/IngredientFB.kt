@@ -12,6 +12,7 @@ data class IngredientFB(
     override val quantityVerbal: String?,
     override val unity: String?,
     override val name: String,
+    override val sort: Int,
     override var lastModified: Long = Date().time
 ) : Ingredient() {
 
@@ -20,7 +21,8 @@ data class IngredientFB(
         val quantity: Double?,
         val quantityVerbal: String?,
         val unity: String?,
-        val name: String
+        val name: String,
+        val sort: Int
     )
 
     constructor(
@@ -28,14 +30,16 @@ data class IngredientFB(
         quantity: Double?,
         quantityVerbal: String?,
         unity: String?,
-        name: String
+        name: String,
+        sort: Int
     ) : this(
         "",
         recipeId,
         quantity,
         quantityVerbal,
         unity,
-        name
+        name,
+        sort
     )
 
     constructor(document: DocumentSnapshot, recipeId: String) : this(
@@ -45,11 +49,12 @@ data class IngredientFB(
         document.getString("quantityVerbal"),
         document.getString("unity"),
         document.getString("name") ?: "",
+        document.getLong("sort")?.toInt() ?: 0,
         0
     )
 
-    val documentData = DocumentData(quantity, quantityVerbal, unity, name)
-
+    val documentData = DocumentData(quantity, quantityVerbal, unity, name, sort)
+/*
     override fun getUpdated(ingredient: Ingredient): IngredientFB {
         return IngredientFB(
             id,
@@ -58,5 +63,5 @@ data class IngredientFB(
             ingredient.quantityVerbal,
             ingredient.unity,
             ingredient.name)
-    }
+    }*/
 }

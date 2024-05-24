@@ -147,7 +147,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?) {
+    fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?, sort: Int) {
         if (name.isEmpty()) {
             return
         }
@@ -155,12 +155,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
                 if (id.isNullOrEmpty()) {
-                    ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name)
+                    ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name, sort)
                 } else {
                     ingredientListData.value?.find { ingredient ->
                         ingredient.id == id
                     }?.let { ingredient ->
-                        ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name)
+                        ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name, sort)
                     }
                 }
                 loadIngredients()
