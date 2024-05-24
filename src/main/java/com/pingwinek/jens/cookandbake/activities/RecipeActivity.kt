@@ -54,12 +54,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
@@ -70,7 +71,6 @@ import com.pingwinek.jens.cookandbake.lib.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.utils.Utils
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-import kotlin.math.roundToInt
 
 class RecipeActivity: AppCompatActivity() {
 
@@ -564,16 +564,16 @@ class RecipeActivity: AppCompatActivity() {
             mutableIntStateOf(-1)
         }
 
-        val leftTextElementWidth = 30f
         val height = MaterialTheme.spacing.standardIcon
         val paddingBelow = MaterialTheme.spacing.extraSmallPadding
-        val switchPositionOffset = height + paddingBelow
+        val switchPositionOffset = (height + paddingBelow).value
 
         var offset by remember { mutableFloatStateOf(0f) }
         var posDelta by remember { mutableIntStateOf(0) }
 
         val onDrag: (Float) -> Unit = { newOffset ->
             offset = newOffset
+            posDelta = (newOffset / switchPositionOffset).toInt()
         }
 
         Column {
@@ -582,15 +582,25 @@ class RecipeActivity: AppCompatActivity() {
             ingredients.sortedBy { ingredient ->
                 ingredient.sort
             }.forEachIndexed { index, ingredient ->
+                val conditionalOffset = if (index == paneWithButtons) {
+                    offset
+                } else if(index < paneWithButtons && index >= paneWithButtons + posDelta) {
+                    switchPositionOffset
+                } else if (index > paneWithButtons && index <= paneWithButtons + posDelta) {
+                    switchPositionOffset * -1
+                } else {
+                    0f
+                }
                 key(index) {
                     IngredientPane(
                         paddingValues = paddingValues,
                         height = height,
                         paddingBelow = paddingBelow,
-                        offset = if (index == paneWithButtons) offset else 0f,
+                        zIndex = if (index == paneWithButtons) 1f else 0f,
+                        elevation = if (index == paneWithButtons) 10f else 0f,
+                        offset = conditionalOffset,
                         paneColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onBackground,
-                        leftTextElementWidth = leftTextElementWidth,
                         showButtons = (paneWithButtons == index),
                         onChangeShowButtons = {
                               paneWithButtons = if (paneWithButtons == index) -1 else index
@@ -771,10 +781,11 @@ class RecipeActivity: AppCompatActivity() {
         paddingValues: PaddingValues,
         height: Dp,
         paddingBelow: Dp,
+        zIndex: Float,
+        elevation: Float,
         offset: Float,
         paneColor: Color,
         contentColor: Color,
-        leftTextElementWidth: Float,
         showButtons: Boolean,
         onChangeShowButtons: () -> Unit,
         onEditIngredient: (String) -> Unit,
@@ -789,7 +800,11 @@ class RecipeActivity: AppCompatActivity() {
             modifier = Modifier
                 .padding(bottom = paddingBelow)
                 .height(height)
-                .offset { IntOffset(0, offset.roundToInt()) }
+                .zIndex(zIndex)
+                .offset(Dp(0f), Dp(offset))
+                .shadow(
+                    elevation = Dp(elevation)
+                )
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
