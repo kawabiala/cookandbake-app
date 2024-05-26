@@ -49,7 +49,7 @@ data class IngredientFB(
         document.getString("quantityVerbal"),
         document.getString("unity"),
         document.getString("name") ?: "",
-        document.getLong("sort")?.toInt() ?: 0,
+        document.getLong("sort")?.toInt() ?: -1,
         0
     )
 

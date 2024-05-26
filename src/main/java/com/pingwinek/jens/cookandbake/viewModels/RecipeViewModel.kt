@@ -167,4 +167,24 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
+    fun bulkUpdateIngredients(updateMap: Map<Ingredient, Int>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateMap.forEach { (ingredient, sort) ->
+                updateIngredient(ingredient, sort)
+            }
+            loadIngredients()
+        }
+    }
+
+    private suspend fun updateIngredient(ingredient: Ingredient, sort: Int) {
+        ingredientRepository.update(
+            ingredient,
+            ingredient.quantity,
+            ingredient.quantityVerbal,
+            ingredient.unity,
+            ingredient.name,
+            sort
+        )
+    }
 }

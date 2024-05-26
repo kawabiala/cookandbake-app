@@ -56,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
@@ -151,6 +152,7 @@ class RecipeActivity: AppCompatActivity() {
 
                 val recipeData = recipeModel.recipeData.observeAsState()
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
+                val ingredients = ingredientData.value ?: listOf()
 
                 val optionBack = PingwinekCooksComposables.OptionItem(
                     labelResourceId = R.string.back,
@@ -183,7 +185,7 @@ class RecipeActivity: AppCompatActivity() {
                         tabMode = tabMode,
                         recipeTitle = recipeData.value?.title ?: "",
                         recipeDescription = recipeData.value?.description ?: "",
-                        ingredients = ingredientData.value ?: listOf(),
+                        ingredients = ingredients,
                         instruction = recipeData.value?.instruction ?: "",
                         onModeChange = { changedMode ->
                             mode = changedMode
@@ -293,7 +295,7 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         var ingredientSortTemp by remember(ingredientIdTemp) {
-            mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: 0)
+            mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: -1)
         }
 
         var deleteDialogMode by remember {
@@ -307,7 +309,7 @@ class RecipeActivity: AppCompatActivity() {
             ingredientQuantityTemp = null
             ingredientQuantityVerbalTemp = null
             ingredientUnityTemp = null
-            ingredientSortTemp = 0
+            ingredientSortTemp = -1
         }
 
         val resetDelete: () -> Unit = {
@@ -338,6 +340,10 @@ class RecipeActivity: AppCompatActivity() {
         val deleteIngredient: () -> Unit = {
             ingredients.find { ingredient -> ingredient.id == ingredientIdTemp }
                 ?.let { recipeModel.deleteIngredient(it) }
+        }
+
+        val onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit = { map ->
+            recipeModel.bulkUpdateIngredients(map)
         }
 
         val onCloseDeleteDialog: () -> Unit = {
@@ -419,6 +425,7 @@ class RecipeActivity: AppCompatActivity() {
                     onDeleteRecipe = onDeleteRecipe,
                     onEditIngredient = onEditIngredient,
                     onDeleteIngredient = onDeleteIngredient,
+                    onChangeSortIngredient = onChangeSortIngredient,
                     onEditInstruction = onEditInstruction,
                     onTabModeChange = onTabModeChange
                 )
@@ -473,6 +480,7 @@ class RecipeActivity: AppCompatActivity() {
         onDeleteRecipe: () -> Unit,
         onEditIngredient: (ingredientId: String) -> Unit,
         onDeleteIngredient: (ingredientId: String) -> Unit,
+        onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit,
         onEditInstruction: () -> Unit,
         onTabModeChange: (TabMode) -> Unit
     ) {
@@ -527,7 +535,8 @@ class RecipeActivity: AppCompatActivity() {
                                 paddingValues = paddingValues,
                                 ingredients = ingredients,
                                 onEditIngredient = onEditIngredient,
-                                onDeleteIngredient = onDeleteIngredient
+                                onDeleteIngredient = onDeleteIngredient,
+                                onChangeSort = onChangeSortIngredient
                             )
                         }
                     ))
@@ -558,35 +567,63 @@ class RecipeActivity: AppCompatActivity() {
         paddingValues: PaddingValues,
         ingredients: List<Ingredient>,
         onEditIngredient: (String) -> Unit,
-        onDeleteIngredient: (String) -> Unit
+        onDeleteIngredient: (String) -> Unit,
+        onChangeSort: (Map<Ingredient, Int>) -> Unit
     ) {
-        var paneWithButtons by remember {
+        var activePane by remember(ingredients) {
             mutableIntStateOf(-1)
+        }
+
+        val ingredientsSorted by remember(ingredients) {
+            mutableStateOf(ingredients.sortedBy { ingredient -> ingredient.sort })
         }
 
         val height = MaterialTheme.spacing.standardIcon
         val paddingBelow = MaterialTheme.spacing.extraSmallPadding
         val switchPositionOffset = (height + paddingBelow).value
 
-        var offset by remember { mutableFloatStateOf(0f) }
-        var posDelta by remember { mutableIntStateOf(0) }
+        var offset by remember(ingredients) { mutableFloatStateOf(0f) }
+        var posDelta by remember(ingredients) { mutableIntStateOf(0) }
 
         val onDrag: (Float) -> Unit = { newOffset ->
             offset = newOffset
             posDelta = (newOffset / switchPositionOffset).toInt()
         }
 
+        val onDragStopped: () -> Unit = {
+            val ingredientsResorted = mutableMapOf<Ingredient, Int>().apply {
+                ingredientsSorted.forEachIndexed { index, ingredient ->
+                    var sort = if (index == activePane) {
+                        index + posDelta
+                    } else if(index < activePane && index >= activePane + posDelta) {
+                        index + 1
+                    } else if (index > activePane && index <= activePane + posDelta) {
+                        index - 1
+                    } else {
+                        index
+                    }
+
+                    sort = when {
+                        sort < 0 -> 0
+                        sort > ingredientsSorted.size -1 -> ingredientsSorted.size -1
+                        else -> sort
+                    }
+
+                    if (sort != ingredient.sort) put(ingredient, sort)
+                }
+            }
+            onChangeSort(ingredientsResorted)
+        }
+
         Column {
             PingwinekCooksComposables.SpacerSmall()
 
-            ingredients.sortedBy { ingredient ->
-                ingredient.sort
-            }.forEachIndexed { index, ingredient ->
-                val conditionalOffset = if (index == paneWithButtons) {
+            ingredientsSorted.forEachIndexed { index, ingredient ->
+                val conditionalOffset = if (index == activePane) {
                     offset
-                } else if(index < paneWithButtons && index >= paneWithButtons + posDelta) {
+                } else if(index < activePane && index >= activePane + posDelta) {
                     switchPositionOffset
-                } else if (index > paneWithButtons && index <= paneWithButtons + posDelta) {
+                } else if (index > activePane && index <= activePane + posDelta) {
                     switchPositionOffset * -1
                 } else {
                     0f
@@ -596,18 +633,19 @@ class RecipeActivity: AppCompatActivity() {
                         paddingValues = paddingValues,
                         height = height,
                         paddingBelow = paddingBelow,
-                        zIndex = if (index == paneWithButtons) 1f else 0f,
-                        elevation = if (index == paneWithButtons) 10f else 0f,
+                        zIndex = if (index == activePane) 1f else 0f,
+                        elevation = if (index == activePane) 10f else 0f,
                         offset = conditionalOffset,
                         paneColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onBackground,
-                        showButtons = (paneWithButtons == index),
-                        onChangeShowButtons = {
-                              paneWithButtons = if (paneWithButtons == index) -1 else index
+                        showButtons = (activePane == index),
+                        onChangeActivePane = {
+                              activePane = if (activePane == index) -1 else index
                                               },
                         onEditIngredient = onEditIngredient,
                         onDeleteIngredient = onDeleteIngredient,
                         onDrag = onDrag,
+                        onDragStopped = onDragStopped,
                         ingredient = ingredient
                     )
                 }
@@ -787,10 +825,11 @@ class RecipeActivity: AppCompatActivity() {
         paneColor: Color,
         contentColor: Color,
         showButtons: Boolean,
-        onChangeShowButtons: () -> Unit,
+        onChangeActivePane: () -> Unit,
         onEditIngredient: (String) -> Unit,
         onDeleteIngredient: (String) -> Unit,
         onDrag: (Float) -> Unit,
+        onDragStopped: () -> Unit,
         ingredient: Ingredient
     ){
         Surface(
@@ -821,7 +860,7 @@ class RecipeActivity: AppCompatActivity() {
                     modifier = Modifier
                         .weight(80f)
                         .fillMaxWidth()
-                        .clickable { onChangeShowButtons() },
+                        .clickable { onChangeActivePane() },
                 ) {
                     val quantity =
                         if (!ingredient.quantityVerbal.isNullOrEmpty()) {
@@ -858,8 +897,10 @@ class RecipeActivity: AppCompatActivity() {
                         .weight(40f)
                 ) {
                     if (showButtons) {
+                        val density = LocalDensity.current
                         val draggableState = rememberDraggableState { delta ->
-                            onDrag(offset + delta)
+                            val deltaDPValue = density.run { delta.toDp().value }
+                            onDrag(offset + deltaDPValue)
                         }
                         IconButton(onClick = {
                             onEditIngredient(ingredient.id)
@@ -882,9 +923,7 @@ class RecipeActivity: AppCompatActivity() {
                                 .draggable(
                                     state = draggableState,
                                     orientation = Orientation.Vertical,
-                                    onDragStopped = { _ ->
-                                        onDrag(0f)
-                                    }
+                                    onDragStopped = { onDragStopped() }
                                 ),
                             onClick = {}
                         ) {
