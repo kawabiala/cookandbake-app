@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
@@ -298,6 +300,12 @@ class RecipeActivity: AppCompatActivity() {
             mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: -1)
         }
 
+        val attachementPickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument()
+        ) { uri ->
+
+        }
+
         var deleteDialogMode by remember {
             mutableStateOf(Delete.NONE)
         }
@@ -340,6 +348,10 @@ class RecipeActivity: AppCompatActivity() {
         val deleteIngredient: () -> Unit = {
             ingredients.find { ingredient -> ingredient.id == ingredientIdTemp }
                 ?.let { recipeModel.deleteIngredient(it) }
+        }
+
+        val onAttachDocument: () -> Unit = {
+            attachementPickerLauncher.launch(arrayOf(""))
         }
 
         val onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit = { map ->
@@ -423,6 +435,7 @@ class RecipeActivity: AppCompatActivity() {
                     instruction = instruction,
                     onEditRecipe = onEditRecipe,
                     onDeleteRecipe = onDeleteRecipe,
+                    onAttachDocument = onAttachDocument,
                     onEditIngredient = onEditIngredient,
                     onDeleteIngredient = onDeleteIngredient,
                     onChangeSortIngredient = onChangeSortIngredient,
@@ -478,6 +491,7 @@ class RecipeActivity: AppCompatActivity() {
         instruction: String,
         onEditRecipe: () -> Unit,
         onDeleteRecipe: () -> Unit,
+        onAttachDocument: () -> Unit,
         onEditIngredient: (ingredientId: String) -> Unit,
         onDeleteIngredient: (ingredientId: String) -> Unit,
         onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit,
@@ -501,11 +515,16 @@ class RecipeActivity: AppCompatActivity() {
             ) {
                 Column(
                     modifier = Modifier
-                        .weight(80f)
+                        .weight(70f)
                         .clickable { showButtons = !showButtons },
                 ) {
-                    Text(text = recipeTitle)
-                    Text(text = recipeDescription)
+                    Text(
+                        fontWeight = FontWeight.Bold,
+                        text = recipeTitle
+                    )
+                    Text(
+                        text = recipeDescription
+                    )
                 }
 
                 if (showButtons) {
@@ -514,6 +533,9 @@ class RecipeActivity: AppCompatActivity() {
                     }
                     IconButton(onClick = onDeleteRecipe) {
                         Icon(Icons.Filled.Delete, getString(R.string.delete_recipe))
+                    }
+                    IconButton(onClick = onAttachDocument) {
+                        Icon(Icons.Filled.Attachment, getString(R.string.attach_document))
                     }
                 }
             }
@@ -570,20 +592,20 @@ class RecipeActivity: AppCompatActivity() {
         onDeleteIngredient: (String) -> Unit,
         onChangeSort: (Map<Ingredient, Int>) -> Unit
     ) {
-        var activePane by remember(ingredients) {
-            mutableIntStateOf(-1)
-        }
-
-        val ingredientsSorted by remember(ingredients) {
-            mutableStateOf(ingredients.sortedBy { ingredient -> ingredient.sort })
-        }
-
         val height = MaterialTheme.spacing.standardIcon
         val paddingBelow = MaterialTheme.spacing.extraSmallPadding
         val switchPositionOffset = (height + paddingBelow).value
 
-        var offset by remember(ingredients) { mutableFloatStateOf(0f) }
-        var posDelta by remember(ingredients) { mutableIntStateOf(0) }
+        var activePane by remember(ingredients) {
+            mutableIntStateOf(-1)
+        }
+
+        var ingredientsSorted by remember(ingredients) {
+            mutableStateOf(ingredients.sortedBy { ingredient -> ingredient.sort })
+        }
+
+        var offset by remember(activePane) { mutableFloatStateOf(0f) }
+        var posDelta by remember(activePane) { mutableIntStateOf(0) }
 
         val onDrag: (Float) -> Unit = { newOffset ->
             offset = newOffset
@@ -591,27 +613,32 @@ class RecipeActivity: AppCompatActivity() {
         }
 
         val onDragStopped: () -> Unit = {
-            val ingredientsResorted = mutableMapOf<Ingredient, Int>().apply {
-                ingredientsSorted.forEachIndexed { index, ingredient ->
-                    var sort = if (index == activePane) {
-                        index + posDelta
-                    } else if(index < activePane && index >= activePane + posDelta) {
-                        index + 1
-                    } else if (index > activePane && index <= activePane + posDelta) {
-                        index - 1
-                    } else {
-                        index
-                    }
+            val ingredientsLocallyResorted = ingredientsSorted.toMutableList()
+            val ingredientsResorted = mutableMapOf<Ingredient, Int>()
 
-                    sort = when {
-                        sort < 0 -> 0
-                        sort > ingredientsSorted.size -1 -> ingredientsSorted.size -1
-                        else -> sort
-                    }
-
-                    if (sort != ingredient.sort) put(ingredient, sort)
+            ingredientsSorted.forEachIndexed { index, ingredient ->
+                var sort = if (index == activePane) {
+                    index + posDelta
+                } else if(index < activePane && index >= activePane + posDelta) {
+                    index + 1
+                } else if (index > activePane && index <= activePane + posDelta) {
+                    index - 1
+                } else {
+                    index
                 }
+
+                sort = when {
+                    sort < 0 -> 0
+                    sort > ingredientsSorted.size -1 -> ingredientsSorted.size -1
+                    else -> sort
+                }
+
+                ingredientsLocallyResorted[sort] = ingredient
+                if (sort != ingredient.sort) ingredientsResorted[ingredient] = sort
             }
+
+            activePane = -1
+            ingredientsSorted = ingredientsLocallyResorted
             onChangeSort(ingredientsResorted)
         }
 

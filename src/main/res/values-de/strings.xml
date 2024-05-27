@@ -68,6 +68,7 @@
     <string name="add_recipe">Rezept hinzufügen</string>
     <string name="edit_recipe">Rezept bearbeiten</string>
     <string name="delete_recipe">Rezept löschen</string>
+    <string name="attach_document">Dokument anhängen</string>
 
     <string name="ingredientRemote">Zutat</string>
     <string name="ingredients">Zutaten</string>

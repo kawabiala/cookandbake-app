@@ -68,6 +68,7 @@
     <string name="add_recipe">Dodawać przepis</string>
     <string name="edit_recipe">Edytować przepis</string>
     <string name="delete_recipe">Zmazać przepis</string>
+    <string name="attach_document">Dołącić dokument</string>
 
     <string name="ingredientRemote">Składnik</string>
     <string name="ingredients">Składniki</string>

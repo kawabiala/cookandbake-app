@@ -68,6 +68,7 @@
     <string name="add_recipe">Add recipe</string>
     <string name="edit_recipe">Edit recipe</string>
     <string name="delete_recipe">Delete recipe</string>
+    <string name="attach_document">Attach document</string>
 
     <string name="ingredientRemote">Ingredient</string>
     <string name="ingredients">Ingredients</string>
