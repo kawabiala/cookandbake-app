@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -29,11 +30,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -53,6 +52,8 @@ class RecipeListingActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
+
+    private var isResumed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,22 +107,18 @@ class RecipeListingActivity : AppCompatActivity() {
         setContent {
             PingwinekCooksAppTheme {
 
-                var selectedNavigationBarItem by remember {
+                val recipes by recipeListData.observeAsState()
+
+                var selectedNavigationItem by remember(isResumed) {
                     mutableIntStateOf(PingwinekCooksComposables.Navigation.RECIPE.ordinal)
                 }
 
-                var loggedIn by remember {
-                    mutableStateOf(false)
+                val loggedIn by remember(recipes, auth.currentUser) {
+                    mutableStateOf(auth.currentUser?.isEmailVerified == true)
                 }
 
-                LifecycleResumeEffect(LocalLifecycleOwner.current) {
-                    loggedIn = auth.currentUser != null && auth.currentUser!!.isEmailVerified
-                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.RECIPE.ordinal
-                    recipeListingModel.loadData()
-
-                    onPauseOrDispose {
-                        loggedIn = false
-                    }
+                val onSelectedNavigationItemChange: (index: Int) -> Unit = { index ->
+                    selectedNavigationItem = index
                 }
 
                 PingwinekCooksScaffold(
@@ -131,13 +128,13 @@ class RecipeListingActivity : AppCompatActivity() {
                         optionItemPrivacy,
                         optionItemImpressum
                     ),
-                    selectedNavigationBarItem = selectedNavigationBarItem,
+                    selectedNavigationBarItem = selectedNavigationItem,
                     navigationBarEnabled = true,
                     navigationBarItems = listOf(
                         optionItemRecipe,
                         if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
                     ),
-                    onSelectedNavigationItemChange = { itemId -> selectedNavigationBarItem = itemId },
+                    onSelectedNavigationItemChange = onSelectedNavigationItemChange,
                     showFab = loggedIn,
                     fabIcon = Icons.Filled.Add,
                     fabIconLabel = getString(R.string.add_recipe),
@@ -145,11 +142,25 @@ class RecipeListingActivity : AppCompatActivity() {
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
+                        recipes = recipes,
                         loggedIn = loggedIn
                     )
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        isResumed = true
+        Log.i(this::class.java.name, "resume")
+        recipeListingModel.loadData()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isResumed = false
     }
 
 
@@ -176,9 +187,9 @@ class RecipeListingActivity : AppCompatActivity() {
     @Composable
     fun ScaffoldContent(
         paddingValues: PaddingValues,
+        recipes: LinkedList<Recipe>?,
         loggedIn: Boolean
     ) {
-        val recipes = recipeListData.observeAsState()
         val scrollState = rememberScrollState()
 
         Column(
@@ -189,7 +200,7 @@ class RecipeListingActivity : AppCompatActivity() {
             PingwinekCooksComposables.SpacerSmall()
 
             if (loggedIn) {
-                recipes.value?.forEachIndexed { index, recipe ->
+                recipes?.forEachIndexed { index, recipe ->
                     if (index > 0) {
                         HorizontalDivider(
                             modifier = Modifier

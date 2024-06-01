@@ -1,9 +1,11 @@
 package com.pingwinek.jens.cookandbake.repos
 
+import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
+import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 import java.util.LinkedList
@@ -11,6 +13,14 @@ import java.util.LinkedList
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
+
+    suspend fun attachDocument(recipe: Recipe, uri: Uri) {
+        try {
+            val isSuccess = FileSourceFB.uploadFile(getAttachmentPath(recipe.id), uri)
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "Error when attaching document: $exception")
+        }
+    }
 
     suspend fun delete(recipe: Recipe) {
         recipeSourceFB.delete(recipe as RecipeFB)
@@ -57,15 +67,12 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
                 recipe.description,
                 recipe.instruction
             ))
-        }
+        }*/
 
-        suspend fun saveFile(recipeId: Int, inputStream: InputStream, type: String) {
-            val name = getFileName(recipeId)
-            val localName = name ?: generateLocalName(recipeId, type)
-            saveFileLocal(inputStream, localName)
-            saveFileRemote(recipeId, inputStream, type, name)
+        suspend fun saveFile(recipeId: String, uri: Uri) {
+            val fileName = uri.lastPathSegment
         }
-
+/*
         private suspend fun generateLocalName(recipeId: Int, type: String) : String {
             val name = "recipe_local_$recipeId.${TYPES[type]}"
             updateRecipe(recipeId)
@@ -108,6 +115,11 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
  */
 
-    companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository)
+    companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {
+
+        private fun getAttachmentPath(id: String): String {
+            return "recipe/$id/attachment"
+        }
+    }
 
 }

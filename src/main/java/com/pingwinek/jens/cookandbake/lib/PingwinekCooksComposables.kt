@@ -35,11 +35,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -66,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksNavigationBar
 import com.pingwinek.jens.cookandbake.theming.DarkColors
 import com.pingwinek.jens.cookandbake.theming.LightColors
 import com.pingwinek.jens.cookandbake.theming.Spacing
@@ -305,34 +302,6 @@ class PingwinekCooksComposables {
                             onSelected()
                         },
                         colors = menuItemColors
-                    )
-                }
-            }
-        }
-
-        @Composable
-        fun PingwinekCooksNavigationBar(
-            selectedItem: Int = 0,
-            enabled: Boolean = true,
-            navigationBarColor: Color = NavigationBarDefaults.containerColor,
-            navigationBarItemColors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
-            menuItems: List<OptionItem>,
-            onSelectedItemChange: (Int) -> Unit
-        ) {
-            NavigationBar(
-                containerColor = navigationBarColor
-            ) {
-                menuItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        colors = navigationBarItemColors,
-                        icon =  { Icon(item.icon, null) } ,
-                        label = { Text(stringResource(id = item.labelResourceId)) },
-                        selected = selectedItem == index && enabled,
-                        enabled = enabled,
-                        onClick = {
-                            onSelectedItemChange(index)
-                            item.onClick()
-                        }
                     )
                 }
             }

@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +30,14 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
 
     var recipeId: String? = null
+
+    fun attachDocument(uri: Uri) {
+        recipeData.value?.let { recipe ->
+            viewModelScope.launch(Dispatchers.IO) {
+                recipeRepository.attachDocument(recipe, uri)
+            }
+        }
+    }
 
     //TODO update recipeData and ingredientListData
     fun deleteRecipe() {

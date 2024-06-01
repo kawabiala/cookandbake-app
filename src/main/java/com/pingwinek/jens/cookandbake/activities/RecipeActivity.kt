@@ -179,7 +179,9 @@ class RecipeActivity: AppCompatActivity() {
         val attachmentPickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument()
         ) { uri ->
-            // see below savePdf
+            if (uri != null) {
+                recipeModel.attachDocument(uri)
+            }
         }
 
         var deleteDialogMode by remember {

@@ -236,9 +236,9 @@ class SignInActivity : BaseActivity() {
      * if there is a new intent, update the intent for this activity - otherwise the original
      * intent would be used; compare documentation in [android.app.Activity]
      */
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent?.let {
+        intent.let {
             this.intent = it
         }
     }
