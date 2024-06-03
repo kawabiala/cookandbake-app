@@ -76,6 +76,33 @@ class FileSourceFB(application: PingwinekCooksApplication) {
         private val storage: FirebaseStorage = Firebase.storage
         private const val BASEPATH: String = "/user"
 
+        suspend fun getFile(cacheDir: File, pathString: String): File? {
+            if (pathString.isEmpty()) return null
+
+            var returnFile: File? = null
+
+            val storageReference =
+                getStorageReference(pathString, auth.currentUser!!.uid)
+
+            if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+                withContext(Dispatchers.IO) {
+                    val contentType = FirestoreDocumentAccessManager
+                        .getMetadata(storageReference)
+                        .contentType
+                    val suffix = if (contentType == "application/pdf") ".pdf" else ""
+
+                    returnFile = File.createTempFile(storageReference.name, suffix, cacheDir)
+                    returnFile?.let {
+                        FirestoreDocumentAccessManager.writeToFile(it, storageReference)
+                    }
+                }
+            }
+
+            Log.i(this::class.java.name, "size: ${returnFile?.length()}")
+
+            return returnFile
+        }
+
         suspend fun uploadFile(pathString: String, uri: Uri): Boolean {
             if (pathString.isEmpty()) return false
 

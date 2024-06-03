@@ -2,6 +2,8 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -49,7 +50,7 @@ import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 import java.util.LinkedList
 
-class SignInActivity : BaseActivity() {
+class SignInActivity : AppCompatActivity() {
 
     private enum class ButtonRightAction {
         NOTHING,
@@ -181,8 +182,6 @@ class SignInActivity : BaseActivity() {
             userInfoViewModel.loadData()
         }
 
-        configureTopBar(title = getString(R.string.profile))
-
         val optionItems = mutableListOf(
             PingwinekCooksComposables.OptionItem(
                 R.string.dataprotection,
@@ -212,12 +211,46 @@ class SignInActivity : BaseActivity() {
             }
         )
 
-        configureDropDown(*optionItems.toTypedArray())
+        val optionItemRecipe = PingwinekCooksComposables.OptionItem(
+            labelResourceId = PingwinekCooksComposables.Navigation.RECIPE.label,
+            icon = PingwinekCooksComposables.Navigation.RECIPE.icon
+        ) {
+            closeAction()
+        }
 
-        configureNavigationBar(
-            selectedItem = Navigation.LOGIN,
-            onRecipeClickAction = closeAction
-            )
+        val optionItemProfileLoggedOut = PingwinekCooksComposables.OptionItem(
+            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
+            icon = PingwinekCooksComposables.Navigation.LOGIN.icon
+        ) {
+        }
+
+        val optionItemProfileLoggedIn = PingwinekCooksComposables.OptionItem(
+            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
+            icon = Icons.Filled.Person
+        ) { startActivity(Intent(this, SignInActivity::class.java))
+        }
+
+        setContent {
+            PingwinekCooksComposables.PingwinekCooksAppTheme(
+
+            ) {
+                PingwinekCooksComposables.PingwinekCooksScaffold(
+                    title = getString(R.string.profile),
+                    showDropDown = true,
+                    dropDownOptions = optionItems,
+                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.LOGIN.ordinal,
+                    navigationBarEnabled = true,
+                    navigationBarItems = listOf(
+                        optionItemRecipe,
+                        optionItemProfileLoggedIn
+                    )
+                ) { paddingValues ->
+                   ScaffoldContent(
+                       paddingValues = paddingValues
+                   )
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -243,15 +276,9 @@ class SignInActivity : BaseActivity() {
         }
     }
 
-    @Preview
-    @Composable
-    fun Preview() {
-        super.BasePreview()
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun ScaffoldContent(paddingValues: PaddingValues) {
+    private fun ScaffoldContent(paddingValues: PaddingValues) {
 
         val authStatus by authenticationViewModel.authStatus.observeAsState()
         val linkMode by authenticationViewModel.linkMode.observeAsState()

@@ -5,6 +5,7 @@ import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.LinkedList
 
 abstract class FirestoreDocumentAccessManager {
@@ -17,18 +18,25 @@ abstract class FirestoreDocumentAccessManager {
             return LinkedList(qs.items)
         }
 
-        suspend fun get(storageReference: StorageReference) : ByteArray {
-            val stream = storageReference.getStream().snapshot.stream
-            val byteArray = ByteArray(MAX_FILE_SIZE.toInt())
+        suspend fun getMetadata(storageReference: StorageReference): StorageMetadata {
+            return SuspendedCoroutineWrapper.suspendedFunction(
+                storageReference.metadata
+            )
+        }
+
+        suspend fun writeToFile(file: File, storageReference: StorageReference) {
+            val streamDownloadTask = SuspendedCoroutineWrapper.suspendedFunction(
+                storageReference.stream
+            )
+
+            val inputStream = streamDownloadTask.stream
+            val outputStream = file.outputStream()
+
             withContext(Dispatchers.IO) {
-                var i = 0
-                while (stream.available() > 0) {
-                    byteArray[i] = stream.read().toByte()
-                    i++
-                }
-                stream.close()
+                outputStream.write(inputStream.readBytes())
+                inputStream.close()
+                outputStream.close()
             }
-            return byteArray
         }
 
         suspend fun upload(storageReference: StorageReference, uri: Uri) : Boolean {

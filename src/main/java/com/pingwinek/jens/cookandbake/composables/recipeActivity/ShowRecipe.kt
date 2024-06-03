@@ -44,9 +44,11 @@ fun ShowRecipe(
     recipeDescription: String,
     ingredients: List<Ingredient>,
     instruction: String,
+    hasAttachment: Boolean,
     onEditRecipe: () -> Unit,
     onDeleteRecipe: () -> Unit,
     onAttachDocument: () -> Unit,
+    onAttachmentClicked: () -> Unit,
     onEditIngredient: (ingredientId: String) -> Unit,
     onDeleteIngredient: (ingredientId: String) -> Unit,
     onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit,
@@ -80,6 +82,16 @@ fun ShowRecipe(
                 Text(
                     text = recipeDescription
                 )
+                if (hasAttachment) {
+                    IconButton(
+                        onClick = onAttachmentClicked
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Attachment,
+                            contentDescription = "Attachment"
+                        )
+                    }
+                }
             }
 
             if (showButtons) {

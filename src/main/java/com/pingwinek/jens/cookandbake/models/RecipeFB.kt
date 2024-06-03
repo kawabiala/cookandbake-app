@@ -8,14 +8,16 @@ data class RecipeFB(
     override val title: String,
     override val description: String?,
     override val instruction: String?,
-    override var lastModified: Long // keep for consistency with abstract base class Recipe and the interface Model
+    override val hasAttachment: Boolean = false,
+    override var lastModified: Long = 0// keep for consistency with abstract base class Recipe and the interface Model
 ) : Recipe() {
 
     @Keep
     data class DocumentData(
         val title: String,
         val description: String?,
-        val instruction: String?
+        val instruction: String?,
+        val hasAttachment: Boolean
     )
 
     constructor(
@@ -26,10 +28,9 @@ data class RecipeFB(
         "",
         title,
         description,
-        instruction,
-        0
+        instruction
     )
-
+/*
     constructor(
         id: String,
         title: String,
@@ -40,20 +41,21 @@ data class RecipeFB(
         title,
         description,
         instruction,
+        false,
         0
-    )
+    )*/
 
     constructor(document: DocumentSnapshot) : this(
         document.id,
         document.getString("title") ?: "",
         document.getString("description") ?: "",
         document.getString("instruction") ?: "",
-        0
+        document.getBoolean("hasAttachment") ?: false
     )
 
-    val documentData = DocumentData(title, description, instruction)
+    val documentData = DocumentData(title, description, instruction, hasAttachment)
 
     override fun getUpdated(recipe: Recipe): RecipeFB {
-        return RecipeFB(recipe.id, recipe.title, recipe.description, recipe.instruction, recipe.lastModified)
+        return RecipeFB(recipe.id, recipe.title, recipe.description, recipe.instruction, recipe.hasAttachment, recipe.lastModified)
     }
 }

@@ -17,6 +17,16 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
 
+        <provider
+            android:authorities="${applicationId}.provider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
         <activity
                 android:name=".activities.RecipeListingActivity"
                 android:launchMode="singleTask"
@@ -32,19 +42,6 @@
                 android:label="@string/recipeLocal"
                 android:launchMode="singleTop"
                 android:parentActivityName=".activities.RecipeListingActivity" />
-        <activity
-                android:name=".activities.IngredientEditActivity"
-                android:windowSoftInputMode="stateVisible"
-                android:parentActivityName=".activities.RecipeActivity" />
-        <activity
-                android:name=".activities.InstructionEditActivity"
-                android:windowSoftInputMode="stateVisible"
-                android:parentActivityName=".activities.RecipeActivity" />
-        <activity
-                android:name=".activities.RecipeEditActivity"
-                android:label="@string/recipeLocal"
-                android:windowSoftInputMode="stateVisible"
-                android:parentActivityName=".activities.RecipeActivity" />
 
         <activity
                 android:name=".activities.ImpressumActivity"

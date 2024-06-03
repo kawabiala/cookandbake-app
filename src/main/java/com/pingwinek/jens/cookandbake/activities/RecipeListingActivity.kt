@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -25,10 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -52,8 +49,6 @@ class RecipeListingActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
-
-    private var isResumed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,16 +104,8 @@ class RecipeListingActivity : AppCompatActivity() {
 
                 val recipes by recipeListData.observeAsState()
 
-                var selectedNavigationItem by remember(isResumed) {
-                    mutableIntStateOf(PingwinekCooksComposables.Navigation.RECIPE.ordinal)
-                }
-
                 val loggedIn by remember(recipes, auth.currentUser) {
                     mutableStateOf(auth.currentUser?.isEmailVerified == true)
-                }
-
-                val onSelectedNavigationItemChange: (index: Int) -> Unit = { index ->
-                    selectedNavigationItem = index
                 }
 
                 PingwinekCooksScaffold(
@@ -128,13 +115,12 @@ class RecipeListingActivity : AppCompatActivity() {
                         optionItemPrivacy,
                         optionItemImpressum
                     ),
-                    selectedNavigationBarItem = selectedNavigationItem,
+                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.RECIPE.ordinal,
                     navigationBarEnabled = true,
                     navigationBarItems = listOf(
                         optionItemRecipe,
                         if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
                     ),
-                    onSelectedNavigationItemChange = onSelectedNavigationItemChange,
                     showFab = loggedIn,
                     fabIcon = Icons.Filled.Add,
                     fabIconLabel = getString(R.string.add_recipe),
@@ -153,16 +139,8 @@ class RecipeListingActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        isResumed = true
-        Log.i(this::class.java.name, "resume")
         recipeListingModel.loadData()
     }
-
-    override fun onPause() {
-        super.onPause()
-        isResumed = false
-    }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //// Data Migration - used one time for migrating data Jan 2024

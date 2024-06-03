@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,7 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
+import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditIngredient
@@ -35,6 +38,7 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.Pi
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
+import java.io.File
 
 
 class RecipeActivity: AppCompatActivity() {
@@ -62,6 +66,12 @@ class RecipeActivity: AppCompatActivity() {
         if (intent.hasExtra(EXTRA_RECIPE_ID)) {
             intent.extras?.getString(EXTRA_RECIPE_ID)?.let { id ->
                 recipeModel.recipeId = id
+            }
+        }
+
+        recipeModel.recipeAttachment.observe(this) {
+            recipeModel.recipeAttachment.value?.let {
+                showAttachment(it)
             }
         }
 
@@ -114,6 +124,7 @@ class RecipeActivity: AppCompatActivity() {
                         tabMode = tabMode,
                         recipeTitle = recipeData.value?.title ?: "",
                         recipeDescription = recipeData.value?.description ?: "",
+                        recipeHasAttachment = recipeData.value?.hasAttachment ?: false,
                         ingredients = ingredients,
                         instruction = recipeData.value?.instruction ?: "",
                         onModeChange = { changedMode ->
@@ -141,6 +152,7 @@ class RecipeActivity: AppCompatActivity() {
         tabMode: TabMode,
         recipeTitle: String,
         recipeDescription: String,
+        recipeHasAttachment: Boolean,
         ingredients: List<Ingredient>,
         instruction: String,
         onModeChange: (Mode) -> Unit,
@@ -232,6 +244,10 @@ class RecipeActivity: AppCompatActivity() {
             attachmentPickerLauncher.launch(arrayOf("application/pdf", "image/*"))
         }
 
+        val onAttachmentClicked: () -> Unit = {
+            recipeModel.loadAttachment(applicationContext)
+        }
+
         val onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit = { map ->
             recipeModel.bulkUpdateIngredients(map)
         }
@@ -311,9 +327,11 @@ class RecipeActivity: AppCompatActivity() {
                     recipeDescription = recipeDescriptionTemp,
                     ingredients = ingredients,
                     instruction = instruction,
+                    hasAttachment = recipeHasAttachment,
                     onEditRecipe = onEditRecipe,
                     onDeleteRecipe = onDeleteRecipe,
                     onAttachDocument = onAttachDocument,
+                    onAttachmentClicked = onAttachmentClicked,
                     onEditIngredient = onEditIngredient,
                     onDeleteIngredient = onDeleteIngredient,
                     onChangeSortIngredient = onChangeSortIngredient,
@@ -419,6 +437,19 @@ class RecipeActivity: AppCompatActivity() {
             },
             null
         )
+    }
+
+    private fun showAttachment(file: File) {
+        Log.i(this::class.java.name, "path: ${file.path}, ${file.absolutePath}")
+        val uri = FileProvider.getUriForFile(applicationContext, "${BuildConfig.APPLICATION_ID}.provider", file)
+        Log.i(this::class.java.name, "uri: $uri")
+        val type = contentResolver.getType(uri)
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.setDataAndType(uri, type)
+
+        startActivity(intent)
     }
 /*
     private fun savePdf(data: Intent) {

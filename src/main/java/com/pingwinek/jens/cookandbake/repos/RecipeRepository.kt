@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.repos
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
@@ -8,18 +9,33 @@ import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import java.io.File
 import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
 
-    suspend fun attachDocument(recipe: Recipe, uri: Uri) {
+    suspend fun attachDocument(recipe: Recipe, uri: Uri): Recipe {
+        var returnRecipe = recipe
+
         try {
             val isSuccess = FileSourceFB.uploadFile(getAttachmentPath(recipe.id), uri)
+            if (isSuccess) {
+                returnRecipe = recipeSourceFB.update(
+                    RecipeFB(
+                        recipe.id,
+                        recipe.title,
+                        recipe.description,
+                        recipe.instruction,
+                        true)
+                )
+            }
         } catch (exception: Exception) {
             Log.e(this::class.java.name, "Error when attaching document: $exception")
         }
+
+        return returnRecipe
     }
 
     suspend fun delete(recipe: Recipe) {
@@ -35,6 +51,16 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         }
     }
 
+    suspend fun getAttachment(context: Context ,recipe: Recipe): File? {
+        val cacheDir = context.cacheDir
+        return try {
+            FileSourceFB.getFile(cacheDir, getAttachmentPath(recipe.id))
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "Error when retrieving attachment: $exception")
+            null
+        }
+    }
+
     suspend fun get(id: String): Recipe {
         return recipeSourceFB.get(id)
     }
@@ -44,7 +70,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         title: String,
         description: String?,
         instruction: String?
-    ) : RecipeFB {
+    ) : Recipe {
         return recipeSourceFB.new(RecipeFB(title, description, instruction))
     }
 
@@ -54,7 +80,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         description: String?,
         instruction: String?
     ): Recipe {
-        return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction))
+        return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
     }
 
     /*

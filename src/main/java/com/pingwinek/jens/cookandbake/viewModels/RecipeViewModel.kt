@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -14,6 +15,7 @@ import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.LinkedList
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
@@ -22,11 +24,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
 
     private val privateRecipeData = MutableLiveData<Recipe>()
+    private val privateRecipeAttachment = MutableLiveData<File>()
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
 
     val recipeData: LiveData<Recipe> = privateRecipeData
+    val recipeAttachment: LiveData<File> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
 
     var recipeId: String? = null
@@ -34,7 +38,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun attachDocument(uri: Uri) {
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.attachDocument(recipe, uri)
+                privateRecipeData.postValue(
+                    recipeRepository.attachDocument(recipe, uri)
+                )
             }
         }
     }
@@ -68,6 +74,17 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 */
+    fun loadAttachment(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            recipeData.value?.let {  recipe: Recipe ->
+                val file = recipeRepository.getAttachment(context, recipe)
+                file?.let {
+                    privateRecipeAttachment.postValue(it)
+                }
+            }
+        }
+    }
+
     fun getShareableRecipe(): ShareableRecipe? {
         return recipeData.value?.let { recipe ->
             ingredientListData.value?.let { ingredients ->
