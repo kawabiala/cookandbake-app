@@ -11,6 +11,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDocumentAccessManager
+import com.pingwinek.jens.cookandbake.models.FileInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -76,37 +77,44 @@ class FileSourceFB(application: PingwinekCooksApplication) {
         private val storage: FirebaseStorage = Firebase.storage
         private const val BASEPATH: String = "/user"
 
-        suspend fun getFile(cacheDir: File, pathString: String): File? {
-            if (pathString.isEmpty()) return null
+        suspend fun getFile(cacheDir: File, filePathString: String): FileInfo? {
+            if (filePathString.isEmpty()) return null
 
-            var returnFile: File? = null
-
-            val storageReference =
-                getStorageReference(pathString, auth.currentUser!!.uid)
+            var returnFileInfo: FileInfo? = null
 
             if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+                val storageReference =
+                    getStorageReference(filePathString, auth.currentUser!!.uid)
+
                 withContext(Dispatchers.IO) {
                     val contentType = FirestoreDocumentAccessManager
                         .getMetadata(storageReference)
                         .contentType
-                    val suffix = if (contentType == "application/pdf") ".pdf" else ""
 
-                    returnFile = File.createTempFile(storageReference.name, suffix, cacheDir)
-                    returnFile?.let {
-                        FirestoreDocumentAccessManager.writeToFile(it, storageReference)
-                    }
+                    val file = File.createTempFile(storageReference.name, null, cacheDir)
+                    FirestoreDocumentAccessManager.writeToFile(file, storageReference)
+
+                    returnFileInfo = FileInfo(file, contentType ?: "")
                 }
             }
 
-            Log.i(this::class.java.name, "size: ${returnFile?.length()}")
+            return returnFileInfo
+        }
 
-            return returnFile
+        suspend fun listAll(pathString: String): List<String> {
+            return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+                FirestoreDocumentAccessManager.getAll(
+                    getStorageReference(pathString, auth.currentUser!!.uid)
+                ).map {  storageReference ->
+                    getPathString(storageReference, auth.currentUser!!.uid)
+                }
+            } else {
+                listOf()
+            }
         }
 
         suspend fun uploadFile(pathString: String, uri: Uri): Boolean {
             if (pathString.isEmpty()) return false
-
-//            val metaData: StorageMetadata = StorageMetadata()
 
             return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
                 FirestoreDocumentAccessManager.upload(
@@ -118,8 +126,36 @@ class FileSourceFB(application: PingwinekCooksApplication) {
             }
         }
 
+        suspend fun deleteDir(pathString: String): Boolean {
+            if (pathString.isEmpty()) return false
+
+            return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+                FirestoreDocumentAccessManager.delete(
+                    getStorageReference(pathString, auth.currentUser!!.uid)
+                )
+            } else {
+                false
+            }
+        }
+
+        suspend fun deleteFile(pathString: String): Boolean {
+            if (pathString.isEmpty()) return false
+
+            return if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+                FirestoreDocumentAccessManager.delete(
+                    getStorageReference(pathString, auth.currentUser!!.uid)
+                )
+            } else {
+                false
+            }
+        }
+
         private fun getStorageReference(pathString: String, userId: String): StorageReference {
             return storage.reference.child("$BASEPATH/$userId/$pathString")
+        }
+
+        private fun getPathString(storageReference: StorageReference, userId: String): String {
+            return storageReference.path.removePrefix("$BASEPATH/$userId/")
         }
 
 

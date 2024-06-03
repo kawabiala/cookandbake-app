@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,9 +35,9 @@ import com.pingwinek.jens.cookandbake.composables.recipeActivity.ShowRecipe
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-import java.io.File
 
 
 class RecipeActivity: AppCompatActivity() {
@@ -439,15 +438,12 @@ class RecipeActivity: AppCompatActivity() {
         )
     }
 
-    private fun showAttachment(file: File) {
-        Log.i(this::class.java.name, "path: ${file.path}, ${file.absolutePath}")
-        val uri = FileProvider.getUriForFile(applicationContext, "${BuildConfig.APPLICATION_ID}.provider", file)
-        Log.i(this::class.java.name, "uri: $uri")
-        val type = contentResolver.getType(uri)
+    private fun showAttachment(fileInfo: FileInfo) {
+        val uri = FileProvider.getUriForFile(applicationContext, "${BuildConfig.APPLICATION_ID}.provider", fileInfo.file)
 
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        intent.setDataAndType(uri, type)
+        intent.setDataAndType(uri, fileInfo.contentType)
 
         startActivity(intent)
     }

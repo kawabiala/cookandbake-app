@@ -13,6 +13,11 @@ abstract class FirestoreDocumentAccessManager {
     companion object {
         const val MAX_FILE_SIZE: Long = 1000000
 
+        suspend fun delete(storageReference: StorageReference) : Boolean {
+            SuspendedCoroutineWrapper.suspendedFunction(storageReference.delete())
+            return true
+        }
+
         suspend fun getAll(storageReference: StorageReference) : LinkedList<StorageReference> {
             val qs = SuspendedCoroutineWrapper.suspendedFunction(storageReference.listAll())
             return LinkedList(qs.items)
@@ -46,11 +51,6 @@ abstract class FirestoreDocumentAccessManager {
 
         suspend fun upload(storageReference: StorageReference, uri: Uri, metaData: StorageMetadata) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.putFile(uri, metaData))
-            return true
-        }
-
-        suspend fun delete(storageReference: StorageReference) : Boolean {
-            SuspendedCoroutineWrapper.suspendedFunction(storageReference.delete())
             return true
         }
     }

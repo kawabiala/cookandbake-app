@@ -4,42 +4,37 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
-import java.io.File
 import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
 
-    suspend fun attachDocument(recipe: Recipe, uri: Uri): Recipe {
+    suspend fun delete(recipe: Recipe) {
+        recipeSourceFB.delete(recipe as RecipeFB)
+    }
+
+    suspend fun deleteAttachment(recipe: Recipe): Recipe {
         var returnRecipe = recipe
 
         try {
-            val isSuccess = FileSourceFB.uploadFile(getAttachmentPath(recipe.id), uri)
-            if (isSuccess) {
-                returnRecipe = recipeSourceFB.update(
-                    RecipeFB(
-                        recipe.id,
-                        recipe.title,
-                        recipe.description,
-                        recipe.instruction,
-                        true)
-                )
-            }
+            returnRecipe = updateHasAttachment(recipe, false)
+            FileSourceFB.deleteFile(getAttachmentFilePath(recipe.id))
         } catch (exception: Exception) {
-            Log.e(this::class.java.name, "Error when attaching document: $exception")
+            Log.e(this::class.java.name, "Error when deleting attachment: $exception")
         }
 
         return returnRecipe
     }
 
-    suspend fun delete(recipe: Recipe) {
-        recipeSourceFB.delete(recipe as RecipeFB)
+    suspend fun get(id: String): Recipe {
+        return recipeSourceFB.get(id)
     }
 
     suspend fun getAll(): LinkedList<Recipe> {
@@ -51,20 +46,15 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         }
     }
 
-    suspend fun getAttachment(context: Context ,recipe: Recipe): File? {
+    suspend fun getAttachment(context: Context ,recipe: Recipe): FileInfo? {
         val cacheDir = context.cacheDir
         return try {
-            FileSourceFB.getFile(cacheDir, getAttachmentPath(recipe.id))
+            FileSourceFB.getFile(cacheDir, getAttachmentFilePath(recipe.id))
         } catch (exception: Exception) {
             Log.e(this::class.java.name, "Error when retrieving attachment: $exception")
             null
         }
     }
-
-    suspend fun get(id: String): Recipe {
-        return recipeSourceFB.get(id)
-    }
-
 
     suspend fun newRecipe(
         title: String,
@@ -72,6 +62,41 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         instruction: String?
     ) : Recipe {
         return recipeSourceFB.new(RecipeFB(title, description, instruction))
+    }
+
+    suspend fun saveAttachment(recipe: Recipe, uri: Uri): Recipe {
+        var returnRecipe = recipe
+
+        // try to delete
+        try {
+            if (FileSourceFB.deleteFile(getAttachmentFilePath(recipe.id))) {
+                returnRecipe = updateHasAttachment(recipe, false)
+            }
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "Error when attaching document: $exception")
+        }
+
+        // try to upload
+        try {
+            if (FileSourceFB.uploadFile(getAttachmentFilePath(recipe.id), uri)) {
+                returnRecipe = updateHasAttachment(recipe, true)
+            }
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "Error when attaching document: $exception")
+        }
+
+        return returnRecipe
+    }
+
+    private suspend fun updateHasAttachment(recipe: Recipe, hasAttachment: Boolean): Recipe {
+        return recipeSourceFB.update(
+            RecipeFB(
+                recipe.id,
+                recipe.title,
+                recipe.description,
+                recipe.instruction,
+                hasAttachment)
+        )
     }
 
     suspend fun updateRecipe(
@@ -83,68 +108,13 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
     }
 
-    /*
-        suspend fun deletePdf(recipeId: Int) {
-            val recipe = recipeSourceLocal.get(recipeId) ?: return
-            updateRecipe(RecipeLocal(
-                recipe.id,
-                recipe.remoteId,
-                recipe.title,
-                recipe.description,
-                recipe.instruction
-            ))
-        }*/
-
-        suspend fun saveFile(recipeId: String, uri: Uri) {
-            val fileName = uri.lastPathSegment
-        }
-/*
-        private suspend fun generateLocalName(recipeId: Int, type: String) : String {
-            val name = "recipe_local_$recipeId.${TYPES[type]}"
-            updateRecipe(recipeId)
-            return name
-        }
-
-        private suspend fun getFileName(recipeId: Int) : String? {
-            TODO()
-        }
-
-    private suspend fun saveFileLocal(inputStream: InputStream, name: String) {
-        TODO()
-        val externalFilesDir = application.applicationContext.getExternalFilesDir(null) ?: return
-        val file = File(externalFilesDir, name)
-        if (externalFilesDir.canWrite() && (!file.exists() || file.canWrite())) {
-
-            withContext(Dispatchers.IO) {
-                val fileOutputStream = FileOutputStream(file)
-
-                try {
-                    fileOutputStream.write(inputStream.readBytes())
-                } catch (ioException: IOException) {
-                    Log.e(
-                        this::class.java.name,
-                        "Could not save file due to exception: $ioException"
-                    )
-                } finally {
-                    fileOutputStream.close()
-                }
-            }
-        }
-    }
-
-    private suspend fun saveFileRemote(recipeId: Int, inputStream: InputStream, type: String, name: String?) {
-        val uri = fileManagerRemote.saveFile(inputStream, type, name)
-        uri?.let {
-            updateRecipe(recipeId, it)
-        }
-    }
-
- */
-
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {
 
-        private fun getAttachmentPath(id: String): String {
-            return "recipe/$id/attachment"
+        private const val RECIPE_FILE_PATH = "recipe"
+        private const val ATTACHMENT_FILE_NAME = "attachment"
+
+        private fun getAttachmentFilePath(id: String): String {
+            return "$RECIPE_FILE_PATH/$id/$ATTACHMENT_FILE_NAME"
         }
     }
 
