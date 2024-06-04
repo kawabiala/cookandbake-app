@@ -1,7 +1,12 @@
 package com.pingwinek.jens.cookandbake.activities
 
+import android.content.ContentResolver
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.OpenableColumns
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +42,9 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.Pi
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
+import java.io.File
 
 
 class RecipeActivity: AppCompatActivity() {
@@ -190,7 +197,13 @@ class RecipeActivity: AppCompatActivity() {
         val attachmentPickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument()
         ) { uri ->
-            if (uri != null) {
+            val size = uri?.let { getSizeForUri(uri) }
+            val name = uri?.let { getNameForUri(uri) }
+            if (name != null) {
+                val suffix = File(name).extension
+                Log.i(this::class.java.name, "suffix: $suffix")
+            }
+            if (uri != null && size != null && size < RecipeRepository.MAX_ATTACHMENT_SIZE) {
                 recipeModel.attachDocument(uri)
             }
         }
@@ -447,22 +460,63 @@ class RecipeActivity: AppCompatActivity() {
 
         startActivity(intent)
     }
-/*
-    private fun savePdf(data: Intent) {
-        data.data?.let { pdfUri ->
-            recipeModel.recipeData.value?.title?.let { title ->
-                contentResolver.takePersistableUriPermission(
-                    pdfUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                recipeModel.saveRecipe(
-                    title,
-                    recipeModel.recipeData.value?.description ?: "",
-                    recipeModel.recipeData.value?.instruction ?: ""
-                )
-                //recipeModel.savePdf(pdfUri)
-            }
+
+    private fun getSizeForUri(uri: Uri): Long? {
+        if (uri.scheme == null || uri.scheme != ContentResolver.SCHEME_CONTENT) {
+            Log.i(this::class.java.name, "Not content scheme for uri $uri")
+            return null
         }
+
+        val projection = arrayOf(OpenableColumns.SIZE)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+
+        var size: Long? = null
+
+        try {
+            if (cursor?.moveToFirst() == true) {
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                if (sizeIndex > -1) {
+                    size = cursor.getLong(sizeIndex)
+                }
+                Log.i(this::class.java.name, "size: $size")
+            }
+        } finally {
+            cursor?.close()
+        }
+
+        return size
     }
-*/
+
+    private fun getNameForUri(uri: Uri): String? {
+        if (uri.scheme == null || uri.scheme != ContentResolver.SCHEME_CONTENT) {
+            Log.i(this::class.java.name, "Not content scheme for uri $uri")
+            return null
+        }
+
+        val projectionString1  = OpenableColumns.DISPLAY_NAME
+        val projectionString2  = MediaStore.Images.Media.DATA
+        val projection = arrayOf(projectionString1, projectionString2)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+
+        var name: String? = null
+
+        try {
+            if (cursor?.moveToFirst() == true) {
+                var nameIndex = cursor.getColumnIndex(projectionString1)
+                if (nameIndex > -1) {
+                    name = cursor.getString(nameIndex)
+                }
+                if (name == null) nameIndex = cursor.getColumnIndex(projectionString2)
+                if (nameIndex > -1) {
+                    name = cursor.getString(nameIndex)
+                }
+                Log.i(this::class.java.name, "name: $name")
+            }
+        } finally {
+            cursor?.close()
+        }
+
+        return name
+    }
+
 }

@@ -11,7 +11,6 @@ import java.util.LinkedList
 abstract class FirestoreDocumentAccessManager {
 
     companion object {
-        const val MAX_FILE_SIZE: Long = 1000000
 
         suspend fun delete(storageReference: StorageReference) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.delete())
