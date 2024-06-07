@@ -4,17 +4,20 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.lib.UriUtils
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import java.io.File
 import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
+    private val uriUtils = application.getServiceLocator().getService(UriUtils::class.java)
 
     suspend fun delete(recipe: Recipe) {
         recipeSourceFB.delete(recipe as RecipeFB)
@@ -66,6 +69,17 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
     suspend fun saveAttachment(recipe: Recipe, uri: Uri): Recipe {
         var returnRecipe = recipe
+
+        val name = uriUtils.getNameForUri(uri)
+        val size = uriUtils.getSizeForUri(uri)
+        val type = uriUtils.getTypeForUri(uri)
+
+        if (name.isNullOrEmpty()) TODO()
+        if (size == null || size == 0.toLong() || size > MAX_ATTACHMENT_SIZE) TODO()
+        if (type.isNullOrEmpty()) TODO()
+
+        val suffix = File(name).extension
+        if (suffix.isEmpty()) TODO()
 
         // try to delete
         try {

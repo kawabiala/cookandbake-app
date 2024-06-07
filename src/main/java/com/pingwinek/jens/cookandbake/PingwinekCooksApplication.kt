@@ -3,6 +3,7 @@ package com.pingwinek.jens.cookandbake
 import android.app.Application
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pingwinek.jens.cookandbake.lib.ServiceLocator
+import com.pingwinek.jens.cookandbake.lib.UriUtils
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
 import com.pingwinek.jens.cookandbake.sources.UserInfoSourceFB
@@ -50,6 +51,9 @@ class PingwinekCooksApplication : Application() {
 
         val userInfoSourceFB = UserInfoSourceFB.getInstance(FirebaseFirestore.getInstance())
         serviceLocator.registerService(userInfoSourceFB)
+
+        val uriUtils = UriUtils.getInstance(this.applicationContext)
+        serviceLocator.registerService(uriUtils)
     }
 
 }
