@@ -42,9 +42,7 @@ import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.Pi
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
-import java.io.File
 
 
 class RecipeActivity: AppCompatActivity() {
@@ -197,15 +195,7 @@ class RecipeActivity: AppCompatActivity() {
         val attachmentPickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument()
         ) { uri ->
-            val size = uri?.let { getSizeForUri(uri) }
-            val name = uri?.let { getNameForUri(uri) }
-            if (name != null) {
-                val suffix = File(name).extension
-                Log.i(this::class.java.name, "suffix: $suffix")
-            }
-            if (uri != null && size != null && size < RecipeRepository.MAX_ATTACHMENT_SIZE) {
-                recipeModel.attachDocument(uri)
-            }
+                uri?.let { recipeModel.attachDocument(uri) }
         }
 
         var deleteDialogMode by remember {

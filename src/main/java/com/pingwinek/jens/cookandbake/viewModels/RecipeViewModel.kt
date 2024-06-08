@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.ShareableRecipe
+import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
@@ -18,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 
-class RecipeViewModel(application: Application) : AndroidViewModel(application) {
+class RecipeViewModel(application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
@@ -28,12 +29,18 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
+    private val privateMessage = MutableLiveData<String>()
 
     val recipeData: LiveData<Recipe> = privateRecipeData
     val recipeAttachment: LiveData<FileInfo> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
+    val message: LiveData<String> = privateMessage
 
     var recipeId: String? = null
+
+    init {
+        recipeRepository.registerQueueListener(this)
+    }
 
     fun attachDocument(uri: Uri) {
         recipeData.value?.let { recipe ->
@@ -42,6 +49,15 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     recipeRepository.saveAttachment(recipe, uri)
                 )
             }
+        }
+    }
+
+    fun bulkUpdateIngredients(updateMap: Map<Ingredient, Int>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateMap.forEach { (ingredient, sort) ->
+                updateIngredient(ingredient, sort)
+            }
+            loadIngredients()
         }
     }
 
@@ -65,15 +81,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             loadIngredients()
         }
     }
-/*
-    fun deletePdf() {
-        recipeData.value?.id?.let {
-            viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.deletePdf(it)
-            }
-        }
-    }
-*/
+
     fun loadAttachment(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             recipeData.value?.let {  recipe: Recipe ->
@@ -92,19 +100,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
-/*
-    private fun getFile() : File? {
-        return try {
-            fileListData.value?.first
-        } catch (exception: NoSuchElementException) {
-            null
-        }
-    }
 
-    fun hasRecipeImage() : Boolean {
-        return getFile() != null
-    }
-*/
     fun loadData() {
         recipeId?.let { id ->
             viewModelScope.launch(Dispatchers.IO) {
@@ -121,35 +117,15 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-/*
-    fun loadFile(name: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val parcelFileDescriptor = fileRepository.loadFile(name)
-            parcelFileDescriptor?.let { file.postValue(it) }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        recipeRepository.unregisterQueueListener(this)
     }
 
- */
-/*
-    fun savePdf(pdfUri: Uri) {
-        val pfd = contentResolver.openFileDescriptor(pdfUri, "rw") ?: return
-        val type = contentResolver.getType(pdfUri) ?: return
-        val contentType = NetworkRequest.ContentType.find(type) ?: return
-
-        val fileName = getFile()?.fileName
-
-        recipeId?.let {
-            viewModelScope.launch(Dispatchers.IO) {
-                if (fileName == null) {
-                    fileRepository.newFile("recipe", it, pfd, contentType)
-                } else {
-                    fileRepository.updateFile(fileName, pfd)
-                }
-            }
-        }
+    override fun onNewItem() {
+        val actionMessage = recipeRepository.getRecipeActionMessageQueue().getLatest()
     }
 
- */
     fun saveRecipe(title: String, description: String) {
         saveRecipe(title, description, recipeData.value?.instruction ?: "")
     }
@@ -194,12 +170,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun bulkUpdateIngredients(updateMap: Map<Ingredient, Int>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            updateMap.forEach { (ingredient, sort) ->
-                updateIngredient(ingredient, sort)
-            }
-            loadIngredients()
+    private fun mapActionMessage(actionMessage: RecipeRepository.RecipeActionMessage): String {
+        return when (actionMessage) {
+            else -> "something went wrong"
         }
     }
 

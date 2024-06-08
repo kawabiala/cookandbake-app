@@ -37,7 +37,6 @@ class UriUtils private constructor(context: Context){
                 if (nameIndex > -1) {
                     name = cursor.getString(nameIndex)
                 }
-                Log.i(this::class.java.name, "name: $name")
             }
         } finally {
             cursor?.close()
@@ -63,7 +62,6 @@ class UriUtils private constructor(context: Context){
                 if (sizeIndex > -1) {
                     size = cursor.getLong(sizeIndex)
                 }
-                Log.i(this::class.java.name, "size: $size")
             }
         } finally {
             cursor?.close()

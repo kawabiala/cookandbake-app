@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.lib.UriUtils
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Recipe
@@ -16,8 +17,17 @@ import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
+    enum class RecipeActionMessage {
+        ATTACHMENT_WITHOUT_NAME_OR_SIZE,
+        ATTACHMENT_WITH_UNSUPPORTED_SIZE,
+        ATTACHMENT_WITHOUT_TYPE_INFORMATION,
+        ATTACHMENT_UPLOAD_FAILED,
+        ATTACHMENT_DOWNLOAD_FAILED
+    }
+
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
     private val uriUtils = application.getServiceLocator().getService(UriUtils::class.java)
+    private val queue = TypedQueue<RecipeActionMessage>()
 
     suspend fun delete(recipe: Recipe) {
         recipeSourceFB.delete(recipe as RecipeFB)
@@ -28,7 +38,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
         try {
             returnRecipe = updateHasAttachment(recipe, false)
-            FileSourceFB.deleteFile(getAttachmentFilePath(recipe.id))
+            deleteAttachment(getAttachmentDirPath(recipe.id))
         } catch (exception: Exception) {
             Log.e(this::class.java.name, "Error when deleting attachment: $exception")
         }
@@ -52,11 +62,21 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     suspend fun getAttachment(context: Context ,recipe: Recipe): FileInfo? {
         val cacheDir = context.cacheDir
         return try {
-            FileSourceFB.getFile(cacheDir, getAttachmentFilePath(recipe.id))
+            val filePathList = FileSourceFB.listAll(getAttachmentDirPath(recipe.id))
+            if (filePathList.isNotEmpty()) {
+                FileSourceFB.getFile(cacheDir, filePathList[0])
+            } else {
+                null
+            }
         } catch (exception: Exception) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_DOWNLOAD_FAILED)
             Log.e(this::class.java.name, "Error when retrieving attachment: $exception")
             null
         }
+    }
+
+    fun getRecipeActionMessageQueue(): TypedQueue<RecipeActionMessage> {
+        return queue
     }
 
     suspend fun newRecipe(
@@ -67,6 +87,10 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         return recipeSourceFB.new(RecipeFB(title, description, instruction))
     }
 
+    fun registerQueueListener(listener: TypedQueue.QueueListener) {
+        queue.registerListener(listener)
+    }
+
     suspend fun saveAttachment(recipe: Recipe, uri: Uri): Recipe {
         var returnRecipe = recipe
 
@@ -74,32 +98,54 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         val size = uriUtils.getSizeForUri(uri)
         val type = uriUtils.getTypeForUri(uri)
 
-        if (name.isNullOrEmpty()) TODO()
-        if (size == null || size == 0.toLong() || size > MAX_ATTACHMENT_SIZE) TODO()
-        if (type.isNullOrEmpty()) TODO()
+        if (name.isNullOrEmpty()) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
+            return returnRecipe
+        }
+        if (size == null || size == 0.toLong()) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
+            return returnRecipe
+        }
+        if (size > MAX_ATTACHMENT_SIZE) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE}")
+            return returnRecipe
+        }
+        if (type.isNullOrEmpty()) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION}")
+            return returnRecipe
+        }
 
-        val suffix = File(name).extension
-        if (suffix.isEmpty()) TODO()
+        var suffix = File(name).extension
+        if (suffix.isEmpty()) suffix = "tmp"
 
         // try to delete
         try {
-            if (FileSourceFB.deleteFile(getAttachmentFilePath(recipe.id))) {
+            if (deleteAttachment(getAttachmentDirPath(recipe.id))) {
                 returnRecipe = updateHasAttachment(recipe, false)
             }
         } catch (exception: Exception) {
-            Log.e(this::class.java.name, "Error when attaching document: $exception")
+            Log.e(this::class.java.name, "Error when deleting document ${getAttachmentDirPath(recipe.id)}: $exception")
         }
 
         // try to upload
         try {
-            if (FileSourceFB.uploadFile(getAttachmentFilePath(recipe.id), uri)) {
+            if (FileSourceFB.uploadFile(getAttachmentFilePath(recipe.id, suffix), uri)) {
                 returnRecipe = updateHasAttachment(recipe, true)
             }
         } catch (exception: Exception) {
+            queue.addItem(RecipeActionMessage.ATTACHMENT_UPLOAD_FAILED)
             Log.e(this::class.java.name, "Error when attaching document: $exception")
         }
 
         return returnRecipe
+    }
+
+    fun unregisterQueueListener(listener: TypedQueue.QueueListener) {
+        queue.unregisterListener(listener)
     }
 
     private suspend fun updateHasAttachment(recipe: Recipe, hasAttachment: Boolean): Recipe {
@@ -122,15 +168,33 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
     }
 
+    private suspend fun deleteAttachment(dirPath: String): Boolean {
+        return try {
+            val filePathList = FileSourceFB.listAll(dirPath)
+            filePathList.forEach { filePath ->
+                FileSourceFB.deleteFile(filePath)
+            }
+            true
+        } catch (exception: Exception) {
+            Log.e(this::class.java.name, "error when deleting document $dirPath: $exception")
+            false
+        }
+    }
+
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {
 
         const val MAX_ATTACHMENT_SIZE: Long = 1024*1024
 
         private const val RECIPE_FILE_PATH = "recipe"
+        private const val ATTACHMENT_FILE_PATH = "attachment"
         private const val ATTACHMENT_FILE_NAME = "attachment"
 
-        private fun getAttachmentFilePath(id: String): String {
-            return "$RECIPE_FILE_PATH/$id/$ATTACHMENT_FILE_NAME"
+        private fun getAttachmentDirPath(id: String): String {
+            return "$RECIPE_FILE_PATH/$id/$ATTACHMENT_FILE_PATH"
+        }
+
+        private fun getAttachmentFilePath(id: String, suffix: String): String {
+            return "${getAttachmentDirPath(id)}/$ATTACHMENT_FILE_NAME.$suffix"
         }
     }
 
