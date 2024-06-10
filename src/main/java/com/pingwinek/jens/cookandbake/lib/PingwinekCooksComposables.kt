@@ -117,6 +117,7 @@ class PingwinekCooksComposables {
             optionItemMid: OptionItem? = null,
             optionItemRight: OptionItem? = null,
             selectedNavigationBarItem: Int = 0,
+            navigationBarVisible: Boolean = true,
             navigationBarEnabled: Boolean = false,
             navigationBarItems: List<OptionItem> = LinkedList(),
             onSelectedNavigationItemChange: (Int) -> Unit = {},
@@ -180,14 +181,16 @@ class PingwinekCooksComposables {
                     )
                 },
                 bottomBar = {
-                    PingwinekCooksNavigationBar(
-                        selectedItem = selectedNavigationBarItem,
-                        enabled = navigationBarEnabled,
-                        navigationBarColor = navigationBarColor,
-                        navigationBarItemColors = navigationBarItemColors,
-                        menuItems = navigationBarItems,
-                        onSelectedItemChange = onSelectedNavigationItemChange
-                    )
+                    if (navigationBarVisible) {
+                        PingwinekCooksNavigationBar(
+                            selectedItem = selectedNavigationBarItem,
+                            enabled = navigationBarEnabled,
+                            navigationBarColor = navigationBarColor,
+                            navigationBarItemColors = navigationBarItemColors,
+                            menuItems = navigationBarItems,
+                            onSelectedItemChange = onSelectedNavigationItemChange
+                        )
+                    }
                 },
                 floatingActionButton = {
                     if (showFab && fabIcon != null) {

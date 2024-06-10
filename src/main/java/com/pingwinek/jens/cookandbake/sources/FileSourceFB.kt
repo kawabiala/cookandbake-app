@@ -7,15 +7,13 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
-import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDocumentAccessManager
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class FileSourceFB(application: PingwinekCooksApplication) {
-
+class FileSourceFB {
 
     companion object {
         private val auth: FirebaseAuth = Firebase.auth

@@ -84,8 +84,11 @@ class RecipeActivity: AppCompatActivity() {
 
                 var mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
                 var tabMode by remember { mutableStateOf(TabMode.INGREDIENTS) }
-                val fabMode by remember(mode, tabMode) { derivedStateOf {
-                        if (mode == Mode.SHOW_RECIPE && tabMode == TabMode.INGREDIENTS) {
+                var ingredientsEditMode by remember { mutableStateOf(false) }
+                val fabMode by remember(mode, tabMode, ingredientsEditMode) { derivedStateOf {
+                        if (mode == Mode.SHOW_RECIPE
+                            && tabMode == TabMode.INGREDIENTS
+                            && !ingredientsEditMode) {
                             FabMode.ADD_INGREDIENT
                         } else {
                             FabMode.NONE
@@ -109,10 +112,15 @@ class RecipeActivity: AppCompatActivity() {
                     onClick = { }
                 )
 
+                val onIngredientFunctionsMode: (Boolean) -> Unit = {
+                    ingredientsEditMode = it
+                }
+
                 PingwinekCooksScaffold(
                     title = "",
                     optionItemLeft = if (mode == Mode.SHOW_RECIPE) optionBack else null,
                     optionItemMid = if (mode == Mode.SHOW_RECIPE) optionShare else null,
+                    navigationBarVisible = false,
                     showFab = (fabMode != FabMode.NONE),
                     fabIconLabel = if (fabMode == FabMode.ADD_INGREDIENT) getString(R.string.plus_new_ingredient) else "",
                     fabIcon = Icons.Filled.Add,
@@ -131,6 +139,7 @@ class RecipeActivity: AppCompatActivity() {
                         recipeHasAttachment = recipeData.value?.hasAttachment ?: false,
                         ingredients = ingredients,
                         instruction = recipeData.value?.instruction ?: "",
+                        onIngredientFunctionsMode = onIngredientFunctionsMode,
                         onModeChange = { changedMode ->
                             mode = changedMode
                         },
@@ -159,6 +168,7 @@ class RecipeActivity: AppCompatActivity() {
         recipeHasAttachment: Boolean,
         ingredients: List<Ingredient>,
         instruction: String,
+        onIngredientFunctionsMode: (Boolean) -> Unit,
         onModeChange: (Mode) -> Unit,
         onTabModeChange: (TabMode) -> Unit,
     ) {
@@ -262,6 +272,7 @@ class RecipeActivity: AppCompatActivity() {
         val onCloseEdit: () -> Unit = {
             resetIngredient()
             onModeChange(Mode.SHOW_RECIPE)
+            onIngredientFunctionsMode(false)
         }
 
         val onDelete: (delete: Delete) -> Unit = { selectedDelete ->
@@ -275,6 +286,7 @@ class RecipeActivity: AppCompatActivity() {
                     deleteIngredient()
                     resetIngredient()
                     resetDelete()
+                    onIngredientFunctionsMode(false)
                 }
             }
         }
@@ -305,6 +317,7 @@ class RecipeActivity: AppCompatActivity() {
             saveIngredient()
             resetIngredient()
             onModeChange(Mode.SHOW_RECIPE)
+            onIngredientFunctionsMode(false)
         }
 
         val onSaveRecipe: () -> Unit = {
@@ -325,6 +338,7 @@ class RecipeActivity: AppCompatActivity() {
                 ShowRecipe(
                     paddingValues = paddingValues,
                     tabMode = tabMode,
+                    onIngredientsFunctionsMode = onIngredientFunctionsMode,
                     recipeTitle = recipeTitleTemp,
                     recipeDescription = recipeDescriptionTemp,
                     ingredients = ingredients,

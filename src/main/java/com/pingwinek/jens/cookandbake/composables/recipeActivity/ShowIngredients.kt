@@ -1,7 +1,7 @@
 package com.pingwinek.jens.cookandbake.composables.recipeActivity
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +19,7 @@ import com.pingwinek.jens.cookandbake.models.Ingredient
 fun ShowIngredients(
     paddingValues: PaddingValues,
     ingredients: List<Ingredient>,
+    onIngredientsFunctionsMode: (Boolean) -> Unit,
     onEditIngredient: (String) -> Unit,
     onDeleteIngredient: (String) -> Unit,
     onChangeSort: (Map<Ingredient, Int>) -> Unit
@@ -37,6 +38,13 @@ fun ShowIngredients(
 
     var offset by remember(activePane) { mutableFloatStateOf(0f) }
     var posDelta by remember(activePane) { mutableIntStateOf(0) }
+
+//    val scrollState = rememberScrollState()
+
+    val onChangeActivePane: (activePane: Int) -> Unit = { pane ->
+        activePane = pane
+        onIngredientsFunctionsMode(pane >= 0)
+    }
 
     val onDrag: (Float) -> Unit = { newOffset ->
         offset = newOffset
@@ -68,12 +76,59 @@ fun ShowIngredients(
             if (sort != ingredient.sort) ingredientsResorted[ingredient] = sort
         }
 
-        activePane = -1
+        onChangeActivePane(-1)
         ingredientsSorted = ingredientsLocallyResorted
         onChangeSort(ingredientsResorted)
     }
 
-    Column {
+    LazyColumn {
+        item {
+            PingwinekCooksComposables.SpacerSmall()
+        }
+
+        ingredientsSorted.forEachIndexed { index, ingredient ->
+            val conditionalOffset = if (index == activePane) {
+                offset
+            } else if (index < activePane && index >= activePane + posDelta) {
+                switchPositionOffset
+            } else if (index > activePane && index <= activePane + posDelta) {
+                switchPositionOffset * -1
+            } else {
+                0f
+            }
+
+            val onChangeActive: () -> Unit = {
+                onChangeActivePane(if (activePane == index) -1 else index)
+            }
+
+            item {
+                key(index) {
+                    IngredientPane(
+                        paddingValues = paddingValues,
+                        height = height,
+                        paddingBelow = paddingBelow,
+                        zIndex = if (index == activePane) 1f else 0f,
+                        elevation = if (index == activePane) 10f else 0f,
+                        offset = conditionalOffset,
+                        paneColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onBackground,
+                        showButtons = (activePane == index),
+                        onChangeActive = onChangeActive,
+                        onEditIngredient = onEditIngredient,
+                        onDeleteIngredient = onDeleteIngredient,
+                        onDrag = onDrag,
+                        onDragStopped = onDragStopped,
+                        ingredient = ingredient
+                    )
+                }
+            }
+        }
+    }
+/*
+    Column(
+        modifier = Modifier
+            .verticalScroll(scrollState)
+    ) {
         PingwinekCooksComposables.SpacerSmall()
 
         ingredientsSorted.forEachIndexed { index, ingredient ->
@@ -108,5 +163,5 @@ fun ShowIngredients(
                 )
             }
         }
-    }
+    }*/
 }

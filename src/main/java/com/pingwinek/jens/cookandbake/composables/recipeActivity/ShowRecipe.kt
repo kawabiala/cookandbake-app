@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.activities.RecipeActivity
@@ -40,6 +41,7 @@ import com.pingwinek.jens.cookandbake.models.Ingredient
 fun ShowRecipe(
     paddingValues: PaddingValues,
     tabMode: RecipeActivity.TabMode,
+    onIngredientsFunctionsMode: (Boolean) -> Unit,
     recipeTitle: String,
     recipeDescription: String,
     ingredients: List<Ingredient>,
@@ -76,10 +78,16 @@ fun ShowRecipe(
                     .clickable { showButtons = !showButtons },
             ) {
                 Text(
-                    fontWeight = FontWeight.Bold,
+                    //fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     text = recipeTitle
                 )
                 Text(
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     text = recipeDescription
                 )
                 if (hasAttachment) {
@@ -101,8 +109,15 @@ fun ShowRecipe(
                 IconButton(onClick = onDeleteRecipe) {
                     Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
                 }
-                IconButton(onClick = onAttachDocument) {
-                    Icon(Icons.Filled.Attachment, stringResource(R.string.attach_document))
+                if (hasAttachment) {
+                    // TODO change button
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.Filled.MoreVert, "more")
+                    }
+                } else {
+                    IconButton(onClick = onAttachDocument) {
+                        Icon(Icons.Filled.Attachment, stringResource(R.string.attach_document))
+                    }
                 }
             }
         }
@@ -124,6 +139,7 @@ fun ShowRecipe(
                         ShowIngredients(
                             paddingValues = paddingValues,
                             ingredients = ingredients,
+                            onIngredientsFunctionsMode = onIngredientsFunctionsMode,
                             onEditIngredient = onEditIngredient,
                             onDeleteIngredient = onDeleteIngredient,
                             onChangeSort = onChangeSortIngredient

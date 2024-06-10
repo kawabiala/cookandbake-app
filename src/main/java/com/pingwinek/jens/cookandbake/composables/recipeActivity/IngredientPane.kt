@@ -31,7 +31,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
@@ -51,7 +51,7 @@ fun IngredientPane(
     paneColor: Color,
     contentColor: Color,
     showButtons: Boolean,
-    onChangeActivePane: () -> Unit,
+    onChangeActive: () -> Unit,
     onEditIngredient: (String) -> Unit,
     onDeleteIngredient: (String) -> Unit,
     onDrag: (Float) -> Unit,
@@ -86,7 +86,7 @@ fun IngredientPane(
                 modifier = Modifier
                     .weight(80f)
                     .fillMaxWidth()
-                    .clickable { onChangeActivePane() },
+                    .clickable { onChangeActive() },
             ) {
                 val quantity =
                     if (!ingredient.quantityVerbal.isNullOrEmpty()) {
@@ -105,7 +105,10 @@ fun IngredientPane(
                 Text(
                     modifier = Modifier
                         .height(height/2),
-                    fontWeight = FontWeight.Bold,
+                    //fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     text = ingredient.name
                 )
                 Text(
@@ -114,6 +117,8 @@ fun IngredientPane(
                         .padding(
                             start = MaterialTheme.spacing.spacerSmall
                         ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     text = quantity
                 )
             }
