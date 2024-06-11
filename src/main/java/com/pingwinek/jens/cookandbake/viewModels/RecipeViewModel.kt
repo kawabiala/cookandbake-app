@@ -61,6 +61,14 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    fun deleteAttachment() {
+        recipeData.value?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                privateRecipeData.postValue(recipeRepository.deleteAttachment(it))
+            }
+        }
+    }
+
     //TODO update recipeData and ingredientListData
     fun deleteRecipe() {
         recipeData.value?.let {

@@ -12,6 +12,7 @@
     <string name="delete">Löschen</string>
     <string name="share">Teilen</string>
     <string name="refresh">Aktualisieren</string>
+    <string name="more">Weitere Optionen</string>
 
     <string name="authenticationMessage">Authentication Message</string>
     <string name="errorMessage">Fehlermeldung</string>
@@ -68,7 +69,11 @@
     <string name="add_recipe">Rezept hinzufügen</string>
     <string name="edit_recipe">Rezept bearbeiten</string>
     <string name="delete_recipe">Rezept löschen</string>
+
     <string name="attach_document">Dokument anhängen</string>
+    <string name="update_attachment">Dokument aktualisieren</string>
+    <string name="delete_attachment">Dokument löschen</string>
+    <string name="show_attachment">Dokument anzeigen</string>
 
     <string name="ingredientRemote">Zutat</string>
     <string name="ingredients">Zutaten</string>

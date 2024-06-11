@@ -1,12 +1,7 @@
 package com.pingwinek.jens.cookandbake.activities
 
-import android.content.ContentResolver
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.provider.OpenableColumns
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -109,7 +104,9 @@ class RecipeActivity: AppCompatActivity() {
                 val optionShare = PingwinekCooksComposables.OptionItem(
                     labelResourceId = R.string.share,
                     icon = Icons.Filled.Share,
-                    onClick = { }
+                    onClick = {
+                        startActivity(getShareRecipeIntent())
+                    }
                 )
 
                 val onIngredientFunctionsMode: (Boolean) -> Unit = {
@@ -243,6 +240,10 @@ class RecipeActivity: AppCompatActivity() {
             }
         }
 
+        val deleteDocument: () -> Unit = {
+
+        }
+
         val deleteRecipe: () -> Unit = {
             recipeModel.deleteRecipe()
         }
@@ -289,6 +290,10 @@ class RecipeActivity: AppCompatActivity() {
                     onIngredientFunctionsMode(false)
                 }
             }
+        }
+
+        val onDeleteDocument: () -> Unit = {
+            recipeModel.deleteAttachment()
         }
 
         val onDeleteIngredient: (ingredientId: String) -> Unit = { id ->
@@ -347,6 +352,7 @@ class RecipeActivity: AppCompatActivity() {
                     onEditRecipe = onEditRecipe,
                     onDeleteRecipe = onDeleteRecipe,
                     onAttachDocument = onAttachDocument,
+                    onDeleteDocument = onDeleteDocument,
                     onAttachmentClicked = onAttachmentClicked,
                     onEditIngredient = onEditIngredient,
                     onDeleteIngredient = onDeleteIngredient,
@@ -464,63 +470,4 @@ class RecipeActivity: AppCompatActivity() {
 
         startActivity(intent)
     }
-
-    private fun getSizeForUri(uri: Uri): Long? {
-        if (uri.scheme == null || uri.scheme != ContentResolver.SCHEME_CONTENT) {
-            Log.i(this::class.java.name, "Not content scheme for uri $uri")
-            return null
-        }
-
-        val projection = arrayOf(OpenableColumns.SIZE)
-        val cursor = contentResolver.query(uri, projection, null, null, null)
-
-        var size: Long? = null
-
-        try {
-            if (cursor?.moveToFirst() == true) {
-                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                if (sizeIndex > -1) {
-                    size = cursor.getLong(sizeIndex)
-                }
-                Log.i(this::class.java.name, "size: $size")
-            }
-        } finally {
-            cursor?.close()
-        }
-
-        return size
-    }
-
-    private fun getNameForUri(uri: Uri): String? {
-        if (uri.scheme == null || uri.scheme != ContentResolver.SCHEME_CONTENT) {
-            Log.i(this::class.java.name, "Not content scheme for uri $uri")
-            return null
-        }
-
-        val projectionString1  = OpenableColumns.DISPLAY_NAME
-        val projectionString2  = MediaStore.Images.Media.DATA
-        val projection = arrayOf(projectionString1, projectionString2)
-        val cursor = contentResolver.query(uri, projection, null, null, null)
-
-        var name: String? = null
-
-        try {
-            if (cursor?.moveToFirst() == true) {
-                var nameIndex = cursor.getColumnIndex(projectionString1)
-                if (nameIndex > -1) {
-                    name = cursor.getString(nameIndex)
-                }
-                if (name == null) nameIndex = cursor.getColumnIndex(projectionString2)
-                if (nameIndex > -1) {
-                    name = cursor.getString(nameIndex)
-                }
-                Log.i(this::class.java.name, "name: $name")
-            }
-        } finally {
-            cursor?.close()
-        }
-
-        return name
-    }
-
 }

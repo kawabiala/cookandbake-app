@@ -50,6 +50,7 @@ fun ShowRecipe(
     onEditRecipe: () -> Unit,
     onDeleteRecipe: () -> Unit,
     onAttachDocument: () -> Unit,
+    onDeleteDocument: () -> Unit,
     onAttachmentClicked: () -> Unit,
     onEditIngredient: (ingredientId: String) -> Unit,
     onDeleteIngredient: (ingredientId: String) -> Unit,
@@ -58,6 +59,25 @@ fun ShowRecipe(
     onTabModeChange: (RecipeActivity.TabMode) -> Unit
 ) {
     var showButtons by remember(recipeTitle) { mutableStateOf(recipeTitle.isEmpty()) }
+    var expanded by remember { mutableStateOf(false) }
+
+    val optionUpdate = PingwinekCooksComposables.OptionItem(
+        labelResourceId = R.string.update_attachment,
+        icon = Icons.Filled.Attachment,
+        onClick = {
+            onAttachDocument()
+            expanded = false
+        }
+    )
+
+    val optionDelete = PingwinekCooksComposables.OptionItem(
+        labelResourceId = R.string.delete_attachment,
+        icon = Icons.Filled.Delete,
+        onClick = {
+            onDeleteDocument()
+            expanded = false
+        }
+    )
 
     Column {
         PingwinekCooksComposables.SpacerSmall()
@@ -96,7 +116,7 @@ fun ShowRecipe(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Attachment,
-                            contentDescription = "Attachment"
+                            contentDescription = stringResource(R.string.show_attachment)
                         )
                     }
                 }
@@ -110,9 +130,14 @@ fun ShowRecipe(
                     Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
                 }
                 if (hasAttachment) {
-                    // TODO change button
-                    IconButton(onClick = {  }) {
-                        Icon(Icons.Filled.MoreVert, "more")
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
+                        PingwinekCooksComposables.PingwinekCooksDropDown(
+                            expanded = expanded,
+                            options = listOf(optionUpdate, optionDelete)
+                        ) {
+
+                        }
                     }
                 } else {
                     IconButton(onClick = onAttachDocument) {
