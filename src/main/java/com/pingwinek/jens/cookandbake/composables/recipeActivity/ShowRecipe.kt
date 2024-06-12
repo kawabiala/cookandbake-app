@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.activities.RecipeActivity
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksDropDown
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksTabElement
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 import com.pingwinek.jens.cookandbake.models.Ingredient
 
@@ -132,7 +134,7 @@ fun ShowRecipe(
                 if (hasAttachment) {
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
-                        PingwinekCooksComposables.PingwinekCooksDropDown(
+                        PingwinekCooksDropDown(
                             expanded = expanded,
                             options = listOf(optionUpdate, optionDelete)
                         ) {
@@ -149,7 +151,7 @@ fun ShowRecipe(
 
         PingwinekCooksComposables.SpacerMedium()
 
-        PingwinekCooksComposables.PingwinekCooksTabElement(
+        PingwinekCooksTabElement(
             modifier = Modifier
                 .fillMaxHeight()
                 .background(color = MaterialTheme.colorScheme.tertiaryContainer),

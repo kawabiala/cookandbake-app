@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.EditPane
 import com.pingwinek.jens.cookandbake.utils.Utils
 
 @Composable
@@ -28,7 +28,7 @@ fun EditIngredient(
 ) {
     val isQuantityAsNumberMissing = (ingredientQuantity == null && !ingredientQuantityVerbal.isNullOrEmpty())
 
-    PingwinekCooksComposables.EditPane(
+    EditPane(
         paddingValues = paddingValues,
         onCancel = onCancel,
         onSave = { if (!isQuantityAsNumberMissing) onSave() }

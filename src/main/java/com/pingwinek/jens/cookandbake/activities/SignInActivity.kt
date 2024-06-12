@@ -40,9 +40,16 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.EditableText
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.Expandable
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.LabelledCheckBox
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.LabelledSwitch
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PasswordField
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksTabRow
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.LabelledCheckBox
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerMedium
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerSmall
 import com.pingwinek.jens.cookandbake.lib.spacing
@@ -231,10 +238,10 @@ class SignInActivity : AppCompatActivity() {
         }
 
         setContent {
-            PingwinekCooksComposables.PingwinekCooksAppTheme(
+            PingwinekCooksAppTheme(
 
             ) {
-                PingwinekCooksComposables.PingwinekCooksScaffold(
+                PingwinekCooksScaffold(
                     title = getString(R.string.profile),
                     showDropDown = true,
                     dropDownOptions = optionItems,
@@ -360,7 +367,7 @@ class SignInActivity : AppCompatActivity() {
 
             SpacerMedium()
 
-            PingwinekCooksComposables.EditableText(
+            EditableText(
                 text = if (viewSettings.editEmail) {
                     newEmail ?: ""
                 } else {
@@ -376,7 +383,7 @@ class SignInActivity : AppCompatActivity() {
                     SpacerSmall()
                 }
 
-                PingwinekCooksComposables.PasswordField(
+                PasswordField(
                     password = password ?: "",
                     label = getString(R.string.password),
                     onValueChange = { authenticationViewModel.onPasswordChange(it) },
@@ -465,7 +472,7 @@ class SignInActivity : AppCompatActivity() {
         highlightLeft: Boolean,
         toggleItem: () -> Unit
     ) {
-        PingwinekCooksComposables.PingwinekCooksTabRow(
+        PingwinekCooksTabRow(
             selectedItem = if (highlightLeft) { 0 } else { 1 },
             menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
                 add(
@@ -486,7 +493,7 @@ class SignInActivity : AppCompatActivity() {
         onCrashlyticsChange: (Boolean) -> Unit,
         onResetPasswordClicked: () -> Unit
     ) {
-        PingwinekCooksComposables.Expandable(
+        Expandable(
             headerText = "Account Settings",
             headerTextStyle = MaterialTheme.typography.headlineMedium,
             headerTextColor = MaterialTheme.colorScheme.onSurface,
@@ -494,7 +501,7 @@ class SignInActivity : AppCompatActivity() {
             boxColor = MaterialTheme.colorScheme.surfaceContainerLow,
             padding = Dp(20F)
         ) { contentTextStyle ->
-            PingwinekCooksComposables.LabelledSwitch(
+            LabelledSwitch(
                 label = getString(R.string.acceptCrashlytics),
                 labelTextStyle = contentTextStyle,
                 checked = crashlyticsEnabled,

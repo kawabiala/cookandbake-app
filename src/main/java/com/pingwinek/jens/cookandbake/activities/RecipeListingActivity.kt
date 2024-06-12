@@ -36,9 +36,9 @@ import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList

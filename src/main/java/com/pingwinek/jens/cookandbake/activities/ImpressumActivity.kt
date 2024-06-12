@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.WebView
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 
 class ImpressumActivity : AppCompatActivity() {
@@ -25,8 +28,8 @@ class ImpressumActivity : AppCompatActivity() {
         url = intent?.extras?.getString("url") ?: ""
 
         setContent {
-            PingwinekCooksComposables.PingwinekCooksAppTheme {
-                PingwinekCooksComposables.PingwinekCooksScaffold(
+            PingwinekCooksAppTheme {
+                PingwinekCooksScaffold(
                     title = title,
                     optionItemRight = PingwinekCooksComposables.OptionItem(
                         R.string.close,
@@ -45,7 +48,7 @@ class ImpressumActivity : AppCompatActivity() {
             modifier = Modifier
                 .padding(paddingValues)
         ) {
-            PingwinekCooksComposables.WebView(url)
+            WebView(url)
         }
     }
 }

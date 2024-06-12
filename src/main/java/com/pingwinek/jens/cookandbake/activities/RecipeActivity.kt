@@ -28,13 +28,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditIngredient
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditInstruction
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditRecipe
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.ShowRecipe
 import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
