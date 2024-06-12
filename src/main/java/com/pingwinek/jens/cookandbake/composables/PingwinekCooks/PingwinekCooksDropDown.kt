@@ -12,14 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksDropDown(
     expanded: Boolean,
     menuItemColors: MenuItemColors = MenuDefaults.itemColors(),
     menuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-    options: List<PingwinekCooksComposables.OptionItem>,
+    options: List<PingwinekCooksComposableHelpers.OptionItem>,
     onSelected: () -> Unit
 ) {
     DropdownMenu(

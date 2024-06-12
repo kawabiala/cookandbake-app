@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksNavigationBar(
@@ -18,7 +18,7 @@ fun PingwinekCooksNavigationBar(
     enabled: Boolean = true,
     navigationBarColor: Color = NavigationBarDefaults.containerColor,
     navigationBarItemColors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
-    menuItems: List<PingwinekCooksComposables.OptionItem>,
+    menuItems: List<PingwinekCooksComposableHelpers.OptionItem>,
     onSelectedItemChange: (Int) -> Unit
 ) {
     NavigationBar(

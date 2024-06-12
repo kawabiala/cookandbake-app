@@ -10,7 +10,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.RecipeFB
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 /**

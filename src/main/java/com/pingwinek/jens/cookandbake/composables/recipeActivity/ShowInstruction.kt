@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.spacing
+import com.pingwinek.jens.cookandbake.composables.spacing
 
 @Composable
 fun ShowInstruction(

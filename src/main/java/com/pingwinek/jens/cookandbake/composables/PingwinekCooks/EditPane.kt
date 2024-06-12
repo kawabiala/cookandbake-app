@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
 
 @Composable
 fun EditPane(
@@ -25,7 +24,7 @@ fun EditPane(
         modifier = Modifier
             .padding(paddingValues)
     ) {
-        PingwinekCooksComposables.SpacerSmall()
+        SpacerSmall()
 
         Row(
             modifier = Modifier
@@ -44,7 +43,7 @@ fun EditPane(
             )
         }
 
-        PingwinekCooksComposables.SpacerMedium()
+        SpacerMedium()
 
         content()
     }

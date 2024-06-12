@@ -48,11 +48,11 @@ import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PasswordField
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksTabRow
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.lib.AuthService
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerMedium
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables.Companion.SpacerSmall
-import com.pingwinek.jens.cookandbake.lib.spacing
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.composables.spacing
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 import java.util.LinkedList
@@ -190,7 +190,7 @@ class SignInActivity : AppCompatActivity() {
         }
 
         val optionItems = mutableListOf(
-            PingwinekCooksComposables.OptionItem(
+            PingwinekCooksComposableHelpers.OptionItem(
                 R.string.dataprotection,
                 Icons.Filled.Lock
             ) {
@@ -203,7 +203,7 @@ class SignInActivity : AppCompatActivity() {
                         )
                 )
             },
-            PingwinekCooksComposables.OptionItem(
+            PingwinekCooksComposableHelpers.OptionItem(
                 R.string.impressum,
                 Icons.Filled.Info
             ) {
@@ -218,21 +218,21 @@ class SignInActivity : AppCompatActivity() {
             }
         )
 
-        val optionItemRecipe = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.RECIPE.label,
-            icon = PingwinekCooksComposables.Navigation.RECIPE.icon
+        val optionItemRecipe = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.RECIPE.label,
+            icon = PingwinekCooksComposableHelpers.Navigation.RECIPE.icon
         ) {
             closeAction()
         }
 
-        val optionItemProfileLoggedOut = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
-            icon = PingwinekCooksComposables.Navigation.LOGIN.icon
+        val optionItemProfileLoggedOut = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
+            icon = PingwinekCooksComposableHelpers.Navigation.LOGIN.icon
         ) {
         }
 
-        val optionItemProfileLoggedIn = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
+        val optionItemProfileLoggedIn = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
             icon = Icons.Filled.Person
         ) { startActivity(Intent(this, SignInActivity::class.java))
         }
@@ -245,7 +245,7 @@ class SignInActivity : AppCompatActivity() {
                     title = getString(R.string.profile),
                     showDropDown = true,
                     dropDownOptions = optionItems,
-                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.LOGIN.ordinal,
+                    selectedNavigationBarItem = PingwinekCooksComposableHelpers.Navigation.LOGIN.ordinal,
                     navigationBarEnabled = true,
                     navigationBarItems = listOf(
                         optionItemRecipe,
@@ -474,13 +474,13 @@ class SignInActivity : AppCompatActivity() {
     ) {
         PingwinekCooksTabRow(
             selectedItem = if (highlightLeft) { 0 } else { 1 },
-            menuItems = LinkedList<PingwinekCooksComposables.OptionItem>().apply {
+            menuItems = LinkedList<PingwinekCooksComposableHelpers.OptionItem>().apply {
                 add(
-                    PingwinekCooksComposables.OptionItem(
+                    PingwinekCooksComposableHelpers.OptionItem(
                         R.string.register, Icons.Filled.Person, toggleItem
                     ))
                 add(
-                    PingwinekCooksComposables.OptionItem(
+                    PingwinekCooksComposableHelpers.OptionItem(
                         R.string.login, Icons.Filled.Person, toggleItem
                     ))
             }

@@ -34,7 +34,7 @@ import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditIngredient
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditInstruction
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.EditRecipe
 import com.pingwinek.jens.cookandbake.composables.recipeActivity.ShowRecipe
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
@@ -95,13 +95,13 @@ class RecipeActivity: AppCompatActivity() {
                 val ingredientData = recipeModel.ingredientListData.observeAsState()
                 val ingredients = ingredientData.value ?: listOf()
 
-                val optionBack = PingwinekCooksComposables.OptionItem(
+                val optionBack = PingwinekCooksComposableHelpers.OptionItem(
                     labelResourceId = R.string.back,
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
                     onClick = { finish() }
                 )
 
-                val optionShare = PingwinekCooksComposables.OptionItem(
+                val optionShare = PingwinekCooksComposableHelpers.OptionItem(
                     labelResourceId = R.string.share,
                     icon = Icons.Filled.Share,
                     onClick = {

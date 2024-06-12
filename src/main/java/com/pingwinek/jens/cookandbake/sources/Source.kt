@@ -1,5 +1,6 @@
-package com.pingwinek.jens.cookandbake.lib.sync
+package com.pingwinek.jens.cookandbake.sources
 
+import com.pingwinek.jens.cookandbake.models.Model
 import java.util.LinkedList
 
 /**

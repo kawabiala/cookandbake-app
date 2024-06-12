@@ -14,7 +14,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.WebView
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 
 class ImpressumActivity : AppCompatActivity() {
 
@@ -31,7 +31,7 @@ class ImpressumActivity : AppCompatActivity() {
             PingwinekCooksAppTheme {
                 PingwinekCooksScaffold(
                     title = title,
-                    optionItemRight = PingwinekCooksComposables.OptionItem(
+                    optionItemRight = PingwinekCooksComposableHelpers.OptionItem(
                         R.string.close,
                         Icons.Filled.Close
                     ) { finish() }

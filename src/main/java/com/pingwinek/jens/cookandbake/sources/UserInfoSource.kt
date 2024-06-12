@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.sources
 
-import com.pingwinek.jens.cookandbake.lib.sync.Source
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.UserInfo
 

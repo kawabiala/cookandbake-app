@@ -11,8 +11,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.spacing
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.composables.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 
 @Composable
@@ -83,7 +83,7 @@ fun ShowIngredients(
 
     LazyColumn {
         item {
-            PingwinekCooksComposables.SpacerSmall()
+            SpacerSmall()
         }
 
         ingredientsSorted.forEachIndexed { index, ingredient ->

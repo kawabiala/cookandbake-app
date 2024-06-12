@@ -36,7 +36,9 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.activities.RecipeActivity
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksDropDown
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksTabElement
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.models.Ingredient
 
 @Composable
@@ -63,7 +65,7 @@ fun ShowRecipe(
     var showButtons by remember(recipeTitle) { mutableStateOf(recipeTitle.isEmpty()) }
     var expanded by remember { mutableStateOf(false) }
 
-    val optionUpdate = PingwinekCooksComposables.OptionItem(
+    val optionUpdate = PingwinekCooksComposableHelpers.OptionItem(
         labelResourceId = R.string.update_attachment,
         icon = Icons.Filled.Attachment,
         onClick = {
@@ -72,7 +74,7 @@ fun ShowRecipe(
         }
     )
 
-    val optionDelete = PingwinekCooksComposables.OptionItem(
+    val optionDelete = PingwinekCooksComposableHelpers.OptionItem(
         labelResourceId = R.string.delete_attachment,
         icon = Icons.Filled.Delete,
         onClick = {
@@ -82,7 +84,7 @@ fun ShowRecipe(
     )
 
     Column {
-        PingwinekCooksComposables.SpacerSmall()
+        SpacerSmall()
 
         Row(
             modifier = Modifier
@@ -149,7 +151,7 @@ fun ShowRecipe(
             }
         }
 
-        PingwinekCooksComposables.SpacerMedium()
+        SpacerMedium()
 
         PingwinekCooksTabElement(
             modifier = Modifier
@@ -157,9 +159,9 @@ fun ShowRecipe(
                 .background(color = MaterialTheme.colorScheme.tertiaryContainer),
             selectedItem = tabMode.ordinal,
             onSelectedItemChange = { item -> onTabModeChange(RecipeActivity.TabMode.entries[item]) },
-            tabItems = mutableListOf<PingwinekCooksComposables.PingwinekCooksTabItem>().apply {
+            tabItems = mutableListOf<PingwinekCooksComposableHelpers.PingwinekCooksTabItem>().apply {
                 add(
-                    PingwinekCooksComposables.PingwinekCooksTabItem(
+                    PingwinekCooksComposableHelpers.PingwinekCooksTabItem(
                     tabNameId = R.string.ingredients,
                     tabIcon = Icons.AutoMirrored.Filled.ReceiptLong,
                     content = {
@@ -174,7 +176,7 @@ fun ShowRecipe(
                     }
                 ))
                 add(
-                    PingwinekCooksComposables.PingwinekCooksTabItem(
+                    PingwinekCooksComposableHelpers.PingwinekCooksTabItem(
                     tabNameId = R.string.instruction,
                     tabIcon = Icons.Filled.Receipt,
                     content = {
@@ -186,7 +188,7 @@ fun ShowRecipe(
                     }
                 ))
                 add(
-                    PingwinekCooksComposables.PingwinekCooksTabItem(
+                    PingwinekCooksComposableHelpers.PingwinekCooksTabItem(
                     tabNameId = R.string.pdf,
                     tabIcon = Icons.Filled.FilePresent,
                     content = {

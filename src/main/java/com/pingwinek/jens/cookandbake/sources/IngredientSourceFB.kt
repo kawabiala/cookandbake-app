@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.IngredientFB
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 class IngredientSourceFB private constructor(private val firestore: FirebaseFirestore)

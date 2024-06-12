@@ -38,7 +38,8 @@ import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
@@ -62,7 +63,7 @@ class RecipeListingActivity : AppCompatActivity() {
 
         recipeListData = recipeListingModel.recipeListData
 
-        val optionItemImpressum = PingwinekCooksComposables.OptionItem(
+        val optionItemImpressum = PingwinekCooksComposableHelpers.OptionItem(
             R.string.impressum,
             Icons.Filled.Info
         ) {
@@ -71,7 +72,7 @@ class RecipeListingActivity : AppCompatActivity() {
                 .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
         }
 
-        val optionItemPrivacy = PingwinekCooksComposables.OptionItem(
+        val optionItemPrivacy = PingwinekCooksComposableHelpers.OptionItem(
             R.string.dataprotection,
             Icons.Filled.Lock
         ) {
@@ -80,20 +81,20 @@ class RecipeListingActivity : AppCompatActivity() {
                 .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
         }
 
-        val optionItemRecipe = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.RECIPE.label,
-            icon = PingwinekCooksComposables.Navigation.RECIPE.icon
+        val optionItemRecipe = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.RECIPE.label,
+            icon = PingwinekCooksComposableHelpers.Navigation.RECIPE.icon
         ) {}
 
-        val optionItemProfileLoggedOut = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
-            icon = PingwinekCooksComposables.Navigation.LOGIN.icon
+        val optionItemProfileLoggedOut = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
+            icon = PingwinekCooksComposableHelpers.Navigation.LOGIN.icon
         ) {
             startActivity(Intent(this, SignInActivity::class.java))
         }
 
-        val optionItemProfileLoggedIn = PingwinekCooksComposables.OptionItem(
-            labelResourceId = PingwinekCooksComposables.Navigation.LOGIN.label,
+        val optionItemProfileLoggedIn = PingwinekCooksComposableHelpers.OptionItem(
+            labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
             icon = Icons.Filled.Person
         ) {
             startActivity(Intent(this, SignInActivity::class.java))
@@ -115,7 +116,7 @@ class RecipeListingActivity : AppCompatActivity() {
                         optionItemPrivacy,
                         optionItemImpressum
                     ),
-                    selectedNavigationBarItem = PingwinekCooksComposables.Navigation.RECIPE.ordinal,
+                    selectedNavigationBarItem = PingwinekCooksComposableHelpers.Navigation.RECIPE.ordinal,
                     navigationBarEnabled = true,
                     navigationBarItems = listOf(
                         optionItemRecipe,
@@ -175,7 +176,7 @@ class RecipeListingActivity : AppCompatActivity() {
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
         ) {
-            PingwinekCooksComposables.SpacerSmall()
+            SpacerSmall()
 
             if (loggedIn) {
                 recipes?.forEachIndexed { index, recipe ->

@@ -13,8 +13,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
-import com.pingwinek.jens.cookandbake.lib.spacing
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.composables.spacing
 import java.util.LinkedList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,14 +22,14 @@ import java.util.LinkedList
 fun PingwinekCooksScaffold(
     title: String,
     showDropDown: Boolean = false,
-    dropDownOptions: List<PingwinekCooksComposables.OptionItem> = LinkedList(),
-    optionItemLeft: PingwinekCooksComposables.OptionItem? = null,
-    optionItemMid: PingwinekCooksComposables.OptionItem? = null,
-    optionItemRight: PingwinekCooksComposables.OptionItem? = null,
+    dropDownOptions: List<PingwinekCooksComposableHelpers.OptionItem> = LinkedList(),
+    optionItemLeft: PingwinekCooksComposableHelpers.OptionItem? = null,
+    optionItemMid: PingwinekCooksComposableHelpers.OptionItem? = null,
+    optionItemRight: PingwinekCooksComposableHelpers.OptionItem? = null,
     selectedNavigationBarItem: Int = 0,
     navigationBarVisible: Boolean = true,
     navigationBarEnabled: Boolean = false,
-    navigationBarItems: List<PingwinekCooksComposables.OptionItem> = LinkedList(),
+    navigationBarItems: List<PingwinekCooksComposableHelpers.OptionItem> = LinkedList(),
     onSelectedNavigationItemChange: (Int) -> Unit = {},
     showFab: Boolean = false,
     fabIcon: ImageVector? = null,

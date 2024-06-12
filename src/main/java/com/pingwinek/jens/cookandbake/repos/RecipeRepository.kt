@@ -11,7 +11,7 @@ import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.io.File
 import java.util.LinkedList
 

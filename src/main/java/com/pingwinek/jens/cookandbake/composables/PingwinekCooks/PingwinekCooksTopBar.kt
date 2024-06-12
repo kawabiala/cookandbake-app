@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 import java.util.LinkedList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,10 +29,10 @@ import java.util.LinkedList
 fun PingwinekCooksTopAppBar(
     title: String = "",
     showDropDown: Boolean = false,
-    dropDownOptions: List<PingwinekCooksComposables.OptionItem> = LinkedList<PingwinekCooksComposables.OptionItem>(),
-    optionItemLeft: PingwinekCooksComposables.OptionItem? = null,
-    optionItemMid: PingwinekCooksComposables.OptionItem? = null,
-    optionItemRight: PingwinekCooksComposables.OptionItem? = null,
+    dropDownOptions: List<PingwinekCooksComposableHelpers.OptionItem> = LinkedList<PingwinekCooksComposableHelpers.OptionItem>(),
+    optionItemLeft: PingwinekCooksComposableHelpers.OptionItem? = null,
+    optionItemMid: PingwinekCooksComposableHelpers.OptionItem? = null,
+    optionItemRight: PingwinekCooksComposableHelpers.OptionItem? = null,
     dropDownItemColors: MenuItemColors = MenuDefaults.itemColors(),
     dropDownMenuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     topBarColors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),

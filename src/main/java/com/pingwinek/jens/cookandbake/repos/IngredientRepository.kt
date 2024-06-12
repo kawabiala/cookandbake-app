@@ -4,7 +4,7 @@ import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.IngredientFB
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 class IngredientRepository private constructor(val application: PingwinekCooksApplication) {

@@ -6,7 +6,7 @@ import com.pingwinek.jens.cookandbake.lib.firestore.SuspendedCoroutineWrapper
 import com.pingwinek.jens.cookandbake.models.UserInfo
 import com.pingwinek.jens.cookandbake.models.UserInfoFB
 import com.pingwinek.jens.cookandbake.sources.UserInfoSourceFB
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 class UserInfoRepository private constructor(val application: PingwinekCooksApplication) {

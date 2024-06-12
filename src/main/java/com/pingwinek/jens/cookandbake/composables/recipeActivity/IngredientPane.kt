@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.spacing
+import com.pingwinek.jens.cookandbake.composables.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.utils.Utils
+import com.pingwinek.jens.cookandbake.lib.Utils
 
 @Composable
 fun IngredientPane(

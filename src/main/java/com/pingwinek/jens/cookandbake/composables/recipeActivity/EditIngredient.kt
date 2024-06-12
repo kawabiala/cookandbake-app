@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.EditPane
-import com.pingwinek.jens.cookandbake.utils.Utils
+import com.pingwinek.jens.cookandbake.lib.Utils
 
 @Composable
 fun EditIngredient(

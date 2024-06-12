@@ -5,14 +5,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksTabElement(
     modifier: Modifier,
     selectedItem: Int,
     onSelectedItemChange: (Int) -> Unit,
-    tabItems: List<PingwinekCooksComposables.PingwinekCooksTabItem>
+    tabItems: List<PingwinekCooksComposableHelpers.PingwinekCooksTabItem>
 ) {
     Column(
         modifier = modifier
@@ -23,9 +23,10 @@ fun PingwinekCooksTabElement(
             PingwinekCooksTabRow(
                 selectedItem = selectedItem,
                 containerColor = Color.Transparent,
-                menuItems = mutableListOf<PingwinekCooksComposables.OptionItem>().apply{
+                menuItems = mutableListOf<PingwinekCooksComposableHelpers.OptionItem>().apply{
                     tabItems.forEachIndexed { index, tabItem ->
-                        add(PingwinekCooksComposables.OptionItem(
+                        add(
+                            PingwinekCooksComposableHelpers.OptionItem(
                             tabItem.tabNameId,
                             tabItem.tabIcon,
                             {onSelectedItemChange(index)}

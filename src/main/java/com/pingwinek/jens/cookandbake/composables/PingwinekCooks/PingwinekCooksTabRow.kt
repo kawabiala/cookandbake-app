@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.lib.PingwinekCooksComposables
+import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksTabRow(
@@ -16,7 +16,7 @@ fun PingwinekCooksTabRow(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.primary,
-    menuItems: List<PingwinekCooksComposables.OptionItem>
+    menuItems: List<PingwinekCooksComposableHelpers.OptionItem>
 ) {
     TabRow(
         selectedTabIndex = selectedItem,

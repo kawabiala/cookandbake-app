@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.utils
+package com.pingwinek.jens.cookandbake.lib
 
 object Utils {
 

@@ -6,7 +6,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
-import com.pingwinek.jens.cookandbake.utils.SingletonHolder
 
 class UriUtils private constructor(context: Context){
 
