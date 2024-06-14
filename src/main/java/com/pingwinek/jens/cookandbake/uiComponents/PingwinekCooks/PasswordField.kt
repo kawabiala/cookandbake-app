@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility

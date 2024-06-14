@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.recipeActivity
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.composables.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 
 @Composable
 fun ShowInstruction(

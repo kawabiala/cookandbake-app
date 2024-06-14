@@ -1,11 +1,11 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.pingwinek.jens.cookandbake.composables.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 
 @Composable
 fun SpacerSmall() {

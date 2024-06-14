@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,8 +13,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.composables.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import java.util.LinkedList
 
 @OptIn(ExperimentalMaterial3Api::class)

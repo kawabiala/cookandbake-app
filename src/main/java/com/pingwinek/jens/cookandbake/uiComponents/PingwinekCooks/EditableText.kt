@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text

@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.recipeActivity
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.composables.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.lib.Utils
 

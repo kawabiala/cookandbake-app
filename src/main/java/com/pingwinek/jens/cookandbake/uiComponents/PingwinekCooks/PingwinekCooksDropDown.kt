@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.foundation.background
 import androidx.compose.material3.DropdownMenu
@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksDropDown(

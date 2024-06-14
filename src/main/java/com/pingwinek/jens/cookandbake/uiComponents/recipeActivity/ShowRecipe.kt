@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.recipeActivity
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,24 +34,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.activities.RecipeActivity
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksDropDown
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.PingwinekCooksTabElement
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerMedium
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksDropDown
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksTabElement
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.uiComponents.TabMode
 
 @Composable
 fun ShowRecipe(
     paddingValues: PaddingValues,
-    tabMode: RecipeActivity.TabMode,
+    tabMode: TabMode,
     onIngredientsFunctionsMode: (Boolean) -> Unit,
     recipeTitle: String,
     recipeDescription: String,
     ingredients: List<Ingredient>,
     instruction: String,
     hasAttachment: Boolean,
+    isAttachmentLoading: Boolean,
     onEditRecipe: () -> Unit,
     onDeleteRecipe: () -> Unit,
     onAttachDocument: () -> Unit,
@@ -60,7 +62,7 @@ fun ShowRecipe(
     onDeleteIngredient: (ingredientId: String) -> Unit,
     onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit,
     onEditInstruction: () -> Unit,
-    onTabModeChange: (RecipeActivity.TabMode) -> Unit
+    onTabModeChange: (TabMode) -> Unit
 ) {
     var showButtons by remember(recipeTitle) { mutableStateOf(recipeTitle.isEmpty()) }
     var expanded by remember { mutableStateOf(false) }
@@ -108,13 +110,17 @@ fun ShowRecipe(
                     overflow = TextOverflow.Ellipsis,
                     text = recipeTitle
                 )
+
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     text = recipeDescription
                 )
-                if (hasAttachment) {
+
+                if (isAttachmentLoading) {
+                    CircularProgressIndicator()
+                } else if (hasAttachment) {
                     IconButton(
                         onClick = onAttachmentClicked
                     ) {
@@ -130,9 +136,11 @@ fun ShowRecipe(
                 IconButton(onClick = onEditRecipe) {
                     Icon(Icons.Filled.Edit, stringResource(R.string.edit_recipe))
                 }
+
                 IconButton(onClick = onDeleteRecipe) {
                     Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
                 }
+
                 if (hasAttachment) {
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
@@ -158,7 +166,7 @@ fun ShowRecipe(
                 .fillMaxHeight()
                 .background(color = MaterialTheme.colorScheme.tertiaryContainer),
             selectedItem = tabMode.ordinal,
-            onSelectedItemChange = { item -> onTabModeChange(RecipeActivity.TabMode.entries[item]) },
+            onSelectedItemChange = { item -> onTabModeChange(TabMode.entries[item]) },
             tabItems = mutableListOf<PingwinekCooksComposableHelpers.PingwinekCooksTabItem>().apply {
                 add(
                     PingwinekCooksComposableHelpers.PingwinekCooksTabItem(

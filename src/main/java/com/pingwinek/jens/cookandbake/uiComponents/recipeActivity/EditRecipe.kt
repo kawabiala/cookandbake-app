@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.recipeActivity
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,7 +7,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.EditPane
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.EditPane
 
 @Composable
 fun EditRecipe(

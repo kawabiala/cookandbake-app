@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -25,16 +24,18 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
 
     private val privateRecipeData = MutableLiveData<Recipe>()
-    private val privateRecipeAttachment = MutableLiveData<FileInfo>()
+    private val privateRecipeAttachment = MutableLiveData<FileInfo?>()
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
     private val privateMessage = MutableLiveData<String>()
+    private val privateIsUpOrDownloading = MutableLiveData<Boolean>(false)
 
     val recipeData: LiveData<Recipe> = privateRecipeData
-    val recipeAttachment: LiveData<FileInfo> = privateRecipeAttachment
+    val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
     val message: LiveData<String> = privateMessage
+    val isUpOrDownLoading: LiveData<Boolean> = privateIsUpOrDownloading
 
     var recipeId: String? = null
 
@@ -43,11 +44,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun attachDocument(uri: Uri) {
+        privateIsUpOrDownloading.postValue(true)
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
                 privateRecipeData.postValue(
                     recipeRepository.saveAttachment(recipe, uri)
                 )
+                privateIsUpOrDownloading.postValue(false)
             }
         }
     }
@@ -90,14 +93,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun loadAttachment(context: Context) {
+    fun loadAttachment() {
+        privateIsUpOrDownloading.postValue(true)
         viewModelScope.launch(Dispatchers.IO) {
             recipeData.value?.let {  recipe: Recipe ->
-                val fileInfo = recipeRepository.getAttachment(context, recipe)
+                val fileInfo = recipeRepository.getAttachment(recipe)
                 fileInfo?.let {
                     privateRecipeAttachment.postValue(it)
                 }
             }
+            privateIsUpOrDownloading.postValue(false)
         }
     }
 

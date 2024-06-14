@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables.recipeActivity
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,8 +11,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.composables.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 
 @Composable

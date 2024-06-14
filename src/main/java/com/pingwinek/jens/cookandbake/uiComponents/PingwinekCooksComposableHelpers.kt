@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.composables
+package com.pingwinek.jens.cookandbake.uiComponents
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person

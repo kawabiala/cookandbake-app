@@ -1,11 +1,11 @@
-package com.pingwinek.jens.cookandbake.composables.PingwinekCooks
+package com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.pingwinek.jens.cookandbake.composables.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 
 @Composable
 fun PingwinekCooksTabElement(

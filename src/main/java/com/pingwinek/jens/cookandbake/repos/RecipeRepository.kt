@@ -1,9 +1,9 @@
 package com.pingwinek.jens.cookandbake.repos
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.lib.UriUtils
 import com.pingwinek.jens.cookandbake.models.FileInfo
@@ -11,7 +11,6 @@ import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.RecipeFB
 import com.pingwinek.jens.cookandbake.sources.FileSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
-import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.io.File
 import java.util.LinkedList
 
@@ -59,8 +58,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         }
     }
 
-    suspend fun getAttachment(context: Context ,recipe: Recipe): FileInfo? {
-        val cacheDir = context.cacheDir
+    suspend fun getAttachment(recipe: Recipe): FileInfo? {
+        val cacheDir = application.applicationContext.cacheDir
         return try {
             val filePathList = FileSourceFB.listAll(getAttachmentDirPath(recipe.id))
             if (filePathList.isNotEmpty()) {
