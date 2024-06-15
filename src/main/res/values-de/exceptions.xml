@@ -21,4 +21,13 @@
 
     <string name="dataProtectionNotChecked">Bitte stimme der Datenschutzerklärung zu!</string>
 
+    <string name="attachmentDeleteFailed">Löschen des Attachments fehlgeschlagen</string>
+    <string name="attachmentDownloadFailed">Download des Attachments fehlgeschlagen</string>
+    <string name="attachmentUploadFailed">Upload des Attachments fehlgeschlagen</string>
+    <string name="attachmentWithoutNameOrSize">Das Attachment hat keinen Namen oder keine Größe</string>
+    <string name="attachmentWithoutTypeInformation">Das Attachment hat keine Type-Information</string>
+    <string name="attachmentWithUnsupportedSize">Das Attachment ist zu groß</string>
+    <string name="recipeListLoadingFailed">Die Rezeptliste konnte nicht geladen werden</string>
+    <string name="recipeUpdateFailed">Das Rezept konnte nicht aktualisiert werden</string>
+
 </resources>

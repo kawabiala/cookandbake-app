@@ -1,6 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib
 
-class TypedQueue<T> {
+class TypedQueue<T>(val maxSize: Int) {
 
     interface QueueListener {
         fun onNewItem()
@@ -10,7 +10,12 @@ class TypedQueue<T> {
     private val listeners = mutableListOf<QueueListener>()
 
     fun addItem(item: T) {
+        while (queue.size >= maxSize) {
+            queue.removeFirst()
+        }
+
         queue.add(item)
+
         listeners.forEach { listener ->
             listener.onNewItem()
         }

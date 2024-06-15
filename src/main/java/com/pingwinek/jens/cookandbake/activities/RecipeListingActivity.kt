@@ -2,7 +2,6 @@ package com.pingwinek.jens.cookandbake.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
@@ -36,11 +35,11 @@ import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
@@ -212,11 +211,6 @@ class RecipeListingActivity : AppCompatActivity() {
             Text(recipe.title)
             Text(recipe.description ?: "")
         }
-    }
-
-    // TODO remove function together with view
-    fun onRecipeItemClick(recipeItem: View) {
-        openRecipeItem(recipeItem.tag as String)
     }
 
     private fun openRecipeItem(itemId: String?) {

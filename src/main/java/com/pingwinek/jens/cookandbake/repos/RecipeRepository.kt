@@ -16,17 +16,20 @@ import java.util.LinkedList
 
 class RecipeRepository private constructor(val application: PingwinekCooksApplication) {
 
-    enum class RecipeActionMessage {
-        ATTACHMENT_WITHOUT_NAME_OR_SIZE,
-        ATTACHMENT_WITH_UNSUPPORTED_SIZE,
-        ATTACHMENT_WITHOUT_TYPE_INFORMATION,
+    enum class RecipeExceptionMessage {
+        ATTACHMENT_DELETE_FAILED,
+        ATTACHMENT_DOWNLOAD_FAILED,
         ATTACHMENT_UPLOAD_FAILED,
-        ATTACHMENT_DOWNLOAD_FAILED
+        ATTACHMENT_WITHOUT_NAME_OR_SIZE,
+        ATTACHMENT_WITHOUT_TYPE_INFORMATION,
+        ATTACHMENT_WITH_UNSUPPORTED_SIZE,
+        RECIPE_LIST_LOAD_FAILED,
+        RECIPE_UPDATE_FAILED
     }
 
     private val recipeSourceFB = application.getServiceLocator().getService(RecipeSourceFB::class.java)
     private val uriUtils = application.getServiceLocator().getService(UriUtils::class.java)
-    private val queue = TypedQueue<RecipeActionMessage>()
+    private val queue = TypedQueue<RecipeExceptionMessage>(10)
 
     suspend fun delete(recipe: Recipe) {
         recipeSourceFB.delete(recipe as RecipeFB)
@@ -39,6 +42,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
             returnRecipe = updateHasAttachment(recipe, false)
             deleteAttachment(getAttachmentDirPath(recipe.id))
         } catch (exception: Exception) {
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_DELETE_FAILED)
             Log.e(this::class.java.name, "Error when deleting attachment: $exception")
         }
 
@@ -53,6 +57,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         return try{
             LinkedList<Recipe>(recipeSourceFB.getAll())
         } catch (exception: Exception) {
+            queue.addItem(RecipeExceptionMessage.RECIPE_LIST_LOAD_FAILED)
             Log.e(this::class.java.name, "Error when retrieving recipe list: $exception")
             LinkedList<Recipe>()
         }
@@ -68,13 +73,13 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
                 null
             }
         } catch (exception: Exception) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_DOWNLOAD_FAILED)
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_DOWNLOAD_FAILED)
             Log.e(this::class.java.name, "Error when retrieving attachment: $exception")
             null
         }
     }
 
-    fun getRecipeActionMessageQueue(): TypedQueue<RecipeActionMessage> {
+    fun getRecipeExceptionMessageQueue(): TypedQueue<RecipeExceptionMessage> {
         return queue
     }
 
@@ -98,23 +103,23 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         val type = uriUtils.getTypeForUri(uri)
 
         if (name.isNullOrEmpty()) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
-            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
             return returnRecipe
         }
         if (size == null || size == 0.toLong()) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
-            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE}")
             return returnRecipe
         }
         if (size > MAX_ATTACHMENT_SIZE) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE)
-            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE}")
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE}")
             return returnRecipe
         }
         if (type.isNullOrEmpty()) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION)
-            Log.e(this::class.java.name, "Error when saving attachment ${RecipeActionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION}")
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION)
+            Log.e(this::class.java.name, "Error when saving attachment ${RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION}")
             return returnRecipe
         }
 
@@ -123,9 +128,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
         // try to delete
         try {
-            if (deleteAttachment(getAttachmentDirPath(recipe.id))) {
-                returnRecipe = updateHasAttachment(recipe, false)
-            }
+            deleteAttachment(getAttachmentDirPath(recipe.id))
+            returnRecipe = updateHasAttachment(recipe, false)
         } catch (exception: Exception) {
             Log.e(this::class.java.name, "Error when deleting document ${getAttachmentDirPath(recipe.id)}: $exception")
         }
@@ -136,7 +140,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
                 returnRecipe = updateHasAttachment(recipe, true)
             }
         } catch (exception: Exception) {
-            queue.addItem(RecipeActionMessage.ATTACHMENT_UPLOAD_FAILED)
+            queue.addItem(RecipeExceptionMessage.ATTACHMENT_UPLOAD_FAILED)
             Log.e(this::class.java.name, "Error when attaching document: $exception")
         }
 
@@ -164,20 +168,20 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         description: String?,
         instruction: String?
     ): Recipe {
-        return recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
+        return try {
+            recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
+        } catch (exception: Exception) {
+            queue.addItem(RecipeExceptionMessage.RECIPE_UPDATE_FAILED)
+            Log.e(this::class.java.name, "Updating recipe failed: $exception")
+            recipe
+        }
     }
 
-    private suspend fun deleteAttachment(dirPath: String): Boolean {
-        return try {
+    private suspend fun deleteAttachment(dirPath: String) {
             val filePathList = FileSourceFB.listAll(dirPath)
             filePathList.forEach { filePath ->
                 FileSourceFB.deleteFile(filePath)
             }
-            true
-        } catch (exception: Exception) {
-            Log.e(this::class.java.name, "error when deleting document $dirPath: $exception")
-            false
-        }
     }
 
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {

@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.ShareableRecipe
 import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.models.FileInfo
@@ -18,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 
-class RecipeViewModel(application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
+class RecipeViewModel(val application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
@@ -29,7 +30,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         value = LinkedList()
     }
     private val privateMessage = MutableLiveData<String>()
-    private val privateIsUpOrDownloading = MutableLiveData<Boolean>(false)
+    private val privateIsUpOrDownloading = MutableLiveData(false)
 
     val recipeData: LiveData<Recipe> = privateRecipeData
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
@@ -136,7 +137,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     }
 
     override fun onNewItem() {
-        val actionMessage = recipeRepository.getRecipeActionMessageQueue().getLatest()
+        val exceptionMessage = recipeRepository.getRecipeExceptionMessageQueue().getLatest()
+        exceptionMessage?.let { privateMessage.postValue(mapActionMessage(it)) }
     }
 
     fun saveRecipe(title: String, description: String) {
@@ -183,9 +185,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    private fun mapActionMessage(actionMessage: RecipeRepository.RecipeActionMessage): String {
+    private fun mapActionMessage(actionMessage: RecipeRepository.RecipeExceptionMessage): String {
         return when (actionMessage) {
-            else -> "something went wrong"
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DELETE_FAILED -> { application.getString(R.string.attachmentDeleteFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DOWNLOAD_FAILED -> { application.getString(R.string.attachmentDownloadFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_UPLOAD_FAILED -> { application.getString(R.string.attachmentUploadFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE -> { application.getString(R.string.attachmentWithoutNameOrSize) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION -> { application.getString(R.string.attachmentWithoutTypeInformation) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE -> { application.getString(R.string.attachmentWithUnsupportedSize) }
+            RecipeRepository.RecipeExceptionMessage.RECIPE_LIST_LOAD_FAILED -> { application.getString(R.string.recipeListLoadingFailed) }
+            RecipeRepository.RecipeExceptionMessage.RECIPE_UPDATE_FAILED -> { application.getString(R.string.recipeUpdateFailed) }
         }
     }
 

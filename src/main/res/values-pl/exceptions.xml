@@ -21,4 +21,13 @@
 
     <string name="dataProtectionNotChecked">Proszę zaakceptować politykę ochrony danych!</string>
 
+    <string name="attachmentDeleteFailed">Zmazanie dokumentu się nie udało</string>
+    <string name="attachmentDownloadFailed">Download dokumentu się nie udało</string>
+    <string name="attachmentUploadFailed">Upload dokumentu się nie udało</string>
+    <string name="attachmentWithoutNameOrSize">Dokument nie ma nazwy albo jest pusty</string>
+    <string name="attachmentWithoutTypeInformation">Typ dokumentu nie znany</string>
+    <string name="attachmentWithUnsupportedSize">Dokument jest za duży</string>
+    <string name="recipeListLoadingFailed">Ładowanie dokument się nie udało</string>
+    <string name="recipeUpdateFailed">Aktualizacja dokumentu się nie udało</string>
+
 </resources>

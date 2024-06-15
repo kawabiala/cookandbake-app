@@ -21,4 +21,13 @@
 
     <string name="dataProtectionNotChecked">Please, agree with the data protection policy!</string>
 
+    <string name="attachmentDeleteFailed">Deletion of attachment failed</string>
+    <string name="attachmentDownloadFailed">Download of attachment failed</string>
+    <string name="attachmentUploadFailed">Upload of attachment failed</string>
+    <string name="attachmentWithoutNameOrSize">Attachment has no name or size</string>
+    <string name="attachmentWithoutTypeInformation">Attachment has no type information</string>
+    <string name="attachmentWithUnsupportedSize">Attachment is too big</string>
+    <string name="recipeListLoadingFailed">The recipe list cannot be loaded</string>
+    <string name="recipeUpdateFailed">The update of the recipe failed</string>
+
 </resources>
