@@ -19,7 +19,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 
-class RecipeViewModel(val application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
+class RecipeViewModel(application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
+
+    private val appl = application
+
+    private val getString: (id: Int) -> String = { id ->
+        application.getString(id)
+    }
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
@@ -29,13 +35,13 @@ class RecipeViewModel(val application: Application) : AndroidViewModel(applicati
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
-    private val privateMessage = MutableLiveData<String>()
+    private val privateMessage = MutableLiveData<String?>()
     private val privateIsUpOrDownloading = MutableLiveData(false)
 
     val recipeData: LiveData<Recipe> = privateRecipeData
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
-    val message: LiveData<String> = privateMessage
+    val message: LiveData<String?> = privateMessage
     val isUpOrDownLoading: LiveData<Boolean> = privateIsUpOrDownloading
 
     var recipeId: String? = null
@@ -141,6 +147,10 @@ class RecipeViewModel(val application: Application) : AndroidViewModel(applicati
         exceptionMessage?.let { privateMessage.postValue(mapActionMessage(it)) }
     }
 
+    fun resetMessage() {
+        privateMessage.postValue(null)
+    }
+
     fun saveRecipe(title: String, description: String) {
         saveRecipe(title, description, recipeData.value?.instruction ?: "")
     }
@@ -187,14 +197,14 @@ class RecipeViewModel(val application: Application) : AndroidViewModel(applicati
 
     private fun mapActionMessage(actionMessage: RecipeRepository.RecipeExceptionMessage): String {
         return when (actionMessage) {
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DELETE_FAILED -> { application.getString(R.string.attachmentDeleteFailed) }
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DOWNLOAD_FAILED -> { application.getString(R.string.attachmentDownloadFailed) }
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_UPLOAD_FAILED -> { application.getString(R.string.attachmentUploadFailed) }
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE -> { application.getString(R.string.attachmentWithoutNameOrSize) }
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION -> { application.getString(R.string.attachmentWithoutTypeInformation) }
-            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE -> { application.getString(R.string.attachmentWithUnsupportedSize) }
-            RecipeRepository.RecipeExceptionMessage.RECIPE_LIST_LOAD_FAILED -> { application.getString(R.string.recipeListLoadingFailed) }
-            RecipeRepository.RecipeExceptionMessage.RECIPE_UPDATE_FAILED -> { application.getString(R.string.recipeUpdateFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DELETE_FAILED -> { getString(R.string.attachmentDeleteFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DOWNLOAD_FAILED -> { getString(R.string.attachmentDownloadFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_UPLOAD_FAILED -> { getString(R.string.attachmentUploadFailed) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE -> { getString(R.string.attachmentWithoutNameOrSize) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION -> { getString(R.string.attachmentWithoutTypeInformation) }
+            RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE -> { getString(R.string.attachmentWithUnsupportedSize) }
+            RecipeRepository.RecipeExceptionMessage.RECIPE_LIST_LOAD_FAILED -> { getString(R.string.recipeListLoadingFailed) }
+            RecipeRepository.RecipeExceptionMessage.RECIPE_UPDATE_FAILED -> { getString(R.string.recipeUpdateFailed) }
         }
     }
 

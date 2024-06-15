@@ -35,6 +35,8 @@ fun PingwinekCooksScaffold(
     fabIcon: ImageVector? = null,
     fabIconLabel: String = "",
     onFabClicked: () -> Unit = {},
+    snackbarMessage: String? = null,
+    onHasShownSnackbar: () -> Unit = {},
     scaffoldContent: @Composable (PaddingValues) -> Unit = {}
 ) {
     val topAppBarColors = TopAppBarDefaults.topAppBarColors(
@@ -76,6 +78,12 @@ fun PingwinekCooksScaffold(
             MaterialTheme.spacing.mainWindowPadding.value.toInt(),
             MaterialTheme.spacing.mainWindowPadding.value.toInt(),
         ),
+        snackbarHost = {
+            Snackbar(
+                snackbarMessage = snackbarMessage,
+                onHasShown = onHasShownSnackbar
+            )
+       },
         topBar = {
             PingwinekCooksTopAppBar(
                 title = title,

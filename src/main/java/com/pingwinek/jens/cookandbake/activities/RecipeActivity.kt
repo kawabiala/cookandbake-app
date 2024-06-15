@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,6 +71,8 @@ class RecipeActivity: AppCompatActivity() {
                     } 
                 }
 
+                val exceptionMessage by recipeModel.message.observeAsState()
+
                 val optionBack = PingwinekCooksComposableHelpers.OptionItem(
                     labelResourceId = R.string.back,
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -100,7 +103,9 @@ class RecipeActivity: AppCompatActivity() {
                         if (fabMode == FabMode.ADD_INGREDIENT) {
                             mode = Mode.EDIT_INGREDIENT
                         }
-                    }
+                    },
+                    snackbarMessage = exceptionMessage,
+                    onHasShownSnackbar = { recipeModel.resetMessage() }
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
