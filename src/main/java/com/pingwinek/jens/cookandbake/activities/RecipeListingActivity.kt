@@ -4,29 +4,15 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -38,8 +24,8 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
+import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
 
@@ -99,6 +85,10 @@ class RecipeListingActivity : AppCompatActivity() {
             startActivity(Intent(this, SignInActivity::class.java))
         }
 
+        val onOpenRecipe: (String) -> Unit = {
+            openRecipeItem(it)
+        }
+
         setContent {
             PingwinekCooksAppTheme {
 
@@ -129,7 +119,8 @@ class RecipeListingActivity : AppCompatActivity() {
                     ScaffoldContent(
                         paddingValues = paddingValues,
                         recipes = recipes,
-                        loggedIn = loggedIn
+                        loggedIn = loggedIn,
+                        onOpenRecipe = onOpenRecipe
                     )
                 }
             }
@@ -161,57 +152,6 @@ class RecipeListingActivity : AppCompatActivity() {
     }
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Composable
-    fun ScaffoldContent(
-        paddingValues: PaddingValues,
-        recipes: LinkedList<Recipe>?,
-        loggedIn: Boolean
-    ) {
-        val scrollState = rememberScrollState()
-
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(scrollState)
-        ) {
-            SpacerSmall()
-
-            if (loggedIn) {
-                recipes?.forEachIndexed { index, recipe ->
-                    if (index > 0) {
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .padding(top = 5.dp, bottom = 5.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh
-                        )
-                    }
-                    key(recipe.id) {
-                        Recipe(recipe = recipe) { recipeId ->
-                            openRecipeItem(recipeId)
-                        }
-                    }
-                }
-            } else {
-                Text(getString(R.string.no_account))
-            }
-        }
-    }
-
-    @Composable
-    private fun Recipe(
-        recipe: Recipe,
-        onClick: (String) -> Unit
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick(recipe.id) }
-        ) {
-            Text(recipe.title)
-            Text(recipe.description ?: "")
-        }
-    }
 
     private fun openRecipeItem(itemId: String?) {
         val intent = Intent(this, RecipeActivity::class.java)
