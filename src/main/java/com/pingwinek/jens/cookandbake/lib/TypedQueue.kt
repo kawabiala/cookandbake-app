@@ -1,6 +1,6 @@
 package com.pingwinek.jens.cookandbake.lib
 
-class TypedQueue<T>(val maxSize: Int) {
+class TypedQueue<T>(private val maxSize: Int) {
 
     interface QueueListener {
         fun onNewItem()

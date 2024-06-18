@@ -91,6 +91,8 @@
     <string name="write_instruction">Add instruction</string>
     <string name="plus_new_ingredient">+ new ingredient</string>
 
+    <string name="gallery">Gallery</string>
+
     <string name="pdf">pdf</string>
     <string name="add_pdf">add pdf</string>
     <string name="delete_pdf">Delete pdf</string>

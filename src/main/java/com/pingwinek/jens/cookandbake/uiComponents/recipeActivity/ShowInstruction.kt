@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
@@ -32,6 +34,7 @@ fun ShowInstruction(
     onEditInstruction: () -> Unit
 ) {
     var showButtons by remember(instruction) { mutableStateOf(instruction.isBlank()) }
+    val scrollState = rememberScrollState()
 
     Row(
         modifier = Modifier
@@ -45,7 +48,9 @@ fun ShowInstruction(
     ) {
         Text(
             modifier = Modifier
-                .clickable { showButtons = !showButtons },
+                .clickable { showButtons = !showButtons }
+                .weight(0.8f)
+                .verticalScroll(scrollState),
             text = instruction
         )
 

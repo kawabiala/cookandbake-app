@@ -90,6 +90,8 @@
     <string name="write_instruction">Jetzt Anleitung ergänzen</string>
     <string name="plus_new_ingredient">+ Neue Zutat</string>
 
+    <string name="gallery">Galerie</string>
+
     <string name="pdf">pdf</string>
     <string name="add_pdf">pdf hinzufügen</string>
     <string name="delete_pdf">pdf löschen</string>

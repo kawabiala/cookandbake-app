@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import com.pingwinek.jens.cookandbake.models.Ingredient
 

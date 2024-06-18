@@ -22,8 +22,8 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.uiComponents.FabMode
 import com.pingwinek.jens.cookandbake.uiComponents.Mode
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.TabMode
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.ScaffoldContent

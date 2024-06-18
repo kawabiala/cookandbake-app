@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import java.util.LinkedList
 
 @Composable

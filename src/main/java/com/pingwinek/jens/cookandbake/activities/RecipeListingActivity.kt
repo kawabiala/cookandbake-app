@@ -22,8 +22,8 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel

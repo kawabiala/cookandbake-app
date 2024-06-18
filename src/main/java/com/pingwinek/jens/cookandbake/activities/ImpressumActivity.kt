@@ -11,9 +11,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.WebView
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.WebView
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 
 class ImpressumActivity : AppCompatActivity() {

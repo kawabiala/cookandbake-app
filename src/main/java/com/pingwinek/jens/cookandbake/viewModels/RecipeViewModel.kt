@@ -21,8 +21,6 @@ import java.util.LinkedList
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
 
-    private val appl = application
-
     private val getString: (id: Int) -> String = { id ->
         application.getString(id)
     }
@@ -149,10 +147,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     fun resetMessage() {
         privateMessage.postValue(null)
-    }
-
-    fun saveRecipe(title: String, description: String) {
-        saveRecipe(title, description, recipeData.value?.instruction ?: "")
     }
 
     fun saveRecipe(title: String, description: String, instruction: String) {

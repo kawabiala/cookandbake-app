@@ -55,11 +55,11 @@ interface AuthService {
             fun matches(password: String): Boolean {
                 val result = runCatching {
                     require(password.length >= minLength)
-                    require(password.none() { it.isWhitespace() } )
-                    require(password.any() { it.isUpperCase() } )
-                    require(password.any() { it.isLowerCase() } )
-                    require(password.any() { it.isDigit() } )
-                    require(password.any() { ! it.isLetterOrDigit() } )
+                    require(password.none { it.isWhitespace() } )
+                    require(password.any { it.isUpperCase() } )
+                    require(password.any { it.isLowerCase() } )
+                    require(password.any { it.isDigit() } )
+                    require(password.any { ! it.isLetterOrDigit() } )
                 }
 
                 return result.isSuccess

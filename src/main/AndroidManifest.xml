@@ -41,6 +41,7 @@
                 android:name=".activities.RecipeActivity"
                 android:label="@string/recipeLocal"
                 android:launchMode="singleTop"
+                android:windowSoftInputMode="adjustResize"
                 android:parentActivityName=".activities.RecipeListingActivity" />
 
         <activity
@@ -50,6 +51,7 @@
             android:name=".activities.SignInActivity"
             android:label="Profile"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTop">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

@@ -7,7 +7,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.EditPane
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
 
 @Composable
 fun EditRecipe(

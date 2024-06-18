@@ -16,7 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,10 +35,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksDropDown
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksTabElement
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerMedium
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksDropDown
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabElement
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.TabMode
 
@@ -197,8 +197,8 @@ fun ShowRecipe(
                 ))
                 add(
                     PingwinekCooksComposableHelpers.PingwinekCooksTabItem(
-                    tabNameId = R.string.pdf,
-                    tabIcon = Icons.Filled.FilePresent,
+                    tabNameId = R.string.gallery,
+                    tabIcon = Icons.Filled.Image,
                     content = {
                     }
                 ))

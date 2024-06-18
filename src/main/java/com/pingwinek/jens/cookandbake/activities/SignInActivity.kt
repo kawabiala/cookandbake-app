@@ -40,16 +40,16 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.EditableText
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.Expandable
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.LabelledCheckBox
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.LabelledSwitch
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PasswordField
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksAppTheme
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.PingwinekCooksTabRow
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerMedium
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditableText
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.Expandable
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledCheckBox
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledSwitch
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PasswordField
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabRow
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.spacing
@@ -238,9 +238,7 @@ class SignInActivity : AppCompatActivity() {
         }
 
         setContent {
-            PingwinekCooksAppTheme(
-
-            ) {
+            PingwinekCooksAppTheme {
                 PingwinekCooksScaffold(
                     title = getString(R.string.profile),
                     showDropDown = true,
@@ -458,7 +456,7 @@ class SignInActivity : AppCompatActivity() {
     fun ProfileHeader(
         text: String
     ) {
-        Row() {
+        Row {
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleMedium,

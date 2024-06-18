@@ -9,7 +9,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class SuspendedCoroutineWrapper {
 
-    class SuspendedCoroutineException(val exception: Exception) : Exception(exception) {
+    class SuspendedCoroutineException(private val exception: Exception) : Exception(exception) {
 
         constructor(message: String): this(Exception(message))
 
