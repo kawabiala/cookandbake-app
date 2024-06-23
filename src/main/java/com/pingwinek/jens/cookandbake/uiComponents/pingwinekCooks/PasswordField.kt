@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks
 
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
@@ -20,7 +22,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 fun PasswordField(
     password: String,
     label: String? = null,
-    onValueChange: (String) -> Unit
+    showResetPassword: Boolean = false,
+    resetPasswordText: String = "",
+    onValueChange: (String) -> Unit,
+    onResetPassword: () -> Unit = {}
 ) {
     var passwordHidden: Boolean by remember { mutableStateOf(true) }
     TextField(
@@ -38,6 +43,15 @@ fun PasswordField(
                 val icon = if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 val description = if (passwordHidden) "show password" else "hide password"
                 Icon(imageVector = icon, contentDescription = description)
+            }
+        },
+        supportingText = {
+            if (showResetPassword) {
+                Text(
+                    modifier = Modifier
+                        .clickable { onResetPassword() },
+                    text = resetPasswordText
+                )
             }
         }
     )

@@ -22,9 +22,9 @@ import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import java.util.LinkedList
@@ -48,22 +48,34 @@ class RecipeListingActivity : AppCompatActivity() {
 
         recipeListData = recipeListingModel.recipeListData
 
+        val startImpressumActivity: () -> Unit = {
+            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                .putExtra("title", getString(R.string.impressum))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
+        }
+
+        val startDataProtectionActivity: () -> Unit = {
+            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
+                .putExtra("title", getString(R.string.dataprotection))
+                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
+        }
+
+        val startSignInActivity: () -> Unit = {
+            startActivity(Intent(this, SignInActivity::class.java))
+        }
+
         val optionItemImpressum = PingwinekCooksComposableHelpers.OptionItem(
             R.string.impressum,
             Icons.Filled.Info
         ) {
-            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                .putExtra("title", getString(R.string.impressum))
-                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_IMPRESSUM)))
+            startImpressumActivity()
         }
 
         val optionItemPrivacy = PingwinekCooksComposableHelpers.OptionItem(
             R.string.dataprotection,
             Icons.Filled.Lock
         ) {
-            startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
-                .putExtra("title", getString(R.string.dataprotection))
-                .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
+            startDataProtectionActivity()
         }
 
         val optionItemRecipe = PingwinekCooksComposableHelpers.OptionItem(
@@ -75,14 +87,14 @@ class RecipeListingActivity : AppCompatActivity() {
             labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
             icon = PingwinekCooksComposableHelpers.Navigation.LOGIN.icon
         ) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            startSignInActivity()
         }
 
         val optionItemProfileLoggedIn = PingwinekCooksComposableHelpers.OptionItem(
             labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
             icon = Icons.Filled.Person
         ) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            startSignInActivity()
         }
 
         val onOpenRecipe: (String) -> Unit = {
@@ -95,6 +107,10 @@ class RecipeListingActivity : AppCompatActivity() {
                 val recipes by recipeListData.observeAsState()
 
                 val loggedIn by remember(recipes, auth.currentUser) {
+                    mutableStateOf(auth.currentUser != null)
+                }
+
+                val verified by remember(recipes, auth.currentUser) {
                     mutableStateOf(auth.currentUser?.isEmailVerified == true)
                 }
 
@@ -120,7 +136,10 @@ class RecipeListingActivity : AppCompatActivity() {
                         paddingValues = paddingValues,
                         recipes = recipes,
                         loggedIn = loggedIn,
-                        onOpenRecipe = onOpenRecipe
+                        verified = verified,
+                        onOpenRecipe = onOpenRecipe,
+                        onShowSignIn = startSignInActivity,
+                        onCheckDataProtection = startDataProtectionActivity
                     )
                 }
             }

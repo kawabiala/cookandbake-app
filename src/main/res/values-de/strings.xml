@@ -13,6 +13,7 @@
     <string name="share">Teilen</string>
     <string name="refresh">Aktualisieren</string>
     <string name="more">Weitere Optionen</string>
+    <string name="checkNow">Jetzt prüfen</string>
 
     <string name="authenticationMessage">Authentication Message</string>
     <string name="errorMessage">Fehlermeldung</string>
@@ -22,6 +23,9 @@
     <string name="is_logged_in">%1$s (angemeldet)</string>
     <string name="logged_in_as">Angemeldet als: %1$s</string>
     <string name="is_not_logged_in">%1$s (nicht angemeldet)</string>
+
+    <string name="registerOrLoginNow">Jetzt anmelden</string>
+    <string name="verifyEmailNow">Jetzt Email verifizieren</string>
 
     <string name="logout">Logout</string>
     <string name="loggedOut">Du bist jetzt ausgeloggt.</string>
@@ -46,10 +50,11 @@
     <string name="confirmUnsubscribe">Profil wirklich löschen?</string>
     <string name="no_account">Kein Profil angemeldet</string>
     <string name="manage_account">Profildaten</string>
+    <string name="verificationNeeded">Du musst Deine Email noch bestätigen.</string>
+    <string name="sendVerificationEmail">Bestätigungs-Link senden</string>
     <string name="confirmationSucceeded">Deine Email ist jetzt bestätigt.</string>
     <string name="confirmationFailed">Die Bestätigung des Profils ist fehlgeschlagen.</string>
     <string name="declareAcceptanceOfDataprotection">Ja, ich bin mit der Speicherung meiner Daten einverstanden und akzeptiere die <annotation clickableArea="dataprotection">Datenschutzbestimmungen</annotation>.</string>
-    <string name="sendVerificationEmail">Bestätigungs-Link senden</string>
 
     <string name="passwordPolicy">Das Passwort muss mind. %d Zeichen lang sein, darf kein Leerzeichen enthalten und muss min. %d Klein- und %d Großbuchstaben enthalten sowie min. %d Zahl und %d Sonderzeichen.</string>
 
@@ -58,6 +63,7 @@
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Datenschutz</string>
+    <string name="WantToCheckDataProtection">Möchtest Du erst die Datenschutzrichtlinie prüfen?</string>
 
     <string name="acceptCrashlytics">Ja, ich bin einverstanden, dass die App Absturzberichte sendet</string>
 

@@ -13,6 +13,7 @@
     <string name="share">Share</string>
     <string name="refresh">Refresh</string>
     <string name="more">More options</string>
+    <string name="checkNow">Check now</string>
 
     <string name="authenticationMessage">Authentication Message</string>
     <string name="errorMessage">Error Message</string>
@@ -22,6 +23,9 @@
     <string name="is_logged_in">%1$s (logged in)</string>
     <string name="logged_in_as">Logged in as: %1$s</string>
     <string name="is_not_logged_in">%1$s (not logged in)</string>
+
+    <string name="registerOrLoginNow">Register or sign in now</string>
+    <string name="verifyEmailNow">Verify email now</string>
 
     <string name="logout">Logout</string>
     <string name="loggedOut">You are now signed out.</string>
@@ -46,10 +50,11 @@
     <string name="confirmUnsubscribe">Really delete profile?</string>
     <string name="no_account">No profile logged in</string>
     <string name="manage_account">Profile</string>
+    <string name="verificationNeeded">Your email needs to be verified.</string>
+    <string name="sendVerificationEmail">Send verification email</string>
     <string name="confirmationSucceeded">Your email is now confirmed.</string>
     <string name="confirmationFailed">Confirmation of profile failed.</string>
     <string name="declareAcceptanceOfDataprotection">Yes, I agree with storing my data and I accept the <annotation clickableArea="dataprotection">privacy statement</annotation>.</string>
-    <string name="sendVerificationEmail">Send verification email</string>
 
     <string name="passwordPolicy">The password must contain at least %d characters, no whitespace, min. %d lower and %d upper letter, min. %d digit and %d special character.</string>
 
@@ -58,6 +63,7 @@
 
     <string name="impressum">Impressum</string>
     <string name="dataprotection">Privacy statement</string>
+    <string name="WantToCheckDataProtection">Do you want to check the data protection policy first?</string>
 
     <string name="acceptCrashlytics">Yes, I agree that the app can send crash reports</string>
 

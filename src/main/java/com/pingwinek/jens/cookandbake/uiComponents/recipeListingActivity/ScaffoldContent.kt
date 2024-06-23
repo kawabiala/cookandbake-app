@@ -7,13 +7,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import java.util.LinkedList
@@ -23,7 +20,10 @@ fun ScaffoldContent(
     paddingValues: PaddingValues,
     recipes: LinkedList<Recipe>?,
     loggedIn: Boolean,
-    onOpenRecipe: (String) -> Unit
+    verified: Boolean,
+    onOpenRecipe: (String) -> Unit,
+    onShowSignIn: () -> Unit,
+    onCheckDataProtection: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -34,7 +34,7 @@ fun ScaffoldContent(
     ) {
         SpacerSmall()
 
-        if (loggedIn) {
+        if (verified) {
             recipes?.forEachIndexed { index, recipe ->
                 if (index > 0) {
                     HorizontalDivider(
@@ -49,8 +49,15 @@ fun ScaffoldContent(
                     }
                 }
             }
+        } else if (loggedIn) {
+            NotVerifiedView(
+                onLogIn = onShowSignIn
+            )
         } else {
-            Text(stringResource(R.string.no_account))
+            NoProfileView(
+                onLogIn = onShowSignIn,
+                onCheckDataProtection = onCheckDataProtection
+            )
         }
     }
 }

@@ -3,6 +3,7 @@
     <string name="unknownException">Unbekannter Fehler</string>
 
     <string name="noSignedInUser">Kein eingeloggter User.</string>
+    <string name="emailNotVerified">Die Email-Adresse ist nicht verifiziert.</string>
     <string name="deleteFailed">Das Löschen des Account ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
     <string name="login_again">Diese Aktion erfordert, dass Du Dich erneut anmeldest.</string>
     <string name="registrationFailed">Das Anlegen des Accounts ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
@@ -13,6 +14,7 @@
     <string name="resetForWrongEmail">Der Reset-Link ist nicht gültig für den eingeloggten User</string>
     <string name="sendVerificationFailed">Das Senden der Verifikations-Email ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
     <string name="sendResetFailed">Das Senden der Passwort-Reset-Email ist fehlgeschlagen. Bitte, versuche es noch einmal!</string>
+    <string name="userAlreadyExists">Der Benutzer existiert bereits</string>
     <string name="verificationFailed">Deine Email konnte nicht verifiziert werden. Möglicherweise war der Link nicht mehr gültig.</string>
 
     <string name="resetOrVerifyCodeMalformed">Der in der Email angegebene Code is ungültig oder abgelaufen.</string>

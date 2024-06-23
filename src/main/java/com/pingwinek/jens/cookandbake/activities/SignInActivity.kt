@@ -40,6 +40,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.AuthService
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditableText
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.Expandable
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledCheckBox
@@ -50,8 +52,6 @@ import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooks
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabRow
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.lib.AuthService
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
@@ -189,6 +189,14 @@ class SignInActivity : AppCompatActivity() {
             userInfoViewModel.loadData()
         }
 
+        // Google Firebase Testing only
+        val googleEmail = "google@pingwinek.de"
+        val googlePW = "X@*updr2HtbRaJac"
+
+        authenticationViewModel.onNewEmailChange(googleEmail)
+        authenticationViewModel.onPasswordChange(googlePW)
+        //authenticationViewModel.signIn()
+
         val optionItems = mutableListOf(
             PingwinekCooksComposableHelpers.OptionItem(
                 R.string.dataprotection,
@@ -251,7 +259,8 @@ class SignInActivity : AppCompatActivity() {
                     )
                 ) { paddingValues ->
                    ScaffoldContent(
-                       paddingValues = paddingValues
+                       paddingValues = paddingValues,
+                       authenticationViewModel = authenticationViewModel
                    )
                 }
             }
@@ -283,7 +292,10 @@ class SignInActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun ScaffoldContent(paddingValues: PaddingValues) {
+    private fun ScaffoldContent(
+        paddingValues: PaddingValues,
+        authenticationViewModel: AuthenticationViewModel
+    ) {
 
         val authStatus by authenticationViewModel.authStatus.observeAsState()
         val linkMode by authenticationViewModel.linkMode.observeAsState()
@@ -384,7 +396,10 @@ class SignInActivity : AppCompatActivity() {
                 PasswordField(
                     password = password ?: "",
                     label = getString(R.string.password),
+                    showResetPassword = true,
+                    resetPasswordText = getString(R.string.lostPassword),
                     onValueChange = { authenticationViewModel.onPasswordChange(it) },
+                    onResetPassword = onResetPasswordClicked
                 )
             }
 
@@ -591,7 +606,9 @@ class SignInActivity : AppCompatActivity() {
             }
 
             AuthService.AuthStatus.SIGNED_OUT -> {
-                if (asRegistration) {
+                if (linkMode == AuthenticationViewModel.EmailLinkMode.RESET) {
+                    resetPasswordView
+                } else if (asRegistration) {
                     registerView
                 } else {
                     signInView
@@ -634,7 +651,7 @@ class SignInActivity : AppCompatActivity() {
             AuthService.AuthActionResult.EXC_RESET_PASSWORD_SEND_FAILED_WITHOUT_REASON -> getString(R.string.sendResetFailed)
             AuthService.AuthActionResult.EXC_SIGNIN_FAILED_WITHOUT_REASON -> getString(R.string.loginFailed)
             AuthService.AuthActionResult.EXC_SIGNOUT_FAILED_WITHOUT_REASON -> getString(R.string.logoutFailed)
-            AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> TODO()
+            AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS -> getString(R.string.userAlreadyExists)
             AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON -> getString(R.string.verificationFailed)
             AuthService.AuthActionResult.EXC_VERIFICATION_SEND_FAILED_WITHOUT_REASON -> getString(R.string.sendVerificationFailed)
             else -> null

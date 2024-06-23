@@ -7,6 +7,7 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import java.util.LinkedList
@@ -164,7 +165,11 @@ class FirebaseAuthService {
                 AuthService.AuthActionResult.REGISTRATION_SUCCEEDED
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
                 Log.e(this::class.java.name, exception.toString())
-                AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
+                if (exception.getUnderlyingException() is FirebaseAuthUserCollisionException) {
+                    AuthService.AuthActionResult.EXC_USER_ALREADY_EXISTS
+                } else {
+                    AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON
+                }
             } catch (exception: Exception) {
                 Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_REGISTRATION_FAILED_WITHOUT_REASON

@@ -3,6 +3,7 @@
     <string name="unknownException">Wystąpił nieznany błąd</string>
 
     <string name="noSignedInUser">Nie ma zalogowanego użytkownika.</string>
+    <string name="emailNotVerified">Adres emailowy nie jest zweryfikowane.</string>
     <string name="deleteFailed">Zmazanie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
     <string name="login_again">Ta czynność wymaga ponownego zalogowania się.</string>
     <string name="registrationFailed">Założenie profilu się nie udało. Proszę, spróbuj jeszcze raz!</string>
@@ -13,6 +14,7 @@
     <string name="resetForWrongEmail">Link do resetowanie hasła nie jest ważny dla zalogowanego użytkownika</string>
     <string name="sendVerificationFailed">Nie udało się wysłać email do weryfikacji. Proszę, spróbuj jeszcze raz!</string>
     <string name="sendResetFailed">Nie udało się wysłać email do resetowania hasła. Proszę, spróbuj jeszcze raz!</string>
+    <string name="userAlreadyExists">Profil już istnieje</string>
     <string name="verificationFailed">Weryfikacja twojego emailu się nie udało. Może link był już nie aktualny.</string>
 
     <string name="resetOrVerifyCodeMalformed">Kod podany w emailu jest nieważny albo nieaktualny.</string>
