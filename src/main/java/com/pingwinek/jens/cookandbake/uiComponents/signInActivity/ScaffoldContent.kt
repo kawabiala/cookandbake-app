@@ -85,7 +85,7 @@ fun ScaffoldContent(
         authenticationViewModel.sendPasswordResetEmail(resetEmail)
     }
 
-    val onShowResetPasswordView: (Boolean) -> Unit = { show ->
+    val onShowResetPasswordRequestView: (Boolean) -> Unit = { show ->
         showResetRequest = show
     }
 
@@ -133,11 +133,18 @@ fun ScaffoldContent(
             )
         }
 
+        if (view == View.LOGIN || view == View.REGISTER) {
+            SignInTabRow(
+                highlightLeft = (view == View.REGISTER),
+                toggleItem = toggleRegistrationView
+            )
+        }
+
         when (view) {
             View.LOGIN -> {
                 LoginView(
                     email = email ?: "",
-                    onResetPassword = { onShowResetPasswordView(true) },
+                    onResetPassword = { onShowResetPasswordRequestView(true) },
                     onLogin = onLogin,
                     onClose = onClose
                 )
@@ -162,7 +169,7 @@ fun ScaffoldContent(
                 ResetPasswordRequestView(
                     email = email ?: "",
                     onResetRequest = onResetPasswordRequestForEmail,
-                    onClose = onClose
+                    onClose = { onShowResetPasswordRequestView(false) }
                 )
             }
 
@@ -172,7 +179,7 @@ fun ScaffoldContent(
                     crashlyticsEnabled = userInfoData?.crashlyticsEnabled ?: false,
                     onCrashlyticsChange = onCrashlyticsChange,
                     onVerify = onVerify,
-                    onResetPasswordRequest = { onShowResetPasswordView(true) },
+                    onResetPasswordRequest = { onShowResetPasswordRequestView(true) },
                     onLogout = onLogout,
                     onDelete = onDelete,
                     onClose = onClose
@@ -184,11 +191,11 @@ fun ScaffoldContent(
                     email = email ?: "",
                     crashlyticsEnabled = userInfoData?.crashlyticsEnabled ?: false,
                     onCrashlyticsChange = onCrashlyticsChange,
-                    onResetPasswordRequest = { onShowResetPasswordView(true) },
+                    onResetPasswordRequest = { onShowResetPasswordRequestView(true) },
                     onLogout = onLogout,
-                    onDelete = onDelete) {
-
-                }
+                    onDelete = onDelete,
+                    onClose = onClose
+                )
             }
         }
     }

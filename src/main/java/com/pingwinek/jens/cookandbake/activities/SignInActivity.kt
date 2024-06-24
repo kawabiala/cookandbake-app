@@ -20,6 +20,7 @@ import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
 
 class SignInActivity : AppCompatActivity() {
 
+    /*
     private enum class ButtonRightAction {
         NOTHING,
         REGISTER,
@@ -27,10 +28,10 @@ class SignInActivity : AppCompatActivity() {
         SENDVERIFICATION,
         SIGNIN,
     }
-
+*/
     /**
      *
-     */
+     */ /*
     private data class ViewSettings(
         val caption: String? = null,
         val showTabRow: Boolean = true,
@@ -55,11 +56,11 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var resetPasswordView: ViewSettings
     private lateinit var unverifiedView: ViewSettings
     private lateinit var verifiedView: ViewSettings
-
+*/
     private lateinit var authenticationViewModel: AuthenticationViewModel
     private lateinit var userInfoViewModel: UserInfoViewModel
 
-    private var asRegistrationView: Boolean = true
+//    private var asRegistrationView: Boolean = true
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Lifecycle Functions
@@ -69,7 +70,7 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Define view settings
-
+/*
         registerView = ViewSettings(
 //            buttonLeftCaption = getString(R.string.close),
             buttonRightCaption = getString(R.string.register),
@@ -132,7 +133,7 @@ class SignInActivity : AppCompatActivity() {
             showLogout = true,
             showDelete = true
         )
-
+*/
         // Observers
 
         authenticationViewModel = ViewModelProvider

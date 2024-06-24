@@ -59,7 +59,7 @@ fun LoginView(
     Column {
         TextField(
             label = { Text(emailLabel) },
-            value = "",
+            value = emailTmp,
             onValueChange = onEmailChange
         )
 
@@ -67,7 +67,7 @@ fun LoginView(
 
         PasswordField(
             label = passwordLabel,
-            password = "",
+            password = passwordTmp,
             showResetPassword = true,
             resetPasswordText = resetPasswordText,
             onResetPassword = onResetPassword,

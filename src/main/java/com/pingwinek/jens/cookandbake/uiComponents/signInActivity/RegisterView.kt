@@ -63,7 +63,7 @@ fun RegisterView(
     Column {
         TextField(
             label = { Text(emailLabel) },
-            value = "",
+            value = emailTmp,
             onValueChange = onEmailChange
         )
 
@@ -71,7 +71,7 @@ fun RegisterView(
 
         PasswordField(
             label = passwordLabel,
-            password = "",
+            password = passwordTmp,
             onValueChange = onPasswordChange
         )
 
