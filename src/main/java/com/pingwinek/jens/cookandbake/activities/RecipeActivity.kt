@@ -20,12 +20,12 @@ import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.FileInfo
-import com.pingwinek.jens.cookandbake.uiComponents.FabMode
-import com.pingwinek.jens.cookandbake.uiComponents.Mode
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.FabMode
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.Mode
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.uiComponents.TabMode
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.TabMode
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 

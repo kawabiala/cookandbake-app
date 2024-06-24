@@ -58,6 +58,7 @@
 
     <string name="passwordPolicy">Das Passwort muss mind. %d Zeichen lang sein, darf kein Leerzeichen enthalten und muss min. %d Klein- und %d Großbuchstaben enthalten sowie min. %d Zahl und %d Sonderzeichen.</string>
 
+    <string name="delete_account">Konto löschen</string>
     <string name="accountCreated">Dein Konto wurde angelegt.</string>
     <string name="accountDeleted">Dein Konto wurde gelöscht.</string>
 

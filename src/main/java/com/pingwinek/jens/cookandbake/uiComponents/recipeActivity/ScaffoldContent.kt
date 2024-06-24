@@ -11,9 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.uiComponents.Delete
-import com.pingwinek.jens.cookandbake.uiComponents.Mode
-import com.pingwinek.jens.cookandbake.uiComponents.TabMode
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 @Composable

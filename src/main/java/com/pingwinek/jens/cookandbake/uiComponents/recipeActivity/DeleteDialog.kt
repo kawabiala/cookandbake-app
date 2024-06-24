@@ -1,13 +1,8 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.Delete
 
 @Composable
 fun DeleteDialog(
@@ -15,6 +10,17 @@ fun DeleteDialog(
     onClose: () -> Unit,
     onDelete: (delete: Delete) -> Unit
 ) {
+    com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DeleteDialog(
+        message = when (dialogMode) {
+            Delete.RECIPE -> stringResource(R.string.delete_recipe)
+            Delete.INGREDIENT -> stringResource(R.string.delete_ingredient)
+            Delete.NONE -> ""
+        },
+        onClose = { onClose() },
+        onDelete = { onDelete(dialogMode) }
+    )
+
+/*
     AlertDialog(
         text = {
             val msg = when (dialogMode) {
@@ -40,4 +46,6 @@ fun DeleteDialog(
             )
         }
     )
+
+ */
 }

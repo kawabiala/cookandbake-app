@@ -18,7 +18,7 @@ fun VerifiedView(
     email: String,
     crashlyticsEnabled: Boolean,
     onCrashlyticsChange: (Boolean) -> Unit,
-    onResetPassword: () -> Unit,
+    onResetPasswordRequest: () -> Unit,
     onLogout: () -> Unit,
     onDelete: () -> Unit,
     onClose: () -> Unit
@@ -56,7 +56,7 @@ fun VerifiedView(
         AccountSettingsBox(
             crashlyticsEnabled = crashlyticsEnabled,
             onCrashlyticsChange = onCrashlyticsChange,
-            onResetPasswordClicked = onResetPassword,
+            onResetPasswordClicked = onResetPasswordRequest,
             onLogout = onLogout,
             onDelete = onDelete
         )

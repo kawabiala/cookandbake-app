@@ -57,6 +57,7 @@
 
     <string name="passwordPolicy">Hasło musi zawierać przynajmniej %d znaków, żadnegych białych znaków, min. %d małą oraz %d dużą literkę, min. %d liczbę oray %d specialny znak.</string>
 
+    <string name="delete_account">Zmazać konto</string>
     <string name="accountCreated">Twoje Konto zostało założone.</string>
     <string name="accountDeleted">Twoje Konto zostało zmazane.</string>
 

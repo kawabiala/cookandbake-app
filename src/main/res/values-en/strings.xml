@@ -58,6 +58,7 @@
 
     <string name="passwordPolicy">The password must contain at least %d characters, no whitespace, min. %d lower and %d upper letter, min. %d digit and %d special character.</string>
 
+    <string name="delete_account">Delete account</string>
     <string name="accountCreated">Your account was created.</string>
     <string name="accountDeleted">Your account was deleted.</string>
 

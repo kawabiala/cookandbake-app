@@ -4,58 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.ViewModelProvider
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditableText
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.Expandable
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledCheckBox
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledSwitch
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PasswordField
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabRow
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.uiComponents.spacing
+import com.pingwinek.jens.cookandbake.uiComponents.signInActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
-import java.util.LinkedList
 
 class SignInActivity : AppCompatActivity() {
 
@@ -197,6 +158,11 @@ class SignInActivity : AppCompatActivity() {
         authenticationViewModel.onPasswordChange(googlePW)
         //authenticationViewModel.signIn()
 
+        val onClose: () -> Unit = {
+            startActivity(Intent(this, RecipeListingActivity::class.java))
+            finish()
+        }
+
         val optionItems = mutableListOf(
             PingwinekCooksComposableHelpers.OptionItem(
                 R.string.dataprotection,
@@ -230,7 +196,7 @@ class SignInActivity : AppCompatActivity() {
             labelResourceId = PingwinekCooksComposableHelpers.Navigation.RECIPE.label,
             icon = PingwinekCooksComposableHelpers.Navigation.RECIPE.icon
         ) {
-            closeAction()
+            onClose()
         }
 
         val optionItemProfileLoggedOut = PingwinekCooksComposableHelpers.OptionItem(
@@ -260,7 +226,9 @@ class SignInActivity : AppCompatActivity() {
                 ) { paddingValues ->
                    ScaffoldContent(
                        paddingValues = paddingValues,
-                       authenticationViewModel = authenticationViewModel
+                       authenticationViewModel = authenticationViewModel,
+                       userInfoViewModel = userInfoViewModel,
+                       onClose = onClose
                    )
                 }
             }
@@ -289,7 +257,7 @@ class SignInActivity : AppCompatActivity() {
             this.intent = it
         }
     }
-
+/*
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ScaffoldContent(
@@ -621,7 +589,6 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getMessage(authResult: AuthService.AuthActionResult?) : String? {
         return when (authResult) {
             AuthService.AuthActionResult.DELETE_SUCCEEDED -> getString(R.string.accountDeleted)
@@ -694,5 +661,7 @@ class SignInActivity : AppCompatActivity() {
     private val signOutAction: () -> Unit = {
         authenticationViewModel.signOut()
     }
+
+ */
 
 }

@@ -40,7 +40,6 @@ import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooks
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.uiComponents.TabMode
 
 @Composable
 fun ShowRecipe(

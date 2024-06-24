@@ -1,4 +1,4 @@
-package com.pingwinek.jens.cookandbake.uiComponents
+package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 enum class Mode {
     SHOW_RECIPE,

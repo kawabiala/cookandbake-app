@@ -22,7 +22,7 @@ import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
 @Composable
 fun ResetPasswordRequestView(
     email: String = "",
-    onLogin: (email: String) -> Unit,
+    onResetRequest: (email: String) -> Unit,
     onClose: () -> Unit
 ) {
     val emailLabel = stringResource(R.string.email)
@@ -43,7 +43,7 @@ fun ResetPasswordRequestView(
     val onEmailChange: (String) -> Unit = { emailTmp = it }
 
     val onResetClicked: () -> Unit = {
-        onLogin(emailTmp)
+        onResetRequest(emailTmp)
     }
 
     Column {

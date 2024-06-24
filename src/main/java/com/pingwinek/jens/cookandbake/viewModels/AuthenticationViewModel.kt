@@ -126,7 +126,20 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-//    fun resetPassword(password: String) {
+    fun register(email: String, password: String, dataPolicyChecked: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            var result = FirebaseAuthService.registerWithEmailAndPassword(email, password, dataPolicyChecked)
+
+            if (result == AuthService.AuthActionResult.REGISTRATION_SUCCEEDED) {
+                changeAuthStatus(AuthService.AuthStatus.SIGNED_IN)
+                result = FirebaseAuthService.sendVerificationEmail()
+            }
+
+            authActionResult.postValue(result)
+        }
+    }
+
+    //    fun resetPassword(password: String) {
     fun resetPassword() {
         if (oobCode.isNullOrEmpty()) {
             authActionResult.postValue(AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON)
@@ -142,6 +155,25 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 changeAuthStatus(AuthService.AuthStatus.SIGNED_OUT)
                 linkMode.postValue(EmailLinkMode.UNKNOWN)
             }
+            authActionResult.postValue(result)
+        }
+    }
+
+    fun resetPassword(password: String) {
+        if (oobCode.isNullOrEmpty()) {
+            authActionResult.postValue(AuthService.AuthActionResult.EXC_RESET_PASSWORD_FAILED_WITHOUT_REASON)
+            logError(Exception("action code is null or empty"))
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = FirebaseAuthService.resetPassword(password, oobCode!!)
+
+            if (result == AuthService.AuthActionResult.RESET_PASSWORD_SUCCEEDED) {
+                changeAuthStatus(AuthService.AuthStatus.SIGNED_OUT)
+                linkMode.postValue(EmailLinkMode.UNKNOWN)
+            }
+
             authActionResult.postValue(result)
         }
     }
@@ -170,6 +202,18 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
                 newEmail.value ?: "",
                 password.value ?: ""
             )
+            if (result == AuthService.AuthActionResult.SIGNIN_SUCCEEDED) {
+                changeAuthStatus(FirebaseAuthService.checkAuthStatus())
+            } else {
+                authActionResult.postValue(result)
+            }
+        }
+    }
+
+    fun signIn(email: String, password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = FirebaseAuthService.signIn(email, password)
+
             if (result == AuthService.AuthActionResult.SIGNIN_SUCCEEDED) {
                 changeAuthStatus(FirebaseAuthService.checkAuthStatus())
             } else {

@@ -21,7 +21,7 @@ fun UnverifiedView(
     crashlyticsEnabled: Boolean,
     onCrashlyticsChange: (Boolean) -> Unit,
     onVerify: () -> Unit,
-    onResetPassword: () -> Unit,
+    onResetPasswordRequest: () -> Unit,
     onLogout: () -> Unit,
     onDelete: () -> Unit,
     onClose: () -> Unit
@@ -74,7 +74,7 @@ fun UnverifiedView(
         AccountSettingsBox(
             crashlyticsEnabled = crashlyticsEnabled,
             onCrashlyticsChange = onCrashlyticsChange,
-            onResetPasswordClicked = onResetPassword,
+            onResetPasswordClicked = onResetPasswordRequest,
             onLogout = onLogout,
             onDelete = onDelete
         )
