@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 
 @Composable
 fun ResetPasswordRequestView(
@@ -26,6 +27,7 @@ fun ResetPasswordRequestView(
     onClose: () -> Unit
 ) {
     val emailLabel = stringResource(R.string.email)
+    val caption = stringResource(R.string.sendPasswordRequest)
     val buttonCloseText = stringResource(R.string.close)
     val buttonResetText = stringResource(R.string.changePassword)
 
@@ -47,6 +49,10 @@ fun ResetPasswordRequestView(
     }
 
     Column {
+        ProfileHeader(text = caption)
+
+        SpacerSmall()
+
         TextField(
             label = { Text(emailLabel) },
             value = "",

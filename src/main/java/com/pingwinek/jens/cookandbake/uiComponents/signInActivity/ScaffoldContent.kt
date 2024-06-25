@@ -24,6 +24,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DeleteDialog
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.UserInfoViewModel
@@ -138,6 +139,8 @@ fun ScaffoldContent(
                 highlightLeft = (view == View.REGISTER),
                 toggleItem = toggleRegistrationView
             )
+
+            SpacerSmall()
         }
 
         when (view) {
@@ -203,13 +206,13 @@ fun ScaffoldContent(
 
 private fun determineViewSetting(
     authStatus: AuthService.AuthStatus?,
-    linkMode: AuthenticationViewModel.EmailLinkMode?,
+    linkMode: EmailLinkMode?,
     asRegistration: Boolean,
     showResetPasswordRequest: Boolean
 ) : View {
     return when (authStatus) {
         AuthService.AuthStatus.VERIFIED -> {
-            if (linkMode == AuthenticationViewModel.EmailLinkMode.RESET) {
+            if (linkMode == EmailLinkMode.RESET) {
                 View.RESET
             } else if (showResetPasswordRequest) {
                 View.RESET_REQUEST
@@ -221,9 +224,9 @@ private fun determineViewSetting(
         }
 
         AuthService.AuthStatus.SIGNED_IN -> {
-            if (linkMode == AuthenticationViewModel.EmailLinkMode.RESET) {
+            if (linkMode == EmailLinkMode.RESET) {
                 View.RESET
-            } else if (linkMode == AuthenticationViewModel.EmailLinkMode.VERIFIED) {
+            } else if (linkMode == EmailLinkMode.VERIFIED) {
                 View.VERIFIED
             } else if (showResetPasswordRequest) {
                 View.RESET_REQUEST
@@ -233,7 +236,7 @@ private fun determineViewSetting(
         }
 
         AuthService.AuthStatus.SIGNED_OUT -> {
-            if (linkMode == AuthenticationViewModel.EmailLinkMode.RESET) {
+            if (linkMode == EmailLinkMode.RESET) {
                 View.RESET
             } else if (asRegistration) {
                 View.REGISTER

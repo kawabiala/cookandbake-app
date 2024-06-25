@@ -8,3 +8,10 @@ enum class View {
     UNVERIFIED,
     VERIFIED
 }
+
+enum class EmailLinkMode {
+    RESET,
+    UNKNOWN,
+    VERIFIED
+}
+

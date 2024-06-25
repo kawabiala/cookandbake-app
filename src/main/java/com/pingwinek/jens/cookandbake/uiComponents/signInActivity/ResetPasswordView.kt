@@ -29,6 +29,7 @@ fun ResetPasswordView(
 ) {
     val emailLabel = stringResource(R.string.email)
     val passwordLabel = stringResource(R.string.password)
+    val caption = stringResource(R.string.lostPassword)
     val buttonCloseText = stringResource(R.string.close)
     val buttonResetText = stringResource(R.string.changePassword)
 
@@ -50,6 +51,10 @@ fun ResetPasswordView(
     }
 
     Column {
+        ProfileHeader(text = caption)
+
+        SpacerSmall()
+
         TextField(
             label = { Text(emailLabel) },
             value = email,

@@ -24,12 +24,10 @@ fun VerifiedView(
     onClose: () -> Unit
 ) {
     val buttonCloseText = stringResource(R.string.close)
-    val verifiedText = stringResource(R.string.confirmationSucceeded)
+    val caption = stringResource(R.string.profile)
 
     Column {
-        Text(
-            text = verifiedText
-        )
+        ProfileHeader(text = caption)
 
         SpacerSmall()
 

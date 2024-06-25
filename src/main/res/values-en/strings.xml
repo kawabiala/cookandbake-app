@@ -33,6 +33,7 @@
 
     <string name="setPassword">Set password</string>
     <string name="password">password</string>
+    <string name="sendPasswordRequest">Send request for password reset</string>
     <string name="lostPassword">Reset password</string>
     <string name="lostPasswordSent">Password reset email was sent.</string>
     <string name="lostPasswordSentLong">Password reset email was sent. If you have not received an email, make sure the email address correct. Maybe you do not have an account with this email address?</string>

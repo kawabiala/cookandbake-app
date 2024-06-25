@@ -32,6 +32,7 @@
 
     <string name="setPassword">Wpisać hasło</string>
     <string name="password">Hasło</string>
+    <string name="sendPasswordRequest">Wysłać email do resetowania hasła</string>
     <string name="lostPassword">Resetować hasło</string>
     <string name="lostPasswordSent">Email do resetowania hasła został wysłany.</string>
     <string name="lostPasswordSentLong">mail do resetowania hasła został wysłany. Jeśli nie dostałeś emailu, sprawdź, aby adres emailowy się zgadzał. Może nie ma konto pod tym emailem?</string>
