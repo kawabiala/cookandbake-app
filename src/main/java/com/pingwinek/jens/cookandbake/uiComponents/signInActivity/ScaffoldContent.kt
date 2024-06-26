@@ -130,7 +130,10 @@ fun ScaffoldContent(
             DeleteDialog(
                 message = stringResource(R.string.confirmUnsubscribe),
                 onClose = { showDeleteDialog = false },
-                onDelete = { authenticationViewModel.deleteAccount() }
+                onDelete = {
+                    authenticationViewModel.deleteAccount()
+                    showDeleteDialog = false
+                }
             )
         }
 

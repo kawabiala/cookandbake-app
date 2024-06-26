@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledCheckBox
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PasswordField
@@ -46,7 +48,7 @@ fun RegisterView(
         disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
     )
 
-    var emailTmp by remember { mutableStateOf("email") }
+    var emailTmp by remember { mutableStateOf("") }
     var passwordTmp by remember { mutableStateOf("") }
     var dataProtectionTmp by remember { mutableStateOf(false) }
     var crashlyticsTmp by remember { mutableStateOf(false) }
@@ -57,13 +59,14 @@ fun RegisterView(
     val onCrashlyticsChanged: (Boolean) -> Unit = { crashlyticsTmp = it }
 
     val onLoginClicked: () -> Unit = {
-        onRegister(emailTmp, passwordTmp, dataProtectionTmp, crashlyticsTmp)
+        onRegister(emailTmp.trim(), passwordTmp.trim(), dataProtectionTmp, crashlyticsTmp)
     }
 
     Column {
         TextField(
             label = { Text(emailLabel) },
             value = emailTmp,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             onValueChange = onEmailChange
         )
 

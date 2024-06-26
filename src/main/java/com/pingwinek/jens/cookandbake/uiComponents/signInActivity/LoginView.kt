@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PasswordField
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
@@ -53,13 +55,14 @@ fun LoginView(
     val onPasswordChange: (String) -> Unit = { passwordTmp = it }
 
     val onLoginClicked: () -> Unit = {
-        onLogin(emailTmp, passwordTmp)
+        onLogin(emailTmp.trim(), passwordTmp.trim())
     }
 
     Column {
         TextField(
             label = { Text(emailLabel) },
             value = emailTmp,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             onValueChange = onEmailChange
         )
 

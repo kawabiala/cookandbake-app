@@ -66,7 +66,7 @@ fun ResetPasswordView(
 
         PasswordField(
             label = passwordLabel,
-            password = "",
+            password = passwordTmp,
             onValueChange = onPasswordChange
         )
 
