@@ -8,10 +8,16 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MessageBoxStyle">
+    <style name="CookAndBakeAppTheme.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#ffffff</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_cookandbake_launcher</item>
+        <item name="postSplashScreenTheme">@style/CookAndBakeAppTheme</item>
+    </style>
+
+    <!-- style name="MessageBoxStyle">
         <item name="android:paddingStart">@dimen/text_padding</item>
         <item name="android:paddingEnd">@dimen/text_padding</item>
         <item name="android:background">@color/colorPrimary</item>
-    </style>
+    </style -->
 
 </resources>

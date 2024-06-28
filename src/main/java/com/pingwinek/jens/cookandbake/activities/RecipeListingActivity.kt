@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -37,6 +38,9 @@ class RecipeListingActivity : AppCompatActivity() {
     private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // needed since Android 12
+        val splashScreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
         auth = Firebase.auth
