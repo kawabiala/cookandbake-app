@@ -106,6 +106,7 @@ class RecipeListingActivity : AppCompatActivity() {
         }
 
         setContent {
+
             PingwinekCooksAppTheme {
 
                 val recipes by recipeListData.observeAsState()
