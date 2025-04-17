@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -19,7 +20,7 @@ fun PingwinekCooksNavigationBar(
     navigationBarColor: Color = NavigationBarDefaults.containerColor,
     navigationBarItemColors: NavigationBarItemColors = NavigationBarItemDefaults.colors(),
     menuItems: List<PingwinekCooksComposableHelpers.OptionItem>,
-    onSelectedItemChange: (Int) -> Unit
+    onSelectedItemChange: (Int) -> Unit = {}
 ) {
     NavigationBar(
         containerColor = navigationBarColor
@@ -28,7 +29,10 @@ fun PingwinekCooksNavigationBar(
             NavigationBarItem(
                 colors = navigationBarItemColors,
                 icon =  { Icon(item.icon, null) } ,
-                label = { Text(stringResource(id = item.labelResourceId)) },
+                label = { Text(
+                    text = stringResource(id = item.labelResourceId),
+                    style = MaterialTheme.typography.headlineSmall
+                ) },
                 selected = selectedItem == index && enabled,
                 enabled = enabled,
                 onClick = {

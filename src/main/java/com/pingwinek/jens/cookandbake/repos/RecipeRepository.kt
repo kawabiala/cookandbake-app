@@ -186,7 +186,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {
 
-        const val MAX_ATTACHMENT_SIZE: Long = 1024*1024
+        const val MAX_ATTACHMENT_SIZE: Long = 1024*1024*4
 
         private const val RECIPE_FILE_PATH = "recipe"
         private const val ATTACHMENT_FILE_PATH = "attachment"
