@@ -13,8 +13,11 @@ import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
+import com.pingwinek.jens.cookandbake.models.Tag
+import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
+import com.pingwinek.jens.cookandbake.repos.TagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.LinkedList
@@ -27,18 +30,29 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val ingredientRepository = IngredientRepository.getInstance(application as PingwinekCooksApplication)
+    private val tagRepository = TagRepository.getInstance(application as PingwinekCooksApplication)
 
     private val privateRecipeData = MutableLiveData<Recipe>()
     private val privateRecipeAttachment = MutableLiveData<FileInfo?>()
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
+    private val privateTagListData = MutableLiveData<LinkedList<Tag>>().apply {
+        value = LinkedList()
+    }
+    private val privateTag4RecipeListData = MutableLiveData<LinkedList<Tag4Recipe>>().apply {
+        value = LinkedList()
+    }
+
     private val privateMessage = MutableLiveData<String?>()
     private val privateIsUpOrDownloading = MutableLiveData(false)
 
     val recipeData: LiveData<Recipe> = privateRecipeData
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
+    val tagListData: LiveData<LinkedList<Tag>> = privateTagListData
+    val tag4RecipeListData: LiveData<LinkedList<Tag4Recipe>> = privateTag4RecipeListData
+
     val message: LiveData<String?> = privateMessage
     val isUpOrDownLoading: LiveData<Boolean> = privateIsUpOrDownloading
 
@@ -46,6 +60,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     init {
         recipeRepository.registerQueueListener(this)
+    }
+
+    private fun addTag(tag: Tag, recipeID: String, recipeTitle: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tagRepository.new(tag, recipeID, recipeTitle)
+        }
     }
 
     fun attachDocument(uri: Uri) {
@@ -91,10 +111,35 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    fun deleteTag4Recipe(tag4Recipe: Tag4Recipe) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tagRepository.deleteForRecipe(tag4Recipe)
+            loadTags4Recipe()
+        }
+    }
+
     fun deleteIngredient(ingredient: Ingredient) {
         viewModelScope.launch(Dispatchers.IO) {
             ingredientRepository.delete(ingredient)
             loadIngredients()
+        }
+    }
+
+    private fun deleteTag(tag4Recipe: Tag4Recipe) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tagRepository.deleteForRecipe(tag4Recipe)
+        }
+    }
+
+    fun generateTag4Recipe(tag: Tag): Tag4Recipe? {
+        return recipeId?.let { tagRepository.generateTag4Recipe(tag, it) }
+    }
+
+    fun getShareableRecipe(): ShareableRecipe? {
+        return recipeData.value?.let { recipe ->
+            ingredientListData.value?.let { ingredients ->
+                ShareableRecipe(recipe, ingredients)
+            }
         }
     }
 
@@ -111,19 +156,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun getShareableRecipe(): ShareableRecipe? {
-        return recipeData.value?.let { recipe ->
-            ingredientListData.value?.let { ingredients ->
-                ShareableRecipe(recipe, ingredients)
-            }
-        }
-    }
-
     fun loadData() {
         recipeId?.let { id ->
             viewModelScope.launch(Dispatchers.IO) {
                 privateRecipeData.postValue(recipeRepository.get(id))
                 loadIngredients()
+                loadTags()
+                loadTags4Recipe()
                 //fileRepository.getFilesForEntityId("recipe", id)
             }
         }
@@ -132,6 +171,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private suspend fun loadIngredients() {
         recipeId?.let { id ->
             privateIngredientListData.postValue(ingredientRepository.getAll(id))
+        }
+    }
+
+    private suspend fun loadTags() {
+        privateTagListData.postValue(tagRepository.getAll())
+    }
+
+    private suspend fun loadTags4Recipe() {
+        recipeId?.let { id ->
+            privateTag4RecipeListData.postValue(tagRepository.getAllForRecipe(id))
         }
     }
 
@@ -164,6 +213,27 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
                     recipeId = recipe.id
                     privateRecipeData.postValue(recipe)
                 }
+            }
+        }
+    }
+
+    fun saveTags(tags: List<Tag>) {
+        recipeId?.let { nonNullRecipeId ->
+            tag4RecipeListData.value!!.forEach { tagOld ->
+                if (tags.find { tagNew -> tagOld.label == tagNew.label } == null) {
+                    deleteTag(tagOld)
+                }
+            }
+
+            tags.forEach { tagNew ->
+                if(tag4RecipeListData.value != null &&
+                    tag4RecipeListData.value!!.find { tagOld -> tagNew.label == tagOld.label  } == null) {
+                    addTag(tagNew, nonNullRecipeId, recipeData.value?.title ?: "")
+                }
+            }
+
+            viewModelScope.launch(Dispatchers.IO) {
+                loadTags4Recipe()
             }
         }
     }

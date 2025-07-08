@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -33,13 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.Ingredient
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksDropDown
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabElement
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerMedium
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTag
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 
 @Composable
 fun ShowRecipe(
@@ -48,6 +47,7 @@ fun ShowRecipe(
     onIngredientsFunctionsMode: (Boolean) -> Unit,
     recipeTitle: String,
     recipeDescription: String,
+    labels: List<String>,
     ingredients: List<Ingredient>,
     instruction: String,
     hasAttachment: Boolean,
@@ -110,12 +110,14 @@ fun ShowRecipe(
                     text = recipeTitle
                 )
 
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    text = recipeDescription
-                )
+                if (recipeDescription.isNotEmpty()) {
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        text = recipeDescription
+                    )
+                }
 
                 if (isAttachmentLoading) {
                     CircularProgressIndicator()
@@ -147,7 +149,7 @@ fun ShowRecipe(
                             expanded = expanded,
                             options = listOf(optionUpdate, optionDelete)
                         ) {
-
+                            expanded = false
                         }
                     }
                 } else {
@@ -158,12 +160,31 @@ fun ShowRecipe(
             }
         }
 
-        SpacerMedium()
+        if (labels.isNotEmpty()) {
+            SpacerSmall()
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        //top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                labels.forEach { label ->
+                    PingwinekCooksTag(label)
+                }
+            }
+        }
+
+        SpacerSmall()
 
         PingwinekCooksTabElement(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(color = MaterialTheme.colorScheme.tertiaryContainer),
+            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+            paddingLeft = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+            paddingRight = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
             selectedItem = tabMode.ordinal,
             onSelectedItemChange = { item -> onTabModeChange(TabMode.entries[item]) },
             tabItems = mutableListOf<PingwinekCooksComposableHelpers.PingwinekCooksTabItem>().apply {
@@ -173,7 +194,6 @@ fun ShowRecipe(
                     tabIcon = Icons.AutoMirrored.Filled.ReceiptLong,
                     content = {
                         ShowIngredients(
-                            paddingValues = paddingValues,
                             ingredients = ingredients,
                             onIngredientsFunctionsMode = onIngredientsFunctionsMode,
                             onEditIngredient = onEditIngredient,

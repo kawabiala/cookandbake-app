@@ -3,9 +3,9 @@ package com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import com.pingwinek.jens.cookandbake.theming.DarkColors
-import com.pingwinek.jens.cookandbake.theming.LightColors
 import com.pingwinek.jens.cookandbake.theming.Typography
+import com.pingwinek.jens.cookandbake.theming.darkScheme
+import com.pingwinek.jens.cookandbake.theming.lightScheme
 
 @Composable
 fun PingwinekCooksAppTheme(
@@ -13,9 +13,9 @@ fun PingwinekCooksAppTheme(
     content: @Composable () -> Unit
 ) {
     val colors = if (!useDarkTheme) {
-        LightColors
+        lightScheme
     } else {
-        DarkColors
+        darkScheme
     }
 
     MaterialTheme(

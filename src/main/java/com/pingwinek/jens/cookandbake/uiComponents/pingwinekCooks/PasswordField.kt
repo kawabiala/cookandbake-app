@@ -28,6 +28,7 @@ fun PasswordField(
     onResetPassword: () -> Unit = {}
 ) {
     var passwordHidden: Boolean by remember { mutableStateOf(true) }
+
     TextField(
         value = password,
         textStyle = MaterialTheme.typography.bodyMedium,

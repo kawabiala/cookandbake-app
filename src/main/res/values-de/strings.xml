@@ -108,4 +108,14 @@
     <string name="email">Email</string>
     <string name="confirmationSent">Eine Email mit Bestätigungslink wurde an die angegebene Email-Adresse gesendet.</string>
 
+    <string name="a2z">A-Z</string>
+    <string name="by_category">Nach Kategorie</string>
+
+    <string name="labels">Labels</string>
+    <string name="manage_labels">Labels verwalten</string>
+    <string name="add_label">Label hinzufügen</string>
+    <string name="delete_label">Label löschen</string>
+    <string name="label_delete_confirm">Das Label wirklich löschen?</string>
+    <string name="no_labels_available">Keine Labels verfügbar</string>
+
 </resources>

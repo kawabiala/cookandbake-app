@@ -8,4 +8,4 @@ enum class Mode {
 }
 enum class FabMode { NONE, ADD_INGREDIENT }
 enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
-enum class Delete { NONE, RECIPE, INGREDIENT }
+enum class Delete { NONE, RECIPE, INGREDIENT, Label }

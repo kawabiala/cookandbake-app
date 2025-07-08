@@ -14,38 +14,10 @@ fun DeleteDialog(
         message = when (dialogMode) {
             Delete.RECIPE -> stringResource(R.string.delete_recipe)
             Delete.INGREDIENT -> stringResource(R.string.delete_ingredient)
+            Delete.Label -> stringResource(R.string.delete_label)
             Delete.NONE -> ""
         },
         onClose = { onClose() },
         onDelete = { onDelete(dialogMode) }
     )
-
-/*
-    AlertDialog(
-        text = {
-            val msg = when (dialogMode) {
-                Delete.RECIPE -> stringResource(R.string.delete_recipe)
-                Delete.INGREDIENT -> stringResource(R.string.delete_ingredient)
-                Delete.NONE -> ""
-            }
-            Text(msg)
-        },
-        onDismissRequest = onClose,
-        dismissButton = {
-            Text(
-                modifier = Modifier
-                    .clickable { onClose() },
-                text = stringResource(R.string.close)
-            )
-        },
-        confirmButton = {
-            Text(
-                modifier = Modifier
-                    .clickable { onDelete(dialogMode) },
-                text = stringResource(R.string.delete)
-            )
-        }
-    )
-
- */
 }

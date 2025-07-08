@@ -1,13 +1,16 @@
 package com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks
 
 import android.content.res.Configuration
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,6 +23,8 @@ import com.pingwinek.jens.cookandbake.R
 @Composable
 fun EditPane(
     paddingValues: PaddingValues,
+    cancelButtonColors: ButtonColors = ButtonDefaults.filledTonalButtonColors(),
+    saveButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
     onCancel: () -> Unit,
     onSave: () -> Unit,
     content: @Composable () -> Unit
@@ -35,16 +40,18 @@ fun EditPane(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                modifier = Modifier
-                    .clickable { onCancel() },
-                text = stringResource(R.string.close)
-            )
-            Text(
-                modifier = Modifier
-                    .clickable { onSave() },
-                text = stringResource(R.string.save)
-            )
+            FilledTonalButton(
+                colors = cancelButtonColors,
+                onClick = onCancel
+            ) {
+                Text(stringResource(R.string.close))
+            }
+            Button(
+                colors = saveButtonColors,
+                onClick = onSave
+            ) {
+                Text(stringResource(R.string.save))
+            }
         }
 
         SpacerMedium()
@@ -61,7 +68,12 @@ fun EditPane(
 @Composable
 fun PreviewEditPane(@PreviewParameter(PPPeditPane::class) parameters: Parameters4EditPane) {
 
-    EditPane(parameters.paddingValues, parameters.onCancel, parameters.onSave, parameters.content)
+    EditPane(
+        paddingValues = parameters.paddingValues,
+        onCancel = parameters.onCancel,
+        onSave = parameters.onSave,
+        content = parameters.content
+    )
 }
 
 class PPPeditPane: PreviewParameterProvider<Parameters4EditPane> {

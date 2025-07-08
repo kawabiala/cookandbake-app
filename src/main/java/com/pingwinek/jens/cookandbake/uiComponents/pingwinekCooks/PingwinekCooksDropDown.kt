@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
@@ -18,7 +17,7 @@ import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpe
 fun PingwinekCooksDropDown(
     expanded: Boolean,
     menuItemColors: MenuItemColors = MenuDefaults.itemColors(),
-    menuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    menuColor: Color = MenuDefaults.containerColor,
     options: List<PingwinekCooksComposableHelpers.OptionItem>,
     onSelected: () -> Unit
 ) {

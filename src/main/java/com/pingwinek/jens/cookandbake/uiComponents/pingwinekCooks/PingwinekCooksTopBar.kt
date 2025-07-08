@@ -7,7 +7,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.Text
@@ -34,9 +33,9 @@ fun PingwinekCooksTopAppBar(
     optionItemMid: PingwinekCooksComposableHelpers.OptionItem? = null,
     optionItemRight: PingwinekCooksComposableHelpers.OptionItem? = null,
     dropDownItemColors: MenuItemColors = MenuDefaults.itemColors(),
-    dropDownMenuColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    dropDownMenuColor: Color = MenuDefaults.containerColor, //MaterialTheme.colorScheme.surfaceContainer,
     topBarColors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
-    topBarIconButtonColors: IconButtonColors = IconButtonDefaults.filledIconButtonColors()
+    topBarIconButtonColors: IconButtonColors = IconButtonDefaults.iconButtonColors()// filledIconButtonColors()
 ) {
     var expanded by remember { mutableStateOf(false) }
 

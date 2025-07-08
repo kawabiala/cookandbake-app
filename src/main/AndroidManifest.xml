@@ -46,6 +46,12 @@
                 android:parentActivityName=".activities.RecipeListingActivity" />
 
         <activity
+            android:name=".activities.LabelManagementActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".activities.RecipeListingActivity" />
+
+        <activity
                 android:name=".activities.ImpressumActivity"
                 android:launchMode="singleTop"/>
         <activity

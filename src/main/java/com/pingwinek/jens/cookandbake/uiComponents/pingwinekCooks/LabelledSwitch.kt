@@ -24,6 +24,7 @@ fun LabelledSwitch(
     onCheckedChange : (checked: Boolean) -> Unit = {}
 ) {
     var checkedLocal by remember { mutableStateOf(checked) }
+
     Row(
         modifier = Modifier
             .toggleable(

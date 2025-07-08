@@ -108,4 +108,14 @@
     <string name="email">Email</string>
     <string name="confirmationSent">Email z linkiem do potwierdzenia wysłany na podany adres.</string>
 
+    <string name="a2z">A-Z</string>
+    <string name="by_category">według kategorii</string>
+
+    <string name="labels">Etykiety</string>
+    <string name="manage_labels">Zarządzać etykietami</string>
+    <string name="add_label">Dodać etykietę</string>
+    <string name="delete_label">Zmazać etykietę</string>
+    <string name="label_delete_confirm">RNaprawdę zmazać etykietę?</string>
+    <string name="no_labels_available">Nie ma etykietek</string>
+
 </resources>

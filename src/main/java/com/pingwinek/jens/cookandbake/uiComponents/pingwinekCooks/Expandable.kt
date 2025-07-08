@@ -35,6 +35,7 @@ fun Expandable(
     content: @Composable (TextStyle) -> Unit
 ) {
     var isOpen by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .background(color = boxColor)

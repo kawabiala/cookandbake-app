@@ -5,10 +5,12 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ class RecipeListingActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
+    private lateinit var recipesByLabelListData: LiveData<LinkedList<Pair<String, LinkedList<Recipe>>>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // needed since Android 12
@@ -51,6 +54,7 @@ class RecipeListingActivity : AppCompatActivity() {
             .create(RecipeListingViewModel::class.java)
 
         recipeListData = recipeListingModel.recipeListData
+        recipesByLabelListData = recipeListingModel.recipesByLabelListData
 
         val startImpressumActivity: () -> Unit = {
             startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
@@ -62,6 +66,10 @@ class RecipeListingActivity : AppCompatActivity() {
             startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
                 .putExtra("title", getString(R.string.dataprotection))
                 .putExtra("url", (application as PingwinekCooksApplication).getURL(R.string.URL_DATAPROTECTION)))
+        }
+
+        val startLabelManagementActivity: () -> Unit = {
+            startActivity(Intent(this@RecipeListingActivity, LabelManagementActivity::class.java))
         }
 
         val startSignInActivity: () -> Unit = {
@@ -80,6 +88,13 @@ class RecipeListingActivity : AppCompatActivity() {
             Icons.Filled.Lock
         ) {
             startDataProtectionActivity()
+        }
+
+        val optionItemLabelManagement = PingwinekCooksComposableHelpers.OptionItem(
+            R.string.manage_labels,
+            Icons.AutoMirrored.Outlined.Label
+        ) {
+            startLabelManagementActivity()
         }
 
         val optionItemRecipe = PingwinekCooksComposableHelpers.OptionItem(
@@ -110,6 +125,7 @@ class RecipeListingActivity : AppCompatActivity() {
             PingwinekCooksAppTheme {
 
                 val recipes by recipeListData.observeAsState()
+                val recipesByLabel by recipesByLabelListData.observeAsState()
 
                 val loggedIn by remember(recipes, auth.currentUser) {
                     mutableStateOf(auth.currentUser != null)
@@ -123,6 +139,7 @@ class RecipeListingActivity : AppCompatActivity() {
                     title = "PingwinekCooks",
                     showDropDown = true,
                     dropDownOptions = listOf(
+                        optionItemLabelManagement,
                         optionItemPrivacy,
                         optionItemImpressum
                     ),
@@ -135,11 +152,14 @@ class RecipeListingActivity : AppCompatActivity() {
                     showFab = loggedIn,
                     fabIcon = Icons.Filled.Add,
                     fabIconLabel = getString(R.string.add_recipe),
+                    fabContainerColor = MaterialTheme.colorScheme.primary,
+                    fabIconColor = MaterialTheme.colorScheme.onPrimary,
                     onFabClicked = { openRecipeItem(null) }
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues = paddingValues,
                         recipes = recipes,
+                        recipesByLabel = recipesByLabel,
                         loggedIn = loggedIn,
                         verified = verified,
                         onOpenRecipe = onOpenRecipe,
