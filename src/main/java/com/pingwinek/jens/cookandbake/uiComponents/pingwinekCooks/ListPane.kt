@@ -18,7 +18,6 @@ fun ListPane(
     color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     margin: Dp = MaterialTheme.spacing.standardPadding,
-    paddingBelow: Dp = MaterialTheme.spacing.standardPadding,
     content: @Composable () -> Unit
     ) {
     Surface(
@@ -26,7 +25,6 @@ fun ListPane(
         contentColor = contentColor,
         shape = ShapeDefaults.Small,
         modifier = modifier
-            .padding(bottom = paddingBelow),
     ) {
         Box(
             modifier = Modifier

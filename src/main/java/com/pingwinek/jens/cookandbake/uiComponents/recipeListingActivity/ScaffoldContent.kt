@@ -147,4 +147,6 @@ fun RecipeComponent(
             }
         )
     }
+
+    SpacerSmall()
 }
