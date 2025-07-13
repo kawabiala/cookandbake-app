@@ -1,11 +1,19 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DragAndDropList
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.ListPane
@@ -28,28 +36,34 @@ fun ShowIngredients(
         activeItem = ingredient
     }
 
-    DragAndDropList(
-        spacing = MaterialTheme.spacing.spacerSmall,
-        listContent = ingredients.sortedBy { ingredient -> ingredient.sort },
-        key = { ingredient -> ingredient.id },
-        activeItem = ingredients.find { it == activeItem },
-        onChangeActiveItem = onChangeActiveItem,
-        onChangeSort = onChangeSort,
-        ) { ingredient, active, onChangeActive, onDrag, onDragStopped ->
+    Column(
+        Modifier
+            .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues())
+    ) {
 
-        ListPane(
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onBackground
-        ) {
-            IngredientPane(
-                showButtons = active,
-                onChangeActive = onChangeActive,
-                onEditIngredient = onEditIngredient,
-                onDeleteIngredient = onDeleteIngredient,
-                onDrag = onDrag,
-                onDragStopped = onDragStopped,
-                ingredient = ingredient
-            )
+        DragAndDropList(
+            spacing = MaterialTheme.spacing.spacerSmall,
+            listContent = ingredients.sortedBy { ingredient -> ingredient.sort },
+            key = { ingredient -> ingredient.id },
+            activeItem = ingredients.find { it == activeItem },
+            onChangeActiveItem = onChangeActiveItem,
+            onChangeSort = onChangeSort,
+            ) { ingredient, active, onChangeActive, onDrag, onDragStopped ->
+
+            ListPane(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onBackground
+            ) {
+                IngredientPane(
+                    showButtons = active,
+                    onChangeActive = onChangeActive,
+                    onEditIngredient = onEditIngredient,
+                    onDeleteIngredient = onDeleteIngredient,
+                    onDrag = onDrag,
+                    onDragStopped = onDragStopped,
+                    ingredient = ingredient
+                )
+            }
         }
     }
 }

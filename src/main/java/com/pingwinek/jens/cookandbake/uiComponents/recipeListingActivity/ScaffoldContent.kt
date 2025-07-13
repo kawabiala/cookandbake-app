@@ -1,11 +1,13 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.SortByAlpha
@@ -13,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,7 +27,7 @@ import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpe
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.ListPane
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabElement
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.VerticalScrollContainer
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
 import java.util.LinkedList
 
 enum class ListVariant(val nameID: Int) {
@@ -60,7 +61,6 @@ fun ScaffoldContent(
 
     var listVariant: Int by remember {
         mutableIntStateOf(ListVariant.ByLabel.ordinal) }
-    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -97,9 +97,15 @@ fun A2ZList(
     recipes: LinkedList<Recipe>?,
     onOpenRecipe: (String) -> Unit
 ) {
-    VerticalScrollContainer {
-        recipes?.forEach { recipe ->
-            key(recipe.id) {
+    recipes?.let { rList ->
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
+        ) {
+            items(
+                rList.toList(),
+                { recipe -> recipe.id }
+            ) { recipe ->
                 RecipeComponent(recipe, onOpenRecipe)
             }
         }
@@ -111,23 +117,30 @@ fun ByCategoryList(
     recipesByLabel: LinkedList<Pair<String, LinkedList<Recipe>>>?,
     onOpenRecipe: (String) -> Unit
     ) {
-    SpacerSmall()
 
-    VerticalScrollContainer {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
+    ) {
         recipesByLabel?.forEach { labelWithRecipes ->
             val labelText = labelWithRecipes.first
             val recipes = labelWithRecipes.second
 
-            Text(
-                text = labelText,
-                style = MaterialTheme.typography.headlineMedium
-            )
+            item {
+                SpacerSmall()
 
-            recipes.forEach { recipe ->
-                key(recipe.id) {
-                    RecipeComponent(recipe, onOpenRecipe)
-                }
+                Text(
+                    text = labelText,
+                    style = MaterialTheme.typography.headlineMedium
+                )
             }
+
+            items(
+                recipes,
+//                { recipe -> recipe.id } // recipe.id is not unique, but key not needed here
+            ) { recipe ->
+                RecipeComponent(recipe, onOpenRecipe)
+            }
+
         }
     }
 }
@@ -147,6 +160,4 @@ fun RecipeComponent(
             }
         )
     }
-
-    SpacerSmall()
 }

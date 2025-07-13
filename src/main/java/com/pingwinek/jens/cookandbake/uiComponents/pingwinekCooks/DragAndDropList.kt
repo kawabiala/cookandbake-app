@@ -27,6 +27,10 @@ import androidx.compose.ui.zIndex
 /**
  * List, that provides drag and drop functionality of list items.
  *
+ * An item of the list is draggable, if it is active. To provide the vertical offset of the dragging and the stop, use the
+ * draggable modifier. It can be attached to any element inside the item. It will result in dragging the whole item.
+ * Letting an item drop, results in resorting of the list and deactivates the item.
+ *
  * @param spacing: the spacing between list items
  * @param listContent: expects a sorted list of items
  * @param key: function defining how to derive a key from an item
@@ -48,7 +52,7 @@ fun <T : Any> DragAndDropList(
     val density = LocalDensity.current
 
     val mapContent: MutableMap<T, Y> by remember(listContent) {
-        mutableStateOf( //the map needs to mutable, but is not expected to trigger recomposition
+        mutableStateOf( //the map needs to be mutable, but is not expected to trigger recomposition
             mutableMapOf<T, Y>().also { map ->
                 listContent.forEach { t ->
                     map[t] = Y(null, 0f)
