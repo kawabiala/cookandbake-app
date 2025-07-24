@@ -7,40 +7,41 @@ import java.util.Date
 data class Tag4RecipeFB(
     override val id: String = "",
     override val recipeID: String,
-    override val label: String,
+    override val sort: Int,
     override var lastModified: Long = Date().time
 ) : Tag4Recipe() {
 
     @Keep
     data class DocumentData(
-        val label: String
+        val sort: Int
     )
 
     constructor(
-        label: String,
-        recipeID: String
+        recipeID: String,
+        sort: Int
     ) : this(
         "",
-        label,
-        recipeID
+        recipeID,
+        sort
     )
-
+/*
     constructor(
         tag: Tag,
-        recipeID: String
+        recipeID: String,
+        sort: Int
     ) : this (
         tag.id,
         recipeID,
-        tag.label
+        sort
     )
-
+*/
     constructor(document: DocumentSnapshot, recipeID: String) : this(
         document.id,
         recipeID,
-        document.getString("label") ?: "",
+        document.getLong("sort")?.toInt() ?: -1,
         0
     )
 
-    val documentData = DocumentData(label)
+    val documentData = DocumentData(sort)
 
 }

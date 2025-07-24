@@ -114,6 +114,7 @@
     <string name="labels">Labels</string>
     <string name="manage_labels">Labels verwalten</string>
     <string name="add_label">Label hinzufügen</string>
+    <string name="edit_label">Label bearbeiten</string>
     <string name="delete_label">Label löschen</string>
     <string name="label_delete_confirm">Das Label wirklich löschen?</string>
     <string name="no_labels_available">Keine Labels verfügbar</string>

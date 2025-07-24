@@ -139,10 +139,10 @@ class RecipeListingActivity : AppCompatActivity() {
                     title = "PingwinekCooks",
                     showDropDown = true,
                     dropDownOptions = listOf(
-                        optionItemLabelManagement,
                         optionItemPrivacy,
                         optionItemImpressum
                     ),
+                    optionItemMid = optionItemLabelManagement,
                     selectedNavigationBarItem = PingwinekCooksComposableHelpers.Navigation.RECIPE.ordinal,
                     navigationBarEnabled = true,
                     navigationBarItems = listOf(

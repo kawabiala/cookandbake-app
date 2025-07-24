@@ -54,14 +54,4 @@ data class IngredientFB(
     )
 
     val documentData = DocumentData(quantity, quantityVerbal, unity, name, sort)
-/*
-    override fun getUpdated(ingredient: Ingredient): IngredientFB {
-        return IngredientFB(
-            id,
-            recipeId,
-            ingredient.quantity,
-            ingredient.quantityVerbal,
-            ingredient.unity,
-            ingredient.name)
-    }*/
 }

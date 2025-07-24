@@ -11,7 +11,6 @@ import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.lib.firestore.SuspendedCoroutineWrapper
 import com.pingwinek.jens.cookandbake.models.Tag
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.models.TagFB
 import java.util.LinkedList
 
@@ -58,11 +57,6 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
         var returnVal = false
 
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-            val recipeList = getRecipes(buildRecipesByTagCollRef(auth.uid!!, item.id))
-            recipeList.forEach { recipeID ->
-                deleteRecipeID(buildRecipeDocRef(auth.uid!!, item.id, recipeID))
-            }
-
             returnVal = delete(buildTagDocRef(auth.uid!!, item.id))
         } else {
             Log.i(this::class.java.name, "unauthorized delete")
@@ -72,7 +66,15 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
     }
 
     override suspend fun update(item: TagFB): TagFB? {
-        throw NotImplementedError("Not supported for Tag")
+        var returnVal: TagFB? = null
+
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+            returnVal = update(buildTagDocRef(auth.uid!!, item.id), item)
+        } else {
+            Log.i(this::class.java.name, "unauthorized update")
+        }
+
+        return returnVal
     }
 
     suspend fun new(tag: Tag): TagFB {
@@ -90,7 +92,7 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
 
         return tag
     }
-
+/*
     override suspend fun getRecipeIDs(tag: Tag): LinkedList<String> {
         var list = LinkedList<String>()
 
@@ -127,7 +129,7 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
 
         return returnVal
     }
-
+*/
     private suspend fun getAll(collRef: CollectionReference) : LinkedList<TagFB> {
         return FirestoreDataAccessManager.getAll(suspendedCoroutineExceptionCallback, collRef) {
             TagFB(it)
@@ -153,6 +155,12 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
         }
     }
 
+    private suspend fun update(docRef: DocumentReference, tagFB: TagFB) : TagFB? {
+        return FirestoreDataAccessManager.update(suspendedCoroutineExceptionCallback, docRef, tagFB.documentData) {
+            TagFB(it)
+        }
+    }
+/*
     private suspend fun getRecipes(collRef: CollectionReference) : LinkedList<String> {
         return FirestoreDataAccessManager.getAll(collRef) {
             it.id
@@ -174,7 +182,7 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
             true
         }
     }
-
+*/
     //TODO handle exceptions
     private fun buildTagsCollRef(userID: String) : CollectionReference {
         return firestore.collection(basePathUser).document(userID).collection(basePathTag)

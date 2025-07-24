@@ -15,7 +15,7 @@ import java.util.LinkedList
 class Tag4RecipeSourceFB private constructor(private val firestore: FirebaseFirestore): Tag4RecipeSource<Tag4RecipeFB> {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val basePathTag: String = "/tag"
+//    private val basePathTag: String = "/tag"
     private val basePathUser: String = "/user"
 
     override suspend fun getAll(): LinkedList<Tag4RecipeFB> {
@@ -39,7 +39,7 @@ class Tag4RecipeSourceFB private constructor(private val firestore: FirebaseFire
     }
 
     override suspend fun delete(item: Tag4RecipeFB): Boolean {
-        var returnVal: Boolean = false
+        var returnVal = false
 
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             returnVal = delete(buildTagByRecipeDocRef(auth.uid!!, item.recipeID, item.id))
@@ -51,7 +51,7 @@ class Tag4RecipeSourceFB private constructor(private val firestore: FirebaseFire
     }
 
     override suspend fun update(item: Tag4RecipeFB): Tag4RecipeFB? {
-        throw NotImplementedError("Not supported for Tag4Recipe")
+        return new(item)
     }
 
     override suspend fun new(item: Tag4RecipeFB): Tag4RecipeFB {
@@ -75,13 +75,13 @@ class Tag4RecipeSourceFB private constructor(private val firestore: FirebaseFire
             Tag4RecipeFB(it, recipeID)
         }
     }
-
+/*
     private suspend fun get(documentReference: DocumentReference, recipeID: String) : Tag4RecipeFB {
         return FirestoreDataAccessManager.get(documentReference) {
             Tag4RecipeFB(it, recipeID)
         }
     }
-
+*/
     private suspend fun new(docRef: DocumentReference, tagFB: Tag4RecipeFB) : Tag4RecipeFB {
         return FirestoreDataAccessManager.update(docRef, tagFB.documentData) {
             Tag4RecipeFB(it, tagFB.recipeID)

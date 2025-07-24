@@ -114,6 +114,7 @@
     <string name="labels">Labels</string>
     <string name="manage_labels">Manage Labels</string>
     <string name="add_label">Add Label</string>
+    <string name="edit_label">Edit Label</string>
     <string name="delete_label">Delete Label</string>
     <string name="label_delete_confirm">Really delete label?</string>
     <string name="no_labels_available">No labels available</string>

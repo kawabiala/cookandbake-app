@@ -8,7 +8,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.models.Tag
+import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.repos.TagRepository
 import kotlinx.coroutines.Dispatchers
@@ -50,26 +50,37 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
 
     fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
-            privateRecipeListData.postValue(recipeRepository.getAll())
-            privateRecipesByLabel.postValue(getAllRecipes4Tags())
+            val recipes = recipeRepository.getAll()
+            privateRecipeListData.postValue(recipes)
+
+            val recipeTagList: MutableList<Pair<Recipe, Tag4Recipe>> = mutableListOf()
+            recipes.forEach { recipe ->
+                tagRepository.getAllForRecipe(recipe.id).forEach { tag ->
+                    recipeTagList.add(Pair(recipe, tag))
+                }
+            }
+
+            privateRecipesByLabel.postValue(getAllRecipes4Tags(recipeTagList))
         }
     }
 
-    private suspend fun getAllRecipes4Tags() : LinkedList<RecipesForLabel> {
+    private suspend fun getAllRecipes4Tags(recipeTagList: List<Pair<Recipe, Tag4Recipe>>) : LinkedList<RecipesForLabel> {
         val returnValue = LinkedList<RecipesForLabel>()
 
         tagRepository.getAll().forEach { tag ->
             returnValue.add(
                 RecipesForLabel(
                     tag.label,
-                    getRecipes4Tag(tag)
+                    LinkedList(recipeTagList.mapNotNull { entry ->
+                        if(entry.second.id == tag.id) entry.first else null
+                    })
                 )
             )
         }
 
         return returnValue
     }
-
+/*
     private suspend fun getRecipes4Tag(tag: Tag) : LinkedList<Recipe> {
         return LinkedList<Recipe>().apply {
             tagRepository.getAllRecipeIdsForTag(tag).forEach { recipeId ->
@@ -79,7 +90,7 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
             }
         }
     }
-
+*/
     private fun getRecipe(recipeID: String) : Recipe? {
         return recipeListData.value?.find { recipe ->
             recipe.id == recipeID

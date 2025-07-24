@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Tag
+import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.repos.TagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,17 +15,30 @@ import java.util.LinkedList
 
 class LabelManagementViewModel(application: Application) : AndroidViewModel(application) {
 
+    data class TagWithCount (
+        val tag: Tag,
+        var count: Int = 0
+    )
+
+    private val recipeRepository = RecipeRepository.getInstance(application as PingwinekCooksApplication)
     private val tagRepository = TagRepository.getInstance(application as PingwinekCooksApplication)
 
-    private val privateLabelListData = MutableLiveData<LinkedList<Tag>>().apply {
+    private val privateAvailableTagsListData = MutableLiveData<LinkedList<TagWithCount>>().apply {
         value = LinkedList()
     }
 
-    val labelListData: LiveData<LinkedList<Tag>> = privateLabelListData
+    val availableTagListData: LiveData<LinkedList<TagWithCount>> = privateAvailableTagsListData
 
     fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
-            privateLabelListData.postValue(tagRepository.getAll())
+            val tagsWithCount = tagRepository.getAll().map { entry -> TagWithCount(entry) }
+            recipeRepository.getAll().forEach { recipe ->
+                tagRepository.getAllForRecipe(recipe.id).forEach { tag ->
+                    tagsWithCount.find { tc -> tc.tag.id == tag.id }?.let { tcFound -> tcFound.count += 1 }
+                }
+            }
+
+            privateAvailableTagsListData.postValue(LinkedList(tagsWithCount))
         }
     }
 
@@ -42,7 +56,10 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun updateLabel(tag: Tag) {
-        TODO("update all Tag4Recipes as well")
+    fun updateLabel(tag: Tag, label: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tagRepository.update(tag, label)
+            loadData()
+        }
     }
 }

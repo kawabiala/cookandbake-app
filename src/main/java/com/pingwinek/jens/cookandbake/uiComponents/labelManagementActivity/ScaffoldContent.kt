@@ -1,17 +1,15 @@
 package com.pingwinek.jens.cookandbake.uiComponents.labelManagementActivity
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,22 +23,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.activities.LabelManagementActivity
 import com.pingwinek.jens.cookandbake.models.Tag
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DeleteDialog
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.ListPane
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
+import com.pingwinek.jens.cookandbake.viewModels.LabelManagementViewModel
 import java.util.LinkedList
 
 @Composable
 fun ScaffoldContent(
     paddingValues: PaddingValues,
-    labels: LinkedList<Tag>?,
+    tagsWithCount: LinkedList<LabelManagementViewModel.TagWithCount>?,
+    tagEditMode: LabelManagementActivity.TagEditMode,
+    onChangeTagEditMode: (LabelManagementActivity.TagEditMode) -> Unit,
     onAddLabel: (String) -> Unit,
-    onDeleteLabel: (Tag) -> Unit
+    onDeleteLabel: (Tag) -> Unit,
+    onUpdateLabel: (Tag, String) -> Unit
 ) {
-    val scrollState = rememberScrollState()
-
     var showDeleteDialog by remember { mutableStateOf(false) }
     var labelTemp by remember { mutableStateOf("") }
     var tagTemp: Tag? by remember { mutableStateOf(null) }
@@ -59,6 +62,29 @@ fun ScaffoldContent(
         showDeleteDialog = true
     }
 
+    val updateLabel: () -> Unit = {
+        tagTemp?.let { tt ->
+            onUpdateLabel(tt, labelTemp)
+        }
+    }
+
+    val onEditTag: (Tag) -> Unit = { tag ->
+        tagTemp = tag
+        labelTemp = tag.label
+        onChangeTagEditMode(LabelManagementActivity.TagEditMode.UPDATE)
+    }
+
+    val onSaveTag: () -> Unit = {
+        if (tagEditMode == LabelManagementActivity.TagEditMode.ADD) {
+            addLabel()
+        } else if (tagEditMode == LabelManagementActivity.TagEditMode.UPDATE) {
+            updateLabel()
+        }
+        tagTemp = null
+        labelTemp = ""
+        onChangeTagEditMode(LabelManagementActivity.TagEditMode.SHOW)
+    }
+
     if (showDeleteDialog) {
         DeleteDialog(
             stringResource(R.string.label_delete_confirm),
@@ -70,61 +96,81 @@ fun ScaffoldContent(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .padding(paddingValues)
-            .verticalScroll(scrollState)
-    ) {
-        SpacerSmall()
+    if (tagEditMode == LabelManagementActivity.TagEditMode.SHOW) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ){
+        tagsWithCount?.let { nonNullListOfTagsWithCount ->
 
-                TextField(
-                    value = labelTemp,
-                    onValueChange = onValueChange,
-                )
-
-                Button(
-                    onClick = addLabel
-                ) {
-                    Text("add")
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
+            ) {
+                item {
+                    SpacerSmall()
                 }
+
+                items(
+                    nonNullListOfTagsWithCount.sortedBy { twc -> twc.tag.label.lowercase() },
+                    key = { tag -> tag.tag.id }
+                ) { tagWithCount ->
+                    ListPane {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Text(
+                                text = "${tagWithCount.tag.label} (${tagWithCount.count})",
+                                modifier = Modifier
+                                    .weight(0.6f)
+                            )
+
+                            Row() {
+                                IconButton(
+                                    onClick = { onEditTag(tagWithCount.tag) }
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Edit,
+                                        stringResource(R.string.edit_label)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { deleteLabel(tagWithCount.tag) }
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        stringResource(R.string.delete_label)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        SpacerSmall()
+    } else {
 
-        labels?.forEachIndexed { index, label ->
-
-            if (index > 0) {
-                HorizontalDivider(
+        EditPane(
+            paddingValues = paddingValues,
+            onCancel = { onChangeTagEditMode(LabelManagementActivity.TagEditMode.SHOW) },
+            onSave = onSaveTag
+        ) {
+                Row(
                     modifier = Modifier
-                        .padding(top = 5.dp, bottom = 5.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-
-                Text(label.label)
-
-                IconButton(
-                    onClick = { deleteLabel(label) }
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        stringResource(R.string.delete_label)
+
+                    TextField(
+                        value = labelTemp,
+                        onValueChange = onValueChange,
                     )
                 }
             }
-        }
+
     }
 }

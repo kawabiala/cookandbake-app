@@ -7,12 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Tag
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 @Composable
@@ -30,10 +30,10 @@ fun ScaffoldContent(
     val isLoadingAttachment by recipeModel.isUpOrDownLoading.observeAsState()
     val ingredientData = recipeModel.ingredientListData.observeAsState()
     val ingredients = ingredientData.value ?: listOf()
-    val tagData = recipeModel.tagListData.observeAsState()
-    val tags = tagData.value ?: listOf()
-    val tag4RecipeData = recipeModel.tag4RecipeListData.observeAsState()
-    val tags4Recipe = tag4RecipeData.value ?: listOf()
+    val availableTagData = recipeModel.availableTagListData.observeAsState()
+    val availableTags = availableTagData.value ?: listOf()
+    val attachedTagData = recipeModel.attachedTagListData.observeAsState()
+    val attachedTags = attachedTagData.value ?: listOf()
 
     var recipeTitleTemp by remember(recipeData?.title) {
         mutableStateOf(recipeData?.title ?: "")
@@ -45,11 +45,17 @@ fun ScaffoldContent(
         mutableStateOf(recipeData?.instruction ?: "")
     }
 
-    var tagsTemp: List<Tag4Recipe> by remember(tag4RecipeData.value) {
-        mutableStateOf(tags4Recipe)
+    val tagsTemp: MutableList<RecipeViewModel.TagHelper> = remember(attachedTagData.value) {
+        mutableStateListOf<RecipeViewModel.TagHelper>().apply { this.addAll(attachedTags) }
     }
-    var tagTemp: Tag4Recipe? by remember {
+    var tagTemp: RecipeViewModel.TagHelper? by remember {
         mutableStateOf(null)
+    }
+
+    val unattachedAvailableTags = availableTags.filter { availableTag ->
+        tagsTemp.find { attachedTag ->
+            attachedTag.tagID == availableTag.id && !attachedTag.isDeleted
+        } == null
     }
 
     var ingredientIdTemp: String? by remember {
@@ -97,8 +103,17 @@ fun ScaffoldContent(
         ingredientSortTemp = -1
     }
 
-    val resetLabel: () -> Unit = {
+    val resetTag: () -> Unit = {
         tagTemp = null
+    }
+
+    val resetTags: () -> Unit = {
+        tagsTemp.removeIf {
+            tt -> tt.isNew
+        }
+        tagsTemp.forEach { tt ->
+            tt.isDeleted = false
+        }
     }
 
     val resetDelete: () -> Unit = {
@@ -123,14 +138,26 @@ fun ScaffoldContent(
         }
     }
 
-    val addLabel: (Tag) -> Unit = { tag ->
-        recipeModel.generateTag4Recipe(tag)?.let {
-            tagsTemp = tagsTemp + it
+    val addTag: (List<Tag>) -> Unit = { tags ->
+        tags.forEach { tag ->
+            tagsTemp.add(
+                RecipeViewModel.TagHelper(
+                    tagID = tag.id,
+                    label = tag.label,
+                    color = tag.color,
+                    sort = tagsTemp.size,
+                    isNew = true
+                )
+            )
         }
     }
 
-    val deleteLabel: () -> Unit = {
-        tagsTemp = tagTemp?.let { tagsTemp - it } ?: listOf()
+    val deleteTag: () -> Unit = {
+        tagTemp?.let { tt ->
+            tagsTemp.remove(tt)
+            tt.isDeleted = true
+            tagsTemp.add(tt)
+        }
     }
 
     val deleteRecipe: () -> Unit = {
@@ -142,7 +169,7 @@ fun ScaffoldContent(
             ?.let { recipeModel.deleteIngredient(it) }
     }
 
-    val onAddLabel: () -> Unit = {
+    val onAddTag: () -> Unit = {
         deleteDialogMode = Delete.NONE
         addLabelDialogMode = true
     }
@@ -166,6 +193,7 @@ fun ScaffoldContent(
 
     val onCloseEdit: () -> Unit = {
         resetIngredient()
+        resetTags()
         onModeChange(Mode.SHOW_RECIPE)
         onIngredientFunctionsMode(false)
     }
@@ -184,8 +212,9 @@ fun ScaffoldContent(
                 onIngredientFunctionsMode(false)
             }
             Delete.Label -> {
-                deleteLabel()
-                resetLabel()
+                deleteTag()
+                resetTag()
+                resetDelete()
             }
         }
     }
@@ -200,11 +229,9 @@ fun ScaffoldContent(
         deleteDialogMode = Delete.INGREDIENT
     }
 
-    val onDeleteLabel: (tag: Tag4Recipe) -> Unit = { tag ->
+    val onDeleteTag: (tag: RecipeViewModel.TagHelper) -> Unit = { tag ->
         tagTemp = tag
-        deleteLabel()
-//        addLabelDialogMode = false
-//        deleteDialogMode = Delete.Label
+        onDelete(Delete.Label)
     }
 
     val onDeleteRecipe: () -> Unit = {
@@ -238,11 +265,11 @@ fun ScaffoldContent(
     }
 
     if (addLabelDialogMode) {
-        AddLabelDialog(
-            labels = tags,
+        AddTagDialog(
+            tags = unattachedAvailableTags,
             onClose = { addLabelDialogMode = false },
-            onSave = { tag ->
-                addLabel(tag)
+            onSave = { tags ->
+                addTag(tags)
                 addLabelDialogMode = false
             }
         )
@@ -265,7 +292,7 @@ fun ScaffoldContent(
                 recipeTitle = recipeTitleTemp,
                 recipeDescription = recipeDescriptionTemp,
                 ingredients = ingredients,
-                labels = tags4Recipe.map { tag -> tag.label },
+                labels = attachedTags.mapNotNull { tag -> if (! tag.isDeleted) tag.label else null },
                 instruction = recipeData?.instruction ?: "",
                 hasAttachment = recipeData?.hasAttachment ?: false,
                 isAttachmentLoading = isLoadingAttachment ?: false,
@@ -289,8 +316,8 @@ fun ScaffoldContent(
                 tags = tagsTemp,
                 onRecipeTitleChange = { title -> recipeTitleTemp = title},
                 onRecipeDescriptionChange = { description -> recipeDescriptionTemp = description},
-                onAddLabel = onAddLabel,
-                onDeleteLabel = onDeleteLabel,
+                onAddLabel = onAddTag,
+                onDeleteLabel = onDeleteTag,
                 onCancel = onCloseEdit,
                 onSave = onSaveRecipe
             )

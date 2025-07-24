@@ -1,13 +1,11 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import com.pingwinek.jens.cookandbake.models.Tag
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
-import java.util.LinkedList
 
 interface TagSource<T: Tag> : Source<T> {
 
-    suspend fun getRecipeIDs(tag: Tag): LinkedList<String>
-    suspend fun newRecipeID(tag4Recipe: Tag4Recipe, recipeTitle: String): String
-    suspend fun deleteRecipeID(tagID: String, recipeID: String): Boolean
+//    suspend fun getRecipeIDs(tag: Tag): LinkedList<String>
+//    suspend fun newRecipeID(tag4Recipe: Tag4Recipe, recipeTitle: String): String
+//    suspend fun deleteRecipeID(tagID: String, recipeID: String): Boolean
 
 }

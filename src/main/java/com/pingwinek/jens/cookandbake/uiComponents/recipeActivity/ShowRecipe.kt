@@ -3,12 +3,15 @@ package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Attachment
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +41,6 @@ import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksDropDown
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTabElement
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTag
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 
 @Composable
@@ -163,7 +166,7 @@ fun ShowRecipe(
         if (labels.isNotEmpty()) {
             SpacerSmall()
 
-            Row(
+            FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
@@ -174,7 +177,20 @@ fun ShowRecipe(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 labels.forEach { label ->
-                    PingwinekCooksTag(label)
+                    InputChip(
+                        selected = true,
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = label,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        modifier = Modifier
+                            .requiredWidthIn(60.dp, 90.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    )
                 }
             }
         }

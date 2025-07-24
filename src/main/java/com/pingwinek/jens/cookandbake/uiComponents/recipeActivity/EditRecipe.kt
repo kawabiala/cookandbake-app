@@ -4,60 +4,55 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
-import com.pingwinek.jens.cookandbake.models.Tag4RecipeFB
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksTag
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
+import com.pingwinek.jens.cookandbake.uiComponents.spacing
+import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 @Composable
 fun EditRecipe(
     paddingValues: PaddingValues,
     recipeTitle: String,
     recipeDescription: String,
-    tags: List<Tag4Recipe>,
+    tags: List<RecipeViewModel.TagHelper>,
     onRecipeTitleChange: (String) -> Unit,
     onRecipeDescriptionChange: (String) -> Unit,
     onAddLabel: () -> Unit,
-    onDeleteLabel: (Tag4Recipe) -> Unit,
+    onDeleteLabel: (RecipeViewModel.TagHelper) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
-    val fabArrangement = if(tags.isNotEmpty()) {
-        Arrangement.End
-    } else {
-        Arrangement.Start
-    }
-
     EditPane (
         paddingValues = paddingValues,
-        cancelButtonColors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.inversePrimary,
-            contentColor = MaterialTheme.colorScheme.primary
-        ),
         onCancel = onCancel,
         onSave = onSave
     ) {
@@ -95,50 +90,50 @@ fun EditRecipe(
 
             SpacerSmall()
 
-            tags.forEachIndexed { index, tag4Recipe ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.spacerSmall)
+            ) {
+                items(
+                    items = tags.filter { tag -> ! tag.isDeleted },
+                    key = { tag -> tag.tagID }
+                ) { tagHelper ->
 
-                if (index > 0) {
-                    HorizontalDivider(
+                    InputChip(
+                        selected = true,
+                        onClick = { onDeleteLabel(tagHelper) },
+                        label = {
+                            Text(
+                                text = tagHelper.label,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
                         modifier = Modifier
-                            .padding(top = 5.dp, bottom = 5.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            .width(180.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        trailingIcon = {
+                            Icon(
+                                Icons.Outlined.Close,
+                                stringResource(R.string.delete)
+                            )
+                        }
                     )
 
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PingwinekCooksTag(tag4Recipe.label)
+                item {
+                    SpacerSmall()
 
-                    IconButton(
-                        onClick = { onDeleteLabel(tag4Recipe) }
+                    FilledIconButton(
+                        onClick = onAddLabel
                     ) {
                         Icon(
-                            Icons.Filled.Delete,
-                            stringResource(R.string.delete_label)
+                            Icons.Filled.Add,
+                            stringResource(R.string.add_label)
                         )
                     }
-                }
-            }
-
-            SpacerSmall()
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = fabArrangement
-            ) {
-                FloatingActionButton(
-                    onClick = onAddLabel
-                ) {
-                    Icon(
-                        Icons.Outlined.Add,
-                        stringResource(R.string.add_label)
-                    )
                 }
             }
         }
@@ -178,8 +173,8 @@ class PPEditRecipe: PreviewParameterProvider<Parameters4PreviewEditRecipe> {
             recipeTitle = "Title",
             recipeDescription = "Description",
             labels = listOf(
-                Tag4RecipeFB("Label 1", "0"),
-                Tag4RecipeFB("Label 2", "1")
+                RecipeViewModel.TagHelper("", "Label 1", "", 0),
+                RecipeViewModel.TagHelper("", "Label 2", "", 1)
             )
         )
     )
@@ -189,11 +184,11 @@ data class Parameters4PreviewEditRecipe (
     val paddingValues: PaddingValues = PaddingValues.Absolute(),
     val recipeTitle: String,
     val recipeDescription: String,
-    val labels: List<Tag4Recipe>,
+    val labels: List<RecipeViewModel.TagHelper>,
     val onRecipeTitleChange: (String) -> Unit = {},
     val onRecipeDescriptionChange: (String) -> Unit = {},
     val onAddLabel: () -> Unit = {},
-    val onDeleteLabel: (Tag4Recipe) -> Unit = {},
+    val onDeleteLabel: (RecipeViewModel.TagHelper) -> Unit = {},
     val onCancel: () -> Unit = {},
     val onSave: () -> Unit = {}
 )
