@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -20,13 +21,13 @@ import com.pingwinek.jens.cookandbake.BuildConfig
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.models.FileInfo
-import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.FabMode
-import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.Mode
+import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.TabMode
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.FabMode
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.Mode
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.ScaffoldContent
+import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.TabMode
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 
@@ -99,6 +100,8 @@ class RecipeActivity: AppCompatActivity() {
                     showFab = (fabMode != FabMode.NONE),
                     fabIconLabel = if (fabMode == FabMode.ADD_INGREDIENT) getString(R.string.plus_new_ingredient) else "",
                     fabIcon = Icons.Filled.Add,
+                    fabContainerColor = MaterialTheme.colorScheme.primary,
+                    fabIconColor = MaterialTheme.colorScheme.onPrimary,
                     onFabClicked = {
                         if (fabMode == FabMode.ADD_INGREDIENT) {
                             mode = Mode.EDIT_INGREDIENT

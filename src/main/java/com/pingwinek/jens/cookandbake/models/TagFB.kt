@@ -8,22 +8,26 @@ data class TagFB(
     override val id: String = "",
     override val label: String,
     override val color: String = "",
+    override val sort: Int = -1,
     override var lastModified: Long = Date().time
 ): Tag() {
 
     @Keep
     data class DocumentData(
         val label: String,
-        val color: String
+        val color: String,
+        val sort: Int
     )
 
     constructor(
         label: String,
-        color: String = ""
+        color: String = "",
+        sort: Int = -1
     ) : this(
         "",
         label,
-        color
+        color,
+        sort
     )
 
     constructor(
@@ -31,15 +35,17 @@ data class TagFB(
     ) : this(
         "",
         tag.label,
-        tag.color
+        tag.color,
+        tag.sort
     )
 
     constructor(document: DocumentSnapshot) : this(
         document.id,
         document.getString("label") ?: "",
         document.getString("color") ?: "",
+        document.getLong("sort")?.toInt() ?: -1,
         0
     )
 
-    val documentData = DocumentData(label, color)
+    val documentData = DocumentData(label, color, sort)
 }

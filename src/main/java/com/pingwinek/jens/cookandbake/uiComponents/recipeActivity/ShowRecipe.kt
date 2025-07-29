@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -61,6 +63,7 @@ fun ShowRecipe(
     onDeleteDocument: () -> Unit,
     onAttachmentClicked: () -> Unit,
     onEditIngredient: (ingredientId: String) -> Unit,
+    onEditTags: () -> Unit,
     onDeleteIngredient: (ingredientId: String) -> Unit,
     onChangeSortIngredient: (Map<Ingredient, Int>) -> Unit,
     onEditInstruction: () -> Unit,
@@ -106,7 +109,6 @@ fun ShowRecipe(
                     .clickable { showButtons = !showButtons },
             ) {
                 Text(
-                    //fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -163,34 +165,45 @@ fun ShowRecipe(
             }
         }
 
-        if (labels.isNotEmpty()) {
-            SpacerSmall()
+        SpacerSmall()
 
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        //top = paddingValues.calculateTopPadding(),
-                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                    ),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                labels.forEach { label ->
-                    InputChip(
-                        selected = true,
-                        onClick = {},
-                        label = {
-                            Text(
-                                text = label,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        modifier = Modifier
-                            .requiredWidthIn(60.dp, 90.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            if (labels.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    labels.forEach { label ->
+                        InputChip(
+                            selected = true,
+                            onClick = {},
+                            label = {
+                                Text(
+                                    text = label,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            modifier = Modifier
+                                .requiredWidthIn(60.dp, 90.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    }
+                }
+            }
+
+            if (showButtons) {
+                FilledTonalIconButton(
+                    onClick = onEditTags
+                ) {
+                    Icon(Icons.AutoMirrored.Outlined.Label, stringResource(R.string.manage_labels))
                 }
             }
         }

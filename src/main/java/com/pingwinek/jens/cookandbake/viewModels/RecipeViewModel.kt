@@ -14,7 +14,6 @@ import com.pingwinek.jens.cookandbake.models.FileInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.Tag
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.repos.IngredientRepository
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.repos.TagRepository
@@ -23,16 +22,6 @@ import kotlinx.coroutines.launch
 import java.util.LinkedList
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application), TypedQueue.QueueListener {
-
-    data class TagHelper(
-        val tagID: String,
-        val label: String,
-        val color: String,
-        var sort: Int,
-        var isNew: Boolean = false,
-        var isUpdated: Boolean = false,
-        var isDeleted: Boolean = false
-    )
 
     private val getString: (id: Int) -> String = { id ->
         application.getString(id)
@@ -50,7 +39,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private val privateAvailableTagListData = MutableLiveData<LinkedList<Tag>>().apply {
         value = LinkedList()
     }
-    private val privateAttachedTagListData = MutableLiveData<LinkedList<TagHelper>>().apply {
+    private val privateAttachedTagListData = MutableLiveData<LinkedList<Tag>>().apply {
         value = LinkedList()
     }
 
@@ -61,7 +50,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
     val availableTagListData: LiveData<LinkedList<Tag>> = privateAvailableTagListData
-    val attachedTagListData: LiveData<LinkedList<TagHelper>> = privateAttachedTagListData
+    val attachedTagListData: LiveData<LinkedList<Tag>> = privateAttachedTagListData
 
     val message: LiveData<String?> = privateMessage
     val isUpOrDownLoading: LiveData<Boolean> = privateIsUpOrDownloading
@@ -71,13 +60,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     init {
         recipeRepository.registerQueueListener(this)
     }
-/*
-    private fun addTag(tag4Recipe: Tag4Recipe) {
-        viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.new(tag4Recipe)
-        }
-    }
-*/
+
     fun attachDocument(uri: Uri) {
         privateIsUpOrDownloading.postValue(true)
         recipeData.value?.let { recipe ->
@@ -120,29 +103,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
             }
         }
     }
-/*
-    fun deleteTag4Recipe(tag4Recipe: Tag4Recipe) {
-        viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.deleteForRecipe(tag4Recipe)
-            loadTags4Recipe()
-        }
-    }
-*/
+
     fun deleteIngredient(ingredient: Ingredient) {
         viewModelScope.launch(Dispatchers.IO) {
             ingredientRepository.delete(ingredient)
             loadIngredients()
         }
-    }
-/*
-    private fun deleteTag(tag4Recipe: Tag4Recipe) {
-        viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.deleteForRecipe(tag4Recipe)
-        }
-    }
-*/
-    fun generateTag4Recipe(tag: TagHelper, sort: Int): Tag4Recipe? {
-        return recipeId?.let { tagRepository.generateTag4Recipe(tag.tagID, it, sort) }
     }
 
     fun getShareableRecipe(): ShareableRecipe? {
@@ -172,8 +138,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
                 privateRecipeData.postValue(recipeRepository.get(id))
                 loadIngredients()
                 loadTags()
-//                loadTags4Recipe()
-                //fileRepository.getFilesForEntityId("recipe", id)
             }
         }
     }
@@ -188,7 +152,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         val tags = tagRepository.getAll()
 
         recipeId?.let { id ->
-            val tagHelperList = mutableListOf<TagHelper>()
+            val tagHelperList = mutableListOf<Tag>()
 
             tagRepository.getAllForRecipe(id).forEach { tag4Recipe ->
                 val nullableTag = tags.find { t -> t.id == tag4Recipe.id }
@@ -198,41 +162,17 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
                     tagRepository.deleteForRecipe(tag4Recipe)
                 } else {
                     tagHelperList.add(
-                        TagHelper(
-                            tag4Recipe.id,
-                            nullableTag.label,
-                            nullableTag.color,
-                            tag4Recipe.sort
-                        )
+                        nullableTag
                     )
                 }
-
-                /*
-                tags.find { t -> t.id == tag4Recipe.id }?.let { nonNullTag ->
-                    tagHelperList.add(
-                        TagHelper(
-                            tag4Recipe.id,
-                            nonNullTag.label,
-                            nonNullTag.color,
-                            tag4Recipe.sort
-                        )
-                    )
-                }
-                */
             }
 
             privateAttachedTagListData.postValue(LinkedList(tagHelperList))
         }
 
-        privateAvailableTagListData.postValue(tagRepository.getAll())
+        privateAvailableTagListData.postValue(tags)
     }
-/*
-    private suspend fun loadTags4Recipe() {
-        recipeId?.let { id ->
-            privateTag4RecipeListData.postValue(tagRepository.getAllForRecipe(id))
-        }
-    }
-*/
+
     override fun onCleared() {
         super.onCleared()
         recipeRepository.unregisterQueueListener(this)
@@ -266,36 +206,22 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun saveTags(tags: List<TagHelper>) {
+    fun saveTags(tags: Map<Tag, Boolean>) {
         viewModelScope.launch(Dispatchers.IO) {
             recipeId?.let { nonNullRecipeId ->
 
-                tags.forEach { tag ->
-                    val tag4Recipe =
-                        tagRepository.generateTag4Recipe(tag.tagID, nonNullRecipeId, tag.sort)
+                tags.forEach { (tag, newOrDelete) ->
 
-                    if (tag.isNew) {
+                    val tag4Recipe =
+                        tagRepository.generateTag4Recipe(tag.id, nonNullRecipeId)
+
+                    if (newOrDelete) {
                         tagRepository.new(tag4Recipe)
-                    } else if (tag.isUpdated) {
-                        tagRepository.update(tag4Recipe)
-                    } else if (tag.isDeleted) {
+                    } else {
                         tagRepository.deleteForRecipe(tag4Recipe)
                     }
                 }
-                /*
-            attachedTagListData.value!!.forEach { tagOld ->
-                if (tags.find { tagNew -> tagOld.label == tagNew.label } == null) {
-                    deleteTag(tagOld)
-                }
-            }
 
-            tags.forEach { tagNew ->
-                if(attachedTagListData.value != null &&
-                    attachedTagListData.value!!.find { tagOld -> tagNew.label == tagOld.label  } == null) {
-                    addTag(tagNew, nonNullRecipeId, recipeData.value?.title ?: "")
-                }
-            }
-*/
                 loadTags()
             }
         }

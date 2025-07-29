@@ -1,6 +1,7 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -32,6 +33,7 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
     fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
             val tagsWithCount = tagRepository.getAll().map { entry -> TagWithCount(entry) }
+            Log.i(this::class.java.name, tagsWithCount.toString())
             recipeRepository.getAll().forEach { recipe ->
                 tagRepository.getAllForRecipe(recipe.id).forEach { tag ->
                     tagsWithCount.find { tc -> tc.tag.id == tag.id }?.let { tcFound -> tcFound.count += 1 }
@@ -42,9 +44,9 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun addLabel(label: String) {
+    fun addLabel(label: String, color: String, sort: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.new(label)
+            tagRepository.new(label, color, sort)
             loadData()
         }
     }
@@ -56,9 +58,9 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun updateLabel(tag: Tag, label: String) {
+    fun updateLabel(tag: Tag, label: String, color: String, sort: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.update(tag, label)
+            tagRepository.update(tag, label, color, sort)
             loadData()
         }
     }

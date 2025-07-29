@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -50,6 +51,8 @@ fun <T : Any> DragAndDropList(
     itemComposable: @Composable (t: T, active: Boolean, onChangeActive: () -> Unit, onDrag: (Float) -> Unit, onDragStopped: () -> Unit) -> Unit
 ) {
     val density = LocalDensity.current
+
+    val lazyListState = rememberLazyListState()
 
     val mapContent: MutableMap<T, Y> by remember(listContent) {
         mutableStateOf( //the map needs to be mutable, but is not expected to trigger recomposition
@@ -175,6 +178,7 @@ fun <T : Any> DragAndDropList(
     }
 
     LazyColumn(
+        state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(spacing)
     ) {
 

@@ -14,7 +14,6 @@ fun DeleteDialog(
         message = when (dialogMode) {
             Delete.RECIPE -> stringResource(R.string.delete_recipe)
             Delete.INGREDIENT -> stringResource(R.string.delete_ingredient)
-            Delete.Label -> stringResource(R.string.delete_label)
             Delete.NONE -> ""
         },
         onClose = { onClose() },

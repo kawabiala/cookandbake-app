@@ -17,9 +17,6 @@ import java.util.LinkedList
 class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
     : TagSource<TagFB>
 {
-    data class RecipeIDDocumentData(
-        val recipeID: String
-    )
 
     private val auth: FirebaseAuth = Firebase.auth
     private val basePathTag: String = "/tag"
@@ -92,44 +89,7 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
 
         return tag
     }
-/*
-    override suspend fun getRecipeIDs(tag: Tag): LinkedList<String> {
-        var list = LinkedList<String>()
 
-        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-            list = getRecipes(buildRecipesByTagCollRef(auth.uid!!, tag.id))
-        } else {
-            Log.i(this::class.java.name, "unauthorized getRecipeIDs")
-        }
-
-        return list
-    }
-
-    override suspend fun newRecipeID(tag4Recipe: Tag4Recipe, recipeTitle: String): String {
-        var returnValue: String = ""
-
-        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-//            recipeID = newRecipeID(buildRecipesByTagCollRef(auth.uid!!, tagID), recipeID)
-            returnValue = newRecipeID(buildRecipeDocRef(auth.uid!!, tag4Recipe.id, tag4Recipe.recipeID), recipeTitle)
-        } else {
-            Log.i(this::class.java.name, "unauthorized newRecipeID")
-        }
-
-        return returnValue
-    }
-
-    override suspend fun deleteRecipeID(tagID: String, recipeID: String): Boolean {
-        var returnVal = false
-
-        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
-            returnVal = deleteRecipeID(buildRecipeDocRef(auth.uid!!, tagID, recipeID))
-        } else {
-            Log.i(this::class.java.name, "unauthorized deleteRecipeID")
-        }
-
-        return returnVal
-    }
-*/
     private suspend fun getAll(collRef: CollectionReference) : LinkedList<TagFB> {
         return FirestoreDataAccessManager.getAll(suspendedCoroutineExceptionCallback, collRef) {
             TagFB(it)
@@ -143,7 +103,6 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
     }
 
     private suspend fun new(collRef: CollectionReference, tagFB: TagFB) : TagFB {
-//        Log.i(this::class.java.name, "new: " + tagFB.label)
         return FirestoreDataAccessManager.new(suspendedCoroutineExceptionCallback, collRef, tagFB.documentData) {
             TagFB(it)
         } ?: tagFB
@@ -160,29 +119,7 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
             TagFB(it)
         }
     }
-/*
-    private suspend fun getRecipes(collRef: CollectionReference) : LinkedList<String> {
-        return FirestoreDataAccessManager.getAll(collRef) {
-            it.id
-        }
-    }
 
-    private suspend fun newRecipeID(docRef: DocumentReference, recipeID: String): String {
-        return FirestoreDataAccessManager.update(docRef, RecipeIDDocumentData(recipeID)) {
-            it.id
-        }
-/*
-        return FirestoreDataAccessManager.newWithID(collRef, RecipeIDDocumentData(recipeID), recipeID) {
-            it.id
-        }*/
-    }
-
-    private suspend fun deleteRecipeID(docRef: DocumentReference): Boolean {
-        return FirestoreDataAccessManager.delete(docRef) {
-            true
-        }
-    }
-*/
     //TODO handle exceptions
     private fun buildTagsCollRef(userID: String) : CollectionReference {
         return firestore.collection(basePathUser).document(userID).collection(basePathTag)
@@ -191,16 +128,6 @@ class TagSourceFB private constructor(private val firestore: FirebaseFirestore)
     private fun buildTagDocRef(userID: String, tagID: String) : DocumentReference {
         if (tagID.isEmpty()) throw IllegalArgumentException("tagID size 0 not allowed")
         return buildTagsCollRef(userID).document(tagID)
-    }
-
-    private fun buildRecipesByTagCollRef(userID: String, tagID: String) : CollectionReference {
-        if (tagID.isEmpty()) throw IllegalArgumentException("tagID size 0 not allowed")
-        return buildTagDocRef(userID, tagID).collection("recipe")
-    }
-
-    private fun buildRecipeDocRef(userID: String, tagID: String, recipeID: String) : DocumentReference {
-        if (recipeID.isEmpty()) throw IllegalArgumentException("recipeID size 0 not allowed")
-        return buildRecipesByTagCollRef(userID, tagID).document(recipeID)
     }
 
     companion object : SingletonHolder<TagSourceFB, FirebaseFirestore>(::TagSourceFB)

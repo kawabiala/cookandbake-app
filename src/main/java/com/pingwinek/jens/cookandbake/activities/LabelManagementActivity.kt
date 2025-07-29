@@ -5,8 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -46,16 +45,16 @@ class LabelManagementActivity : AppCompatActivity() {
             finish()
         }
 
-        val onAddLabel: (String) -> Unit = { label ->
-            labelModel.addLabel(label)
+        val onAddLabel: (String, String, Int) -> Unit = { label, color, sort ->
+            labelModel.addLabel(label, color, sort)
         }
 
         val onDeleteLabel: (Tag) -> Unit = { tag ->
             labelModel.deleteLabel(tag)
         }
 
-        val onUpdateLabel: (Tag, String) -> Unit = { tag, label ->
-            labelModel.updateLabel(tag, label)
+        val onUpdateLabel: (Tag, String, String, Int) -> Unit = { tag, label, color, sort ->
+            labelModel.updateLabel(tag, label, color, sort)
         }
 
         setContent {
@@ -63,26 +62,24 @@ class LabelManagementActivity : AppCompatActivity() {
             PingwinekCooksAppTheme {
 
                 val tagsWithCount by tagListData.observeAsState()
-                var tagEditMode by remember(tagsWithCount) { mutableStateOf(LabelManagementActivity.TagEditMode.SHOW) }
+                var tagEditMode by remember(tagsWithCount) { mutableStateOf(TagEditMode.SHOW) }
 
                 val onChangeTagEditMode: (TagEditMode) -> Unit = { mode ->
                     tagEditMode = mode
                 }
 
-                val onFabClicked: () -> Unit = {
+                val optionAdd = PingwinekCooksComposableHelpers.OptionItem(
+                    R.string.add_label,
+                    Icons.Outlined.Add
+                ) {
                     tagEditMode = TagEditMode.ADD
                 }
 
                 PingwinekCooksScaffold(
                     title = getString(R.string.manage_labels),
                     optionItemLeft = optionBack,
+                    optionItemRight = optionAdd,
                     navigationBarVisible = false,
-                    showFab = (tagEditMode == TagEditMode.SHOW),
-                    fabIcon = Icons.Filled.Add,
-                    fabIconLabel = getString(R.string.add_label),
-                    fabContainerColor = MaterialTheme.colorScheme.primary,
-                    fabIconColor = MaterialTheme.colorScheme.onPrimary,
-                    onFabClicked = onFabClicked
                 ) { paddingValues ->
                     ScaffoldContent(
                         paddingValues,

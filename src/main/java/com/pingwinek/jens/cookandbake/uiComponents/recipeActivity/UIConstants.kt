@@ -4,8 +4,9 @@ enum class Mode {
     SHOW_RECIPE,
     EDIT_RECIPE,
     EDIT_INGREDIENT,
-    EDIT_INSTRUCTION
+    EDIT_INSTRUCTION,
+    EDIT_TAGS
 }
 enum class FabMode { NONE, ADD_INGREDIENT }
 enum class TabMode { INGREDIENTS, INSTRUCTION, PDF }
-enum class Delete { NONE, RECIPE, INGREDIENT, Label }
+enum class Delete { NONE, RECIPE, INGREDIENT }

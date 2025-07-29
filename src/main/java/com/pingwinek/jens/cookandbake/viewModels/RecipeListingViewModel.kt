@@ -67,7 +67,9 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
     private suspend fun getAllRecipes4Tags(recipeTagList: List<Pair<Recipe, Tag4Recipe>>) : LinkedList<RecipesForLabel> {
         val returnValue = LinkedList<RecipesForLabel>()
 
-        tagRepository.getAll().forEach { tag ->
+        tagRepository.getAll()
+            .sortedBy { tag -> tag.sort }
+            .forEach { tag ->
             returnValue.add(
                 RecipesForLabel(
                     tag.label,

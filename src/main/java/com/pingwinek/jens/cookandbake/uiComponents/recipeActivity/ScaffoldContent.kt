@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,17 +44,14 @@ fun ScaffoldContent(
         mutableStateOf(recipeData?.instruction ?: "")
     }
 
-    val tagsTemp: MutableList<RecipeViewModel.TagHelper> = remember(attachedTagData.value) {
-        mutableStateListOf<RecipeViewModel.TagHelper>().apply { this.addAll(attachedTags) }
-    }
-    var tagTemp: RecipeViewModel.TagHelper? by remember {
-        mutableStateOf(null)
-    }
-
-    val unattachedAvailableTags = availableTags.filter { availableTag ->
-        tagsTemp.find { attachedTag ->
-            attachedTag.tagID == availableTag.id && !attachedTag.isDeleted
-        } == null
+    val tags = mutableMapOf<Tag, Boolean>().apply {
+        availableTags
+            .sortedBy { tag -> tag.sort }
+            .forEach { availableTag ->
+            this[availableTag] = attachedTags.find { attachedTag ->
+                attachedTag.id == availableTag.id
+            } != null
+        }
     }
 
     var ingredientIdTemp: String? by remember {
@@ -85,10 +81,6 @@ fun ScaffoldContent(
         }
     }
 
-    var addLabelDialogMode by remember {
-        mutableStateOf(false)
-    }
-
     var deleteDialogMode by remember {
         mutableStateOf(Delete.NONE)
     }
@@ -103,26 +95,12 @@ fun ScaffoldContent(
         ingredientSortTemp = -1
     }
 
-    val resetTag: () -> Unit = {
-        tagTemp = null
-    }
-
-    val resetTags: () -> Unit = {
-        tagsTemp.removeIf {
-            tt -> tt.isNew
-        }
-        tagsTemp.forEach { tt ->
-            tt.isDeleted = false
-        }
-    }
-
     val resetDelete: () -> Unit = {
         deleteDialogMode = Delete.NONE
     }
 
     val saveRecipe: () -> Unit = {
         recipeModel.saveRecipe(recipeTitleTemp, recipeDescriptionTemp, instructionTemp)
-        recipeModel.saveTags(tagsTemp)
     }
 
     val saveIngredient: () -> Unit = {
@@ -138,28 +116,6 @@ fun ScaffoldContent(
         }
     }
 
-    val addTag: (List<Tag>) -> Unit = { tags ->
-        tags.forEach { tag ->
-            tagsTemp.add(
-                RecipeViewModel.TagHelper(
-                    tagID = tag.id,
-                    label = tag.label,
-                    color = tag.color,
-                    sort = tagsTemp.size,
-                    isNew = true
-                )
-            )
-        }
-    }
-
-    val deleteTag: () -> Unit = {
-        tagTemp?.let { tt ->
-            tagsTemp.remove(tt)
-            tt.isDeleted = true
-            tagsTemp.add(tt)
-        }
-    }
-
     val deleteRecipe: () -> Unit = {
         recipeModel.deleteRecipe()
     }
@@ -167,11 +123,6 @@ fun ScaffoldContent(
     val deleteIngredient: () -> Unit = {
         ingredients.find { ingredient -> ingredient.id == ingredientIdTemp }
             ?.let { recipeModel.deleteIngredient(it) }
-    }
-
-    val onAddTag: () -> Unit = {
-        deleteDialogMode = Delete.NONE
-        addLabelDialogMode = true
     }
 
     val onAttachDocument: () -> Unit = {
@@ -193,9 +144,12 @@ fun ScaffoldContent(
 
     val onCloseEdit: () -> Unit = {
         resetIngredient()
-        resetTags()
         onModeChange(Mode.SHOW_RECIPE)
         onIngredientFunctionsMode(false)
+    }
+
+    val onCloseEditTags: () -> Unit = {
+        onModeChange(Mode.SHOW_RECIPE)
     }
 
     val onDelete: (delete: Delete) -> Unit = { selectedDelete ->
@@ -211,11 +165,6 @@ fun ScaffoldContent(
                 resetDelete()
                 onIngredientFunctionsMode(false)
             }
-            Delete.Label -> {
-                deleteTag()
-                resetTag()
-                resetDelete()
-            }
         }
     }
 
@@ -225,17 +174,10 @@ fun ScaffoldContent(
 
     val onDeleteIngredient: (ingredientId: String) -> Unit = { id ->
         ingredientIdTemp = id
-        addLabelDialogMode = false
         deleteDialogMode = Delete.INGREDIENT
     }
 
-    val onDeleteTag: (tag: RecipeViewModel.TagHelper) -> Unit = { tag ->
-        tagTemp = tag
-        onDelete(Delete.Label)
-    }
-
     val onDeleteRecipe: () -> Unit = {
-        addLabelDialogMode = false
         deleteDialogMode = Delete.RECIPE
     }
 
@@ -252,6 +194,24 @@ fun ScaffoldContent(
         onModeChange(Mode.EDIT_RECIPE)
     }
 
+    val onEditTags: () -> Unit = {
+        onModeChange(Mode.EDIT_TAGS)
+    }
+
+    val onChangeTags: (Map<Tag, Boolean>) -> Unit = { changedTags ->
+        val tagsToChange = mutableMapOf<Tag, Boolean>().apply {
+            changedTags.forEach { (changedTag, selected) ->
+                if (tags[changedTag] != selected) {
+                    this[changedTag] = selected
+                }
+            }
+        }
+
+        recipeModel.saveTags(tagsToChange)
+
+        onModeChange(Mode.SHOW_RECIPE)
+    }
+
     val onSaveIngredient: () -> Unit = {
         saveIngredient()
         resetIngredient()
@@ -262,17 +222,6 @@ fun ScaffoldContent(
     val onSaveRecipe: () -> Unit = {
         saveRecipe()
         onModeChange(Mode.SHOW_RECIPE)
-    }
-
-    if (addLabelDialogMode) {
-        AddTagDialog(
-            tags = unattachedAvailableTags,
-            onClose = { addLabelDialogMode = false },
-            onSave = { tags ->
-                addTag(tags)
-                addLabelDialogMode = false
-            }
-        )
     }
 
     if (deleteDialogMode != Delete.NONE) {
@@ -292,7 +241,9 @@ fun ScaffoldContent(
                 recipeTitle = recipeTitleTemp,
                 recipeDescription = recipeDescriptionTemp,
                 ingredients = ingredients,
-                labels = attachedTags.mapNotNull { tag -> if (! tag.isDeleted) tag.label else null },
+                labels = attachedTags
+                    .sortedBy { tag -> tag.sort }
+                    .map { tag -> tag.label },
                 instruction = recipeData?.instruction ?: "",
                 hasAttachment = recipeData?.hasAttachment ?: false,
                 isAttachmentLoading = isLoadingAttachment ?: false,
@@ -302,6 +253,7 @@ fun ScaffoldContent(
                 onDeleteDocument = onDeleteDocument,
                 onAttachmentClicked = onAttachmentClicked,
                 onEditIngredient = onEditIngredient,
+                onEditTags = onEditTags,
                 onDeleteIngredient = onDeleteIngredient,
                 onChangeSortIngredient = onChangeSortIngredient,
                 onEditInstruction = onEditInstruction,
@@ -313,11 +265,8 @@ fun ScaffoldContent(
                 paddingValues = paddingValues,
                 recipeTitle = recipeTitleTemp,
                 recipeDescription = recipeDescriptionTemp,
-                tags = tagsTemp,
                 onRecipeTitleChange = { title -> recipeTitleTemp = title},
                 onRecipeDescriptionChange = { description -> recipeDescriptionTemp = description},
-                onAddLabel = onAddTag,
-                onDeleteLabel = onDeleteTag,
                 onCancel = onCloseEdit,
                 onSave = onSaveRecipe
             )
@@ -344,6 +293,14 @@ fun ScaffoldContent(
                 onInstructionChange = { changedInstruction -> instructionTemp = changedInstruction },
                 onCancel = onCloseEdit,
                 onSave = onSaveRecipe
+            )
+        }
+        Mode.EDIT_TAGS -> {
+            EditTags(
+                paddingValues = paddingValues,
+                tags = tags,
+                onChangeTags = onChangeTags,
+                onClose = onCloseEditTags
             )
         }
     }
