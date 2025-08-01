@@ -22,7 +22,7 @@ import com.pingwinek.jens.cookandbake.R
 
 @Composable
 fun EditPane(
-    paddingValues: PaddingValues,
+    paddingValues: PaddingValues = PaddingValues.Absolute(),
     cancelButtonColors: ButtonColors = ButtonDefaults.filledTonalButtonColors(),
     saveButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
     onCancel: () -> Unit,

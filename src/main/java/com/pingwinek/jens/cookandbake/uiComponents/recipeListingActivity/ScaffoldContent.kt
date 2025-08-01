@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -151,13 +152,12 @@ fun RecipeComponent(
     onOpenRecipe: (String) -> Unit
 ) {
     ListPane (
+        modifier = Modifier
+            .clickable { onOpenRecipe(recipe.id) }
     ) {
         Recipe(
             paddingValues = PaddingValues(0.dp),
-            recipe = recipe,
-            onClick = { recipeId ->
-                onOpenRecipe(recipeId)
-            }
+            recipe = recipe
         )
     }
 }

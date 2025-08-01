@@ -82,22 +82,6 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
 
         return returnValue
     }
-/*
-    private suspend fun getRecipes4Tag(tag: Tag) : LinkedList<Recipe> {
-        return LinkedList<Recipe>().apply {
-            tagRepository.getAllRecipeIdsForTag(tag).forEach { recipeId ->
-                getRecipe(recipeId)?.let { nonNullRecipe ->
-                    this.add(nonNullRecipe)
-                }
-            }
-        }
-    }
-*/
-    private fun getRecipe(recipeID: String) : Recipe? {
-        return recipeListData.value?.find { recipe ->
-            recipe.id == recipeID
-        }
-    }
 
     /**
      * Used one time for migrating data Jan. 2024

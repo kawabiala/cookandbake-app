@@ -26,17 +26,17 @@ class LabelManagementActivity : AppCompatActivity() {
         SHOW, ADD, UPDATE
     }
 
-    private lateinit var labelModel: LabelManagementViewModel
+    private lateinit var tagModel: LabelManagementViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        labelModel = ViewModelProvider(
+        tagModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[LabelManagementViewModel::class.java]
 
-        val tagListData = labelModel.availableTagListData
+        val tagListData = tagModel.availableTagListData
 
         val optionBack = PingwinekCooksComposableHelpers.OptionItem(
             R.string.back,
@@ -46,15 +46,15 @@ class LabelManagementActivity : AppCompatActivity() {
         }
 
         val onAddLabel: (String, String, Int) -> Unit = { label, color, sort ->
-            labelModel.addLabel(label, color, sort)
+            tagModel.addLabel(label, color, sort)
         }
 
         val onDeleteLabel: (Tag) -> Unit = { tag ->
-            labelModel.deleteLabel(tag)
+            tagModel.deleteLabel(tag)
         }
 
         val onUpdateLabel: (Tag, String, String, Int) -> Unit = { tag, label, color, sort ->
-            labelModel.updateLabel(tag, label, color, sort)
+            tagModel.updateLabel(tag, label, color, sort)
         }
 
         setContent {
@@ -78,7 +78,7 @@ class LabelManagementActivity : AppCompatActivity() {
                 PingwinekCooksScaffold(
                     title = getString(R.string.manage_labels),
                     optionItemLeft = optionBack,
-                    optionItemRight = optionAdd,
+                    optionItemRight = if (tagEditMode == TagEditMode.SHOW) optionAdd else null,
                     navigationBarVisible = false,
                 ) { paddingValues ->
                     ScaffoldContent(
@@ -97,6 +97,6 @@ class LabelManagementActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        labelModel.loadData()
+        tagModel.loadData()
     }
 }

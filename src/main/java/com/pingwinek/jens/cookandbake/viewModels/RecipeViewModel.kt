@@ -104,9 +104,24 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun deleteIngredient(ingredient: Ingredient) {
+    fun deleteIngredient(deleteIngredient: Ingredient) {
         viewModelScope.launch(Dispatchers.IO) {
-            ingredientRepository.delete(ingredient)
+
+            ingredientRepository.getAll(deleteIngredient.recipeId).forEach { ingredient ->
+
+                if (ingredient.sort > deleteIngredient.sort) {
+                    ingredientRepository.update(
+                        ingredient,
+                        ingredient.quantity,
+                        ingredient.quantityVerbal,
+                        ingredient.unity,
+                        ingredient.name,
+                        ingredient.sort -1
+                    )
+                }
+            }
+
+            ingredientRepository.delete(deleteIngredient)
             loadIngredients()
         }
     }

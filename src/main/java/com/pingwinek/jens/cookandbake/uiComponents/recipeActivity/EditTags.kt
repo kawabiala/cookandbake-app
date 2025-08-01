@@ -49,7 +49,7 @@ fun EditTags(
 
         LazyColumn {
             items(
-                items = localTags.toList(),
+                items = localTags.toList().sortedBy { pair -> pair.first.sort },
                 key = { pair -> pair.first.id }
             ) { pair ->
 

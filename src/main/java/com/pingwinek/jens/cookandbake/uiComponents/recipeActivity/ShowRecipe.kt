@@ -93,117 +93,125 @@ fun ShowRecipe(
     Column {
         SpacerSmall()
 
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .clickable { showButtons = !showButtons }
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(70f)
-                    .clickable { showButtons = !showButtons },
-            ) {
-                Text(
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    text = recipeTitle
-                )
 
-                if (recipeDescription.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(70f)
+                ) {
                     Text(
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        text = recipeDescription
+                        text = recipeTitle
                     )
-                }
 
-                if (isAttachmentLoading) {
-                    CircularProgressIndicator()
-                } else if (hasAttachment) {
-                    IconButton(
-                        onClick = onAttachmentClicked
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Attachment,
-                            contentDescription = stringResource(R.string.show_attachment)
+                    if (recipeDescription.isNotEmpty()) {
+                        Text(
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            text = recipeDescription
                         )
                     }
-                }
-            }
 
-            if (showButtons) {
-                IconButton(onClick = onEditRecipe) {
-                    Icon(Icons.Filled.Edit, stringResource(R.string.edit_recipe))
-                }
-
-                IconButton(onClick = onDeleteRecipe) {
-                    Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
-                }
-
-                if (hasAttachment) {
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
-                        PingwinekCooksDropDown(
-                            expanded = expanded,
-                            options = listOf(optionUpdate, optionDelete)
+                    if (isAttachmentLoading) {
+                        CircularProgressIndicator()
+                    } else if (hasAttachment) {
+                        IconButton(
+                            onClick = onAttachmentClicked
                         ) {
-                            expanded = false
+                            Icon(
+                                imageVector = Icons.Filled.Attachment,
+                                contentDescription = stringResource(R.string.show_attachment)
+                            )
                         }
                     }
-                } else {
-                    IconButton(onClick = onAttachDocument) {
-                        Icon(Icons.Filled.Attachment, stringResource(R.string.attach_document))
+                }
+
+                if (showButtons) {
+                    IconButton(onClick = onEditRecipe) {
+                        Icon(Icons.Filled.Edit, stringResource(R.string.edit_recipe))
+                    }
+
+                    IconButton(onClick = onDeleteRecipe) {
+                        Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
+                    }
+
+                    if (hasAttachment) {
+                        IconButton(onClick = { expanded = !expanded }) {
+                            Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
+                            PingwinekCooksDropDown(
+                                expanded = expanded,
+                                options = listOf(optionUpdate, optionDelete)
+                            ) {
+                                expanded = false
+                            }
+                        }
+                    } else {
+                        IconButton(onClick = onAttachDocument) {
+                            Icon(Icons.Filled.Attachment, stringResource(R.string.attach_document))
+                        }
                     }
                 }
             }
-        }
 
-        SpacerSmall()
+            SpacerSmall()
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            if (labels.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    labels.forEach { label ->
-                        InputChip(
-                            selected = true,
-                            onClick = {},
-                            label = {
-                                Text(
-                                    text = label,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            modifier = Modifier
-                                .requiredWidthIn(60.dp, 90.dp),
-                            shape = RoundedCornerShape(16.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (labels.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        labels.forEach { label ->
+                            InputChip(
+                                selected = true,
+                                onClick = { showButtons = !showButtons },
+                                label = {
+                                    Text(
+                                        text = label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                modifier = Modifier
+                                    .requiredWidthIn(60.dp, 90.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (showButtons) {
+                    FilledTonalIconButton(
+                        onClick = onEditTags
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.Label,
+                            stringResource(R.string.manage_labels)
                         )
                     }
-                }
-            }
-
-            if (showButtons) {
-                FilledTonalIconButton(
-                    onClick = onEditTags
-                ) {
-                    Icon(Icons.AutoMirrored.Outlined.Label, stringResource(R.string.manage_labels))
                 }
             }
         }

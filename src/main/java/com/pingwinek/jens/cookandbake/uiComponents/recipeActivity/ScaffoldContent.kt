@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,11 +47,18 @@ fun ScaffoldContent(
 
     val tags = mutableMapOf<Tag, Boolean>().apply {
         availableTags
-            .sortedBy { tag -> tag.sort }
             .forEach { availableTag ->
             this[availableTag] = attachedTags.find { attachedTag ->
                 attachedTag.id == availableTag.id
             } != null
+        }
+    }
+
+    val ingredientSortMax by remember {
+        derivedStateOf {
+            ingredients.maxOfOrNull { ingredient ->
+                ingredient.sort
+            }
         }
     }
 
@@ -70,7 +78,7 @@ fun ScaffoldContent(
         mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.unity)
     }
     var ingredientSortTemp by remember(ingredientIdTemp) {
-        mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: -1)
+        mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: ingredientSortMax ?:  -1)
     }
 
     val attachmentPickerLauncher = rememberLauncherForActivityResult(
@@ -92,7 +100,7 @@ fun ScaffoldContent(
         ingredientQuantityTemp = null
         ingredientQuantityVerbalTemp = null
         ingredientUnityTemp = null
-        ingredientSortTemp = -1
+        ingredientSortTemp = ingredientSortMax ?: -1
     }
 
     val resetDelete: () -> Unit = {

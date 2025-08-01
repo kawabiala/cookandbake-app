@@ -33,8 +33,9 @@ import androidx.compose.ui.zIndex
  * Letting an item drop, results in resorting of the list and deactivates the item.
  *
  * @param spacing: the spacing between list items
- * @param listContent: expects a sorted list of items
+ * @param listContent: expects a list of items
  * @param key: function defining how to derive a key from an item
+ * @param sort: function providing the sorting position as Integer
  * @param activeItem: the active item or null, if no item is active
  * @param onChangeActiveItem: use this function to indicate a change of the active item; provide null for deactivation of any items
  * @param onChangeSort: returns the a map of items that have changed their sort order with the items as keys and the new sort order as values
@@ -45,6 +46,7 @@ fun <T : Any> DragAndDropList(
     spacing: Dp = 0.dp,
     listContent: List<T>,
     key: (T) -> Any,
+    sort: (T) -> Int,
     activeItem: T?,
     onChangeActiveItem: (T?) -> Unit,
     onChangeSort: (Map<T, Int>) -> Unit,
@@ -73,10 +75,11 @@ fun <T : Any> DragAndDropList(
     var offsetY: Float by remember(listContent) { mutableFloatStateOf(0f) }
     var temporaryRank: Int? by remember(listContent) { mutableStateOf(null) }
 
-    fun getRank (positionsY: List<Float>, positionY: Float): Int {
+    fun getSort (mappedPositionsY: Map<T, Float>, positionY: Float): Int {
         var rank = 0
+        val positionsY = mappedPositionsY.values.toList()
 
-        for (item in 1..<positionsY.size) {
+        for (item in 1..<mappedPositionsY.size) {
             val posYLower = positionsY[item - 1]
             val posYHigher = positionsY[item]
             val midPosY = posYLower + (posYHigher - posYLower) / 2
@@ -85,7 +88,7 @@ fun <T : Any> DragAndDropList(
             }
         }
 
-        return rank
+        return sort(mappedPositionsY.entries.elementAt(rank).key)
     }
 
     fun resetActive() {
@@ -131,12 +134,16 @@ fun <T : Any> DragAndDropList(
 
             basePosY?.let { bpY ->
 
-                val newRank = getRank(
-                    mapContent.values.mapNotNull { y -> y.positionY }.toList(), bpY + offsetY
+                val newRank = getSort(
+                    mapContent.mapNotNull { entry ->
+                        entry.value.positionY?.let { py ->
+                            Pair(entry.key, py)
+                        }
+                    }.toMap(), bpY + offsetY
                 )
 
                 if (temporaryRank != newRank) {
-                    val oldRank = listContent.indexOfFirst { t -> t == ai }
+                    val oldRank = sort(ai)
 
                     updateOffsets(oldRank, newRank)
 
@@ -148,21 +155,23 @@ fun <T : Any> DragAndDropList(
 
     val onDragStopped = fun() {
         temporaryRank?.let { tr ->
-            val oldRank = listContent.indexOf(activeItem)
+            val oldRank = activeItem?.let { sort(it) } ?: -1
 
             var preliminaryOffsetY = 0f
             val spacingFloat = density.run { spacing.toPx() }
 
             val mapResorted = mutableMapOf<T, Int>().also { map ->
-                for (i in listContent.indices) {
-                    if (i == oldRank) {
-                        map[listContent[i]] = tr
-                    } else if (i in (oldRank+1)..tr ) {
-                        map[listContent[i]] = i-1
-                        preliminaryOffsetY += ((mapContent[listContent[i]]?.height ?: 0f) + spacingFloat)
-                    } else if (i in tr..<oldRank) {
-                        map[listContent[i]] = i+1
-                        preliminaryOffsetY -= ((mapContent[listContent[i]]?.height ?: 0f) + spacingFloat)
+                listContent.forEach { t ->
+                    val oldSort = sort(t)
+
+                    if (oldSort == oldRank) {
+                        map[t] = tr
+                    } else if (oldSort in (oldRank+1)..tr ) {
+                        map[t] = oldSort-1
+                        preliminaryOffsetY += ((mapContent[t]?.height ?: 0f) + spacingFloat)
+                    } else if (oldSort in tr..<oldRank) {
+                        map[t] = oldSort+1
+                        preliminaryOffsetY -= ((mapContent[t]?.height ?: 0f) + spacingFloat)
                     }
                 }
             }
@@ -183,7 +192,7 @@ fun <T : Any> DragAndDropList(
     ) {
 
         items(
-            items = listContent,
+            items = listContent.sortedBy { t -> sort(t) },
             key = key
         ) { t ->
 

@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +15,10 @@ import com.pingwinek.jens.cookandbake.models.Recipe
 fun Recipe(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     recipe: Recipe,
-    onClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(recipe.id) }
             .padding(paddingValues)
     ) {
         Text(

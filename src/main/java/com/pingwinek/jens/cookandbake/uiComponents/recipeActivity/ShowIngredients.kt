@@ -1,5 +1,6 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -45,18 +46,20 @@ fun ShowIngredients(
             spacing = MaterialTheme.spacing.spacerSmall,
             listContent = ingredients.sortedBy { ingredient -> ingredient.sort },
             key = { ingredient -> ingredient.id },
+            sort = { ingredient -> ingredient.sort },
             activeItem = ingredients.find { it == activeItem },
             onChangeActiveItem = onChangeActiveItem,
             onChangeSort = onChangeSort,
             ) { ingredient, active, onChangeActive, onDrag, onDragStopped ->
 
             ListPane(
+                modifier = Modifier
+                    .clickable { onChangeActive() },
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onBackground
             ) {
                 IngredientPane(
                     showButtons = active,
-                    onChangeActive = onChangeActive,
                     onEditIngredient = onEditIngredient,
                     onDeleteIngredient = onDeleteIngredient,
                     onDrag = onDrag,

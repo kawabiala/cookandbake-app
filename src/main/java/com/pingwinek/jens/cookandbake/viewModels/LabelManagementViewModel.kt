@@ -51,9 +51,19 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun deleteLabel(tag: Tag) {
+    fun deleteLabel(deleteTag: Tag) {
         viewModelScope.launch(Dispatchers.IO) {
-            tagRepository.delete(tag)
+            tagRepository.getAll().forEach { tag ->
+                if (tag.sort > deleteTag.sort) {
+                    tagRepository.update(
+                        tag,
+                        tag.label,
+                        tag.color,
+                        tag.sort -1
+                    )
+                }
+            }
+            tagRepository.delete(deleteTag)
             loadData()
         }
     }

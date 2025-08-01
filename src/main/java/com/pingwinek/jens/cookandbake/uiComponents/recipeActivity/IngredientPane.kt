@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -30,7 +29,6 @@ import com.pingwinek.jens.cookandbake.uiComponents.spacing
 @Composable
 fun IngredientPane(
     showButtons: Boolean,
-    onChangeActive: () -> Unit,
     onEditIngredient: (String) -> Unit,
     onDeleteIngredient: (String) -> Unit,
     onDrag: (Float) -> Unit,
@@ -58,14 +56,15 @@ fun IngredientPane(
         }
 
     Row(
+//        modifier = Modifier
+//            .clickable { onChangeActive() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier
-                .weight(80f)
                 .fillMaxWidth()
-                .clickable { onChangeActive() },
+                .weight(80f)
         ) {
             Text(
                 style = MaterialTheme.typography.headlineSmall,

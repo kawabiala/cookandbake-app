@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,14 @@ fun ScaffoldContent(
     onDeleteLabel: (Tag) -> Unit,
     onUpdateLabel: (tag: Tag, label: String, color: String, sort: Int) -> Unit
 ) {
+    val tagsSortMax by remember(tagsWithCount) {
+        derivedStateOf {
+            tagsWithCount?.maxOfOrNull { twc ->
+                twc.tag.sort
+            }?.plus(1)
+        }
+    }
+
     var activeItem: LabelManagementViewModel.TagWithCount? by remember {
         mutableStateOf(null)
     }
@@ -58,9 +67,16 @@ fun ScaffoldContent(
         labelTemp = changedValue
     }
 
-    val addLabel: () -> Unit = {
-        onAddLabel(labelTemp, "", -1)
+    val reset: () -> Unit = {
+        tagTemp = null
         labelTemp = ""
+        onChangeTagEditMode(LabelManagementActivity.TagEditMode.SHOW)
+        activeItem = null
+        showDeleteDialog = false
+    }
+
+    val addLabel: () -> Unit = {
+        onAddLabel(labelTemp, "", tagsSortMax ?: -1)
     }
 
     val deleteLabel: (Tag) -> Unit = { tag ->
@@ -86,9 +102,7 @@ fun ScaffoldContent(
         } else if (tagEditMode == LabelManagementActivity.TagEditMode.UPDATE) {
             updateLabel()
         }
-        tagTemp = null
-        labelTemp = ""
-        onChangeTagEditMode(LabelManagementActivity.TagEditMode.SHOW)
+        reset()
     }
 
     val onChangeSort: (Map<LabelManagementViewModel.TagWithCount, Int>) -> Unit = { twcs ->
@@ -100,11 +114,10 @@ fun ScaffoldContent(
     if (showDeleteDialog) {
         DeleteDialog(
             stringResource(R.string.label_delete_confirm),
-            onClose = { showDeleteDialog = false }
+            onClose = { reset() }
         ) {
             tagTemp?.let { onDeleteLabel(it) }
-            showDeleteDialog = false
-            tagTemp = null
+            reset()
         }
     }
 
@@ -121,6 +134,7 @@ fun ScaffoldContent(
                     spacing = MaterialTheme.spacing.spacerSmall,
                     listContent = nonNullListOfTagsWithCount.sortedBy { twc -> twc.tag.sort },
                     key = { twc -> twc.tag.id },
+                    sort = { twc -> twc.tag.sort },
                     activeItem = activeItem,
                     onChangeActiveItem = { twc ->
                         activeItem = if (activeItem == twc) null else twc
@@ -128,7 +142,10 @@ fun ScaffoldContent(
                     onChangeSort = onChangeSort
                 ) { tagWithCount, active, onChangeActive, onDrag, onDragStopped ->
 
-                    ListPane {
+                    ListPane(
+                        modifier = Modifier
+                            .clickable { onChangeActive() },
+                    ) {
 
                         val draggableState = rememberDraggableState { delta ->
                             onDrag(delta)
@@ -136,9 +153,9 @@ fun ScaffoldContent(
 
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onChangeActive() },
-                            horizontalArrangement = Arrangement.SpaceBetween
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
 
                             Text(
@@ -191,20 +208,20 @@ fun ScaffoldContent(
         } else {
 
             EditPane(
-                paddingValues = paddingValues,
-                onCancel = { onChangeTagEditMode(LabelManagementActivity.TagEditMode.SHOW) },
+                onCancel = { reset() },
                 onSave = onSaveTag
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
 
                     TextField(
                         value = labelTemp,
                         onValueChange = onValueChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
             }
