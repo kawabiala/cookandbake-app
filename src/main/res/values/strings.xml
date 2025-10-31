@@ -6,6 +6,8 @@
     <string name="no">No</string>
     <string name="ok" translatable="false">OK</string>
 
+    <string name="all">all</string>
+
     <string name="close">Close</string>
     <string name="back">Back</string>
     <string name="done">Done</string>

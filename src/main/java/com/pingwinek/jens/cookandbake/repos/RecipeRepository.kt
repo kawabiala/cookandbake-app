@@ -86,9 +86,10 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     suspend fun newRecipe(
         title: String,
         description: String?,
-        instruction: String?
+        instruction: String?,
+        tags: List<String>
     ) : Recipe {
-        return recipeSourceFB.new(RecipeFB(title, description, instruction))
+        return recipeSourceFB.new(RecipeFB(title, description, instruction, tags))
     }
 
     fun registerQueueListener(listener: TypedQueue.QueueListener) {
@@ -158,6 +159,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
                 recipe.title,
                 recipe.description,
                 recipe.instruction,
+                recipe.tags,
                 hasAttachment)
         )
     }
@@ -166,10 +168,11 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         recipe: Recipe,
         title: String,
         description: String?,
-        instruction: String?
+        instruction: String?,
+        tags: List<String>
     ): Recipe {
         return try {
-            recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, recipe.hasAttachment))
+            recipeSourceFB.update(RecipeFB(recipe.id, title, description, instruction, tags, recipe.hasAttachment))
         } catch (exception: Exception) {
             queue.addItem(RecipeExceptionMessage.RECIPE_UPDATE_FAILED)
             Log.e(this::class.java.name, "Updating recipe failed: $exception")

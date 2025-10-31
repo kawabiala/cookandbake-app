@@ -2,11 +2,11 @@ package com.pingwinek.jens.cookandbake.sources
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.storage
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDocumentAccessManager
 import com.pingwinek.jens.cookandbake.models.FileInfo
 import kotlinx.coroutines.Dispatchers

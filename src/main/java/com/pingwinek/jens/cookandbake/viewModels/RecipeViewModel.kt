@@ -166,19 +166,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private suspend fun loadTags() {
         val tags = tagRepository.getAll()
 
-        recipeId?.let { id ->
+        recipeData.value?.let { recipe ->
             val tagHelperList = mutableListOf<Tag>()
 
-            tagRepository.getAllForRecipe(id).forEach { tag4Recipe ->
-                val nullableTag = tags.find { t -> t.id == tag4Recipe.id }
-
-                if (nullableTag == null) {
-                    // if no corresponding tags are found, tag4Recipe is no valid tag anymore and will be deleted
-                    tagRepository.deleteForRecipe(tag4Recipe)
-                } else {
-                    tagHelperList.add(
-                        nullableTag
-                    )
+            recipe.tags.forEach { tagId ->
+                (tags.find { t -> t.id == tagId })?.let { nonNullTag ->
+                    tagHelperList.add(nonNullTag)
                 }
             }
 
@@ -209,11 +202,11 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
         recipeData.value?.let {recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                privateRecipeData.postValue(recipeRepository.updateRecipe(recipe, title, description, instruction))
+                privateRecipeData.postValue(recipeRepository.updateRecipe(recipe, title, description, instruction, recipe.tags))
             }
         } ?: run {
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.newRecipe(title, description, instruction).let { recipe ->
+                recipeRepository.newRecipe(title, description, instruction, listOf()).let { recipe ->
                     recipeId = recipe.id
                     privateRecipeData.postValue(recipe)
                 }
@@ -223,19 +216,34 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     fun saveTags(tags: Map<Tag, Boolean>) {
         viewModelScope.launch(Dispatchers.IO) {
-            recipeId?.let { nonNullRecipeId ->
+            recipeData.value?.let { recipe ->
+                val availableTags = tagRepository.getAll()
+                val saveTags: MutableList<String> =
+                    attachedTagListData.value?.mapTo(mutableListOf()) { tag -> tag.id } ?: mutableListOf()
 
                 tags.forEach { (tag, newOrDelete) ->
 
-                    val tag4Recipe =
-                        tagRepository.generateTag4Recipe(tag.id, nonNullRecipeId)
-
                     if (newOrDelete) {
-                        tagRepository.new(tag4Recipe)
+                        if (availableTags.find { availableTag ->
+                            availableTag == tag } == null) {
+                            saveTags.remove(tag.id)
+                        } else {
+                            saveTags.add(tag.id)
+                        }
                     } else {
-                        tagRepository.deleteForRecipe(tag4Recipe)
+                        saveTags.remove(tag.id)
                     }
                 }
+
+                privateRecipeData.postValue(
+                    recipeRepository.updateRecipe(
+                        recipe,
+                        recipe.title,
+                        recipe.description,
+                        recipe.instruction,
+                        saveTags
+                    )
+                )
 
                 loadTags()
             }

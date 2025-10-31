@@ -18,7 +18,6 @@ import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.CircularProgressIndicator
@@ -251,13 +250,14 @@ fun ShowRecipe(
                         )
                     }
                 ))
+                /*
                 add(
                     PingwinekCooksComposableHelpers.PingwinekCooksTabItem(
                     tabNameId = R.string.gallery,
                     tabIcon = Icons.Filled.Image,
                     content = {
                     }
-                ))
+                ))*/
             }
         )
     }

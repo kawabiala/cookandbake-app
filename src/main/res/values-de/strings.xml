@@ -5,6 +5,8 @@
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
 
+    <string name="all">alle</string>
+
     <string name="close">Schließen</string>
     <string name="back">Zurück</string>
     <string name="done">Fertig</string>

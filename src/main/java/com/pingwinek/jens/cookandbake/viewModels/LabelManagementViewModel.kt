@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.viewModels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,10 +32,10 @@ class LabelManagementViewModel(application: Application) : AndroidViewModel(appl
     fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
             val tagsWithCount = tagRepository.getAll().map { entry -> TagWithCount(entry) }
-            Log.i(this::class.java.name, tagsWithCount.toString())
+
             recipeRepository.getAll().forEach { recipe ->
-                tagRepository.getAllForRecipe(recipe.id).forEach { tag ->
-                    tagsWithCount.find { tc -> tc.tag.id == tag.id }?.let { tcFound -> tcFound.count += 1 }
+                recipe.tags.forEach { tagId ->
+                    tagsWithCount.find { tc -> tc.tag.id == tagId }?.let { tcFound -> tcFound.count += 1 }
                 }
             }
 

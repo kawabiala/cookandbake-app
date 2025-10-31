@@ -2,12 +2,6 @@ package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,8 +32,8 @@ fun ShowIngredients(
     }
 
     Column(
-        Modifier
-            .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues())
+//        Modifier
+  //          .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues())
     ) {
 
         DragAndDropList(

@@ -9,12 +9,19 @@ import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
@@ -28,8 +35,10 @@ import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
+import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.CategoriesDrawerSheet
 import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.ScaffoldContent
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
+import kotlinx.coroutines.launch
 import java.util.LinkedList
 
 class RecipeListingActivity : AppCompatActivity() {
@@ -124,8 +133,43 @@ class RecipeListingActivity : AppCompatActivity() {
 
             PingwinekCooksAppTheme {
 
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+                val scope = rememberCoroutineScope()
+                val close = fun () { scope.launch { drawerState.close() }}
+
                 val recipes by recipeListData.observeAsState()
                 val recipesByLabel by recipesByLabelListData.observeAsState()
+
+                var labelFilter: String? by remember {
+                    mutableStateOf(null)
+                }
+
+                val filteredRecipes: List<Recipe> by remember(recipes, recipesByLabel, labelFilter) {
+                    mutableStateOf(
+                        (if (labelFilter == null) recipes else recipesByLabel?.toMap()[labelFilter]) ?: listOf()
+                    )
+                }
+
+                val categories = (recipesByLabel?.map { pair ->
+                    Pair(
+                        pair.first,
+                        {
+                            labelFilter = pair.first
+                            close()
+                        }
+                    )
+                } ?: listOf())
+                    .toMutableList()
+                    .also { map ->
+                        map.add(0, Pair(
+                            stringResource(R.string.all),
+                            {
+                                labelFilter = null
+                                close()
+                            }
+                        ))
+                    }
 
                 val loggedIn by remember(recipes, auth.currentUser) {
                     mutableStateOf(auth.currentUser != null)
@@ -135,37 +179,55 @@ class RecipeListingActivity : AppCompatActivity() {
                     mutableStateOf(auth.currentUser?.isEmailVerified == true)
                 }
 
-                PingwinekCooksScaffold(
-                    title = "PingwinekCooks",
-                    showDropDown = true,
-                    dropDownOptions = listOf(
-                        optionItemPrivacy,
-                        optionItemImpressum
-                    ),
-                    optionItemMid = optionItemLabelManagement,
-                    selectedNavigationBarItem = PingwinekCooksComposableHelpers.Navigation.RECIPE.ordinal,
-                    navigationBarEnabled = true,
-                    navigationBarItems = listOf(
-                        optionItemRecipe,
-                        if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
-                    ),
-                    showFab = loggedIn,
-                    fabIcon = Icons.Filled.Add,
-                    fabIconLabel = getString(R.string.add_recipe),
-                    fabContainerColor = MaterialTheme.colorScheme.primary,
-                    fabIconColor = MaterialTheme.colorScheme.onPrimary,
-                    onFabClicked = { openRecipeItem(null) }
-                ) { paddingValues ->
-                    ScaffoldContent(
-                        paddingValues = paddingValues,
-                        recipes = recipes,
-                        recipesByLabel = recipesByLabel,
-                        loggedIn = loggedIn,
-                        verified = verified,
-                        onOpenRecipe = onOpenRecipe,
-                        onShowSignIn = startSignInActivity,
-                        onCheckDataProtection = startDataProtectionActivity
-                    )
+                val optionItemMenu = PingwinekCooksComposableHelpers.OptionItem(
+                    labelResourceId = R.string.labels,
+                    icon = Icons.Filled.Menu
+                ) {
+                    scope.launch {
+                        drawerState.open()
+                    }
+                }
+
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        CategoriesDrawerSheet(categories)
+                    }
+                ) {
+
+                    PingwinekCooksScaffold(
+                        title = "PingwinekCooks",
+                        showDropDown = true,
+                        dropDownOptions = listOf(
+                            optionItemPrivacy,
+                            optionItemImpressum
+                        ),
+                        optionItemLeft = optionItemMenu,
+                        optionItemMid = optionItemLabelManagement,
+                        selectedNavigationBarItem = PingwinekCooksComposableHelpers.Navigation.RECIPE.ordinal,
+                        navigationBarEnabled = true,
+                        navigationBarItems = listOf(
+                            optionItemRecipe,
+                            if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
+                        ),
+                        showFab = loggedIn,
+                        fabIcon = Icons.Filled.Add,
+                        fabIconLabel = getString(R.string.add_recipe),
+                        fabContainerColor = MaterialTheme.colorScheme.primary,
+                        fabIconColor = MaterialTheme.colorScheme.onPrimary,
+                        onFabClicked = { openRecipeItem(null) }
+                    ) { paddingValues ->
+                        ScaffoldContent(
+                            paddingValues = paddingValues,
+                            recipes = LinkedList(filteredRecipes),
+                            label = labelFilter,
+                            loggedIn = loggedIn,
+                            verified = verified,
+                            onOpenRecipe = onOpenRecipe,
+                            onShowSignIn = startSignInActivity,
+                            onCheckDataProtection = startDataProtectionActivity
+                        )
+                    }
                 }
             }
         }

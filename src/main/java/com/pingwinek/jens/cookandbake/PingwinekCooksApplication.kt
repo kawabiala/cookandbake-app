@@ -6,7 +6,6 @@ import com.pingwinek.jens.cookandbake.lib.ServiceLocator
 import com.pingwinek.jens.cookandbake.lib.UriUtils
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
 import com.pingwinek.jens.cookandbake.sources.RecipeSourceFB
-import com.pingwinek.jens.cookandbake.sources.Tag4RecipeSourceFB
 import com.pingwinek.jens.cookandbake.sources.TagSourceFB
 import com.pingwinek.jens.cookandbake.sources.UserInfoSourceFB
 import java.util.Locale
@@ -56,9 +55,6 @@ class PingwinekCooksApplication : Application() {
 
         val tagSourceFB = TagSourceFB.getInstance(FirebaseFirestore.getInstance())
         serviceLocator.registerService(tagSourceFB)
-
-        val tag4RecipeSourceFB = Tag4RecipeSourceFB.getInstance((FirebaseFirestore.getInstance()))
-        serviceLocator.registerService(tag4RecipeSourceFB)
 
         val uriUtils = UriUtils.getInstance(this.applicationContext)
         serviceLocator.registerService(uriUtils)

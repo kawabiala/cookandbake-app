@@ -2,15 +2,15 @@ package com.pingwinek.jens.cookandbake.sources
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.RecipeFB
-import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 /**
@@ -36,7 +36,7 @@ class RecipeSourceFB private constructor(private val firestore: FirebaseFirestor
 
     // does not work for firestore, because id is not Int
     override suspend fun get(id: String) : RecipeFB {
-        var recipeFB = RecipeFB("","","","",false,0)
+        var recipeFB = RecipeFB("","","","", listOf(), false,0)
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             recipeFB = get(buildRecipeDocRef(auth.uid!!, id))
         } else {

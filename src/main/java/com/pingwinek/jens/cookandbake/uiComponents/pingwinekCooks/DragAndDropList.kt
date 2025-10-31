@@ -56,14 +56,17 @@ fun <T : Any> DragAndDropList(
 
     val lazyListState = rememberLazyListState()
 
-    val mapContent: MutableMap<T, Y> by remember(listContent) {
-        mutableStateOf( //the map needs to be mutable, but is not expected to trigger recomposition
-            mutableMapOf<T, Y>().also { map ->
-                listContent.forEach { t ->
-                    map[t] = Y(null, 0f)
-                }
-            }
-        )
+    data class SortItem(
+        val sort: Int,
+        var y: Float? = null,
+        var height: Float? = null,
+        val offsetY: Float = 0f
+    )
+
+    val mappedContent: MutableMap<T, SortItem> = mutableMapOf<T, SortItem>().also { map ->
+        listContent.sortedBy { t -> sort(t) }.forEachIndexed { index, t ->
+            map.put(t, SortItem(index))
+        }
     }
 
     var mapOffsetsY: Map<T, Float> by remember(listContent) {
@@ -75,20 +78,24 @@ fun <T : Any> DragAndDropList(
     var offsetY: Float by remember(listContent) { mutableFloatStateOf(0f) }
     var temporaryRank: Int? by remember(listContent) { mutableStateOf(null) }
 
-    fun getSort (mappedPositionsY: Map<T, Float>, positionY: Float): Int {
-        var rank = 0
-        val positionsY = mappedPositionsY.values.toList()
+    fun getSort (positionY: Float): Int {
+            var rank = 0
+        val sorted = mappedContent.entries.sortedBy { entry ->
+            entry.value.sort
+        }.mapNotNull { entry ->
+            entry.value.y?.let { _ -> entry }
+        }
 
-        for (item in 1..<mappedPositionsY.size) {
-            val posYLower = positionsY[item - 1]
-            val posYHigher = positionsY[item]
+        for (item in 1..< sorted.size) {
+            val posYLower = sorted[item - 1].value.y!!
+            val posYHigher = sorted[item].value.y!!
             val midPosY = posYLower + (posYHigher - posYLower) / 2
             if (positionY >= midPosY) {
                 rank = item
             }
         }
 
-        return sort(mappedPositionsY.entries.elementAt(rank).key)
+        return sorted[rank].value.sort
     }
 
     fun resetActive() {
@@ -97,27 +104,24 @@ fun <T : Any> DragAndDropList(
     }
 
     fun updateOffsets(oldRank: Int, newRank: Int) {
-        val height = mapContent[activeItem]?.height
+        val height = mappedContent[activeItem]?.height
 
         if (height == null) Log.e("DragAndDropList", "no height defined for active item")
 
         height?.let { h ->
             val heightPlusSpacing = density.run { spacing.toPx() } + h
-            val updatedMap = mutableMapOf<T, Float>()
 
-            mapOffsetsY.keys.forEachIndexed { index, t ->
-                if (t == activeItem) {
-                    updatedMap[t] = offsetY
-                } else if (index in (oldRank + 1)..newRank) {
-                    updatedMap[t] = heightPlusSpacing * -1
-                } else if (index in newRank..<oldRank) {
-                    updatedMap[t] = heightPlusSpacing
+            mapOffsetsY = mappedContent.map { entry ->
+                if (entry.key == activeItem) {
+                    Pair(entry.key, offsetY)
+                } else if (entry.value.sort in (oldRank + 1)..newRank) {
+                    Pair(entry.key, heightPlusSpacing * -1)
+                } else if (entry.value.sort in newRank..<oldRank) {
+                    Pair(entry.key, heightPlusSpacing)
                 } else {
-                    updatedMap[t] = 0f
+                    Pair(entry.key, 0f)
                 }
-            }
-
-            mapOffsetsY = updatedMap
+            }.toMap()
         }
     }
 
@@ -127,27 +131,22 @@ fun <T : Any> DragAndDropList(
     }
 
     val onDrag = fun (deltaOffsetY: Float) {
-        activeItem?.let { ai ->
-            offsetY += deltaOffsetY
+        activeItem?.let {
+            mappedContent[it]?.let { ai ->
 
-            val basePosY = mapContent[ai]?.positionY
+                offsetY += deltaOffsetY
 
-            basePosY?.let { bpY ->
+                val basePosY = ai.y
 
-                val newRank = getSort(
-                    mapContent.mapNotNull { entry ->
-                        entry.value.positionY?.let { py ->
-                            Pair(entry.key, py)
-                        }
-                    }.toMap(), bpY + offsetY
-                )
+                basePosY?.let { bpY ->
+                    val newRank = getSort(bpY + offsetY)
 
-                if (temporaryRank != newRank) {
-                    val oldRank = sort(ai)
+                    if (temporaryRank != newRank) {
+                        val oldRank = ai.sort
 
-                    updateOffsets(oldRank, newRank)
-
-                    temporaryRank = newRank
+                        updateOffsets(oldRank, newRank)
+                        temporaryRank = newRank
+                    }
                 }
             }
         }
@@ -155,26 +154,26 @@ fun <T : Any> DragAndDropList(
 
     val onDragStopped = fun() {
         temporaryRank?.let { tr ->
-            val oldRank = activeItem?.let { sort(it) } ?: -1
+            val oldRank = activeItem?.let { mappedContent[it]?.sort } ?: -1
 
             var preliminaryOffsetY = 0f
             val spacingFloat = density.run { spacing.toPx() }
 
-            val mapResorted = mutableMapOf<T, Int>().also { map ->
-                listContent.forEach { t ->
-                    val oldSort = sort(t)
+            val mapResorted = mappedContent.mapNotNull { entry ->
+                val oldSort = entry.value.sort
 
-                    if (oldSort == oldRank) {
-                        map[t] = tr
-                    } else if (oldSort in (oldRank+1)..tr ) {
-                        map[t] = oldSort-1
-                        preliminaryOffsetY += ((mapContent[t]?.height ?: 0f) + spacingFloat)
-                    } else if (oldSort in tr..<oldRank) {
-                        map[t] = oldSort+1
-                        preliminaryOffsetY -= ((mapContent[t]?.height ?: 0f) + spacingFloat)
-                    }
+                if (oldSort == oldRank) {
+                    Pair(entry.key,tr)
+                } else if (oldSort in (oldRank+1)..tr ) {
+                    preliminaryOffsetY += ((entry.value.height ?: 0f) + spacingFloat)
+                    Pair (entry.key,oldSort-1)
+                } else if (oldSort in tr..<oldRank) {
+                    preliminaryOffsetY -= ((entry.value.height ?: 0f) + spacingFloat)
+                    Pair(entry.key,oldSort+1)
+                } else {
+                    Pair(entry.key, oldSort)
                 }
-            }
+            }.toMap()
 
             onChangeSort(mapResorted)
             offsetY = preliminaryOffsetY
@@ -183,7 +182,8 @@ fun <T : Any> DragAndDropList(
     }
 
     val reportPosition: (T, Float, Float) -> Unit = { t, positionY, height ->
-        mapContent[t] = Y(positionY, height)
+        mappedContent[t]?.y = positionY
+        mappedContent[t]?.height = height
     }
 
     LazyColumn(
@@ -192,34 +192,31 @@ fun <T : Any> DragAndDropList(
     ) {
 
         items(
-            items = listContent.sortedBy { t -> sort(t) },
-            key = key
-        ) { t ->
+            items = mappedContent.entries.sortedBy { entry -> entry.value.sort }
+        ) {
+            entry ->
 
-            val zIndex = if (t == activeItem) 1f else 0f
-            val shadow = density.run { (if (t == activeItem) 10f else 0f).toDp() }
-            val localOffsetY = if (t == activeItem) offsetY else (mapOffsetsY[t] ?: 0f)
+            val zIndex = if (entry.key == activeItem) 1f else 0f
+            val shadow = density.run { (if (entry.key == activeItem) 10f else 0f).toDp() }
+            val localOffsetY = if (entry.key == activeItem) offsetY else (mapOffsetsY[entry.key] ?: 0f)
 
             val changeActive = fun() {
-                onChangeActive(if (t == activeItem) null else t)
+                onChangeActive(if (entry == activeItem) null else entry.key)
             }
 
             Box(
                 modifier = Modifier
                     .onGloballyPositioned { coordinates ->
-                        reportPosition(t, coordinates.positionInRoot().y, coordinates.boundsInRoot().height)
+                        reportPosition(entry.key, coordinates.positionInRoot().y, coordinates.boundsInRoot().height)
                     }
                     .offset { Offset(0f, localOffsetY).round() }
                     .zIndex(zIndex)
                     .shadow(shadow)
             ) {
-                itemComposable(t, t == activeItem, changeActive, onDrag, onDragStopped)
+                itemComposable(entry.key, entry.key == activeItem, changeActive, onDrag, onDragStopped)
             }
+
         }
+
     }
 }
-
-data class Y(
-    val positionY: Float?,
-    val height: Float
-)

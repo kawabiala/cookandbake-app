@@ -8,7 +8,6 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.models.Recipe
-import com.pingwinek.jens.cookandbake.models.Tag4Recipe
 import com.pingwinek.jens.cookandbake.repos.RecipeRepository
 import com.pingwinek.jens.cookandbake.repos.TagRepository
 import kotlinx.coroutines.Dispatchers
@@ -53,10 +52,10 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
             val recipes = recipeRepository.getAll()
             privateRecipeListData.postValue(recipes)
 
-            val recipeTagList: MutableList<Pair<Recipe, Tag4Recipe>> = mutableListOf()
+            val recipeTagList: MutableList<Pair<Recipe, String>> = mutableListOf()
             recipes.forEach { recipe ->
-                tagRepository.getAllForRecipe(recipe.id).forEach { tag ->
-                    recipeTagList.add(Pair(recipe, tag))
+                recipe.tags.forEach { tagId ->
+                    recipeTagList.add(Pair(recipe, tagId))
                 }
             }
 
@@ -64,7 +63,7 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    private suspend fun getAllRecipes4Tags(recipeTagList: List<Pair<Recipe, Tag4Recipe>>) : LinkedList<RecipesForLabel> {
+    private suspend fun getAllRecipes4Tags(recipeTagList: List<Pair<Recipe, String>>) : LinkedList<RecipesForLabel> {
         val returnValue = LinkedList<RecipesForLabel>()
 
         tagRepository.getAll()
@@ -74,7 +73,7 @@ class RecipeListingViewModel(application: Application) : AndroidViewModel(applic
                 RecipesForLabel(
                     tag.label,
                     LinkedList(recipeTagList.mapNotNull { entry ->
-                        if(entry.second.id == tag.id) entry.first else null
+                        if(entry.second == tag.id) entry.first else null
                     })
                 )
             )

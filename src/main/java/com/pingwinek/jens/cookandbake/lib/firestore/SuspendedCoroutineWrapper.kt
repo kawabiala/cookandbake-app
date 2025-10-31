@@ -1,11 +1,12 @@
 package com.pingwinek.jens.cookandbake.lib.firestore
 
 import com.google.android.gms.tasks.Task
-import com.pingwinek.jens.cookandbake.UNKNOWN_EXCEPTIOM
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+
+const val UNKNOWN_EXCEPTIOM = "unknown exception"
 
 class SuspendedCoroutineWrapper {
 
