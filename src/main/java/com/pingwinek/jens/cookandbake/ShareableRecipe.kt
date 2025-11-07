@@ -4,28 +4,42 @@ import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import java.util.LinkedList
 
-class ShareableRecipe(recipe: Recipe, private val ingredients: LinkedList<Ingredient>) {
+class ShareableRecipe(
+    recipe: Recipe,
+    private val ingredients: LinkedList<Ingredient>,
+    private val ingredientHeader: String,
+    private val instructionHeader: String) {
 
     val title = recipe.title
     val description = recipe.description
     val instruction = recipe.instruction
 
-    private val ingredientsAsText = ingredients.joinToString(System.lineSeparator()) { ingredient ->
-        StringBuilder().apply {
-            append("- ")
-            ingredient.quantity?.let {
-                if (it > 0) {
-                    append("$it ")
+    private val ingredientsAsText = ingredients
+        .sortedBy { ingredient -> ingredient.sort }
+        .joinToString(System.lineSeparator()) { ingredient ->
+            StringBuilder().apply {
+                if (ingredient.isGroupHeader) {
+                    append("${System.lineSeparator()}")
+                } else {
+                    append("- ")
                 }
-            }
-            ingredient.unity?.let {
-                if (it.isNotEmpty()) {
-                    append(("$it "))
+
+                ingredient.quantity?.let {
+                    if (it > 0) {
+                        append("$it ")
+                    }
                 }
-            }
-            append(ingredient.name)
-        }.toString()
+
+                ingredient.unity?.let {
+                    if (it.isNotEmpty()) {
+                        append(("$it "))
+                    }
+                }
+
+                append(ingredient.name)
+            }.toString()
     }
+
     val subject = "$title - $description"
 
     fun getPlainText(poweredBy: String?): String {
@@ -38,10 +52,12 @@ class ShareableRecipe(recipe: Recipe, private val ingredients: LinkedList<Ingred
             }
             append(System.lineSeparator())
             if (ingredientsAsText.isNotEmpty()) {
+                append("$ingredientHeader:${System.lineSeparator()}")
                 append("$ingredientsAsText${System.lineSeparator()}${System.lineSeparator()}")
             }
             instruction?.let {
                 if (instruction.isNotEmpty()) {
+                    append("$instructionHeader:${System.lineSeparator()}")
                     append("$instruction${System.lineSeparator()}${System.lineSeparator()}")
                 }
             }
@@ -56,8 +72,12 @@ class ShareableRecipe(recipe: Recipe, private val ingredients: LinkedList<Ingred
             append("<p><b>$title</b></p>")
             append("<p>$description</p>")
             append("<ul>")
-            ingredients.forEach { ingredient ->
-                append("<li>${ingredient.quantity} ${ingredient.unity} ${ingredient.name}</li>")
+            ingredients.sortedBy { ingredient -> ingredient.sort } .forEach { ingredient ->
+                if (ingredient.isGroupHeader) {
+                    append("<li><b>${ingredient.name}</b></li>")
+                } else {
+                    append("<li>${ingredient.quantity} ${ingredient.unity} ${ingredient.name}</li>")
+                }
             }
             append("</ul>")
             append("<p>$instruction</p>")

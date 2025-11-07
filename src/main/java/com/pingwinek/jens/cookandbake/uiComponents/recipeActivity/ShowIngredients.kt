@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DragAndDropList
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.ListPane
@@ -27,14 +28,16 @@ fun ShowIngredients(
     }
 
     val onChangeActiveItem = fun(ingredient: Ingredient?) {
-        onIngredientsFunctionsMode(ingredient != null)
-        activeItem = ingredient
+        if (activeItem == ingredient) {
+            activeItem = null
+            onIngredientsFunctionsMode(false)
+        } else {
+            onIngredientsFunctionsMode(ingredient != null)
+            activeItem = ingredient
+        }
     }
 
-    Column(
-//        Modifier
-  //          .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues())
-    ) {
+    Column {
 
         DragAndDropList(
             spacing = MaterialTheme.spacing.spacerSmall,
@@ -46,10 +49,13 @@ fun ShowIngredients(
             onChangeSort = onChangeSort,
             ) { ingredient, active, onChangeActive, onDrag, onDragStopped ->
 
+//            val color = if (ingredient.isGroupHeader) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
+            val color = if (ingredient.isGroupHeader) Color.Unspecified else MaterialTheme.colorScheme.surfaceContainerHigh
+
             ListPane(
                 modifier = Modifier
                     .clickable { onChangeActive() },
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                color = color,
                 contentColor = MaterialTheme.colorScheme.onBackground
             ) {
                 IngredientPane(

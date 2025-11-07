@@ -13,6 +13,7 @@ data class IngredientFB(
     override val unity: String?,
     override val name: String,
     override val sort: Int,
+    override val isGroupHeader: Boolean = false,
     override var lastModified: Long = Date().time
 ) : Ingredient() {
 
@@ -22,7 +23,27 @@ data class IngredientFB(
         val quantityVerbal: String?,
         val unity: String?,
         val name: String,
-        val sort: Int
+        val sort: Int,
+        @field:JvmField val isGroupHeader: Boolean
+    )
+
+    constructor(
+        recipeId: String,
+        quantity: Double?,
+        quantityVerbal: String?,
+        unity: String?,
+        name: String,
+        sort: Int,
+        isGroupHeader: Boolean
+    ) : this(
+        "",
+        recipeId,
+        quantity,
+        quantityVerbal,
+        unity,
+        name,
+        sort,
+        isGroupHeader
     )
 
     constructor(
@@ -50,8 +71,8 @@ data class IngredientFB(
         document.getString("unity"),
         document.getString("name") ?: "",
         document.getLong("sort")?.toInt() ?: -1,
-        0
+        document.getBoolean("isGroupHeader") ?: false
     )
 
-    val documentData = DocumentData(quantity, quantityVerbal, unity, name, sort)
+    val documentData = DocumentData(quantity, quantityVerbal, unity, name, sort, isGroupHeader)
 }

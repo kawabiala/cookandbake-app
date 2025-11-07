@@ -1,10 +1,10 @@
 package com.pingwinek.jens.cookandbake.repos
 
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.IngredientFB
 import com.pingwinek.jens.cookandbake.sources.IngredientSourceFB
-import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 class IngredientRepository private constructor(val application: PingwinekCooksApplication) {
@@ -25,7 +25,8 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         quantityVerbal: String?,
         unity: String?,
         name: String,
-        sort: Int
+        sort: Int,
+        isGroupHeader: Boolean
     ) : Ingredient {
         return ingredientSourceFB.new(
             IngredientFB(
@@ -34,7 +35,49 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
                 quantityVerbal,
                 unity,
                 name,
-                sort)
+                sort,
+                isGroupHeader
+            )
+        )
+    }
+
+    suspend fun new(
+        recipeId: String,
+        quantity: Double?,
+        quantityVerbal: String?,
+        unity: String?,
+        name: String,
+        sort: Int
+    ) = new (
+        recipeId,
+        quantity,
+        quantityVerbal,
+        unity,
+        name,
+        sort,
+        false
+    )
+
+    suspend fun update(
+        ingredient: Ingredient,
+        quantity: Double?,
+        quantityVerbal: String?,
+        unity: String?,
+        name: String,
+        sort: Int,
+        isGroupHeader: Boolean
+    ): Ingredient {
+        return ingredientSourceFB.update(
+            IngredientFB(
+                ingredient.id,
+                ingredient.recipeId,
+                quantity,
+                quantityVerbal,
+                unity,
+                name,
+                sort,
+                isGroupHeader
+            )
         )
     }
 
@@ -45,19 +88,15 @@ class IngredientRepository private constructor(val application: PingwinekCooksAp
         unity: String?,
         name: String,
         sort: Int
-    ): Ingredient {
-        return ingredientSourceFB.update(
-            IngredientFB(
-                ingredient.id,
-                ingredient.recipeId,
-                quantity,
-                quantityVerbal,
-                unity,
-                name,
-                sort
-            )
-        )
-    }
+    ) = update(
+        ingredient,
+        quantity,
+        quantityVerbal,
+        unity,
+        name,
+        sort,
+        ingredient.isGroupHeader
+    )
 
     companion object : SingletonHolder<IngredientRepository, PingwinekCooksApplication>(::IngredientRepository)
 

@@ -95,6 +95,7 @@
     <string name="unity">Unity</string>
     <string name="edit_ingredient">Edit ingredient</string>
     <string name="delete_ingredient">Delete ingredient</string>
+    <string name="isGroupHeader">Group of Ingredients</string>
 
     <string name="instruction">Instruction</string>
     <string name="write_instruction">Add instruction</string>

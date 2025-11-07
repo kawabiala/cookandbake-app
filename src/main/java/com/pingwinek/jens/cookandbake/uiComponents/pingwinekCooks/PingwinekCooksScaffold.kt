@@ -49,6 +49,12 @@ fun PingwinekCooksScaffold(
     onHasShownSnackbar: () -> Unit = {},
     scaffoldContent: @Composable (PaddingValues) -> Unit = {}
 ) {
+    val bottomPadding = if (navigationBarVisible) {
+        PaddingValues()
+    } else {
+        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+    }
+
     val topAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer
     )
@@ -69,7 +75,7 @@ fun PingwinekCooksScaffold(
 
     Scaffold(
         modifier = Modifier
-            .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()),
+            .padding(bottomPadding),
         contentWindowInsets = WindowInsets(
             MaterialTheme.spacing.mainWindowPadding.value.toInt(),
             MaterialTheme.spacing.mainWindowPadding.value.toInt(),

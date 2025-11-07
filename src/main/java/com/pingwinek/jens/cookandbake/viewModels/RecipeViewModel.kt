@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
@@ -129,7 +130,11 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     fun getShareableRecipe(): ShareableRecipe? {
         return recipeData.value?.let { recipe ->
             ingredientListData.value?.let { ingredients ->
-                ShareableRecipe(recipe, ingredients)
+                ShareableRecipe(
+                    recipe,
+                    ingredients,
+                    application.applicationContext.getString(R.string.ingredients),
+                    application.applicationContext.getString(R.string.instruction))
             }
         }
     }
@@ -250,7 +255,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?, sort: Int) {
+    fun saveIngredient(id: String?, name: String, quantity: Double?, quantityVerbal:String?, unity: String?, sort: Int, isGroupHeader: Boolean) {
         if (name.isEmpty()) {
             return
         }
@@ -258,12 +263,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
                 if (id.isNullOrEmpty()) {
-                    ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name, sort)
+                    ingredientRepository.new(recipe.id, quantity, quantityVerbal, unity, name, sort, isGroupHeader)
                 } else {
                     ingredientListData.value?.find { ingredient ->
                         ingredient.id == id
                     }?.let { ingredient ->
-                        ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name, sort)
+                        ingredientRepository.update(ingredient, quantity, quantityVerbal, unity, name, sort, isGroupHeader)
                     }
                 }
                 loadIngredients()

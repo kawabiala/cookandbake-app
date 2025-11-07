@@ -7,5 +7,6 @@ abstract class Ingredient: Model {
     abstract val unity: String?
     abstract val name: String
     abstract val sort: Int
+    abstract val isGroupHeader: Boolean
 //    abstract fun getUpdated(ingredient: Ingredient) : Ingredient
 }

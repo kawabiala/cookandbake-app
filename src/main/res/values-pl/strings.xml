@@ -95,6 +95,7 @@
     <string name="unity">Jedność</string>
     <string name="edit_ingredient">Edytować składnik</string>
     <string name="delete_ingredient">Zmazać składnik</string>
+    <string name="isGroupHeader">Grupa składników</string>
 
     <string name="instruction">Instrukcja</string>
     <string name="write_instruction">Teraz instrukcję skompletować</string>

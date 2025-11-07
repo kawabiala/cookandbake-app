@@ -9,8 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
 import com.pingwinek.jens.cookandbake.lib.Utils
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.LabelledCheckBox
 
 @Composable
 fun EditIngredient(
@@ -19,10 +20,12 @@ fun EditIngredient(
     ingredientQuantity: Double?,
     ingredientQuantityVerbal: String?,
     ingredientUnity: String?,
+    ingredientIsGroupHeader: Boolean,
     onIngredientNameChange: (String) -> Unit,
     onIngredientQuantityChange: (Double?) -> Unit,
     onIngredientQuantityVerbalChange: (String) -> Unit,
     onIngredientUnityChange: (String) -> Unit,
+    onIngredientIsGroupHeaderChange: (Boolean) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -43,40 +46,48 @@ fun EditIngredient(
                     onIngredientNameChange(changedString)
                 }
             )
-            TextField(
-                value = Utils.quantityToString(ingredientQuantity),
-                label = {
-                    Text(stringResource(R.string.quantity_number))
-                },
-                isError = isQuantityAsNumberMissing,
-                supportingText = {
-                    if (isQuantityAsNumberMissing) {
-                        Text(stringResource(R.string.ingredient_quantity_unequal_verbal))
+            LabelledCheckBox(
+                checked = ingredientIsGroupHeader,
+                label = stringResource(R.string.isGroupHeader),
+                onCheckedChange = { changedBoolean -> onIngredientIsGroupHeaderChange(changedBoolean) }
+            )
+
+            if (! ingredientIsGroupHeader) {
+                TextField(
+                    value = Utils.quantityToString(ingredientQuantity),
+                    label = {
+                        Text(stringResource(R.string.quantity_number))
+                    },
+                    isError = isQuantityAsNumberMissing,
+                    supportingText = {
+                        if (isQuantityAsNumberMissing) {
+                            Text(stringResource(R.string.ingredient_quantity_unequal_verbal))
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = { changedString ->
+                        onIngredientQuantityChange(Utils.quantityToDouble(changedString))
                     }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = { changedString ->
-                    onIngredientQuantityChange(Utils.quantityToDouble(changedString))
-                }
-            )
-            TextField(
-                value = ingredientQuantityVerbal ?: "",
-                label = {
-                    Text(stringResource(R.string.quantity_verbal))
-                },
-                onValueChange = { changedString ->
-                    onIngredientQuantityVerbalChange(changedString)
-                }
-            )
-            TextField(
-                value = ingredientUnity ?: "",
-                label = {
-                    Text(stringResource(R.string.unity))
-                },
-                onValueChange = { changedString ->
-                    onIngredientUnityChange(changedString)
-                }
-            )
+                )
+                TextField(
+                    value = ingredientQuantityVerbal ?: "",
+                    label = {
+                        Text(stringResource(R.string.quantity_verbal))
+                    },
+                    onValueChange = { changedString ->
+                        onIngredientQuantityVerbalChange(changedString)
+                    }
+                )
+                TextField(
+                    value = ingredientUnity ?: "",
+                    label = {
+                        Text(stringResource(R.string.unity))
+                    },
+                    onValueChange = { changedString ->
+                        onIngredientUnityChange(changedString)
+                    }
+                )
+            }
         }
     }
 }

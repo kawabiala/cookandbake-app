@@ -81,6 +81,10 @@ fun ScaffoldContent(
         mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: ingredientSortMax ?:  -1)
     }
 
+    var ingredientIsGroupHeaderTemp by remember(ingredientIdTemp) {
+        mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.isGroupHeader ?: false)
+    }
+
     val attachmentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -101,6 +105,7 @@ fun ScaffoldContent(
         ingredientQuantityVerbalTemp = null
         ingredientUnityTemp = null
         ingredientSortTemp = ingredientSortMax ?: -1
+        ingredientIsGroupHeaderTemp = false
     }
 
     val resetDelete: () -> Unit = {
@@ -119,7 +124,8 @@ fun ScaffoldContent(
                 ingredientQuantityTemp,
                 ingredientQuantityVerbalTemp,
                 ingredientUnityTemp,
-                ingredientSortTemp
+                ingredientSortTemp,
+                ingredientIsGroupHeaderTemp
             )
         }
     }
@@ -286,10 +292,12 @@ fun ScaffoldContent(
                 ingredientQuantity = ingredientQuantityTemp,
                 ingredientQuantityVerbal = ingredientQuantityVerbalTemp,
                 ingredientUnity = ingredientUnityTemp,
+                ingredientIsGroupHeader = ingredientIsGroupHeaderTemp,
                 onIngredientNameChange = { name -> ingredientNameTemp = name},
                 onIngredientQuantityChange = { quantity -> ingredientQuantityTemp = quantity},
                 onIngredientQuantityVerbalChange = { quantityVerbal -> ingredientQuantityVerbalTemp = quantityVerbal},
                 onIngredientUnityChange = { unity -> ingredientUnityTemp = unity},
+                onIngredientIsGroupHeaderChange = { isGroupHeader -> ingredientIsGroupHeaderTemp = isGroupHeader},
                 onCancel = onCloseEdit,
                 onSave = onSaveIngredient
             )

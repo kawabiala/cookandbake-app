@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
@@ -19,13 +20,15 @@ fun LabelledCheckBox(
 ) {
     var checkedLocal by remember { mutableStateOf(checked) }
     Row(
-        Modifier.toggleable(
-            value = checked,
-            onValueChange = {
-                checkedLocal = it
-                onCheckedChange(it)
-            }
-        )
+        modifier = Modifier
+            .toggleable(
+                value = checked,
+                onValueChange = {
+                    checkedLocal = it
+                    onCheckedChange(it)
+                }
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             checked = checked,

@@ -55,6 +55,8 @@ fun IngredientPane(
             }
         }
 
+    val style = if (ingredient.isGroupHeader) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall
+
     Row(
 //        modifier = Modifier
 //            .clickable { onChangeActive() },
@@ -67,20 +69,23 @@ fun IngredientPane(
                 .weight(80f)
         ) {
             Text(
-                style = MaterialTheme.typography.headlineSmall,
+                style = style,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 text = ingredient.name
             )
-            Text(
-                modifier = Modifier
-                    .padding(
-                        start = MaterialTheme.spacing.spacerSmall
-                    ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                text = quantity
-            )
+
+            if (! ingredient.isGroupHeader) {
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            start = MaterialTheme.spacing.spacerSmall
+                        ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    text = quantity
+                )
+            }
         }
 
         Row(
