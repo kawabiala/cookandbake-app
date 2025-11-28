@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.pingwinek.jens.cookandbake.R
@@ -55,11 +56,10 @@ fun IngredientPane(
             }
         }
 
-    val style = if (ingredient.isGroupHeader) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall
+    val style = if (ingredient.isGroupHeader) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.headlineSmall
+    val color = if (ingredient.isGroupHeader) MaterialTheme.colorScheme.onPrimaryContainer else Color.Unspecified
 
     Row(
-//        modifier = Modifier
-//            .clickable { onChangeActive() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -70,6 +70,7 @@ fun IngredientPane(
         ) {
             Text(
                 style = style,
+                color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 text = ingredient.name

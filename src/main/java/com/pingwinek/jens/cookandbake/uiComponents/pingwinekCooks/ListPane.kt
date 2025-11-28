@@ -18,6 +18,7 @@ fun ListPane(
     color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     margin: Dp = MaterialTheme.spacing.standardPadding,
+    paddingValues: PaddingValues? = null,
     content: @Composable () -> Unit
     ) {
     Surface(
@@ -26,9 +27,11 @@ fun ListPane(
         shape = ShapeDefaults.Small,
         modifier = modifier
     ) {
+        val paddingValues: PaddingValues = paddingValues ?: PaddingValues(margin)
+
         Box(
             modifier = Modifier
-                .padding(PaddingValues(margin))
+                .padding(paddingValues)
         ) {
             content()
         }

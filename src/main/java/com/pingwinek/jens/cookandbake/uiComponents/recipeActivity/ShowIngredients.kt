@@ -2,6 +2,7 @@ package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DragAndDropList
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.ListPane
@@ -49,14 +51,20 @@ fun ShowIngredients(
             onChangeSort = onChangeSort,
             ) { ingredient, active, onChangeActive, onDrag, onDragStopped ->
 
-//            val color = if (ingredient.isGroupHeader) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
             val color = if (ingredient.isGroupHeader) Color.Unspecified else MaterialTheme.colorScheme.surfaceContainerHigh
+            val paddingValues = PaddingValues(
+                start = MaterialTheme.spacing.standardPadding,
+                top = if (ingredient.isGroupHeader) MaterialTheme.spacing.standardPadding * 2 else MaterialTheme.spacing.standardPadding,
+                end = MaterialTheme.spacing.standardPadding,
+                bottom = if (ingredient.isGroupHeader) 0.dp else MaterialTheme.spacing.standardPadding
+            )
 
             ListPane(
                 modifier = Modifier
                     .clickable { onChangeActive() },
                 color = color,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                contentColor = MaterialTheme.colorScheme.onBackground,
+                paddingValues = paddingValues
             ) {
                 IngredientPane(
                     showButtons = active,
