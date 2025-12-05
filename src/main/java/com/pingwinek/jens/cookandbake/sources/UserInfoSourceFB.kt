@@ -1,15 +1,15 @@
 package com.pingwinek.jens.cookandbake.sources
 
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.Firebase
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.UserInfoFB
-import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 /**
@@ -25,7 +25,7 @@ class UserInfoSourceFB private constructor(private val firestore: FirebaseFirest
 
     override suspend fun getAll(): LinkedList<UserInfoFB> {
         if (!isAuthenticated()) throw Exception("unauthorized getAll")
-        return Companion.getAll(buildUserInfosCollRef(auth.uid!!))
+        return getAll(buildUserInfosCollRef(auth.uid!!))
     }
 
     override suspend fun get(id: String) : UserInfoFB {

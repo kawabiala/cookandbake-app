@@ -1,15 +1,15 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Firebase
+import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import com.pingwinek.jens.cookandbake.lib.firestore.FirestoreDataAccessManager
 import com.pingwinek.jens.cookandbake.models.IngredientFB
-import com.pingwinek.jens.cookandbake.lib.SingletonHolder
 import java.util.LinkedList
 
 class IngredientSourceFB private constructor(private val firestore: FirebaseFirestore)
@@ -71,6 +71,7 @@ class IngredientSourceFB private constructor(private val firestore: FirebaseFire
         }
     }
 
+    @Suppress("unused")
     private suspend fun get(documentReference: DocumentReference, recipeID: String) : IngredientFB {
         return FirestoreDataAccessManager.get(documentReference) {
             IngredientFB(it, recipeID)

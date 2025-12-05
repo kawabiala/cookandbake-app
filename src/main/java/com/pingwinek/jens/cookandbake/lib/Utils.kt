@@ -13,7 +13,9 @@ object Utils {
     fun quantityToDouble(quantity: String?) : Double {
         return when (quantity) {
             null, "" -> 0.0
-            else -> quantity.toDouble()
+            else -> {
+                quantity.toDouble()
+            }
         }
     }
 }

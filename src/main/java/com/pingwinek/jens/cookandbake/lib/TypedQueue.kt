@@ -11,7 +11,7 @@ class TypedQueue<T>(private val maxSize: Int) {
 
     fun addItem(item: T) {
         while (queue.size >= maxSize) {
-            queue.removeFirst()
+            queue.removeAt(0)
         }
 
         queue.add(item)
@@ -27,8 +27,9 @@ class TypedQueue<T>(private val maxSize: Int) {
         return item
     }
 
+    @Suppress("unused")
     fun getOldest(): T? {
-        return if (queue.isEmpty()) null else queue.removeFirst()
+        return if (queue.isEmpty()) null else queue.removeAt(0)
     }
 
     fun registerListener(listener: QueueListener) {

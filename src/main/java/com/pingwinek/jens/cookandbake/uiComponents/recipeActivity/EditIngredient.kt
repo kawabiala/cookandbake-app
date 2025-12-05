@@ -1,11 +1,16 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.pingwinek.jens.cookandbake.R
@@ -31,6 +36,27 @@ fun EditIngredient(
 ) {
     val isQuantityAsNumberMissing = (ingredientQuantity == null && !ingredientQuantityVerbal.isNullOrEmpty())
 
+    /*
+    Temporarily save text value ending with a dot. Replace comma by dot. Ensure max. 1 dot in the number string.
+     */
+    var tmpQuantity: String by remember { mutableStateOf(Utils.quantityToString(ingredientQuantity)) }
+    val onIngredientQuantityTextFieldChange: (String?) -> Unit = { changedString ->
+        changedString?.let { changedString ->
+            val editedString = changedString.replace(",", ".").replace("..", ".")
+            if (editedString.endsWith(".")) {
+                tmpQuantity = editedString
+            } else {
+                try {
+                    val changedDouble = Utils.quantityToDouble(editedString)
+                    tmpQuantity = Utils.quantityToString(changedDouble)
+                    onIngredientQuantityChange(changedDouble)
+                } catch (e: Exception) {
+                    Log.e("EditIngredient", e.toString())
+                }
+            }
+        }
+    }
+
     EditPane(
         paddingValues = paddingValues,
         onCancel = onCancel,
@@ -54,7 +80,8 @@ fun EditIngredient(
 
             if (! ingredientIsGroupHeader) {
                 TextField(
-                    value = Utils.quantityToString(ingredientQuantity),
+                    value = tmpQuantity,
+//                    value = Utils.quantityToString(ingredientQuantity),
                     label = {
                         Text(stringResource(R.string.quantity_number))
                     },
@@ -66,7 +93,8 @@ fun EditIngredient(
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { changedString ->
-                        onIngredientQuantityChange(Utils.quantityToDouble(changedString))
+                        onIngredientQuantityTextFieldChange(changedString)
+//                        onIngredientQuantityChange(Utils.quantityToDouble(changedString))
                     }
                 )
                 TextField(

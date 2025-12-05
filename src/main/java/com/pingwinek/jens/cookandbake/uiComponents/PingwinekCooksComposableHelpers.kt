@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.theming.Spacing
 
+// Defines extension property MaterialTheme.spacing
 val MaterialTheme.spacing: Spacing
     get() = Spacing()
 

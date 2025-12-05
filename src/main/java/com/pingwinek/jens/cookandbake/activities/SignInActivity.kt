@@ -82,7 +82,7 @@ class SignInActivity : AppCompatActivity() {
             onClose()
         }
 
-        val optionItemProfileLoggedOut = PingwinekCooksComposableHelpers.OptionItem(
+        PingwinekCooksComposableHelpers.OptionItem(
             labelResourceId = PingwinekCooksComposableHelpers.Navigation.LOGIN.label,
             icon = PingwinekCooksComposableHelpers.Navigation.LOGIN.icon
         ) {

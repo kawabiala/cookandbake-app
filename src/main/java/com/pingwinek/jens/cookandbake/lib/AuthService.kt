@@ -46,15 +46,15 @@ interface AuthService {
 
         companion object {
 
-            private val minLength = 8
+            private const val MIN_LENGTH = 8
 
             fun getPasswordPolicy(policyString: String): String {
-                return policyString.format(minLength, 1, 1, 1, 1)
+                return policyString.format(MIN_LENGTH, 1, 1, 1, 1)
             }
 
             fun matches(password: String): Boolean {
                 val result = runCatching {
-                    require(password.length >= minLength)
+                    require(password.length >= MIN_LENGTH)
                     require(password.none { it.isWhitespace() } )
                     require(password.any { it.isUpperCase() } )
                     require(password.any { it.isLowerCase() } )

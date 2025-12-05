@@ -46,23 +46,6 @@ data class IngredientFB(
         isGroupHeader
     )
 
-    constructor(
-        recipeId: String,
-        quantity: Double?,
-        quantityVerbal: String?,
-        unity: String?,
-        name: String,
-        sort: Int
-    ) : this(
-        "",
-        recipeId,
-        quantity,
-        quantityVerbal,
-        unity,
-        name,
-        sort
-    )
-
     constructor(document: DocumentSnapshot, recipeId: String) : this(
         document.id,
         recipeId,

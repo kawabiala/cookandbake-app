@@ -93,12 +93,12 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     //TODO update recipeData and ingredientListData
     fun deleteRecipe() {
-        recipeData.value?.let {
+        recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                recipeRepository.delete(it)
+                recipeRepository.delete(recipe)
                 ingredientListData.value?.let { ingredients ->
-                    ingredients.forEach {
-                        ingredientRepository.delete(it)
+                    ingredients.forEach { ingredient ->
+                        ingredientRepository.delete(ingredient)
                     }
                 }
             }

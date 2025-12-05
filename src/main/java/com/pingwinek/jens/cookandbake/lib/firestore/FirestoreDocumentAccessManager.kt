@@ -12,6 +12,7 @@ abstract class FirestoreDocumentAccessManager {
 
     companion object {
 
+        @Suppress("SameReturnValue")
         suspend fun delete(storageReference: StorageReference) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.delete())
             return true
@@ -43,11 +44,13 @@ abstract class FirestoreDocumentAccessManager {
             }
         }
 
+        @Suppress("SameReturnValue")
         suspend fun upload(storageReference: StorageReference, uri: Uri) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.putFile(uri))
             return true
         }
 
+        @Suppress("unused", "SameReturnValue")
         suspend fun upload(storageReference: StorageReference, uri: Uri, metaData: StorageMetadata) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.putFile(uri, metaData))
             return true

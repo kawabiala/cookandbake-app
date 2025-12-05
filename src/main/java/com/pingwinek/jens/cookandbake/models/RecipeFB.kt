@@ -44,7 +44,7 @@ data class RecipeFB(
             val returnValue = mutableListOf<String>()
             if (any is List<*>) {
                 any.forEach { item ->
-                    returnValue.add(if (item is String) item else "")
+                    returnValue.add(item as? String ?: "")
                 }
                 returnValue
             } else {

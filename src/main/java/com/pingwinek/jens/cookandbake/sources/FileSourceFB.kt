@@ -1,9 +1,9 @@
 package com.pingwinek.jens.cookandbake.sources
 
 import android.net.Uri
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.storage
@@ -69,6 +69,7 @@ class FileSourceFB {
             }
         }
 
+        @Suppress("unused")
         suspend fun deleteDir(pathString: String): Boolean {
             if (pathString.isEmpty()) return false
 

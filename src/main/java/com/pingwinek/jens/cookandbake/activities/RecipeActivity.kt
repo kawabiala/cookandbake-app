@@ -58,7 +58,7 @@ class RecipeActivity: AppCompatActivity() {
         setContent {
             PingwinekCooksAppTheme {
 
-                var mode by remember { mutableStateOf(Mode.SHOW_RECIPE)}
+                var mode by remember { mutableStateOf(if (recipeModel.recipeId != null) Mode.SHOW_RECIPE else Mode.EDIT_RECIPE)}
                 var tabMode by remember { mutableStateOf(TabMode.INGREDIENTS) }
                 var ingredientsEditMode by remember { mutableStateOf(false) }
                 val fabMode by remember(mode, tabMode, ingredientsEditMode) { derivedStateOf {
@@ -162,7 +162,7 @@ class RecipeActivity: AppCompatActivity() {
         val uri = FileProvider.getUriForFile(applicationContext, "${BuildConfig.APPLICATION_ID}.provider", fileInfo.file)
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         intent.setDataAndType(uri, fileInfo.contentType)
 
         startActivity(intent)

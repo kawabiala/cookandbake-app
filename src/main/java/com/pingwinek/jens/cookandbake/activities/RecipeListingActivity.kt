@@ -153,8 +153,8 @@ class RecipeListingActivity : AppCompatActivity() {
 
                 val categories = (recipesByLabel?.map { pair ->
                     Pair(
-                        pair.first,
-                        {
+                        first = pair.first,
+                        second = {
                             labelFilter = pair.first
                             close()
                         }
@@ -163,8 +163,8 @@ class RecipeListingActivity : AppCompatActivity() {
                     .toMutableList()
                     .also { map ->
                         map.add(0, Pair(
-                            stringResource(R.string.all),
-                            {
+                            first = stringResource(R.string.all),
+                            second = {
                                 labelFilter = null
                                 close()
                             }
