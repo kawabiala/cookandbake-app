@@ -1,8 +1,8 @@
 package com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +18,7 @@ fun PingwinekCooksTabRow(
     contentColor: Color = TabRowDefaults.primaryContentColor,
     menuItems: List<PingwinekCooksComposableHelpers.OptionItem>
 ) {
-    TabRow(
+    PrimaryTabRow(
         selectedTabIndex = selectedItem,
         containerColor = containerColor,
         contentColor = contentColor
