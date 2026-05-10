@@ -25,11 +25,15 @@ fun ShowIngredients(
     onDeleteIngredient: (String) -> Unit,
     onChangeSort: (Map<Ingredient, Int>) -> Unit
 ) {
+    var sortedIngredients by remember(ingredients) {
+        mutableStateOf(ingredients.sortedBy { ingredient -> ingredient.sort })
+    }
+
     var activeItem: Ingredient? by remember(ingredients) {
         mutableStateOf(null)
     }
 
-    val onChangeActiveItem = fun(ingredient: Ingredient?) {
+    val onChangeActiveItem: (Ingredient?) -> Unit = { ingredient ->
         if (activeItem == ingredient) {
             activeItem = null
             onIngredientsFunctionsMode(false)
@@ -43,7 +47,7 @@ fun ShowIngredients(
 
         DragAndDropList(
             spacing = MaterialTheme.spacing.spacerSmall,
-            listContent = ingredients.sortedBy { ingredient -> ingredient.sort },
+            listContent = sortedIngredients,
             key = { ingredient -> ingredient.id },
             sort = { ingredient -> ingredient.sort },
             activeItem = ingredients.find { it == activeItem },

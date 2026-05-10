@@ -25,6 +25,7 @@ fun EditPane(
     paddingValues: PaddingValues = PaddingValues.Absolute(),
     cancelButtonColors: ButtonColors = ButtonDefaults.filledTonalButtonColors(),
     saveButtonColors: ButtonColors = ButtonDefaults.buttonColors(),
+    isSaveEnabled: Boolean = true,
     onCancel: () -> Unit,
     onSave: () -> Unit,
     content: @Composable () -> Unit
@@ -48,6 +49,7 @@ fun EditPane(
             }
             Button(
                 colors = saveButtonColors,
+                enabled = isSaveEnabled,
                 onClick = onSave
             ) {
                 Text(stringResource(R.string.save))
@@ -70,6 +72,7 @@ fun PreviewEditPane(@PreviewParameter(PPPeditPane::class) parameters: Parameters
 
     EditPane(
         paddingValues = parameters.paddingValues,
+        isSaveEnabled = true,
         onCancel = parameters.onCancel,
         onSave = parameters.onSave,
         content = parameters.content

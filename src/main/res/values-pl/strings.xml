@@ -81,7 +81,7 @@
     <string name="delete_recipe">Zmazać przepis</string>
 
     <string name="attach_document">Dołącić dokument</string>
-    <string name="update_attachment">Zaakutalizować dokument</string>
+    <string name="update_attachment">Zaaktualizować dokument</string>
     <string name="delete_attachment">Zmazać dokument</string>
     <string name="show_attachment">Wyświetlić dokument</string>
 
@@ -102,6 +102,11 @@
     <string name="plus_new_ingredient">+ nowy składnik</string>
 
     <string name="gallery">Galeria</string>
+    <string name="edit_image_name">Edytować nazwę obrazu</string>
+    <string name="save_image_name">Zapisać nazwę obrazu</string>
+    <string name="delete_image">Zmazać obraz</string>
+    <string name="take_picture">Rób zdjęcie</string>
+    <string name="choose_from_gallery">Wybierz z galerii</string>
 
     <string name="pdf">pdf</string>
     <string name="add_pdf">Dodawać pdf</string>
@@ -119,7 +124,8 @@
     <string name="add_label">Dodać etykietę</string>
     <string name="edit_label">Edytować etykietę</string>
     <string name="delete_label">Zmazać etykietę</string>
-    <string name="label_delete_confirm">RNaprawdę zmazać etykietę?</string>
+    <string name="label_selected">Etykieta wybrana</string>
+    <string name="label_delete_confirm">Naprawdę zmazać etykietę?</string>
     <string name="no_labels_available">Nie ma etykietek</string>
 
 </resources>

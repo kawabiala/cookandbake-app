@@ -6,6 +6,8 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import java.io.FileNotFoundException
+import java.io.InputStream
 
 class UriUtils private constructor(context: Context){
 
@@ -71,5 +73,17 @@ class UriUtils private constructor(context: Context){
 
     fun getTypeForUri(uri: Uri): String? {
         return contentResolver.getType(uri)
+    }
+
+    fun openInputStream(uri: Uri): InputStream? {
+        var inputStream: InputStream? = null
+
+        try {
+            inputStream = contentResolver.openInputStream(uri)
+        } catch (e: FileNotFoundException) {
+            Log.e(this::class.java.name, e.toString())
+        }
+
+        return inputStream
     }
 }

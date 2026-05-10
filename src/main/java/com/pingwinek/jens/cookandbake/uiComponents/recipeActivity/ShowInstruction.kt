@@ -22,9 +22,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.spacing
 
 @Composable
@@ -33,6 +36,8 @@ fun ShowInstruction(
     instruction: String,
     onEditInstruction: () -> Unit
 ) {
+    val layoutDirection = LocalLayoutDirection.current
+
     var showButtons by remember(instruction) { mutableStateOf(instruction.isBlank()) }
     val scrollState = rememberScrollState()
 
@@ -40,8 +45,8 @@ fun ShowInstruction(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                end = paddingValues.calculateEndPadding(layoutDirection),
                 top = MaterialTheme.spacing.spacerSmall
             ),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -59,5 +64,48 @@ fun ShowInstruction(
                 Icon(Icons.Filled.Edit, stringResource(R.string.write_instruction))
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Normal Instruction")
+@Composable
+private fun PreviewShowInstruction() {
+    PingwinekCooksAppTheme { // Replace with CookAndBakeTheme if you have one
+        ShowInstruction(
+            paddingValues = PaddingValues(16.dp),
+            instruction = "Preheat the oven to 200°C. Mix flour, eggs, and milk until smooth.",
+            onEditInstruction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Long Instruction (Scrollable)")
+@Composable
+private fun PreviewLongShowInstruction() {
+    PingwinekCooksAppTheme {
+        ShowInstruction(
+            paddingValues = PaddingValues(16.dp),
+            instruction = "Step 1: Start by gathering all ingredients.\n\n" +
+                    "Step 2: Chop the onions and garlic finely.\n\n" +
+                    "Step 3: Heat oil in a large pan over medium heat.\n\n" +
+                    "Step 4: Sauté the onions until translucent.\n\n" +
+                    "Step 5: Add the meat and brown it thoroughly on all sides.\n\n" +
+                    "Step 6: Pour in the tomato sauce and simmer for 45 minutes.\n\n" +
+                    "Step 7: Boil water in a separate pot for the pasta.\n\n" +
+                    "Step 8: Serve hot with parmesan cheese and fresh basil leaves.",
+            onEditInstruction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Empty Instruction")
+@Composable
+private fun PreviewEmptyShowInstruction() {
+    PingwinekCooksAppTheme {
+        ShowInstruction(
+            paddingValues = PaddingValues(16.dp),
+            instruction = "",
+            onEditInstruction = {}
+        )
     }
 }

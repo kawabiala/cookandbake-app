@@ -1,18 +1,7 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.pingwinek.jens.cookandbake.models.Ingredient
-import com.pingwinek.jens.cookandbake.models.Tag
 import com.pingwinek.jens.cookandbake.viewModels.RecipeViewModel
 
 @Composable
@@ -26,10 +15,13 @@ fun ScaffoldContent(
     onTabModeChange: (TabMode) -> Unit,
     onFinish: () -> Unit
 ) {
+    /*
     val recipeData by recipeModel.recipeData.observeAsState()
     val isLoadingAttachment by recipeModel.isUpOrDownLoading.observeAsState()
     val ingredientData = recipeModel.ingredientListData.observeAsState()
     val ingredients = ingredientData.value ?: listOf()
+    val imageGalleryInfosData = recipeModel.imageGalleryInfos.observeAsState()
+    val imageGalleryInfos = imageGalleryInfosData.value ?: listOf()
     val availableTagData = recipeModel.availableTagListData.observeAsState()
     val availableTags = availableTagData.value ?: listOf()
     val attachedTagData = recipeModel.attachedTagListData.observeAsState()
@@ -53,7 +45,8 @@ fun ScaffoldContent(
             } != null
         }
     }
-
+*/
+    /*
     val ingredientSortMax by remember {
         derivedStateOf {
             ingredients.maxOfOrNull { ingredient ->
@@ -62,6 +55,8 @@ fun ScaffoldContent(
         }
     }
 
+     */
+/*
     var ingredientIdTemp: String? by remember {
         mutableStateOf(null)
     }
@@ -77,12 +72,20 @@ fun ScaffoldContent(
     var ingredientUnityTemp by remember(ingredientIdTemp) {
         mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.unity)
     }
+    */
+    /*
     var ingredientSortTemp by remember(ingredientIdTemp) {
         mutableIntStateOf(findIngredient(ingredients, ingredientIdTemp)?.sort ?: ingredientSortMax ?:  -1)
     }
 
+     */
+/*
     var ingredientIsGroupHeaderTemp by remember(ingredientIdTemp) {
         mutableStateOf(findIngredient(ingredients, ingredientIdTemp)?.isGroupHeader ?: false)
+    }
+
+    var imageIdTemp: String? by remember {
+        mutableStateOf(null)
     }
 
     val attachmentPickerLauncher = rememberLauncherForActivityResult(
@@ -96,18 +99,8 @@ fun ScaffoldContent(
     var deleteDialogMode by remember {
         mutableStateOf(Delete.NONE)
     }
-
-    val resetIngredient: () -> Unit = {
-        ingredientIdTemp = null
-        // when adding new ingredients, id is always null and other temp-values are not reset automatically
-        ingredientNameTemp = null
-        ingredientQuantityTemp = null
-        ingredientQuantityVerbalTemp = null
-        ingredientUnityTemp = null
-        ingredientSortTemp = ingredientSortMax ?: -1
-        ingredientIsGroupHeaderTemp = false
-    }
-
+*/
+/*
     val resetDelete: () -> Unit = {
         deleteDialogMode = Delete.NONE
     }
@@ -179,6 +172,7 @@ fun ScaffoldContent(
                 resetDelete()
                 onIngredientFunctionsMode(false)
             }
+            Delete.IMAGE -> {}
         }
     }
 
@@ -211,7 +205,8 @@ fun ScaffoldContent(
     val onEditTags: () -> Unit = {
         onModeChange(Mode.EDIT_TAGS)
     }
-
+*/*/
+    /*
     val onChangeTags: (Map<Tag, Boolean>) -> Unit = { changedTags ->
         val tagsToChange = mutableMapOf<Tag, Boolean>().apply {
             changedTags.forEach { (changedTag, selected) ->
@@ -224,6 +219,13 @@ fun ScaffoldContent(
         recipeModel.saveTags(tagsToChange)
 
         onModeChange(Mode.SHOW_RECIPE)
+    }
+
+     */
+/*
+    val onImageSelected: (String) -> Unit = { imageId ->
+        imageIdTemp = imageId
+        onModeChange(Mode.SHOW_IMAGE)
     }
 
     val onSaveIngredient: () -> Unit = {
@@ -255,6 +257,7 @@ fun ScaffoldContent(
                 recipeTitle = recipeTitleTemp,
                 recipeDescription = recipeDescriptionTemp,
                 ingredients = ingredients,
+                imageGalleryInfos = imageGalleryInfos,
                 labels = attachedTags
                     .sortedBy { tag -> tag.sort }
                     .map { tag -> tag.label },
@@ -271,7 +274,15 @@ fun ScaffoldContent(
                 onDeleteIngredient = onDeleteIngredient,
                 onChangeSortIngredient = onChangeSortIngredient,
                 onEditInstruction = onEditInstruction,
+                onImageSelected = onImageSelected,
                 onTabModeChange = onTabModeChange
+            )
+        }
+        Mode.SHOW_IMAGE -> {
+            ShowImage(
+                imageGalleryInfos.find { imageInfo ->
+                    imageInfo.imageId == imageIdTemp
+                }
             )
         }
         Mode.EDIT_RECIPE -> {
@@ -315,15 +326,18 @@ fun ScaffoldContent(
             EditTags(
                 paddingValues = paddingValues,
                 tags = tags,
-                onChangeTags = onChangeTags,
+                onSave = onChangeTags,
                 onClose = onCloseEditTags
             )
         }
     }
-}
 
+ */
+}
+/*
 private fun findIngredient(ingredients: List<Ingredient>, ingredientId: String?): Ingredient? {
     return ingredients.find { ingredient ->
         ingredient.id == ingredientId
     }
 }
+*/

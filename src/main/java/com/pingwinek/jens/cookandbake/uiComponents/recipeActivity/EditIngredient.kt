@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,20 +27,34 @@ fun EditIngredient(
     ingredientQuantityVerbal: String?,
     ingredientUnity: String?,
     ingredientIsGroupHeader: Boolean,
-    onIngredientNameChange: (String) -> Unit,
-    onIngredientQuantityChange: (Double?) -> Unit,
-    onIngredientQuantityVerbalChange: (String) -> Unit,
-    onIngredientUnityChange: (String) -> Unit,
-    onIngredientIsGroupHeaderChange: (Boolean) -> Unit,
     onCancel: () -> Unit,
-    onSave: () -> Unit
+    onSave: (String, Double?, String?, String?, Boolean) -> Unit
 ) {
-    val isQuantityAsNumberMissing = (ingredientQuantity == null && !ingredientQuantityVerbal.isNullOrEmpty())
+    var ingredientNameTemp by remember {
+        mutableStateOf(ingredientName)
+    }
+    var ingredientQuantityTemp by remember {
+        mutableStateOf(ingredientQuantity)
+    }
+    var ingredientQuantityVerbalTemp by remember {
+        mutableStateOf(ingredientQuantityVerbal)
+    }
+    var ingredientUnityTemp by remember {
+        mutableStateOf(ingredientUnity)
+    }
+    var ingredientIsGroupHeaderTemp by remember {
+        mutableStateOf(ingredientIsGroupHeader)
+    }
 
     /*
     Temporarily save text value ending with a dot. Replace comma by dot. Ensure max. 1 dot in the number string.
      */
     var tmpQuantity: String by remember { mutableStateOf(Utils.quantityToString(ingredientQuantity)) }
+
+    val isQuantityAsNumberMissing by remember {
+        derivedStateOf { (ingredientQuantityTemp == null && !ingredientQuantityVerbalTemp.isNullOrEmpty()) }
+    }
+
     val onIngredientQuantityTextFieldChange: (String?) -> Unit = { changedString ->
         changedString?.let { changedString ->
             val editedString = changedString.replace(",", ".").replace("..", ".")
@@ -49,11 +64,23 @@ fun EditIngredient(
                 try {
                     val changedDouble = Utils.quantityToDouble(editedString)
                     tmpQuantity = Utils.quantityToString(changedDouble)
-                    onIngredientQuantityChange(changedDouble)
+                    ingredientQuantityTemp = changedDouble
                 } catch (e: Exception) {
                     Log.e("EditIngredient", e.toString())
                 }
             }
+        }
+    }
+
+    val onSave: () -> Unit = {
+        if (!ingredientNameTemp.isNullOrEmpty()) {
+            onSave(
+                ingredientNameTemp!!,
+                ingredientQuantityTemp,
+                ingredientQuantityVerbalTemp,
+                ingredientUnityTemp,
+                ingredientIsGroupHeaderTemp
+            )
         }
     }
 
@@ -64,18 +91,21 @@ fun EditIngredient(
     ) {
         Column {
             TextField(
-                value = ingredientName ?: "",
+                value = ingredientNameTemp ?: "",
                 label = {
                     Text(stringResource(R.string.ingredientName))
                 },
                 onValueChange = { changedString ->
-                    onIngredientNameChange(changedString)
+                    ingredientNameTemp = changedString
                 }
             )
             LabelledCheckBox(
-                checked = ingredientIsGroupHeader,
+                checked = ingredientIsGroupHeaderTemp,
                 label = stringResource(R.string.isGroupHeader),
-                onCheckedChange = { changedBoolean -> onIngredientIsGroupHeaderChange(changedBoolean) }
+                onCheckedChange = {
+                    changedBoolean ->
+                    ingredientIsGroupHeaderTemp = changedBoolean
+                }
             )
 
             if (! ingredientIsGroupHeader) {
@@ -94,25 +124,24 @@ fun EditIngredient(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { changedString ->
                         onIngredientQuantityTextFieldChange(changedString)
-//                        onIngredientQuantityChange(Utils.quantityToDouble(changedString))
                     }
                 )
                 TextField(
-                    value = ingredientQuantityVerbal ?: "",
+                    value = ingredientQuantityVerbalTemp ?: "",
                     label = {
                         Text(stringResource(R.string.quantity_verbal))
                     },
                     onValueChange = { changedString ->
-                        onIngredientQuantityVerbalChange(changedString)
+                        ingredientQuantityVerbalTemp = changedString
                     }
                 )
                 TextField(
-                    value = ingredientUnity ?: "",
+                    value = ingredientUnityTemp ?: "",
                     label = {
                         Text(stringResource(R.string.unity))
                     },
                     onValueChange = { changedString ->
-                        onIngredientUnityChange(changedString)
+                        ingredientUnityTemp = changedString
                     }
                 )
             }

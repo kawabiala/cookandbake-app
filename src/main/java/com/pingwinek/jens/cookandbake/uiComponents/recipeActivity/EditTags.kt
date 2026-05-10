@@ -11,9 +11,10 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,31 +26,39 @@ import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.EditPane
 @Composable
 fun EditTags(
     paddingValues: PaddingValues = PaddingValues.Absolute(),
-    tags: Map<Tag, Boolean>,
-    onChangeTags: (Map<Tag, Boolean>) -> Unit,
+    availableTags: List<Tag>,
+    attachedTags: List<Tag>,
+    onSave: (Map<Tag, Boolean>) -> Unit,
     onClose: () -> Unit
 ) {
-    val localTags: SnapshotStateMap<Tag, Boolean> = remember {
+    val tags = remember(availableTags, attachedTags) {
+        val attachedIds = attachedTags.map { it.id }.toSet()
+        val sortedList = availableTags.sortedBy { it.sort }
+
         mutableStateMapOf<Tag, Boolean>().apply {
-            this.putAll(tags)
+            sortedList.forEach { tag ->
+                this[tag] = tag.id in attachedIds
+            }
         }
     }
 
-    val onClick = fun(tag: Tag) {
-        localTags[tag]?.let { selected ->
-            localTags[tag] = !selected
+    val tagList by remember { derivedStateOf { tags.toList() } }
+
+    val onClick: (Tag) -> Unit = { tag ->
+        tags[tag]?.let { selected ->
+            tags[tag] = !selected
         }
     }
 
     EditPane(
         paddingValues = paddingValues,
         onCancel = onClose,
-        onSave = { onChangeTags(localTags) }
+        onSave = { onSave(tags) }
     ) {
 
         LazyColumn {
             items(
-                items = localTags.toList().sortedBy { pair -> pair.first.sort },
+                items = tagList,
                 key = { pair -> pair.first.id }
             ) { pair ->
 
@@ -72,7 +81,7 @@ fun EditTags(
                         if (selected) {
                             Icon(
                                 Icons.Outlined.Check,
-                                stringResource(R.string.add_label)
+                                stringResource(R.string.label_selected)
                             )
                         }
                     },

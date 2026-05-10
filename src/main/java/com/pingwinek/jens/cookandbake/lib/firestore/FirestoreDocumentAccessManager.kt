@@ -6,6 +6,7 @@ import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.InputStream
 import java.util.LinkedList
 
 abstract class FirestoreDocumentAccessManager {
@@ -21,6 +22,10 @@ abstract class FirestoreDocumentAccessManager {
         suspend fun getAll(storageReference: StorageReference) : LinkedList<StorageReference> {
             val qs = SuspendedCoroutineWrapper.suspendedFunction(storageReference.listAll())
             return LinkedList(qs.items)
+        }
+
+        suspend fun getUri(storageReference: StorageReference) : Uri {
+            return SuspendedCoroutineWrapper.suspendedFunction(storageReference.downloadUrl)
         }
 
         suspend fun getMetadata(storageReference: StorageReference): StorageMetadata {
@@ -44,6 +49,11 @@ abstract class FirestoreDocumentAccessManager {
             }
         }
 
+        suspend fun updateMetadata(storageReference: StorageReference, storageMetadata: StorageMetadata) : Boolean {
+            SuspendedCoroutineWrapper.suspendedFunction(storageReference.updateMetadata(storageMetadata))
+            return true
+        }
+
         @Suppress("SameReturnValue")
         suspend fun upload(storageReference: StorageReference, uri: Uri) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.putFile(uri))
@@ -53,6 +63,18 @@ abstract class FirestoreDocumentAccessManager {
         @Suppress("unused", "SameReturnValue")
         suspend fun upload(storageReference: StorageReference, uri: Uri, metaData: StorageMetadata) : Boolean {
             SuspendedCoroutineWrapper.suspendedFunction(storageReference.putFile(uri, metaData))
+            return true
+        }
+
+        @Suppress("SameReturnValue")
+        suspend fun upload(storageReference: StorageReference, inputStream: InputStream) : Boolean {
+            SuspendedCoroutineWrapper.suspendedFunction(storageReference.putStream(inputStream))
+            return true
+        }
+
+        @Suppress("unused", "SameReturnValue")
+        suspend fun upload(storageReference: StorageReference, inputStream: InputStream, metadata: StorageMetadata) : Boolean {
+            SuspendedCoroutineWrapper.suspendedFunction(storageReference.putStream(inputStream, metadata))
             return true
         }
     }

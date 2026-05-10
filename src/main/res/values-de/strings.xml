@@ -102,6 +102,11 @@
     <string name="plus_new_ingredient">+ Neue Zutat</string>
 
     <string name="gallery">Galerie</string>
+    <string name="edit_image_name">Bildname bearbeiten</string>
+    <string name="save_image_name">Bildname speichern</string>
+    <string name="delete_image">Bild löschen</string>
+    <string name="take_picture">Kamera</string>
+    <string name="choose_from_gallery">Galerie</string>
 
     <string name="pdf">pdf</string>
     <string name="add_pdf">pdf hinzufügen</string>
@@ -119,6 +124,7 @@
     <string name="add_label">Label hinzufügen</string>
     <string name="edit_label">Label bearbeiten</string>
     <string name="delete_label">Label löschen</string>
+    <string name="label_selected">Label ausgewählt</string>
     <string name="label_delete_confirm">Das Label wirklich löschen?</string>
     <string name="no_labels_available">Keine Labels verfügbar</string>
 

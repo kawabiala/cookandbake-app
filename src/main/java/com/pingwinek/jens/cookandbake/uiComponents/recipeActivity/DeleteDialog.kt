@@ -2,21 +2,16 @@ package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.pingwinek.jens.cookandbake.R
 
 @Composable
 fun DeleteDialog(
-    dialogMode: Delete,
+    deleteTarget: DeleteTarget,
     onClose: () -> Unit,
-    onDelete: (delete: Delete) -> Unit
+    onDelete: (DeleteTarget) -> Unit
 ) {
     com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DeleteDialog(
-        message = when (dialogMode) {
-            Delete.RECIPE -> stringResource(R.string.delete_recipe)
-            Delete.INGREDIENT -> stringResource(R.string.delete_ingredient)
-            Delete.NONE -> ""
-        },
+        message =  deleteTarget.messageId?.let { stringResource(it) } ?: "",
         onClose = { onClose() },
-        onDelete = { onDelete(dialogMode) }
+        onDelete = { onDelete(deleteTarget) }
     )
 }

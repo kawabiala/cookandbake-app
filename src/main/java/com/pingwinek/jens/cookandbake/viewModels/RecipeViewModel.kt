@@ -12,6 +12,7 @@ import com.pingwinek.jens.cookandbake.R
 import com.pingwinek.jens.cookandbake.ShareableRecipe
 import com.pingwinek.jens.cookandbake.lib.TypedQueue
 import com.pingwinek.jens.cookandbake.models.FileInfo
+import com.pingwinek.jens.cookandbake.models.ImageInfo
 import com.pingwinek.jens.cookandbake.models.Ingredient
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.models.Tag
@@ -37,6 +38,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private val privateIngredientListData = MutableLiveData<LinkedList<Ingredient>>().apply {
         value = LinkedList()
     }
+    private val privateImageGalleryInfos = MutableLiveData<List<ImageInfo>>().apply {
+        value = listOf()
+    }
     private val privateAvailableTagListData = MutableLiveData<LinkedList<Tag>>().apply {
         value = LinkedList()
     }
@@ -50,6 +54,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     val recipeData: LiveData<Recipe> = privateRecipeData
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
+    val imageGalleryInfos: LiveData<List<ImageInfo>> = privateImageGalleryInfos
     val availableTagListData: LiveData<LinkedList<Tag>> = privateAvailableTagListData
     val attachedTagListData: LiveData<LinkedList<Tag>> = privateAttachedTagListData
 
@@ -60,6 +65,23 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
 
     init {
         recipeRepository.registerQueueListener(this)
+    }
+
+    fun addImage(uri: Uri) {
+        recipeData.value?.let { recipe ->
+            viewModelScope.launch(Dispatchers.IO) {
+                val imageInfo = recipeRepository.addImage(recipe, uri)
+
+                imageInfo?.let { nonNullImageInfo ->
+                    val imageInfoList = imageGalleryInfos.value ?: listOf()
+                    privateImageGalleryInfos.postValue(
+                        imageInfoList.toMutableList().apply {
+                            add(nonNullImageInfo)
+                        }
+                    )
+                }
+            }
+        }
     }
 
     fun attachDocument(uri: Uri) {
@@ -101,6 +123,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
                         ingredientRepository.delete(ingredient)
                     }
                 }
+            }
+        }
+    }
+
+    fun deleteImage(imageId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            recipeData.value?.let { recipe ->
+                recipeRepository.deleteImage(recipe, imageId)
+
+                loadImageGalleryInfos()
             }
         }
     }
@@ -157,8 +189,17 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
             viewModelScope.launch(Dispatchers.IO) {
                 privateRecipeData.postValue(recipeRepository.get(id))
                 loadIngredients()
+                loadImageGalleryInfos()
                 loadTags()
             }
+        }
+    }
+
+    private suspend fun loadImageGalleryInfos() {
+        recipeId?.let { id ->
+            privateImageGalleryInfos.postValue(
+                recipeRepository.getAllImageGallery(recipeRepository.get(id))
+            )
         }
     }
 
@@ -219,39 +260,23 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun saveTags(tags: Map<Tag, Boolean>) {
+    fun saveTags(selectedTags: List<Tag>) {
+        val currentRecipe = recipeData.value ?: return
+        val updateTags = selectedTags.map { it.id }
+
         viewModelScope.launch(Dispatchers.IO) {
-            recipeData.value?.let { recipe ->
-                val availableTags = tagRepository.getAll()
-                val saveTags: MutableList<String> =
-                    attachedTagListData.value?.mapTo(mutableListOf()) { tag -> tag.id } ?: mutableListOf()
-
-                tags.forEach { (tag, newOrDelete) ->
-
-                    if (newOrDelete) {
-                        if (availableTags.find { availableTag ->
-                            availableTag == tag } == null) {
-                            saveTags.remove(tag.id)
-                        } else {
-                            saveTags.add(tag.id)
-                        }
-                    } else {
-                        saveTags.remove(tag.id)
-                    }
-                }
 
                 privateRecipeData.postValue(
                     recipeRepository.updateRecipe(
-                        recipe,
-                        recipe.title,
-                        recipe.description,
-                        recipe.instruction,
-                        saveTags
+                        currentRecipe,
+                        currentRecipe.title,
+                        currentRecipe.description,
+                        currentRecipe.instruction,
+                        updateTags
                     )
                 )
 
                 loadTags()
-            }
         }
     }
 
@@ -276,6 +301,24 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    fun updateImageName(imageName: String) {
+        recipeData.value?.let { recipe ->
+            viewModelScope.launch(Dispatchers.IO) {
+                val imageInfo = recipeRepository.updateImageName(recipe, imageName)
+
+                imageInfo?.let { nonNullImageInfo ->
+                    val imageInfoList = imageGalleryInfos.value ?: listOf()
+                    privateImageGalleryInfos.postValue(
+                        imageInfoList.toMutableList().apply {
+                            val index = this.indexOfFirst { it.imageId == nonNullImageInfo.imageId }
+                            this[index] = nonNullImageInfo
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     private fun mapActionMessage(actionMessage: RecipeRepository.RecipeExceptionMessage): String {
         return when (actionMessage) {
             RecipeRepository.RecipeExceptionMessage.ATTACHMENT_DELETE_FAILED -> { getString(R.string.attachmentDeleteFailed) }
@@ -284,6 +327,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
             RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_NAME_OR_SIZE -> { getString(R.string.attachmentWithoutNameOrSize) }
             RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITHOUT_TYPE_INFORMATION -> { getString(R.string.attachmentWithoutTypeInformation) }
             RecipeRepository.RecipeExceptionMessage.ATTACHMENT_WITH_UNSUPPORTED_SIZE -> { getString(R.string.attachmentWithUnsupportedSize) }
+            RecipeRepository.RecipeExceptionMessage.IMAGE_GALLERY_DOWNLOAD_URIS_FAILED -> { "" }
             RecipeRepository.RecipeExceptionMessage.RECIPE_LIST_LOAD_FAILED -> { getString(R.string.recipeListLoadingFailed) }
             RecipeRepository.RecipeExceptionMessage.RECIPE_UPDATE_FAILED -> { getString(R.string.recipeUpdateFailed) }
         }

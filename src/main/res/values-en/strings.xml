@@ -102,6 +102,11 @@
     <string name="plus_new_ingredient">+ new ingredient</string>
 
     <string name="gallery">Gallery</string>
+    <string name="edit_image_name">Edit image name</string>
+    <string name="save_image_name">Save image name</string>
+    <string name="delete_image">Delete image</string>
+    <string name="take_picture">Take picture</string>
+    <string name="choose_from_gallery">Choose from gallery</string>
 
     <string name="pdf">pdf</string>
     <string name="add_pdf">add pdf</string>
@@ -119,6 +124,7 @@
     <string name="add_label">Add Label</string>
     <string name="edit_label">Edit Label</string>
     <string name="delete_label">Delete Label</string>
+    <string name="label_selected">Label Selected</string>
     <string name="label_delete_confirm">Really delete label?</string>
     <string name="no_labels_available">No labels available</string>
 
