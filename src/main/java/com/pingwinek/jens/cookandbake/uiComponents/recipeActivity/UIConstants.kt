@@ -5,7 +5,6 @@ enum class Mode {
     SHOW_IMAGE,
     EDIT_RECIPE,
     EDIT_INGREDIENT,
-    EDIT_INSTRUCTION,
     EDIT_TAGS
 }
 enum class FabMode { NONE, ADD_INGREDIENT, ADD_IMAGE }

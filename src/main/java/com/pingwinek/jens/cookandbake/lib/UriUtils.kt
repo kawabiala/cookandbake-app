@@ -2,6 +2,8 @@ package com.pingwinek.jens.cookandbake.lib
 
 import android.content.ContentResolver
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -85,5 +87,16 @@ class UriUtils private constructor(context: Context){
         }
 
         return inputStream
+    }
+
+    fun toBitmap(uri: Uri): Bitmap? {
+        var bitmap: Bitmap? = null
+
+        openInputStream(uri)?.let { inputStream ->
+            bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+        }
+
+        return bitmap
     }
 }

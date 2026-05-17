@@ -1,6 +1,5 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -13,31 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Attachment
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.pingwinek.jens.cookandbake.R
-import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
-import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksDropDown
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.SpacerSmall
 
 @Composable
@@ -48,37 +36,11 @@ fun ShowRecipe(
     labels: List<String>,
     hasAttachment: Boolean,
     isAttachmentLoading: Boolean,
-    onEditRecipe: () -> Unit,
-    onDeleteRecipe: () -> Unit,
-    onAttachDocument: () -> Unit,
-    onDeleteDocument: () -> Unit,
     onAttachmentClicked: () -> Unit,
-    onEditTags: () -> Unit
 ) {
-    var showButtons by remember(recipeTitle) { mutableStateOf(recipeTitle.isEmpty()) }
-    var expanded by remember { mutableStateOf(false) }
-
-    val optionUpdate = PingwinekCooksComposableHelpers.OptionItem(
-        labelResourceId = R.string.update_attachment,
-        icon = Icons.Filled.Attachment,
-        onClick = {
-            onAttachDocument()
-            expanded = false
-        }
-    )
-
-    val optionDelete = PingwinekCooksComposableHelpers.OptionItem(
-        labelResourceId = R.string.delete_attachment,
-        icon = Icons.Filled.Delete,
-        onClick = {
-            onDeleteDocument()
-            expanded = false
-        }
-    )
 
     Column(
         modifier = Modifier
-            .clickable { showButtons = !showButtons }
     ) {
 
         Row(
@@ -124,32 +86,6 @@ fun ShowRecipe(
                     }
                 }
             }
-
-            if (showButtons) {
-                IconButton(onClick = onEditRecipe) {
-                    Icon(Icons.Filled.Edit, stringResource(R.string.edit_recipe))
-                }
-
-                IconButton(onClick = onDeleteRecipe) {
-                    Icon(Icons.Filled.Delete, stringResource(R.string.delete_recipe))
-                }
-
-                if (hasAttachment) {
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Icon(Icons.Filled.MoreVert, stringResource(R.string.more))
-                        PingwinekCooksDropDown(
-                            expanded = expanded,
-                            options = listOf(optionUpdate, optionDelete)
-                        ) {
-                            expanded = false
-                        }
-                    }
-                } else {
-                    IconButton(onClick = onAttachDocument) {
-                        Icon(Icons.Filled.Attachment, stringResource(R.string.attach_document))
-                    }
-                }
-            }
         }
 
         SpacerSmall()
@@ -170,7 +106,7 @@ fun ShowRecipe(
                     labels.forEach { label ->
                         InputChip(
                             selected = true,
-                            onClick = { showButtons = !showButtons },
+                            onClick = {},
                             label = {
                                 Text(
                                     text = label,
@@ -183,17 +119,6 @@ fun ShowRecipe(
                             shape = RoundedCornerShape(16.dp)
                         )
                     }
-                }
-            }
-
-            if (showButtons) {
-                FilledTonalIconButton(
-                    onClick = onEditTags
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.Label,
-                        stringResource(R.string.manage_labels)
-                    )
                 }
             }
         }

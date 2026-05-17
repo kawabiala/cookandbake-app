@@ -1,7 +1,6 @@
 package com.pingwinek.jens.cookandbake.repos
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.core.graphics.scale
@@ -40,38 +39,26 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     private val queue = TypedQueue<RecipeExceptionMessage>(10)
 
     suspend fun addImage(recipe: Recipe, uri: Uri) : ImageInfo? {
-        var bitmap: Bitmap? = null
+        var imageName = uriUtils.getNameForUri(uri)
+        if (imageName.isNullOrEmpty()) imageName = ""
 
+        val imageId = "${getRandomString(SIZE_OF_RANDOM_STRING)}.${FileFormat.SUFFIX}"
+
+        var bitmap: Bitmap? = uriUtils.toBitmap(uri)
+/*
         uriUtils.openInputStream(uri)?.let { inputStream ->
             bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream.close()
         } ?: Log.e(this::class.java.name, "inputstream is null")
-
-        var imageName = uriUtils.getNameForUri(uri)
-        if (imageName.isNullOrEmpty()) imageName = ""
-
-        val imageId = "${getRandomString(20)}.${FileFormat.SUFFIX}"
-
+*/
         if (bitmap == null) {
             Log.e(this::class.java.name, "bitmap is null")
             return null
         }
 
-        Log.i(this::class.java.name, "bitmap height ${bitmap.height}, bytes ${bitmap.allocationByteCount}, density ${bitmap.density}")
         bitmap = scaleBitmap(bitmap)
-        Log.i(this::class.java.name, "bitmap height ${bitmap.height}, bytes ${bitmap.allocationByteCount}, density ${bitmap.density}")
 
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(FileFormat.compressFormat, 100, outputStream)
-        val inputStream = ByteArrayInputStream(outputStream.toByteArray())
-
-        val returnValue = FileSourceFB.uploadInputStream(
-            getImageGalleryFilePATH(recipe.id, imageId),
-            inputStream,
-            imageName)
-        bitmap.recycle()
-
-        return returnValue
+        return uploadImage(getImageGalleryFilePATH(recipe.id, imageId), imageName, bitmap)
     }
 
     suspend fun delete(recipe: Recipe) {
@@ -251,6 +238,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     companion object : SingletonHolder<RecipeRepository, PingwinekCooksApplication>(::RecipeRepository) {
 
         private const val ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm"
+        private const val SIZE_OF_RANDOM_STRING = 20
         const val MAX_PIXELS_LONGEST_SIZE = 1000
         const val MAX_ATTACHMENT_SIZE: Long = 1024*1024*4
 
@@ -297,6 +285,23 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
             Log.i(this::class.java.name, "scaleBitmap: compressFactor $compressFactor")
 
             return bitmap.scale(width / compressFactor, height / compressFactor)
+        }
+
+        private suspend fun uploadImage(pathString: String, imageName: String, bitmap: Bitmap): ImageInfo? {
+            val outputStream = ByteArrayOutputStream()
+            bitmap.compress(FileFormat.compressFormat, 100, outputStream)
+            val inputStream = ByteArrayInputStream(outputStream.toByteArray())
+
+            val returnValue = FileSourceFB.uploadInputStream(
+                pathString,
+                inputStream,
+                imageName)
+
+            inputStream.close()
+            outputStream.close()
+            bitmap.recycle()
+
+            return returnValue
         }
 
     }

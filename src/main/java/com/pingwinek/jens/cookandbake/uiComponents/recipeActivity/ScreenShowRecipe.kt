@@ -1,10 +1,17 @@
 package com.pingwinek.jens.cookandbake.uiComponents.recipeActivity
 
 import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
@@ -40,17 +47,20 @@ fun ScreenShowRecipe(
     loadAttachment: () -> Unit,
     bulkUpdateIngredients: (Map<Ingredient, Int>) -> Unit,
     onEditRecipe: () -> Unit,
-    onEditInstruction: () -> Unit,
     onEditTags: () -> Unit,
     onEditIngredient: (String?) -> Unit,
     onImageSelected: (String) -> Unit,
     onAddImage: (Boolean) -> Unit,
-    onTabeModeChange: (TabMode) -> Unit,
+    onTabModeChange: (TabMode) -> Unit,
     onShareRecipe: () -> Unit,
     onHasShownSnackBar: () -> Unit,
     onFinish: () -> Unit,
     exceptionMessage: String?,
 ) {
+    var deleteTarget by remember {
+        mutableStateOf<DeleteTarget>(DeleteTarget.NONE)
+    }
+
     var ingredientsEditMode by remember { mutableStateOf(false) }
     val fabMode by remember(tabMode, ingredientsEditMode) {
         derivedStateOf {
@@ -65,11 +75,69 @@ fun ScreenShowRecipe(
         }
     }
 
+    val attachmentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            attachDocument(uri)
+        }
+    }
+
     val fabIcon = Icons.Filled.Add
     val fabIconLabel = when (fabMode) {
         FabMode.ADD_INGREDIENT -> stringResource(R.string.plus_new_ingredient)
         FabMode.ADD_IMAGE -> "addImage"
         FabMode.NONE -> ""
+    }
+
+    val onIngredientFunctionsMode: (Boolean) -> Unit = {
+        ingredientsEditMode = it
+    }
+
+    val onAttachDocument: () -> Unit = {
+        attachmentPickerLauncher.launch(arrayOf("application/pdf", "image/*"))
+    }
+
+    val onCloseDeleteDialog: () -> Unit = {
+        deleteTarget = DeleteTarget.NONE
+    }
+
+    val onDelete: (deleteTarget: DeleteTarget) -> Unit = { target ->
+        when (target) {
+            is DeleteTarget.NONE -> {}
+            is DeleteTarget.RECIPE -> {
+                deleteRecipe()
+            }
+            is DeleteTarget.ATTACHMENT -> {
+                deleteAttachment()
+            }
+            is DeleteTarget.INGREDIENT -> {
+                deleteIngredient(target.ingredient)
+                onIngredientFunctionsMode(false)
+            }
+            is DeleteTarget.IMAGE -> {}
+        }
+        deleteTarget = DeleteTarget.NONE
+    }
+
+    val onDeleteIngredient: (ingredientId: String) -> Unit = { id ->
+        val deleteIngredient = ingredients.find { ingredient ->
+            ingredient.id == id
+        }
+        if (deleteIngredient != null) {
+            deleteTarget = DeleteTarget.INGREDIENT(deleteIngredient)
+        } else  {
+            Log.e("ScaffoldShowRecipe", "ingredient not found")
+            deleteTarget = DeleteTarget.NONE
+        }
+    }
+
+    val onDeleteRecipe: () -> Unit = {
+        deleteTarget = DeleteTarget.RECIPE
+    }
+
+    val onDeleteAttachment: () -> Unit = {
+        deleteTarget = DeleteTarget.ATTACHMENT
     }
 
     val onFabClicked: () -> Unit = {
@@ -82,14 +150,16 @@ fun ScreenShowRecipe(
         }
     }
 
-    val onIngredientFunctionsMode: (Boolean) -> Unit = {
-        ingredientsEditMode = it
-    }
-
     val optionBack = PingwinekCooksComposableHelpers.OptionItem(
         labelResourceId = R.string.back,
         icon = Icons.AutoMirrored.Outlined.ArrowBack,
         onClick = onFinish
+    )
+
+    val optionEditRecipe = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.edit_recipe,
+        icon = Icons.Filled.Edit,
+        onClick = onEditRecipe
     )
 
     val optionShare = PingwinekCooksComposableHelpers.OptionItem(
@@ -97,6 +167,49 @@ fun ScreenShowRecipe(
         icon = Icons.Filled.Share,
         onClick = onShareRecipe
     )
+
+    val optionDeleteRecipe = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.delete_recipe,
+        icon = Icons.Filled.Delete,
+        onClick = onDeleteRecipe
+    )
+
+    val optionAttachDocument = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.attach_document,
+        icon = Icons.Filled.Add,
+        onClick = onAttachDocument
+    )
+
+    val optionUpdateDocument = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.update_attachment,
+        icon = Icons.Filled.Attachment,
+        onClick = onAttachDocument
+    )
+
+    val optionDeleteDocument = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.delete_attachment,
+        icon = Icons.Filled.Delete,
+        onClick = onDeleteAttachment
+    )
+
+    val optionEditTags = PingwinekCooksComposableHelpers.OptionItem(
+        labelResourceId = R.string.manage_labels,
+        icon = Icons.AutoMirrored.Outlined.Label,
+        onClick = onEditTags
+    )
+
+    val dropDownOptions = mutableListOf(
+        optionShare,
+        optionDeleteRecipe,
+        optionEditTags,
+    ).apply {
+        if (recipeHasAttachment) {
+            add(optionUpdateDocument)
+            add(optionDeleteDocument)
+        } else {
+            add(optionAttachDocument)
+        }
+    }.toList()
 
     val fabMenuItems by remember(fabMode) {
         derivedStateOf {
@@ -119,10 +232,20 @@ fun ScreenShowRecipe(
         }
     }
 
+    if (deleteTarget != DeleteTarget.NONE) {
+        DeleteDialog(
+            deleteTarget = deleteTarget,
+            onClose = onCloseDeleteDialog,
+            onDelete = onDelete
+        )
+    }
+
     PingwinekCooksScaffold(
         title = "",
         optionItemLeft = optionBack,
-        optionItemMid = optionShare,
+        optionItemMid = optionEditRecipe,
+        showDropDown = true,
+        dropDownOptions = dropDownOptions,
         navigationBarVisible = false,
         showFab = (fabMode != FabMode.NONE),
         fabIcon = fabIcon,
@@ -147,20 +270,21 @@ fun ScreenShowRecipe(
             ingredients = ingredients,
             imageGalleryInfos = imageGalleryInfos,
             isLoadingAttachment = isLoadingAttachment,
-            deleteRecipe = deleteRecipe,
-            deleteIngredient = deleteIngredient,
-            attachDocument = attachDocument,
-            onDeleteDocument = deleteAttachment,
             onAttachmentClicked = loadAttachment,
             onChangeSortIngredient = bulkUpdateIngredients,
-            onEditRecipe = onEditRecipe,
-            onEditInstruction = onEditInstruction,
-            onEditTags = onEditTags,
             onEditIngredient = onEditIngredient,
+            onDeleteIngredient = onDeleteIngredient,
             onIngredientFunctionsMode = onIngredientFunctionsMode,
             onImageSelected = onImageSelected,
-            onTabModeChange = onTabeModeChange,
+            onTabModeChange = onTabModeChange,
         )
     }
+}
 
+sealed class DeleteTarget(val messageId: Int? = null) {
+    object NONE: DeleteTarget()
+    object RECIPE: DeleteTarget(R.string.delete_recipe)
+    object ATTACHMENT: DeleteTarget(R.string.delete_attachment)
+    data class INGREDIENT(val ingredient: Ingredient): DeleteTarget(R.string.delete_ingredient)
+    object IMAGE: DeleteTarget()
 }

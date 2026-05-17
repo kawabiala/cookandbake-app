@@ -32,7 +32,6 @@ import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.DeleteDialog
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.EditIngredient
-import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.EditInstruction
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.EditRecipe
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.EditTags
 import com.pingwinek.jens.cookandbake.uiComponents.recipeActivity.Mode
@@ -165,12 +164,11 @@ class RecipeActivity: AppCompatActivity() {
                             loadAttachment = { recipeModel.loadAttachment() },
                             bulkUpdateIngredients = { map -> recipeModel.bulkUpdateIngredients(map) },
                             onEditRecipe = { mode = Mode.EDIT_RECIPE },
-                            onEditInstruction = { mode = Mode.EDIT_INSTRUCTION },
                             onEditTags = { mode = Mode.EDIT_TAGS },
                             onEditIngredient = onEditIngredient,
                             onImageSelected = onImageSelected,
                             onAddImage = onAddImage,
-                            onTabeModeChange = { changedTabMode -> tabMode = changedTabMode },
+                            onTabModeChange = { changedTabMode -> tabMode = changedTabMode },
                             onShareRecipe = { startActivity(getShareRecipeIntent()) },
                             onHasShownSnackBar = { recipeModel.resetMessage() },
                             onFinish = { finish() },
@@ -237,8 +235,8 @@ class RecipeActivity: AppCompatActivity() {
 
                     Mode.EDIT_RECIPE -> {
 
-                        val onSave: (String, String) -> Unit = { recipeTitle, recipeDescription ->
-                            recipeModel.saveRecipe(recipeTitle, recipeDescription, recipe?.instruction ?: "")
+                        val onSave: (String, String, String) -> Unit = { recipeTitle, recipeDescription, instruction ->
+                            recipeModel.saveRecipe(recipeTitle, recipeDescription, instruction)
                             mode = Mode.SHOW_RECIPE
                         }
 
@@ -252,6 +250,7 @@ class RecipeActivity: AppCompatActivity() {
                                 paddingValues = paddingValues,
                                 recipeTitle = recipe?.title ?: "",
                                 recipeDescription = recipe?.description ?: "",
+                                instruction = recipe?.instruction ?: "",
                                 onCancel = { mode = Mode.SHOW_RECIPE },
                                 onSave = onSave
                             )
@@ -306,34 +305,6 @@ class RecipeActivity: AppCompatActivity() {
                                 ingredientIsGroupHeader = ingredient?.isGroupHeader ?: false,
                                 onCancel = onCancel,
                                 onSave = onSave,
-                            )
-                        }
-                    }
-
-                    Mode.EDIT_INSTRUCTION -> {
-
-                        val onSave: (String) -> Unit = { instruction ->
-                            recipe?.let { nonNullRecipe ->
-                                recipeModel.saveRecipe(
-                                    title = nonNullRecipe.title,
-                                    description = nonNullRecipe.description ?: "",
-                                    instruction = instruction
-                                )
-                            }
-                            mode = Mode.SHOW_RECIPE
-                        }
-
-                        PingwinekCooksScaffold(
-                            title = "",
-                            navigationBarVisible = false,
-                            snackbarMessage = exceptionMessage,
-                            onHasShownSnackbar = { recipeModel.resetMessage() }
-                        ) { paddingValues ->
-                            EditInstruction(
-                                paddingValues = paddingValues,
-                                instruction = recipe?.instruction ?: "",
-                                onCancel = { mode = Mode.SHOW_RECIPE },
-                                onSave = onSave
                             )
                         }
                     }
