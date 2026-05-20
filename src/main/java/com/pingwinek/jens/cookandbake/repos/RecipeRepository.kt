@@ -45,12 +45,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         val imageId = "${getRandomString(SIZE_OF_RANDOM_STRING)}.${FileFormat.SUFFIX}"
 
         var bitmap: Bitmap? = uriUtils.toBitmap(uri)
-/*
-        uriUtils.openInputStream(uri)?.let { inputStream ->
-            bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream.close()
-        } ?: Log.e(this::class.java.name, "inputstream is null")
-*/
+
         if (bitmap == null) {
             Log.e(this::class.java.name, "bitmap is null")
             return null

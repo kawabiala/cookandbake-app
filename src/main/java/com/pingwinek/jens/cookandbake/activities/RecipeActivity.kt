@@ -240,6 +240,14 @@ class RecipeActivity: AppCompatActivity() {
                             mode = Mode.SHOW_RECIPE
                         }
 
+                        val onCancel: () -> Unit = {
+                            if (recipeModel.recipeId != null) {
+                                mode = Mode.SHOW_RECIPE
+                            } else {
+                                finish()
+                            }
+                        }
+
                         PingwinekCooksScaffold(
                             title = "",
                             navigationBarVisible = false,
@@ -251,7 +259,7 @@ class RecipeActivity: AppCompatActivity() {
                                 recipeTitle = recipe?.title ?: "",
                                 recipeDescription = recipe?.description ?: "",
                                 instruction = recipe?.instruction ?: "",
-                                onCancel = { mode = Mode.SHOW_RECIPE },
+                                onCancel = onCancel,
                                 onSave = onSave
                             )
                         }

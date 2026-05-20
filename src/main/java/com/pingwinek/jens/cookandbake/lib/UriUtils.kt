@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import java.io.FileNotFoundException
 import java.io.InputStream
 
@@ -91,12 +92,25 @@ class UriUtils private constructor(context: Context){
 
     fun toBitmap(uri: Uri): Bitmap? {
         var bitmap: Bitmap? = null
+        var orientation = 0
+
+        openInputStream(uri)?.let { inputStream ->
+            orientation = ExifInterface(inputStream).rotationDegrees
+            inputStream.close()
+        }
 
         openInputStream(uri)?.let { inputStream ->
             bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream.close()
         }
 
+        bitmap = bitmap?.rotate(orientation.toFloat())
+
         return bitmap
+    }
+
+    fun Bitmap.rotate(degrees: Float): Bitmap {
+        val matrix = android.graphics.Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
     }
 }
