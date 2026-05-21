@@ -93,6 +93,10 @@ class RecipeActivity: AppCompatActivity() {
                     mutableStateOf(null)
                 }
 
+                if (tabMode == TabMode.IMAGE && recipeModel.imageGalleryLoaded.value == false) {
+                    recipeModel.loadImageGallery()
+                }
+
                 when (mode) {
                     Mode.SHOW_RECIPE -> {
 
@@ -349,6 +353,7 @@ class RecipeActivity: AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        recipeModel.invalidateImageGallery()
         recipeModel.loadData()
     }
 

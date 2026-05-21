@@ -41,6 +41,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     private val privateImageGalleryInfos = MutableLiveData<List<ImageInfo>>().apply {
         value = listOf()
     }
+    private val privateImageGalleryLoaded = MutableLiveData(false)
     private val privateAvailableTagListData = MutableLiveData<LinkedList<Tag>>().apply {
         value = LinkedList()
     }
@@ -55,6 +56,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
     val recipeAttachment: LiveData<FileInfo?> = privateRecipeAttachment
     val ingredientListData: LiveData<LinkedList<Ingredient>> = privateIngredientListData
     val imageGalleryInfos: LiveData<List<ImageInfo>> = privateImageGalleryInfos
+    val imageGalleryLoaded: LiveData<Boolean> = privateImageGalleryLoaded
     val availableTagListData: LiveData<LinkedList<Tag>> = privateAvailableTagListData
     val attachedTagListData: LiveData<LinkedList<Tag>> = privateAttachedTagListData
 
@@ -171,6 +173,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    fun invalidateImageGallery() {
+        privateImageGalleryLoaded.postValue(false)
+    }
+
     fun loadAttachment() {
         privateIsUpOrDownloading.postValue(true)
         viewModelScope.launch(Dispatchers.IO) {
@@ -189,10 +195,17 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
             viewModelScope.launch(Dispatchers.IO) {
                 privateRecipeData.postValue(recipeRepository.get(id))
                 loadIngredients()
-                loadImageGalleryInfos()
                 loadTags()
             }
         }
+    }
+
+    fun loadImageGallery() {
+        viewModelScope.launch(Dispatchers.IO) {
+            loadImageGalleryInfos()
+        }
+        // not waiting for for the image gallery to load, to avoid race condition in the activity
+        privateImageGalleryLoaded.postValue(true)
     }
 
     private suspend fun loadImageGalleryInfos() {
