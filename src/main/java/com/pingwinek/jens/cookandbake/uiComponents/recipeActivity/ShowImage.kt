@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -94,11 +95,15 @@ fun ShowImage(
 }
 
 @Composable
-fun ShowImageName(
+fun RowScope.ShowImageName(
     imageInfo: ImageInfo,
     toggleIsEditImageName: () -> Unit
 ) {
-    Text(text = imageInfo.imageName)
+    Text(
+        modifier = Modifier
+            .weight(0.9f),
+        text = imageInfo.imageName
+    )
 
     IconButton(
         onClick = toggleIsEditImageName
@@ -108,7 +113,7 @@ fun ShowImageName(
 }
 
 @Composable
-fun EditImageName(
+fun RowScope.EditImageName(
     imageInfo: ImageInfo,
     saveImageName: (String) -> Unit
 ) {
@@ -119,6 +124,8 @@ fun EditImageName(
     }
 
     TextField(
+        modifier = Modifier
+            .weight(0.9f),
         value = imageName,
         onValueChange = { changedString ->
             imageName = changedString
@@ -140,7 +147,8 @@ fun ShowImagePreview() {
         imageInfo = ImageInfo(
             imageId = "imageId",
             downloadUri = "https://example.com/image.jpg".toUri(),
-            imageName = "Delicious Cake"
+//            imageName = "Delicious Cake"
+            imageName = "Very long long long long long long long image name for test purposes"
         ),
         updateImageName = {}
     )

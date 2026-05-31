@@ -182,7 +182,7 @@ class RecipeActivity: AppCompatActivity() {
 
                     Mode.SHOW_IMAGE -> {
 
-                        val imageInfo by remember(imageIdTemp) {
+                        val imageInfo by remember(imageIdTemp, imageGalleryInfos) {
                             derivedStateOf { imageGalleryInfos.find { imageInfo -> imageInfo.imageId == imageIdTemp } }
                         }
 
@@ -198,7 +198,9 @@ class RecipeActivity: AppCompatActivity() {
                         }
 
                         val updateImageName: (String) -> Unit = { imageName ->
-                            recipeModel.updateImageName(imageName)
+                            imageIdTemp?.let { imageId ->
+                                recipeModel.updateImageName(imageId, imageName)
+                            }
                         }
 
                         val optionBack = PingwinekCooksComposableHelpers.OptionItem(

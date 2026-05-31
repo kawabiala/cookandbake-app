@@ -314,10 +314,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-    fun updateImageName(imageName: String) {
+    fun updateImageName(imageId: String, imageName: String) {
         recipeData.value?.let { recipe ->
             viewModelScope.launch(Dispatchers.IO) {
-                val imageInfo = recipeRepository.updateImageName(recipe, imageName)
+                val imageInfo = recipeRepository.updateImageName(recipe, imageId, imageName)
 
                 imageInfo?.let { nonNullImageInfo ->
                     val imageInfoList = imageGalleryInfos.value ?: listOf()

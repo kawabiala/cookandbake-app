@@ -53,7 +53,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
 
         bitmap = scaleBitmap(bitmap)
 
-        return uploadImage(getImageGalleryFilePATH(recipe.id, imageId), imageName, bitmap)
+        return uploadImage(getImageGalleryFilePath(recipe.id, imageId), imageName, bitmap)
     }
 
     suspend fun delete(recipe: Recipe) {
@@ -75,7 +75,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
     }
 
     suspend fun deleteImage(recipe: Recipe, imageId: String) {
-        FileSourceFB.deleteFile(getImageGalleryFilePATH(recipe.id, imageId))
+        FileSourceFB.deleteFile(getImageGalleryFilePath(recipe.id, imageId))
     }
 
     suspend fun get(id: String): Recipe {
@@ -203,8 +203,8 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
         )
     }
 
-    suspend fun updateImageName(recipe: Recipe, imageName: String): ImageInfo? {
-        return FileSourceFB.updateImageName(getImageGalleryDirPath(recipe.id), imageName)
+    suspend fun updateImageName(recipe: Recipe, imageId: String, imageName: String): ImageInfo? {
+        return FileSourceFB.updateImageName(getImageGalleryFilePath(recipe.id, imageId), imageName)
     }
 
     suspend fun updateRecipe(
@@ -259,7 +259,7 @@ class RecipeRepository private constructor(val application: PingwinekCooksApplic
             return "$RECIPE_FILE_PATH/$id/$IMAGE_GALLERY_DIR_PATH"
         }
 
-        private fun getImageGalleryFilePATH(id: String, imageId: String) : String {
+        private fun getImageGalleryFilePath(id: String, imageId: String) : String {
             return "${getImageGalleryDirPath(id)}/$imageId"
         }
 

@@ -108,7 +108,7 @@ fun EditIngredient(
                 }
             )
 
-            if (! ingredientIsGroupHeader) {
+            if (! ingredientIsGroupHeaderTemp) {
                 TextField(
                     value = tmpQuantity,
 //                    value = Utils.quantityToString(ingredientQuantity),
