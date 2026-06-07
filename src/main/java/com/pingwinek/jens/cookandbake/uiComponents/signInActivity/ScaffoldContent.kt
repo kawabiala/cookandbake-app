@@ -221,16 +221,12 @@ private fun determineViewSetting(
                 View.RESET_REQUEST
             } else {
                 View.VERIFIED
-                //signInView
-                //registerView
             }
         }
 
         AuthService.AuthStatus.SIGNED_IN -> {
             if (linkMode == EmailLinkMode.RESET) {
                 View.RESET
-            } else if (linkMode == EmailLinkMode.VERIFIED) {
-                View.VERIFIED
             } else if (showResetPasswordRequest) {
                 View.RESET_REQUEST
             } else {

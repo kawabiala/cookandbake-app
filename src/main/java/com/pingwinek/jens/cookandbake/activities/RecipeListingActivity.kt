@@ -25,18 +25,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.pingwinek.jens.cookandbake.EXTRA_RECIPE_ID
 import com.pingwinek.jens.cookandbake.PingwinekCooksApplication
 import com.pingwinek.jens.cookandbake.R
+import com.pingwinek.jens.cookandbake.lib.AuthService
 import com.pingwinek.jens.cookandbake.models.Recipe
 import com.pingwinek.jens.cookandbake.uiComponents.PingwinekCooksComposableHelpers
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksAppTheme
 import com.pingwinek.jens.cookandbake.uiComponents.pingwinekCooks.PingwinekCooksScaffold
 import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.CategoriesDrawerSheet
 import com.pingwinek.jens.cookandbake.uiComponents.recipeListingActivity.ScaffoldContent
+import com.pingwinek.jens.cookandbake.viewModels.AuthenticationViewModel
 import com.pingwinek.jens.cookandbake.viewModels.RecipeListingViewModel
 import kotlinx.coroutines.launch
 import java.util.LinkedList
@@ -44,7 +43,7 @@ import java.util.LinkedList
 class RecipeListingActivity : AppCompatActivity() {
 
     private lateinit var recipeListingModel: RecipeListingViewModel
-    private lateinit var auth: FirebaseAuth
+    private lateinit var authenticationViewModel: AuthenticationViewModel
 
     private lateinit var recipeListData: LiveData<LinkedList<Recipe>>
     private lateinit var recipesByLabelListData: LiveData<LinkedList<Pair<String, LinkedList<Recipe>>>>
@@ -55,15 +54,20 @@ class RecipeListingActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        auth = Firebase.auth
-
         recipeListingModel = ViewModelProvider
             .AndroidViewModelFactory
             .getInstance(application)
             .create(RecipeListingViewModel::class.java)
 
+        authenticationViewModel = ViewModelProvider
+            .AndroidViewModelFactory
+            .getInstance(application)
+            .create(AuthenticationViewModel::class.java)
+
         recipeListData = recipeListingModel.recipeListData
         recipesByLabelListData = recipeListingModel.recipesByLabelListData
+
+        authenticationViewModel.checkAuthStatus()
 
         val startImpressumActivity: () -> Unit = {
             startActivity(Intent(this@RecipeListingActivity, ImpressumActivity::class.java)
@@ -141,6 +145,10 @@ class RecipeListingActivity : AppCompatActivity() {
                 val recipes by recipeListData.observeAsState()
                 val recipesByLabel by recipesByLabelListData.observeAsState()
 
+                val authStatus by authenticationViewModel.authStatus.observeAsState()
+                val loggedIn = authStatus == AuthService.AuthStatus.SIGNED_IN
+                val verified = authStatus == AuthService.AuthStatus.VERIFIED
+
                 var labelFilter: String? by remember {
                     mutableStateOf(null)
                 }
@@ -171,21 +179,21 @@ class RecipeListingActivity : AppCompatActivity() {
                         ))
                     }
 
-                val loggedIn by remember(recipes, auth.currentUser) {
-                    mutableStateOf(auth.currentUser != null)
-                }
-
-                val verified by remember(recipes, auth.currentUser) {
-                    mutableStateOf(auth.currentUser?.isEmailVerified == true)
-                }
-
-                val optionItemMenu = PingwinekCooksComposableHelpers.OptionItem(
-                    labelResourceId = R.string.labels,
-                    icon = Icons.Filled.Menu
-                ) {
-                    scope.launch {
-                        drawerState.open()
-                    }
+                val optionItemMenu by remember(loggedIn, verified) {
+                    mutableStateOf(
+                        if (loggedIn && verified) {
+                            PingwinekCooksComposableHelpers.OptionItem(
+                                labelResourceId = R.string.labels,
+                                icon = Icons.Filled.Menu
+                            ) {
+                                scope.launch {
+                                    drawerState.open()
+                                }
+                            }
+                        } else {
+                            null
+                        }
+                    )
                 }
 
                 ModalNavigationDrawer(
@@ -210,7 +218,7 @@ class RecipeListingActivity : AppCompatActivity() {
                             optionItemRecipe,
                             if (loggedIn) optionItemProfileLoggedIn else optionItemProfileLoggedOut
                         ),
-                        showFab = loggedIn,
+                        showFab = verified,
                         fabIcon = Icons.Filled.Add,
                         fabIconLabel = getString(R.string.add_recipe),
                         fabContainerColor = MaterialTheme.colorScheme.primary,
@@ -237,6 +245,7 @@ class RecipeListingActivity : AppCompatActivity() {
         super.onResume()
 
         recipeListingModel.loadData()
+        authenticationViewModel.checkAuthStatus()
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

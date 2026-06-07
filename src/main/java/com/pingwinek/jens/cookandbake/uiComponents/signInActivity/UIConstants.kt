@@ -12,6 +12,5 @@ enum class View {
 enum class EmailLinkMode {
     RESET,
     UNKNOWN,
-    VERIFIED
 }
 

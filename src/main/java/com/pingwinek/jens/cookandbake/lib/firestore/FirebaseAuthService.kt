@@ -36,7 +36,7 @@ class FirebaseAuthService {
         private val auth = FirebaseAuth.getInstance()
         private val authListeners = LinkedList<AuthService.AuthenticationListener>()
 
-        private const val FB_AUTH_DOMAIN = "https://www.pingwinek.de"
+        private const val FB_AUTH_DOMAIN = "https://fb.pingwinek.de"
         private const val QP_LINK = "link"
         private const val QP_OOBCODE = "oobCode"
         private const val HANDLE_IN_APP = true
@@ -284,15 +284,7 @@ class FirebaseAuthService {
                 SuspendedCoroutineWrapper.suspendedFunction(
                     TIMEOUT,
                     auth.applyActionCode(actionCode))
-                auth.currentUser?.let { user ->
-                    SuspendedCoroutineWrapper.suspendedFunction(
-                        TIMEOUT,
-                        user.getIdToken(true))
-                    SuspendedCoroutineWrapper.suspendedFunction(
-                        TIMEOUT,
-                        user.reload())
                     AuthService.AuthActionResult.VERIFICATION_SUCCEEDED
-                } ?: AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON
             } catch (exception: SuspendedCoroutineWrapper.SuspendedCoroutineException) {
                 Log.e(this::class.java.name, exception.toString())
                 AuthService.AuthActionResult.EXC_VERIFICATION_FAILED_WITHOUT_REASON

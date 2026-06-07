@@ -46,8 +46,7 @@ class AuthenticationViewModel(application: Application) : AndroidViewModel(appli
 
                 FirebaseAuthService.ActionCodeOperation.VERIFY -> {
                     if (FirebaseAuthService.verify(actionCode) == AuthService.AuthActionResult.VERIFICATION_SUCCEEDED) {
-                        linkMode.postValue(EmailLinkMode.VERIFIED)
-                        changeAuthStatus(AuthService.AuthStatus.VERIFIED)
+                        changeAuthStatus(FirebaseAuthService.checkAuthStatus())
                         authActionResult.postValue(AuthService.AuthActionResult.VERIFICATION_SUCCEEDED)
                     } else {
                         linkMode.postValue(EmailLinkMode.UNKNOWN)
