@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
@@ -82,14 +83,14 @@ class RecipeActivity: AppCompatActivity() {
                 val imageGalleryInfosData = recipeModel.imageGalleryInfos.observeAsState()
                 val imageGalleryInfos = imageGalleryInfosData.value ?: listOf()
 
-                var mode by remember { mutableStateOf(if (recipeModel.recipeId != null) Mode.SHOW_RECIPE else Mode.EDIT_RECIPE)}
-                var tabMode by remember { mutableStateOf(TabMode.INGREDIENTS) }
+                var mode by rememberSaveable() { mutableStateOf(if (recipeModel.recipeId != null) Mode.SHOW_RECIPE else Mode.EDIT_RECIPE)}
+                var tabMode by rememberSaveable() { mutableStateOf(TabMode.INGREDIENTS) }
 
-                var ingredientIdTemp: String? by remember {
+                var ingredientIdTemp: String? by rememberSaveable() {
                     mutableStateOf(null)
                 }
 
-                var imageIdTemp: String? by remember {
+                var imageIdTemp: String? by rememberSaveable {
                     mutableStateOf(null)
                 }
 
@@ -100,7 +101,7 @@ class RecipeActivity: AppCompatActivity() {
                 when (mode) {
                     Mode.SHOW_RECIPE -> {
 
-                        var uriTemp: Uri? by remember { mutableStateOf(null) }
+                        var uriTemp: Uri? by rememberSaveable { mutableStateOf(null) }
 
                         val photoPickerLauncher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.PickVisualMedia()
@@ -186,7 +187,7 @@ class RecipeActivity: AppCompatActivity() {
                             derivedStateOf { imageGalleryInfos.find { imageInfo -> imageInfo.imageId == imageIdTemp } }
                         }
 
-                        var deleteImageId: String? by remember(imageIdTemp) {
+                        var deleteImageId: String? by rememberSaveable (imageIdTemp) {
                             mutableStateOf(null)
                         }
 

@@ -20,6 +20,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -149,7 +150,7 @@ class RecipeListingActivity : AppCompatActivity() {
                 val loggedIn = authStatus == AuthService.AuthStatus.SIGNED_IN
                 val verified = authStatus == AuthService.AuthStatus.VERIFIED
 
-                var labelFilter: String? by remember {
+                var labelFilter: String? by rememberSaveable {
                     mutableStateOf(null)
                 }
 
@@ -179,9 +180,9 @@ class RecipeListingActivity : AppCompatActivity() {
                         ))
                     }
 
-                val optionItemMenu by remember(loggedIn, verified) {
+                val optionItemMenu by remember(verified) {
                     mutableStateOf(
-                        if (loggedIn && verified) {
+                        if (verified) {
                             PingwinekCooksComposableHelpers.OptionItem(
                                 labelResourceId = R.string.labels,
                                 icon = Icons.Filled.Menu
